@@ -1,0 +1,8 @@
+The cat sat on the mat.
+The dog ran in the park.
+Cats and dogs are animals.
+The quick brown fox jumps over the lazy dog.
+Transformers use self attention to mix token information.
+Training runs in parallel with a causal mask.
+Inference generates one token at a time.
+KV cache stores past keys and values for speed.
