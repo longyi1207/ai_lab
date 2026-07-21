@@ -1,53 +1,31 @@
-# transformer_lab
+# ai_lab
 
-Hands-on scripts for **training**, **inference**, and **interpretability** — companion to `notes/transformer_interview_visual.md` and `notes/transformer_hands_on_learning.md`.
+Hands-on AI/ML systems learning projects — each subdirectory is self-contained (own README,
+own dependencies, own venv). Real code, run and verified where the hardware allows, honestly
+reported (including bugs found and negative results) where it doesn't.
 
-## Quick start
+## Projects
 
-```bash
-cd code/transformer_lab
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-bash run_all.sh
-```
+### [`dist_training_lab/`](dist_training_lab/) — distributed training & ML infrastructure
 
-Or step by step:
+A hands-on curriculum covering the distributed-training and ML-infra skills frontier AI labs'
+research-infrastructure / ML-platform-engineering roles screen for: DDP, FSDP2, tensor/pipeline/
+expert parallelism, FP8 quantization, and fault tolerance — implemented from scratch and
+numerically verified against single-device references wherever possible, entirely on a laptop
+(no cloud spend required for correctness, only for real multi-GPU speed/memory numbers).
 
-| Script | What you learn | Time (M4) |
-|--------|----------------|-----------|
-| `train_tiny.py` | Parallel training, causal mask, teacher forcing | ~1 min |
-| `infer_demo.py` | Serial inference vs one-shot training forward | ~5 sec |
-| `kv_cache_demo.py` | HF GPT-2 with/without KV cache timing | ~30 sec |
-| `logit_lens_demo.py` | Layer-wise predictions (TransformerLens) | ~1 min |
+See [`dist_training_lab/README.md`](dist_training_lab/README.md) for the full phase-by-phase
+writeup, including real bugs found (a macOS-specific FSDP2 device-mesh crash, a gloo backend
+limitation with ragged `all_to_all`, an undocumented non-1.0 gradient through a naive FP8 cast)
+and honest negative results (naive vs block-wise FP8 quantization barely differed in a toy
+training run, which turned out to be more informative than a clean confirmation would have been).
 
-Optional interpretability dependency:
+### [`transformer_lab/`](transformer_lab/) — transformer training & interpretability basics
 
-```bash
-pip install transformer-lens
-python logit_lens_demo.py
-```
+Small, readable scripts for training, inference, and interpretability: causal self-attention
+from scratch, KV-cache speedup measurement, and a logit-lens walk through a real GPT-2's layers.
+See [`transformer_lab/README.md`](transformer_lab/README.md).
 
-## Files
+## License
 
-```
-minimal_gpt.py      # ~150 lines: causal MHA + pre-norm GPT + generate()
-train_tiny.py       # char-level train on data/tiny_corpus.txt
-infer_demo.py       # prints training vs inference side-by-side
-kv_cache_demo.py    # measures cache speedup on real GPT-2
-logit_lens_demo.py  # residual → unembed per layer
-outputs/            # checkpoints + figures (gitignored patterns ok)
-```
-
-## Concept map
-
-```
-train_tiny.py     →  notes/transformer_interview_visual.md §6 Training
-infer_demo.py     →  §6 Inference (serial steps)
-kv_cache_demo.py  →  §8 KV cache
-logit_lens_demo.py → hook into openllama_playground / emotion_vectors path
-```
-
-## Next steps
-
-- Scale up: [nanoGPT](https://github.com/karpathy/nanoGPT) Shakespeare, then [nanochat](https://github.com/karpathy/nanochat) on cloud
-- Deep MI: `../openllama_playground/`, `../emotion_vectors/`, [ARENA](https://www.arena.education/)
+MIT — see [LICENSE](LICENSE).

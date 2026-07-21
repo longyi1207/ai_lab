@@ -1,0 +1,227 @@
+<!doctype html>
+<title>dist_training_lab — shakespeare_gpt_v1</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --surface-1: #fcfcfb; --page: #f9f9f7;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --series-1: #2a78d6; --series-2: #008300; --series-3: #e87ba4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5; --series-2: #008300; --series-3: #d55181;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --page: #0d0d0d;
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --series-1: #3987e5; --series-2: #008300; --series-3: #d55181;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.viz-root { padding: 24px; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 18px; color: var(--text-primary); margin: 0 0 4px; }
+.subtitle { color: var(--text-secondary); font-size: 13px; margin: 0 0 20px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.panel.wide { grid-column: 1 / -1; }
+.panel h2 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 2px; }
+.panel .note { font-size: 12px; color: var(--text-secondary); margin: 0 0 10px; }
+svg { display: block; overflow: visible; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.axis-line { stroke: var(--axis); stroke-width: 1; }
+.axis-label { fill: var(--text-muted); font-size: 11px; }
+.line { fill: none; stroke-width: 2; stroke-linecap: round; }
+.marker { stroke-width: 2; }
+.annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.annotation-label { fill: var(--text-secondary); font-size: 11px; }
+.legend { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.crosshair { stroke: var(--axis); stroke-width: 1; pointer-events: none; opacity: 0; }
+.tooltip { position: absolute; background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 12px; color: var(--text-primary); pointer-events: none; opacity: 0;
+  box-shadow: 0 4px 12px var(--border); white-space: nowrap; z-index: 10; }
+.tooltip .row { display: flex; justify-content: space-between; gap: 12px; }
+.tooltip .row .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.tooltip .step { color: var(--text-muted); margin-bottom: 4px; }
+table.data-table { border-collapse: collapse; font-size: 12px; margin-top: 12px; width: 100%; }
+table.data-table th, table.data-table td { text-align: right; padding: 4px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+table.data-table th { color: var(--text-muted); font-weight: 500; }
+td.highlight { color: var(--series-3); font-weight: 600; }
+details summary { cursor: pointer; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+</style>
+<div class="viz-root">
+  <h1>dist_training_lab — shakespeare_gpt_v1</h1>
+  <p class="subtitle">Phase 1 training dashboard, generated from logs/shakespeare_gpt_v1.jsonl</p>
+  <div class="grid">
+    <div class="panel wide" id="panel-loss"></div>
+    <div class="panel" id="panel-lr"></div>
+    <div class="panel" id="panel-gradnorm"></div>
+    <div class="panel wide" id="panel-tokspersec"></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+const DATA = {"train_steps": [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1040, 1060, 1080, 1100, 1120, 1140, 1160, 1180, 1200, 1220, 1240, 1260, 1280, 1300, 1320, 1340, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540, 1560, 1580, 1600, 1620, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080, 2100, 2120, 2140, 2160, 2180, 2200, 2220, 2240, 2260, 2280, 2300, 2320, 2340, 2360, 2380, 2400, 2420, 2440, 2460, 2480, 2500, 2520, 2540, 2560, 2580, 2600, 2620, 2640, 2660, 2680, 2700, 2720, 2740, 2760, 2780, 2800, 2820, 2840, 2860, 2880, 2900, 2920, 2940, 2960, 2980, 2999], "train_loss": [10.9122, 9.6485, 9.0559, 8.1968, 7.2271, 6.3796, 5.7188, 5.4186, 5.0959, 5.0243, 4.7341, 4.611, 4.5743, 4.5422, 4.4351, 4.3369, 4.2834, 4.1907, 3.9776, 3.8661, 3.9372, 3.8177, 3.868, 3.7188, 3.7628, 3.7342, 3.6111, 3.5848, 3.5193, 3.5416, 3.4759, 3.3965, 3.4643, 3.3377, 3.3029, 3.2859, 3.1479, 3.1701, 3.1715, 3.0713, 3.0078, 2.9851, 3.0074, 2.9823, 2.8393, 2.8944, 2.7914, 2.7545, 2.6949, 2.6431, 2.5683, 2.6145, 2.5792, 2.55, 2.5255, 2.4063, 2.4022, 2.4592, 2.2876, 2.2788, 2.2248, 2.2393, 2.166, 2.203, 2.1444, 2.1658, 2.0784, 2.0864, 1.9702, 1.8841, 1.8698, 1.8262, 1.8838, 1.8119, 1.7794, 1.7457, 1.6449, 1.6865, 1.6189, 1.5801, 1.6125, 1.5872, 1.565, 1.5506, 1.4626, 1.5015, 1.4121, 1.4919, 1.3765, 1.3792, 1.3675, 1.3919, 1.3653, 1.281, 1.2483, 1.2556, 1.2443, 1.1884, 1.2363, 1.1981, 1.1827, 1.2122, 1.2141, 1.115, 1.0988, 1.091, 1.1014, 1.1084, 1.0564, 1.0889, 1.083, 1.0435, 1.0503, 0.9769, 1.0363, 0.9888, 0.9737, 0.9979, 0.9515, 0.9525, 0.9326, 0.9536, 0.9187, 0.914, 0.9093, 0.9565, 0.8962, 0.9041, 0.9037, 0.8956, 0.8958, 0.918, 0.864, 0.8858, 0.8916, 0.8728, 0.8465, 0.8448, 0.867, 0.838, 0.8481, 0.8446, 0.8387, 0.8553, 0.8462, 0.8224, 0.8085, 0.7724, 0.8098, 0.8256, 0.8053], "grad_norm": [8.3351, 2.8538, 2.4467, 2.3099, 1.8568, 1.2241, 0.97, 0.7623, 1.167, 0.6842, 0.6542, 0.8024, 0.6735, 0.9084, 0.778, 0.7347, 0.8098, 0.7438, 1.1879, 0.8208, 1.1903, 1.108, 0.8858, 1.033, 0.9831, 0.8759, 0.9904, 1.0866, 0.8792, 0.9297, 0.8924, 0.928, 1.1326, 1.064, 1.0456, 1.2086, 1.1036, 1.1683, 1.1647, 1.3174, 1.2167, 1.3449, 1.2421, 1.4528, 1.3143, 1.3946, 1.3928, 1.3506, 1.447, 1.4556, 1.6472, 1.5863, 1.5389, 1.5736, 1.7661, 1.6126, 1.7754, 2.0307, 1.7234, 1.8555, 1.9599, 1.911, 2.0019, 1.899, 2.0691, 2.4501, 1.9568, 1.9929, 2.0155, 2.0223, 1.9963, 2.0188, 2.0696, 2.0947, 2.2504, 2.2733, 2.0534, 2.2051, 2.1037, 2.0006, 2.4224, 2.1367, 2.0274, 2.1374, 2.2413, 2.1826, 2.3039, 2.4743, 2.1719, 2.3013, 2.2076, 2.1012, 2.1807, 2.2298, 2.1352, 2.0319, 2.1536, 2.1108, 2.245, 2.2595, 2.268, 2.1108, 2.1907, 2.0434, 2.2279, 2.0917, 1.9853, 2.2582, 2.1512, 2.1424, 2.1834, 2.2083, 2.2255, 2.1447, 1.9947, 2.0985, 2.0151, 2.0387, 2.0445, 1.9565, 1.9023, 2.0252, 1.9674, 1.941, 1.8643, 2.0505, 1.9623, 1.9032, 2.0261, 1.9502, 1.9363, 1.9479, 1.8885, 1.9444, 1.9422, 1.8777, 1.8739, 1.9157, 1.9552, 1.9841, 1.8369, 1.904, 1.9438, 1.9615, 1.9159, 1.9097, 1.9704, 1.8631, 1.8979, 1.9547, 1.9553], "lr": [1.4999999999999998e-06, 3.149999999999999e-05, 6.149999999999999e-05, 9.149999999999999e-05, 0.0001215, 0.0001515, 0.0001815, 0.0002115, 0.0002415, 0.0002715, 0.0003, 0.0002999660117172384, 0.00029986406398307746, 0.00029969420813127153, 0.00029945652968935724, 0.00029915114833558773, 0.0002987782178386712, 0.0002983379259803436, 0.00029783049446081497, 0.00029725617878713676, 0.00029661526814454614, 0.0002959080852508527, 0.00029513498619394016, 0.0002942963602524656, 0.0002933926296998457, 0.0002924242495916296, 0.0002913917075363645, 0.0002902955234500702, 0.0002891362492944458, 0.0002879144687989401, 0.00028663079716682654, 0.00028528588076542964, 0.00028388039680065963, 0.00028241505297601886, 0.0002808905871362519, 0.00027930776689581835, 0.0002776673892523758, 0.0002759702801854678, 0.00027421729424061787, 0.0002724093140990404, 0.000270547250133184, 0.00026863203994833147, 0.0002666646479104875, 0.000264646064660791, 0.0002625773066166978, 0.0002604594154601839, 0.0002582934576132267, 0.00025608052370083, 0.0002538217280018612, 0.0002515182078879782, 0.000249171123250929, 0.00024678165591851065, 0.00024435100905948387, 0.00024188040657774097, 0.0002393710924960338, 0.0002368243303295704, 0.0002342414024497973, 0.00023162360943868677, 0.0002289722694338548, 0.00022628871746483876, 0.0002235743047808703, 0.00022083039817048024, 0.00021805837927327964, 0.00021525964388426257, 0.00021243560125098123, 0.00020958767336394754, 0.00020671729424061788, 0.00020382590920332228, 0.0002009149741515011, 0.00019798595482861566, 0.0001950403260841024, 0.0001920795711307418, 0.0001891051807978159, 0.00018611865278043115, 0.00018312149088538346, 0.00018011520427394653, 0.0001771013067019635, 0.00017408131575762534, 0.0001710567520973195, 0.00016802913867993365, 0.00016499999999999997, 0.00016197086132006632, 0.0001589432479026805, 0.00015591868424237463, 0.00015289869329803647, 0.0001498847957260534, 0.00014687850911461654, 0.0001438813472195688, 0.00014089481920218406, 0.00013792042886925818, 0.00013495967391589754, 0.00013201404517138428, 0.00012908502584849885, 0.00012617409079667766, 0.0001232827057593821, 0.00012041232663605247, 0.00011756439874901871, 0.00011474035611573738, 0.0001119416207267203, 0.00010916960182951972, 0.00010642569521912965, 0.00010371128253516117, 0.00010102773056614517, 9.837639056131316e-05, 9.575859755020265e-05, 9.317566967042956e-05, 9.062890750396617e-05, 8.811959342225898e-05, 8.564899094051613e-05, 8.321834408148932e-05, 8.082887674907097e-05, 7.848179211202174e-05, 7.617827199813879e-05, 7.391947629916995e-05, 7.170654238677327e-05, 6.954058453981609e-05, 6.742269338330214e-05, 6.535393533920902e-05, 6.333535208951252e-05, 6.136796005166849e-05, 5.9452749866815986e-05, 5.7590685900959574e-05, 5.5782705759382104e-05, 5.402971981453217e-05, 5.233261074762414e-05, 5.0692233104181636e-05, 4.910941286374807e-05, 4.758494702398112e-05, 4.611960319934037e-05, 4.471411923457034e-05, 4.336920283317343e-05, 4.208553120105986e-05, 4.086375070555417e-05, 3.970447654992976e-05, 3.860829246363548e-05, 3.7575750408370376e-05, 3.660737030015427e-05, 3.570363974753439e-05, 3.486501380605981e-05, 3.4091914749147275e-05, 3.3384731855453814e-05, 3.274382121286321e-05, 3.2169505539184994e-05, 3.1662074019656414e-05, 3.122178216132881e-05, 3.084885166441225e-05, 3.054347031064273e-05, 3.0305791868728428e-05, 3.013593601692253e-05, 3.003398828276162e-05, 3.0000084974263673e-05], "tok_s": [24064, 31061, 31141, 31162, 31172, 30991, 30787, 30977, 31310, 30930, 31454, 31257, 31453, 22445, 30775, 30339, 29747, 29364, 28661, 28831, 28595, 28320, 28229, 28158, 27769, 28133, 19979, 28009, 28110, 28361, 28158, 28297, 28339, 28345, 28490, 28511, 28147, 28458, 21226, 28657, 28597, 28495, 28590, 28467, 28688, 28389, 28344, 28513, 28515, 28302, 28476, 20677, 28273, 28499, 28408, 28359, 28153, 28135, 27956, 28322, 28532, 27299, 28065, 21013, 28591, 28490, 28342, 28448, 28480, 28519, 28619, 28639, 28511, 28403, 28352, 28359, 20616, 28261, 28463, 28468, 28453, 27307, 27457, 27818, 27878, 27923, 27883, 27755, 20682, 27792, 27871, 27972, 28032, 27891, 27609, 28103, 28006, 28281, 28300, 28253, 28293, 20637, 28311, 28349, 28352, 28428, 28412, 28392, 28416, 28358, 28423, 28406, 28376, 21104, 28278, 28385, 28273, 28353, 28332, 28265, 28384, 28312, 28414, 28384, 28417, 28402, 20680, 28443, 28407, 28379, 28342, 28333, 28443, 28392, 28417, 28413, 28428, 28403, 21132, 28278, 28430, 28067, 28366, 28335, 28343, 28371, 28373, 28333, 28252, 28152, 29801], "eval_steps": [250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750], "eval_train": [4.4063, 3.5745, 3.0133, 2.3822, 1.7836, 1.3174, 0.9816, 0.7369, 0.586, 0.4983, 0.4415], "eval_val": [4.9791, 4.7112, 4.778, 5.0478, 5.5138, 5.7694, 5.9853, 6.2669, 6.4714, 6.6304, 6.6981]};
+
+function els(tag, attrs, parent) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(el);
+  return el;
+}
+
+function niceTicks(min, max, n) {
+  const span = max - min || 1;
+  const step = span / n;
+  const ticks = [];
+  for (let i = 0; i <= n; i++) ticks.push(min + step * i);
+  return ticks;
+}
+
+function lineChart(containerId, opts) {
+  const container = document.getElementById(containerId);
+  const W = container.clientWidth || 1000, H = opts.height || 220;
+  const padL = 46, padR = 12, padT = 10, padB = 24;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const allX = opts.series.flatMap(s => s.x);
+  const allY = opts.series.flatMap(s => s.y);
+  const xMin = Math.min(...allX), xMax = Math.max(...allX);
+  let yMin = opts.yMin !== undefined ? opts.yMin : Math.min(...allY);
+  let yMax = opts.yMax !== undefined ? opts.yMax : Math.max(...allY);
+  if (opts.log) { yMin = Math.log10(Math.max(yMin, 1e-9)); yMax = Math.log10(yMax); }
+  const yPad = (yMax - yMin) * 0.08 || 1;
+  yMin -= yPad; yMax += yPad;
+
+  const sx = x => padL + ((x - xMin) / (xMax - xMin || 1)) * plotW;
+  const sy = y => {
+    const v = opts.log ? Math.log10(Math.max(y, 1e-9)) : y;
+    return padT + plotH - ((v - yMin) / (yMax - yMin || 1)) * plotH;
+  };
+
+  if (opts.title) {
+    const h = document.createElement('h2'); h.textContent = opts.title; container.appendChild(h);
+  }
+  if (opts.note) {
+    const p = document.createElement('p'); p.className = 'note'; p.textContent = opts.note; container.appendChild(p);
+  }
+  if (opts.series.length > 1) {
+    const legend = document.createElement('div'); legend.className = 'legend';
+    opts.series.forEach(s => {
+      const item = document.createElement('div'); item.className = 'legend-item';
+      item.innerHTML = `<span class="legend-dot" style="background:${s.color}"></span>${s.label}`;
+      legend.appendChild(item);
+    });
+    container.appendChild(legend);
+  }
+
+  const svg = els('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, container);
+
+  const yTicks = niceTicks(yMin + yPad, yMax - yPad, 4);
+  yTicks.forEach(t => {
+    const y = sy(opts.log ? Math.pow(10, t) : t);
+    els('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'gridline' }, svg);
+    const label = opts.log ? Math.pow(10, t).toFixed(t < 0 ? 2 : 0) : (opts.yFmt ? opts.yFmt(t) : t.toFixed(2));
+    els('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' }, svg).textContent = label;
+  });
+  els('line', { x1: padL, x2: padL, y1: padT, y2: H - padB, class: 'axis-line' }, svg);
+  els('line', { x1: padL, x2: W - padR, y1: H - padB, y2: H - padB, class: 'axis-line' }, svg);
+  const xTicks = niceTicks(xMin, xMax, 4);
+  xTicks.forEach(t => {
+    els('text', { x: sx(t), y: H - padB + 16, class: 'axis-label', 'text-anchor': 'middle' }, svg).textContent = Math.round(t);
+  });
+
+  opts.series.forEach(s => {
+    const d = s.x.map((x, i) => `${i === 0 ? 'M' : 'L'} ${sx(x).toFixed(1)} ${sy(s.y[i]).toFixed(1)}`).join(' ');
+    els('path', { d, class: 'line', stroke: s.color, opacity: s.thin ? 0.55 : 1 }, svg);
+    if (s.markers) {
+      s.x.forEach((x, i) => {
+        els('circle', { cx: sx(x), cy: sy(s.y[i]), r: 4, fill: opts.bg || 'var(--surface-1)', stroke: s.color, class: 'marker' }, svg);
+      });
+    }
+  });
+
+  if (opts.annotations) {
+    opts.annotations.forEach(a => {
+      const x = sx(a.x);
+      els('line', { x1: x, x2: x, y1: padT, y2: H - padB, class: 'annotation-line' }, svg);
+      els('text', { x: x + 5, y: padT + 12, class: 'annotation-label' }, svg).textContent = a.label;
+    });
+  }
+
+  // hover crosshair + tooltip
+  const crosshair = els('line', { x1: 0, x2: 0, y1: padT, y2: H - padB, class: 'crosshair' }, svg);
+  const hitRect = els('rect', { x: padL, y: padT, width: plotW, height: plotH, fill: 'transparent' }, svg);
+  const tooltip = document.getElementById('tooltip');
+  hitRect.addEventListener('mousemove', (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const mx = ev.clientX - rect.left;
+    const xVal = xMin + ((mx - padL) / plotW) * (xMax - xMin);
+    let best = opts.series[0], bestIdx = 0, bestDist = Infinity;
+    opts.series[0].x.forEach((x, i) => { const d = Math.abs(x - xVal); if (d < bestDist) { bestDist = d; bestIdx = i; } });
+    const step = opts.series[0].x[bestIdx];
+    crosshair.setAttribute('x1', sx(step)); crosshair.setAttribute('x2', sx(step)); crosshair.style.opacity = 1;
+    let html = `<div class="step">step ${step}</div>`;
+    opts.series.forEach(s => {
+      const idx = s.x.indexOf(step) !== -1 ? s.x.indexOf(step) : bestIdx;
+      const val = s.y[Math.min(idx, s.y.length - 1)];
+      html += `<div class="row"><span><span class="dot" style="background:${s.color}"></span>${s.label}</span><span>${val.toFixed(opts.tooltipDecimals || 3)}</span></div>`;
+    });
+    tooltip.innerHTML = html;
+    tooltip.style.opacity = 1;
+    tooltip.style.left = (ev.clientX + 14) + 'px';
+    tooltip.style.top = (ev.clientY - 10) + 'px';
+  });
+  hitRect.addEventListener('mouseleave', () => { crosshair.style.opacity = 0; tooltip.style.opacity = 0; });
+}
+
+lineChart('panel-loss', {
+  title: 'Loss — raw train (noisy, per-step) vs eval train/val (averaged over 50 batches)',
+  note: 'Val loss bottoms around step 500 then climbs — classic overfitting on a tiny (304K-token) corpus.',
+  height: 260,
+  log: true,
+  tooltipDecimals: 3,
+  series: [
+    { label: 'train loss (raw)', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.train_loss, thin: true },
+    { label: 'eval train loss', color: 'var(--series-2)', x: DATA.eval_steps, y: DATA.eval_train, markers: true },
+    { label: 'eval val loss', color: 'var(--series-3)', x: DATA.eval_steps, y: DATA.eval_val, markers: true },
+  ],
+  annotations: [ { x: 500, label: 'val loss minimum (step 500)' } ],
+});
+
+lineChart('panel-lr', {
+  title: 'Learning rate schedule',
+  note: 'Linear warmup (200 steps) then cosine decay to min_lr.',
+  height: 200,
+  tooltipDecimals: 6,
+  series: [ { label: 'lr', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.lr } ],
+});
+
+lineChart('panel-gradnorm', {
+  title: 'Gradient norm (pre-clip)',
+  note: 'Settles once past warmup — no instability.',
+  height: 200,
+  tooltipDecimals: 3,
+  series: [ { label: 'grad norm', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.grad_norm } ],
+});
+
+lineChart('panel-tokspersec', {
+  title: 'Throughput (tokens/sec)',
+  note: 'Periodic dips coincide with eval passes stealing compute — expected, not a regression.',
+  height: 180,
+  yFmt: v => (v/1000).toFixed(0) + 'k',
+  tooltipDecimals: 0,
+  series: [ { label: 'tok/s', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.tok_s } ],
+});
+</script>
+

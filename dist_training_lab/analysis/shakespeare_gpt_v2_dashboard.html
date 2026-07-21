@@ -1,0 +1,227 @@
+<!doctype html>
+<title>dist_training_lab — shakespeare_gpt_v2</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --surface-1: #fcfcfb; --page: #f9f9f7;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --series-1: #2a78d6; --series-2: #008300; --series-3: #e87ba4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5; --series-2: #008300; --series-3: #d55181;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --page: #0d0d0d;
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --series-1: #3987e5; --series-2: #008300; --series-3: #d55181;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.viz-root { padding: 24px; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 18px; color: var(--text-primary); margin: 0 0 4px; }
+.subtitle { color: var(--text-secondary); font-size: 13px; margin: 0 0 20px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.panel.wide { grid-column: 1 / -1; }
+.panel h2 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 2px; }
+.panel .note { font-size: 12px; color: var(--text-secondary); margin: 0 0 10px; }
+svg { display: block; overflow: visible; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.axis-line { stroke: var(--axis); stroke-width: 1; }
+.axis-label { fill: var(--text-muted); font-size: 11px; }
+.line { fill: none; stroke-width: 2; stroke-linecap: round; }
+.marker { stroke-width: 2; }
+.annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.annotation-label { fill: var(--text-secondary); font-size: 11px; }
+.legend { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.crosshair { stroke: var(--axis); stroke-width: 1; pointer-events: none; opacity: 0; }
+.tooltip { position: absolute; background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 12px; color: var(--text-primary); pointer-events: none; opacity: 0;
+  box-shadow: 0 4px 12px var(--border); white-space: nowrap; z-index: 10; }
+.tooltip .row { display: flex; justify-content: space-between; gap: 12px; }
+.tooltip .row .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.tooltip .step { color: var(--text-muted); margin-bottom: 4px; }
+table.data-table { border-collapse: collapse; font-size: 12px; margin-top: 12px; width: 100%; }
+table.data-table th, table.data-table td { text-align: right; padding: 4px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+table.data-table th { color: var(--text-muted); font-weight: 500; }
+td.highlight { color: var(--series-3); font-weight: 600; }
+details summary { cursor: pointer; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+</style>
+<div class="viz-root">
+  <h1>dist_training_lab — shakespeare_gpt_v2</h1>
+  <p class="subtitle">Phase 1 training dashboard, generated from logs/shakespeare_gpt_v2.jsonl</p>
+  <div class="grid">
+    <div class="panel wide" id="panel-loss"></div>
+    <div class="panel" id="panel-lr"></div>
+    <div class="panel" id="panel-gradnorm"></div>
+    <div class="panel wide" id="panel-tokspersec"></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+const DATA = {"train_steps": [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1040, 1060, 1080, 1100, 1120, 1140, 1160, 1180, 1200, 1220, 1240, 1260, 1280, 1300, 1320, 1340, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500], "train_loss": [10.9122, 9.6484, 9.0559, 8.1969, 7.2271, 6.3796, 5.7186, 5.4191, 5.0963, 5.0253, 4.7348, 4.6109, 4.5756, 4.5337, 4.4366, 4.3374, 4.2821, 4.1961, 3.966, 3.8616, 3.9285, 3.816, 3.8701, 3.7158, 3.7576, 3.7337, 3.6167, 3.5793, 3.5151, 3.539, 3.4768, 3.3923, 3.4609, 3.3413, 3.3055, 3.2862, 3.1445, 3.1674, 3.1669, 3.0739, 3.0054, 2.983, 3.0054, 2.9803, 2.8434, 2.8941, 2.7898, 2.7518, 2.6932, 2.6415, 2.5656, 2.616, 2.579, 2.5545, 2.5202, 2.4033, 2.3991, 2.4577, 2.2772, 2.2739, 2.2206, 2.2384, 2.1651, 2.2006, 2.1378, 2.1597, 2.0787, 2.0906, 1.9629, 1.8857, 1.8667, 1.823, 1.8799, 1.8131, 1.7745, 1.7408], "grad_norm": [8.3351, 2.8537, 2.4467, 2.3098, 1.857, 1.2254, 0.9481, 0.8366, 1.176, 0.7573, 0.702, 0.7931, 0.7497, 0.7481, 0.8831, 0.8895, 0.9475, 1.0155, 0.7821, 0.9063, 1.0907, 0.9675, 0.8884, 1.0197, 0.8861, 0.8917, 1.1546, 0.9885, 0.8407, 1.0203, 0.8813, 0.9199, 1.0685, 1.1507, 1.2379, 1.2232, 1.0498, 1.1077, 1.1544, 1.3127, 1.2059, 1.3346, 1.2169, 1.4158, 1.3938, 1.4402, 1.3913, 1.3816, 1.5388, 1.4847, 1.6316, 1.5828, 1.6316, 1.6336, 1.6757, 1.5988, 1.8455, 2.038, 1.6779, 1.7924, 1.8307, 1.9474, 1.9664, 1.9266, 2.0155, 2.4244, 1.9944, 2.0286, 1.9792, 2.1077, 2.0303, 2.0162, 2.0572, 2.2091, 2.2199, 2.3049], "lr": [1.4999999999999998e-06, 3.149999999999999e-05, 6.149999999999999e-05, 9.149999999999999e-05, 0.0001215, 0.0001515, 0.0001815, 0.0002115, 0.0002415, 0.0002715, 0.0003, 0.0002999660117172384, 0.00029986406398307746, 0.00029969420813127153, 0.00029945652968935724, 0.00029915114833558773, 0.0002987782178386712, 0.0002983379259803436, 0.00029783049446081497, 0.00029725617878713676, 0.00029661526814454614, 0.0002959080852508527, 0.00029513498619394016, 0.0002942963602524656, 0.0002933926296998457, 0.0002924242495916296, 0.0002913917075363645, 0.0002902955234500702, 0.0002891362492944458, 0.0002879144687989401, 0.00028663079716682654, 0.00028528588076542964, 0.00028388039680065963, 0.00028241505297601886, 0.0002808905871362519, 0.00027930776689581835, 0.0002776673892523758, 0.0002759702801854678, 0.00027421729424061787, 0.0002724093140990404, 0.000270547250133184, 0.00026863203994833147, 0.0002666646479104875, 0.000264646064660791, 0.0002625773066166978, 0.0002604594154601839, 0.0002582934576132267, 0.00025608052370083, 0.0002538217280018612, 0.0002515182078879782, 0.000249171123250929, 0.00024678165591851065, 0.00024435100905948387, 0.00024188040657774097, 0.0002393710924960338, 0.0002368243303295704, 0.0002342414024497973, 0.00023162360943868677, 0.0002289722694338548, 0.00022628871746483876, 0.0002235743047808703, 0.00022083039817048024, 0.00021805837927327964, 0.00021525964388426257, 0.00021243560125098123, 0.00020958767336394754, 0.00020671729424061788, 0.00020382590920332228, 0.0002009149741515011, 0.00019798595482861566, 0.0001950403260841024, 0.0001920795711307418, 0.0001891051807978159, 0.00018611865278043115, 0.00018312149088538346, 0.00018011520427394653], "tok_s": [18282, 31613, 31618, 31622, 31659, 31709, 31458, 31423, 31601, 31593, 31569, 31575, 31536, 22774, 30871, 30029, 29230, 29083, 28138, 27958, 27704, 27348, 27085, 26391, 26338, 26449, 19200, 27078, 27062, 26794, 26502, 22928, 23991, 24989, 25372, 25294, 25414, 25758, 19170, 25548, 26009, 24866, 26062, 26285, 26315, 26323, 26445, 26442, 25092, 24639, 25994, 19252, 26631, 26655, 26461, 25567, 26366, 26024, 26406, 26453, 26768, 26709, 25563, 19463, 25628, 26103, 26625, 26693, 26389, 25508, 26336, 26585, 26268, 26089, 26109, 26327], "eval_steps": [250, 500, 750, 1000, 1250, 1500], "eval_train": [4.402, 3.5763, 3.0121, 2.378, 1.7854, 1.3144], "eval_val": [4.9734, 4.7187, 4.7783, 5.0441, 5.5037, 5.7568]};
+
+function els(tag, attrs, parent) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(el);
+  return el;
+}
+
+function niceTicks(min, max, n) {
+  const span = max - min || 1;
+  const step = span / n;
+  const ticks = [];
+  for (let i = 0; i <= n; i++) ticks.push(min + step * i);
+  return ticks;
+}
+
+function lineChart(containerId, opts) {
+  const container = document.getElementById(containerId);
+  const W = container.clientWidth || 1000, H = opts.height || 220;
+  const padL = 46, padR = 12, padT = 10, padB = 24;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const allX = opts.series.flatMap(s => s.x);
+  const allY = opts.series.flatMap(s => s.y);
+  const xMin = Math.min(...allX), xMax = Math.max(...allX);
+  let yMin = opts.yMin !== undefined ? opts.yMin : Math.min(...allY);
+  let yMax = opts.yMax !== undefined ? opts.yMax : Math.max(...allY);
+  if (opts.log) { yMin = Math.log10(Math.max(yMin, 1e-9)); yMax = Math.log10(yMax); }
+  const yPad = (yMax - yMin) * 0.08 || 1;
+  yMin -= yPad; yMax += yPad;
+
+  const sx = x => padL + ((x - xMin) / (xMax - xMin || 1)) * plotW;
+  const sy = y => {
+    const v = opts.log ? Math.log10(Math.max(y, 1e-9)) : y;
+    return padT + plotH - ((v - yMin) / (yMax - yMin || 1)) * plotH;
+  };
+
+  if (opts.title) {
+    const h = document.createElement('h2'); h.textContent = opts.title; container.appendChild(h);
+  }
+  if (opts.note) {
+    const p = document.createElement('p'); p.className = 'note'; p.textContent = opts.note; container.appendChild(p);
+  }
+  if (opts.series.length > 1) {
+    const legend = document.createElement('div'); legend.className = 'legend';
+    opts.series.forEach(s => {
+      const item = document.createElement('div'); item.className = 'legend-item';
+      item.innerHTML = `<span class="legend-dot" style="background:${s.color}"></span>${s.label}`;
+      legend.appendChild(item);
+    });
+    container.appendChild(legend);
+  }
+
+  const svg = els('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` }, container);
+
+  const yTicks = niceTicks(yMin + yPad, yMax - yPad, 4);
+  yTicks.forEach(t => {
+    const y = sy(opts.log ? Math.pow(10, t) : t);
+    els('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'gridline' }, svg);
+    const label = opts.log ? Math.pow(10, t).toFixed(t < 0 ? 2 : 0) : (opts.yFmt ? opts.yFmt(t) : t.toFixed(2));
+    els('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' }, svg).textContent = label;
+  });
+  els('line', { x1: padL, x2: padL, y1: padT, y2: H - padB, class: 'axis-line' }, svg);
+  els('line', { x1: padL, x2: W - padR, y1: H - padB, y2: H - padB, class: 'axis-line' }, svg);
+  const xTicks = niceTicks(xMin, xMax, 4);
+  xTicks.forEach(t => {
+    els('text', { x: sx(t), y: H - padB + 16, class: 'axis-label', 'text-anchor': 'middle' }, svg).textContent = Math.round(t);
+  });
+
+  opts.series.forEach(s => {
+    const d = s.x.map((x, i) => `${i === 0 ? 'M' : 'L'} ${sx(x).toFixed(1)} ${sy(s.y[i]).toFixed(1)}`).join(' ');
+    els('path', { d, class: 'line', stroke: s.color, opacity: s.thin ? 0.55 : 1 }, svg);
+    if (s.markers) {
+      s.x.forEach((x, i) => {
+        els('circle', { cx: sx(x), cy: sy(s.y[i]), r: 4, fill: opts.bg || 'var(--surface-1)', stroke: s.color, class: 'marker' }, svg);
+      });
+    }
+  });
+
+  if (opts.annotations) {
+    opts.annotations.forEach(a => {
+      const x = sx(a.x);
+      els('line', { x1: x, x2: x, y1: padT, y2: H - padB, class: 'annotation-line' }, svg);
+      els('text', { x: x + 5, y: padT + 12, class: 'annotation-label' }, svg).textContent = a.label;
+    });
+  }
+
+  // hover crosshair + tooltip
+  const crosshair = els('line', { x1: 0, x2: 0, y1: padT, y2: H - padB, class: 'crosshair' }, svg);
+  const hitRect = els('rect', { x: padL, y: padT, width: plotW, height: plotH, fill: 'transparent' }, svg);
+  const tooltip = document.getElementById('tooltip');
+  hitRect.addEventListener('mousemove', (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const mx = ev.clientX - rect.left;
+    const xVal = xMin + ((mx - padL) / plotW) * (xMax - xMin);
+    let best = opts.series[0], bestIdx = 0, bestDist = Infinity;
+    opts.series[0].x.forEach((x, i) => { const d = Math.abs(x - xVal); if (d < bestDist) { bestDist = d; bestIdx = i; } });
+    const step = opts.series[0].x[bestIdx];
+    crosshair.setAttribute('x1', sx(step)); crosshair.setAttribute('x2', sx(step)); crosshair.style.opacity = 1;
+    let html = `<div class="step">step ${step}</div>`;
+    opts.series.forEach(s => {
+      const idx = s.x.indexOf(step) !== -1 ? s.x.indexOf(step) : bestIdx;
+      const val = s.y[Math.min(idx, s.y.length - 1)];
+      html += `<div class="row"><span><span class="dot" style="background:${s.color}"></span>${s.label}</span><span>${val.toFixed(opts.tooltipDecimals || 3)}</span></div>`;
+    });
+    tooltip.innerHTML = html;
+    tooltip.style.opacity = 1;
+    tooltip.style.left = (ev.clientX + 14) + 'px';
+    tooltip.style.top = (ev.clientY - 10) + 'px';
+  });
+  hitRect.addEventListener('mouseleave', () => { crosshair.style.opacity = 0; tooltip.style.opacity = 0; });
+}
+
+lineChart('panel-loss', {
+  title: 'Loss — raw train (noisy, per-step) vs eval train/val (averaged over 50 batches)',
+  note: 'Val loss bottoms around step 500 then climbs — classic overfitting on a tiny (304K-token) corpus.',
+  height: 260,
+  log: true,
+  tooltipDecimals: 3,
+  series: [
+    { label: 'train loss (raw)', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.train_loss, thin: true },
+    { label: 'eval train loss', color: 'var(--series-2)', x: DATA.eval_steps, y: DATA.eval_train, markers: true },
+    { label: 'eval val loss', color: 'var(--series-3)', x: DATA.eval_steps, y: DATA.eval_val, markers: true },
+  ],
+  annotations: [ { x: 500, label: 'val loss minimum (step 500)' } ],
+});
+
+lineChart('panel-lr', {
+  title: 'Learning rate schedule',
+  note: 'Linear warmup (200 steps) then cosine decay to min_lr.',
+  height: 200,
+  tooltipDecimals: 6,
+  series: [ { label: 'lr', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.lr } ],
+});
+
+lineChart('panel-gradnorm', {
+  title: 'Gradient norm (pre-clip)',
+  note: 'Settles once past warmup — no instability.',
+  height: 200,
+  tooltipDecimals: 3,
+  series: [ { label: 'grad norm', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.grad_norm } ],
+});
+
+lineChart('panel-tokspersec', {
+  title: 'Throughput (tokens/sec)',
+  note: 'Periodic dips coincide with eval passes stealing compute — expected, not a regression.',
+  height: 180,
+  yFmt: v => (v/1000).toFixed(0) + 'k',
+  tooltipDecimals: 0,
+  series: [ { label: 'tok/s', color: 'var(--series-1)', x: DATA.train_steps, y: DATA.tok_s } ],
+});
+</script>
+
