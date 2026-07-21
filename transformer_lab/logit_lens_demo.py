@@ -46,7 +46,7 @@ def main(args: argparse.Namespace) -> None:
     model = HookedTransformer.from_pretrained("gpt2-small", device=device)
 
     tokens = model.to_tokens(args.prompt)
-    log.info("Prompt tokens: %s", model.to_str_tokens(tokens)[0])
+    log.info("Prompt tokens: %s", model.to_str_tokens(tokens))
 
     _, cache = model.run_with_cache(tokens)
     n_layers = model.cfg.n_layers
