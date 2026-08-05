@@ -1,0 +1,11 @@
+key_name          = "YOUR_KEY_PAIR"
+aws_region        = "us-east-1"
+aws_profile       = "default"
+instance_type     = "g5.48xlarge"   # or p4d.24xlarge
+efa_extra_nics    = -1              # -1 auto: 0 for g5, 3 for p4d/p5
+use_spot          = false
+spot_max_price    = ""
+allowed_ssh_cidrs = ["YOUR.IP.ADDR.ESS/32"]
+volume_gb         = 256
+budget_usd        = 250
+budget_email      = ""              # set to enable AWS Budgets 80% alert

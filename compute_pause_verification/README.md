@@ -20,6 +20,16 @@ python3 build_notes.py
 
 Depends on: `svg_panels.py`, `figures/`.
 
+## Related experiment code
+
+**[`interconnect_train_detect/`](interconnect_train_detect/)** — Seferis & Fist–style detector scaffold: can cross-node / collective byte rates separate benign LLM pretraining from inference?
+
+- Local smoke + Welch t / Cohen d + Plotly dashboard  
+- AWS Terraform for 2×8 GPU (g5/p4d) + autodestroy  
+- Red-team workloads: DiLoCo, KV-disguise, column-parallel TP  
+
+GPU burn deferred pending budget; offline path works on CPU.
+
 ## Scope
 
 **In:** Claim A mechanisms and the public research lineage around them.  

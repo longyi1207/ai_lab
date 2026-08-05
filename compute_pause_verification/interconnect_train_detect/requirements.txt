@@ -1,0 +1,9 @@
+torch>=2.2.0
+numpy>=1.26
+pyyaml>=6.0
+requests>=2.31
+psutil>=5.9
+# GPU nodes:
+# nvidia-ml-py>=12.0
+# transformers>=4.40
+# accelerate>=0.30

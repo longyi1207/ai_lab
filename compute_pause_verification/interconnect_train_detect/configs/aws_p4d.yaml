@@ -1,0 +1,54 @@
+# AWS CUDA baseline — 2×8 GPU (g5.48xlarge or p4d.24xlarge).
+run_name: aws_cuda_baseline
+mode: cluster
+nnodes: 2
+nproc_per_node: 8
+node_rank: 0  # overridden by ICTD_NODE_RANK
+master_addr: null  # ICTD_MASTER_ADDR
+master_port: 29500
+collector_url: null  # ICTD_COLLECTOR
+collector:
+  host: 0.0.0.0
+  port: 8765
+  poll_hz: 20
+monitor:
+  backends: [ib, nccl, proc_net, nvml]
+  iface: null          # set via detect_fabric.sh / ICTD_IFACE
+  ib_device: null
+workloads:
+  - name: train_ddp
+    kind: train_ddp
+    steps: 80
+    warmup_steps: 10
+    batch_size: 2
+    seq_len: 256
+  - name: infer_dp
+    kind: infer_dp
+    steps: 80
+    batch_size: 4
+    seq_len: 256
+  - name: infer_tp
+    kind: infer_tp
+    steps: 80
+    batch_size: 1
+    seq_len: 256
+    tp_size: 2
+  - name: diloco
+    kind: diloco
+    steps: 80
+    inner_steps: 10
+    batch_size: 2
+    seq_len: 256
+model:
+  backend: tiny  # swap to hf + 1B/7B when ready
+  n_layer: 8
+  n_head: 8
+  n_embd: 512
+  vocab_size: 32000
+  block_size: 256
+detect:
+  bandwidth_threshold_gbps: null
+  calibrate: youden
+  alpha: 0.05
+  d_min: 0.8
+output_dir: outputs/aws_cuda_baseline

@@ -1,0 +1,45 @@
+# Cheaper CUDA path: still 2×8 GPU but weaker fabric (g5).
+# Use to validate software; don't over-claim interconnect realism vs p4d/p5.
+run_name: aws_g5_baseline
+mode: cluster
+nnodes: 2
+nproc_per_node: 8
+master_port: 29500
+collector:
+  host: 0.0.0.0
+  port: 8765
+  poll_hz: 20
+monitor:
+  backends: [proc_net, nvml]
+  iface: null
+workloads:
+  - name: train_ddp
+    kind: train_ddp
+    steps: 60
+    warmup_steps: 5
+    batch_size: 1
+    seq_len: 128
+  - name: infer_dp
+    kind: infer_dp
+    steps: 60
+    batch_size: 2
+    seq_len: 128
+  - name: diloco
+    kind: diloco
+    steps: 60
+    inner_steps: 8
+    batch_size: 1
+    seq_len: 128
+model:
+  backend: tiny
+  n_layer: 6
+  n_head: 8
+  n_embd: 512
+  vocab_size: 8192
+  block_size: 128
+detect:
+  bandwidth_threshold_gbps: null
+  calibrate: youden
+  alpha: 0.05
+  d_min: 0.8
+output_dir: outputs/aws_g5_baseline

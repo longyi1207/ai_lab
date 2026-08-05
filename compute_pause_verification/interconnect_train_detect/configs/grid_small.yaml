@@ -1,0 +1,27 @@
+# Small grid: vary batch/seq so separation isn't just "bigger batch = more traffic".
+run_name: grid_small
+mode: smoke
+collector:
+  host: 127.0.0.1
+  port: 8765
+  poll_hz: 10
+monitor:
+  backends: [synthetic, nccl]
+  iface: lo0
+grid:
+  batch_sizes: [1, 4, 8]
+  seq_lens: [32, 64, 128]
+workloads_kinds: [train_ddp, infer_dp, diloco]
+model:
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 128
+detect:
+  bandwidth_threshold_gbps: null
+  calibrate: youden
+  alpha: 0.05
+  d_min: 0.8
+  min_window_s: 1.5
+output_dir: outputs/grid_small

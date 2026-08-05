@@ -1,0 +1,45 @@
+# Smoke: CPU / synthetic interconnect — validates pipeline without IB or 16 GPUs.
+run_name: smoke_baseline
+mode: smoke  # smoke | cluster
+collector:
+  host: 127.0.0.1
+  port: 8765
+  poll_hz: 10
+monitor:
+  # synthetic injects train-like vs infer-like byte rates based on workload tag
+  backends: [synthetic, proc_net, nccl]
+  iface: lo0
+workloads:
+  - name: train_ddp
+    kind: train_ddp
+    steps: 40
+    warmup_steps: 5
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+  - name: infer_dp
+    kind: infer_dp
+    steps: 40
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+  - name: diloco
+    kind: diloco
+    steps: 40
+    inner_steps: 8
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+model:
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 64
+detect:
+  bandwidth_threshold_gbps: null  # auto-calibrate via youden when null
+  calibrate: youden
+  alpha: 0.05
+  d_min: 0.8
+  min_window_s: 2.0
+output_dir: outputs/smoke
