@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Compute-Pause Verification — Study Notes</title>
+<style>
+
+  :root {
+    --bg: #fdfcfb;
+    --ink: #1a1a18;
+    --ink-dim: #55524a;
+    --ink-faint: #8a867a;
+    --accent: #9a5b12;
+    --rule: rgba(26,26,24,0.13);
+    --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea;
+    --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --bg: #171613;
+      --ink: #eae6dd;
+      --ink-dim: #a9a396;
+      --ink-faint: #746f63;
+      --accent: #d99a49;
+      --rule: rgba(234,230,221,0.13);
+      --rule-soft: rgba(234,230,221,0.07);
+      --code-bg: #100f0d;
+      --code-border: rgba(234,230,221,0.10);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171613; --ink: #eae6dd; --ink-dim: #a9a396; --ink-faint: #746f63;
+    --accent: #d99a49; --rule: rgba(234,230,221,0.13); --rule-soft: rgba(234,230,221,0.07);
+    --code-bg: #100f0d; --code-border: rgba(234,230,221,0.10);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #fdfcfb; --ink: #1a1a18; --ink-dim: #55524a; --ink-faint: #8a867a;
+    --accent: #9a5b12; --rule: rgba(26,26,24,0.13); --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea; --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16.5px;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; }
+
+  h1, h2, h3, h4 { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; font-weight: 600; text-wrap: balance; margin: 0; }
+  p { text-wrap: pretty; margin: 0 0 14px; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* layout: sidebar + content */
+  .page { display: flex; max-width: 1180px; margin: 0 auto; }
+  nav.toc {
+    width: 200px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    padding: 48px 0 48px 28px;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.toc .num { color: var(--ink-faint); margin-right: 6px; }
+  nav.toc a {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    text-decoration: none;
+    padding: 4px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -12px;
+    line-height: 1.5;
+  }
+  nav.toc a.active { color: var(--ink); border-left-color: var(--accent); }
+  nav.toc a:hover { color: var(--ink); }
+  @media (max-width: 880px) { nav.toc { display: none; } }
+
+  main { flex: 1; min-width: 0; padding: 56px 32px 120px; max-width: 760px; }
+  @media (max-width: 880px) { main { padding: 40px 20px 100px; } }
+
+  section { padding-top: 64px; margin-top: -8px; border-top: 1px solid var(--rule-soft); }
+  section:first-of-type { border-top: none; padding-top: 0; }
+
+  .kicker { font-size: 12.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  h2 { font-size: 24px; line-height: 1.3; margin-bottom: 6px; }
+  h2 .n { color: var(--accent); margin-right: 10px; }
+  .dek { font-size: 15px; color: var(--ink-faint); margin-bottom: 28px; font-family: system-ui, sans-serif; }
+  h3 { font-size: 15.5px; margin: 30px 0 10px; color: var(--ink); }
+
+  section p, section li { color: var(--ink-dim); line-height: 1.68; font-size: 16px; max-width: 66ch; }
+  section ul, section ol { margin: 0 0 14px; padding-left: 22px; }
+  section li { margin-bottom: 5px; }
+  strong { color: var(--ink); font-weight: 600; }
+  code:not(pre code) {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  /* code blocks */
+  pre {
+    margin: 16px 0 20px;
+    padding: 16px 18px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.62;
+  }
+  pre code { color: var(--ink-dim); }
+  pre .kw { color: var(--accent); }
+  pre .cm { color: var(--ink-faint); font-style: italic; }
+  pre .out { color: var(--ink); }
+  .code-cap { font-size: 12px; color: var(--ink-faint); margin: -14px 0 20px; font-family: ui-monospace, monospace; }
+
+  /* figures */
+  figure { margin: 24px 0 28px; }
+  figure img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 4px; }
+  figcaption { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; line-height: 1.5; }
+  figcaption .src { text-decoration: none; border-bottom: 1px dotted var(--ink-faint); }
+
+  /* remark / note callouts — restrained, text-led not box-led */
+  .note { margin: 20px 0; padding-left: 16px; border-left: 2px solid var(--rule); }
+  .note .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-bottom: 4px; display: block; }
+  .note p:last-child { margin-bottom: 0; }
+  .note.bug .label { color: var(--accent); }
+
+  /* small data table */
+  .tbl { overflow-x: auto; margin: 18px 0 24px; }
+  table { border-collapse: collapse; font-size: 14px; width: 100%; }
+  th, td { text-align: left; padding: 7px 16px 7px 0; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
+  th { color: var(--ink-faint); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { color: var(--ink-dim); }
+  td.mono, th.mono { font-family: ui-monospace, monospace; }
+
+  /* simple inline diagram bits (no long svg paths, just css) */
+  .flow { display: flex; align-items: center; gap: 10px; margin: 22px 0; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 13px; }
+  .flow .box { border: 1px solid var(--rule-strong, var(--rule)); padding: 8px 12px; border-radius: 5px; color: var(--ink-dim); background: var(--code-bg); }
+  .flow .arrow { color: var(--ink-faint); }
+
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 20px 0; }
+
+  header.masthead { padding-bottom: 40px; margin-bottom: 8px; }
+  header.masthead h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; margin-bottom: 14px; }
+  header.masthead p { font-size: 16px; color: var(--ink-dim); max-width: 60ch; }
+  header.masthead .meta { font-size: 12.5px; color: var(--ink-faint); margin-top: 18px; font-family: ui-monospace, monospace; }
+
+  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+
+
+  /* SVG diagrams */
+  .svg-fig {
+    margin: 24px 0 28px;
+    padding: 18px 16px 12px;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .svg-fig svg { width: 100%; height: auto; display: block; }
+  .svg-fig .cap {
+    font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0 24px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .two-col .panel {
+    border: 1px solid var(--rule-soft); border-radius: 4px; padding: 14px 14px 10px;
+    background: transparent;
+  }
+  .two-col .panel h4 {
+    font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--accent);
+    margin: 0 0 8px; font-weight: 600;
+  }
+  .two-col .panel p, .two-col .panel li { font-size: 13.5px; max-width: none; }
+  .ladder { margin: 20px 0 24px; font-family: ui-monospace, monospace; font-size: 13px; }
+  .ladder .rung {
+    display: grid; grid-template-columns: 72px 1fr; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--rule-soft); align-items: start;
+  }
+  .ladder .rung:last-child { border-bottom: none; }
+  .ladder .lvl { color: var(--accent); font-weight: 600; }
+  .ladder .body { color: var(--ink-dim); line-height: 1.55; font-family: system-ui, sans-serif; font-size: 14.5px; }
+  .ladder .body strong { color: var(--ink); }
+  @media print {
+    nav.toc { display: none !important; }
+    main { max-width: 100%; padding: 24px 32px; }
+    section { break-inside: avoid; page-break-inside: avoid; }
+    figure, .svg-fig { break-inside: avoid; }
+    a { color: var(--ink); text-decoration: none; }
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc" aria-label="Contents">
+  <a href="#map"><span class="num">0</span>Map</a>
+  <a href="#glossary"><span class="num">0b</span>Primer</a>
+  <a href="#wasil"><span class="num">1</span>Wasil</a>
+  <a href="#shavit"><span class="num">2</span>Shavit</a>
+  <a href="#rahman"><span class="num">3</span>Rahman</a>
+  <a href="#joshc"><span class="num">4</span>joshc</a>
+  <a href="#cankaya"><span class="num">5</span>Plan A</a>
+  <a href="#zkllm"><span class="num">6</span>zkLLM</a>
+  <a href="#verinf"><span class="num">7</span>VerInf</a>
+  <a href="#flexheg"><span class="num">8</span>FlexHEG</a>
+  <a href="#zk"><span class="num">9</span>ZK-train</a>
+  <a href="#synth"><span class="num">10</span>Synth</a>
+</nav>
+<main>
+
+<header class="masthead">
+  <div class="kicker">Briefing deck · compute-pause verification</div>
+  <h1>Research directions for verifiable AI slowdown</h1>
+  <p>A self-contained technical map of the main public papers and posts on verifying (and preferably throttling) frontier AI training under low trust. For each piece: who wrote it, what problem it addresses, how mature it is, and how it relates to the rest of the stack. Diagrams first; public links in each section.</p>
+  <p class="meta">2026-08-04 · standalone briefing · sources linked inline (arXiv / LessWrong / Substack / project sites)</p>
+</header>
+
+<section id="map">
+  <div class="kicker">Orientation</div>
+  <h2><span class="n">0.</span>Why this exists, what “Claim A” means, and the stack</h2>
+
+
+  <h3>0.0 Motivation — why anyone is building this</h3>
+  <p><strong>Anthropic (2026), <em>When AI builds itself</em>.</strong> The Institute argued the world should have the <em>option</em> of a coordinated slowdown or temporary pause on frontier development — but only if parties can <strong>verify</strong> that others actually stopped, so bad actors cannot use a collective pause as cover to race ahead. Conditional pause language is the point: verification systems are a prerequisite, not a side quest.
+  (<a href="https://www.anthropic.com/institute/recursive-self-improvement">anthropic.com/institute/recursive-self-improvement</a>)</p>
+  <p><strong>AI 2027, Appendix S (scenario research).</strong> If the US and China tried an AI arms-control style deal, how would cheating be caught? The appendix lists four imperfect families: (1) intelligence collection, (2) crude compute shutdowns with inspectors, (3) <strong>hardware-enabled mechanisms (HEM)</strong> — tamper-resistant reporting of what accelerators run, analogous to seals/attestations in other verification regimes, and (4) politically extreme “AI lie detection” of officials. This deck is mostly fleshing out family (3) and the monitoring stack that sits under it.
+  (<a href="https://ai-2027.com/">ai-2027.com</a> · research notes on compute / verification)</p>
+  <p>Same problem, different genres: a lab institute essay (Anthropic) and a public scenario appendix (AI 2027) both treat <strong>credible verification</strong> as the binding constraint on any pause story.</p>
+
+  <h3>0.1 The policy problem in one paragraph</h3>
+  <p>Labs and governments sometimes talk about a <strong>coordinated slowdown or pause</strong> on frontier model development. That option is worthless if parties cannot tell whether others actually stopped. Self-reports are not enough under low trust (rival states, or competing labs). The technical agenda is: build monitoring / attestation / enforcement so large unauthorized <em>training</em> is discoverable or physically hard — without requiring mutual trust in each other’s word.</p>
+  <p>Training vs inference is the load-bearing distinction. <strong>Training</strong> updates weights (often with heavy multi-GPU communication). <strong>Inference</strong> serves a fixed model. Datacenters can look “busy” either way; a sophisticated actor can try to disguise training (especially post-deployment RL) as serving. So “the GPUs are warm” is not a proof of compliance.</p>
+
+  <h3>0.2 Four claims people mix up</h3>
+  <p>People say “AI verification” for several <em>different sentences</em>. This deck is almost entirely about <strong>Claim A</strong>.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.4; }
+  </style>
+  <text x="24" y="22" class="h">Four different sentences people call “AI verification” — only one is this deck’s focus</text>
+  <rect x="24" y="36" width="160" height="150" rx="4" class="hi"/>
+  <text x="36" y="58" class="t">Claim A</text>
+  <text x="36" y="78" class="s">No covert frontier</text>
+  <text x="36" y="94" class="s">training / only</text>
+  <text x="36" y="110" class="s">allowed workloads</text>
+  <text x="36" y="132" class="s">Who cares: treaties,</text>
+  <text x="36" y="148" class="s">pause / slowdown,</text>
+  <text x="36" y="164" class="s">export controls</text>
+  <text x="36" y="180" class="s">THIS DECK</text>
+  <rect x="196" y="36" width="160" height="150" rx="4" class="box"/>
+  <text x="208" y="58" class="t">Claim B</text>
+  <text x="208" y="78" class="s">You got the model</text>
+  <text x="208" y="94" class="s">you were sold /</text>
+  <text x="208" y="110" class="s">audited</text>
+  <text x="208" y="132" class="s">Who cares: banks,</text>
+  <text x="208" y="148" class="s">hospitals, buyers</text>
+  <text x="208" y="164" class="s">Tech: identity,</text>
+  <text x="208" y="180" class="s">recompute, DRM-ish</text>
+  <rect x="368" y="36" width="160" height="150" rx="4" class="box"/>
+  <text x="380" y="58" class="t">Claim C</text>
+  <text x="380" y="78" class="s">Run happened in</text>
+  <text x="380" y="94" class="s">this jurisdiction /</text>
+  <text x="380" y="110" class="s">TEE; cloud can’t peek</text>
+  <text x="380" y="132" class="s">Who cares: sovereignty,</text>
+  <text x="380" y="148" class="s">GDPR, enterprise</text>
+  <text x="380" y="164" class="s">Tech: CC / TEE,</text>
+  <text x="380" y="180" class="s">attestation, location</text>
+  <rect x="540" y="36" width="160" height="150" rx="4" class="box"/>
+  <text x="552" y="58" class="t">Claim D</text>
+  <text x="552" y="78" class="s">This agent only</text>
+  <text x="552" y="94" class="s">did approved tool</text>
+  <text x="552" y="110" class="s">calls</text>
+  <text x="552" y="132" class="s">Who cares: agent</text>
+  <text x="552" y="148" class="s">users / enterprises</text>
+  <text x="552" y="164" class="s">Tech: audit trails,</text>
+  <text x="552" y="180" class="s">policy engines</text>
+</svg>
+<p class="cap">Mixing claims is the most common briefing failure. FlexHEG / Cankaya / joshc / Rahman are mostly Claim A. Commercial TEE “AI Passport” products are mostly B/C (sometimes D) — useful, but they do not by themselves prove “no covert training.”</p>
+</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Claim</th><th>Plain English</th><th>Primary audience</th><th>Example tech</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">A</td><td>No covert frontier training; only allowed / declared workloads on monitored compute</td><td>Treaties, pause/slowdown, export-control regimes</td><td>TAPs, recompute, train↔infer detectors, FlexHEG, PoL-style transcripts</td></tr>
+        <tr><td class="mono">B</td><td>The model that answered you is the one you bought / audited</td><td>Enterprise buyers, regulated sectors</td><td>Model identity binding, inference receipts, DRM-adjacent ZK</td></tr>
+        <tr><td class="mono">C</td><td>This run happened in a stated place / TEE; the host can’t read your data</td><td>Sovereignty, GDPR, confidential cloud</td><td>Confidential computing, remote attestation, location proofs</td></tr>
+        <tr><td class="mono">D</td><td>This agent only performed approved tool calls</td><td>Agent products / enterprise copilots</td><td>Audit logs, policy engines, “passport” receipts</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <span class="label">Scope of this deck</span>
+    <p><strong>In:</strong> Claim A mechanisms and the research lineage around them. <strong>Out (except as contrast):</strong> commercial TEE inference products aimed at B/C/D. Those can share primitives (attestation, recompute) but answering B/C does not answer “did you secretly train a bigger model?”</p>
+  </div>
+
+  <h3>0.3 Map of works covered</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Claim A lineage">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .ly { font: 600 9.5px ui-monospace, monospace; fill: #8a867a; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); stroke-width: 1; }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.3; }
+    .arr { stroke: #8a867a; stroke-width: 1.15; fill: none; marker-end: url(#ml); }
+  </style>
+  <defs>
+    <marker id="ml" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="20" class="h">Claim A lineage — arrows = motivates / hardens / implements a slice (not call-stack)</text>
+  <text x="24" y="36" class="s">Numbers = deck reading order. Same row = siblings (different tools), not “later replaces earlier.”</text>
+
+  <!-- #1 Wasil -->
+  <rect x="270" y="48" width="180" height="44" rx="3" class="box"/>
+  <text x="282" y="66" class="t">1 Wasil 2024</text>
+  <text x="282" y="82" class="s">method menu</text>
+  <text x="24" y="74" class="ly">menu</text>
+
+  <path d="M300 92 L120 118" class="arr"/>
+  <path d="M360 92 L360 118" class="arr"/>
+  <path d="M420 92 L600 118" class="arr"/>
+
+  <!-- row: classical | near-term | hardware -->
+  <rect x="40" y="124" width="160" height="50" rx="3" class="box"/>
+  <text x="52" y="144" class="t">2 Shavit + PoL</text>
+  <text x="52" y="160" class="s">chip + transcript</text>
+  <text x="24" y="118" class="ly">classical</text>
+
+  <rect x="280" y="124" width="160" height="50" rx="3" class="box"/>
+  <text x="292" y="144" class="t">4 joshc 2026</text>
+  <text x="292" y="160" class="s">TAP / wipe red-team</text>
+  <text x="280" y="118" class="ly">near-term facility</text>
+
+  <rect x="520" y="124" width="160" height="50" rx="3" class="hi"/>
+  <text x="532" y="144" class="t">8 FlexHEG</text>
+  <text x="532" y="160" class="s">active caps / shell</text>
+  <text x="520" y="118" class="ly">hardware track</text>
+
+  <path d="M90 174 L90 198" class="arr"/>
+  <path d="M160 174 L280 214" class="arr"/>
+  <path d="M360 174 L360 198" class="arr"/>
+
+  <!-- hardeners + Cankaya -->
+  <rect x="40" y="204" width="160" height="50" rx="3" class="box"/>
+  <text x="52" y="224" class="t">3 Rahman 2026</text>
+  <text x="52" y="240" class="s">train↔infer NVML</text>
+  <text x="24" y="198" class="ly">thin detector</text>
+
+  <rect x="280" y="204" width="160" height="50" rx="3" class="box"/>
+  <text x="292" y="224" class="t">9 Peigné 2026</text>
+  <text x="292" y="240" class="s">ZK training horizon</text>
+  <text x="280" y="198" class="ly">training crypto</text>
+
+  <rect x="480" y="204" width="200" height="56" rx="3" class="hi"/>
+  <text x="492" y="224" class="t">5 Cankaya 2026</text>
+  <text x="492" y="240" class="s">taps · bit-exact · Plan A/B</text>
+  <text x="480" y="198" class="ly">retrofit blueprint</text>
+
+  <path d="M580 174 L580 202" class="arr"/>
+  <path d="M580 260 L580 278" class="arr"/>
+
+  <rect x="470" y="282" width="220" height="44" rx="3" class="box"/>
+  <text x="482" y="300" class="t">6–7 zkLLM · VerInf · DiFR</text>
+  <text x="482" y="316" class="s">Plan B evaluate engines</text>
+  <text x="24" y="308" class="ly">inference crypto</text>
+
+  <text x="24" y="348" class="s">FlexHEG ∥ Cankaya: longer silicon track vs near-term facility retrofit — complementary, not sequential.</text>
+</svg>
+<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM/VerInf/DiFR sit under Plan B evaluate. FlexHEG is the parallel hardware-enforcement track.</p>
+</div>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">loose</div><div class="body"><strong>NTM / inspections</strong> — satellites, energy, site visits (Wasil’s access-light methods)</div></div>
+    <div class="rung"><div class="lvl">medium</div><div class="body"><strong>Network / facility controls</strong> — TAPs, bandwidth caps, memory wipes, output recompute (joshc; Cankaya taps)</div></div>
+    <div class="rung"><div class="lvl">tight</div><div class="body"><strong>Workload monitoring</strong> — weight snapshots + transcripts (Shavit); thin train↔infer telemetry (Rahman)</div></div>
+    <div class="rung"><div class="lvl">hard</div><div class="body"><strong>Hardware-enabled guarantees</strong> — FlexHEG FLOP caps / licenses / interlocks</div></div>
+    <div class="rung"><div class="lvl">crypto</div><div class="body"><strong>ZK training proofs</strong> — Peigné et al. (§9 research horizon)</div></div>
+    <div class="rung"><div class="lvl">infer</div><div class="body"><strong>Near-term inference retrofit</strong> — Cankaya Plan A (§5 taps + bit-exact) then Plan B (§6 zkLLM · §7 VerInf)</div></div>
+  </div>
+  <p><strong>Maturity legend used below:</strong> <em>Survey</em> (conceptual menu) · <em>Blueprint</em> (architecture, no full deploy) · <em>Empirical paper</em> (measured results) · <em>Prototype / demo</em> · <em>Horizon</em> (no working end-to-end system yet) · <em>Product</em> (mass deployment — almost nothing here qualifies).</p>
+</section>
+
+
+<section id="glossary">
+  <div class="kicker">Primer</div>
+  <h2><span class="n">0b.</span>Hardware · ML systems · crypto vocabulary</h2>
+  <p class="dek">Zoom from hall → interconnect layers → rack → node → board → SM, then why traffic looks different for train vs infer, then ZK vocab for §§6–7. Skim once; jump back when a later section feels opaque.</p>
+
+  <h3>1 · Where this lives — a real hall</h3>
+  <figure>
+    <img src="figures/meta_rsc_datacenter_aisle.jpg" alt="Meta AI Research SuperCluster data hall aisle"/>
+    <figcaption>Real AI cluster hall (Meta AI Research SuperCluster press photo): rack rows, cold-aisle containment, overhead cable trays carrying the scale-out fabric. Source: <a href="https://ai.meta.com/blog/ai-rsc/">Meta AI — Introducing the AI Research SuperCluster</a>.</figcaption>
+  </figure>
+
+  <h3>2 · Organizing abstraction — interconnect ladder</h3>
+  <p>Everything below is a zoom into one of these layers. Tap feasibility is uneven because only some layers ever become light.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interconnect ladder copper to optics">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.25; }
+  </style>
+  <text x="24" y="22" class="h">Interconnect ladder — copper vs optics (organizing abstraction for everything below)</text>
+  <text x="24" y="36" class="s">Read top→bottom once; later figures are zooms of a single layer.</text>
+
+  <rect x="24" y="48" width="672" height="52" rx="3" class="hi"/>
+  <text x="36" y="68" class="t">1 · Die / package / board</text>
+  <text x="36" y="86" class="s">On-die mesh · HBM · NVLink-C2C (Grace↔GPU). Electrical, mm–cm. Opaque to facility taps. → zoom: board + SM</text>
+
+  <rect x="24" y="112" width="672" height="52" rx="3" class="box"/>
+  <text x="36" y="132" class="t">2 · Scale-up domain (NVLink / NVSwitch)</text>
+  <text x="36" y="150" class="s">Intra-node mesh or whole-rack copper spine (NVL72). Still mostly electrical. → zoom: NVL72 + 8-GPU node</text>
+
+  <rect x="24" y="176" width="672" height="70" rx="3" class="box"/>
+  <text x="36" y="196" class="t">3 · Scale-out fabric (InfiniBand / RoCE / Spectrum-X)</text>
+  <text x="36" y="214" class="s">NIC → DAC copper (short) or AOC/transceiver (longer). Here electrical ↔ optical conversion happens:</text>
+  <text x="36" y="232" class="s">SerDes → laser/photodiode in QSFP/OSFP → fiber → far end recovers electrical → switch ASIC.</text>
+
+  <rect x="24" y="258" width="330" height="58" rx="3" class="box"/>
+  <text x="36" y="280" class="t">Tap-friendly</text>
+  <text x="36" y="298" class="s">Optical fiber / NS chokepoints · passive taps</text>
+  <rect x="366" y="258" width="330" height="58" rx="3" class="box"/>
+  <text x="378" y="280" class="t">Tap-hostile</text>
+  <text x="378" y="298" class="s">Copper NVLink spine · on-board links</text>
+</svg>
+<p class="cap">IB/RoCE (layer 3) carry the cross-node all-reduces Claim A people want to meter. Layer-2 copper spines move TB/s without becoming light — hard tap case for Cankaya/joshc.</p>
+</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Link</th><th>Medium</th><th>Job</th><th>Tap note</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">NVLink / NVSwitch</td><td>Copper (board / cable cartridge / rack spine)</td><td>Scale-up: activations, TP shards, in-rack collectives</td><td>Hard — never becomes light</td></tr>
+        <tr><td class="mono">InfiniBand (Quantum…)</td><td>DAC copper short; fiber + QSFP/OSFP longer</td><td>Scale-out GPU↔GPU (NCCL over RDMA)</td><td>Fiber segments = tap candidates</td></tr>
+        <tr><td class="mono">RoCE / Spectrum-X</td><td>Same physical story as IB, Ethernet framing</td><td>Same role as IB in many clouds</td><td>Same EO story</td></tr>
+        <tr><td class="mono">PCIe</td><td>Board traces</td><td>GPU↔CPU / GPU↔NIC</td><td>Inside box</td></tr>
+        <tr><td class="mono">AOC / transceiver</td><td>Electrical→laser→fiber→photodiode→electrical</td><td>Longer runs, leaf–spine, NS exit</td><td>Conversion lives in the pluggable module</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Electro–optical conversion in one sentence:</strong> the NIC SerDes is electrical; for distance you plug in a module that drives a laser into fiber and recovers bits at the far end. Passive optical taps copy photons on the fiber; they do nothing for copper NVLink spines inside the rack.</p>
+
+  <h3>3 · Ladder mapped onto a facility</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .wire { stroke: #9a5b12; stroke-width: 1.5; fill: none; }
+  </style>
+  <text x="24" y="22" class="h">Datacenter hierarchy — IB/RoCE ≠ “only cross-pod”</text>
+  <rect x="24" y="40" width="150" height="70" rx="3" class="box"/>
+  <text x="36" y="62" class="t">GPU + HBM</text>
+  <text x="36" y="80" class="s">die · SMs</text>
+  <text x="36" y="96" class="s">ladder layer 1</text>
+  <path d="M174 75 L200 75" class="wire"/>
+  <rect x="200" y="40" width="170" height="70" rx="3" class="box"/>
+  <text x="212" y="58" class="t">Node (e.g. 8-GPU)</text>
+  <text x="212" y="76" class="s">NVLink inside = layer 2</text>
+  <text x="212" y="94" class="s">NIC = layer-3 edge</text>
+  <path d="M370 75 L396 75" class="wire"/>
+  <rect x="396" y="40" width="140" height="70" rx="3" class="box"/>
+  <text x="408" y="58" class="t">Rack</text>
+  <text x="408" y="76" class="s">many nodes, or</text>
+  <text x="408" y="94" class="s">1× NVL72 domain</text>
+  <path d="M536 75 L562 75" class="wire"/>
+  <rect x="562" y="40" width="134" height="70" rx="3" class="box"/>
+  <text x="574" y="58" class="t">Pod / cluster</text>
+  <text x="574" y="76" class="s">scale-out fabric</text>
+  <text x="574" y="94" class="s">IB/RoCE leaf–spine</text>
+
+  <rect x="24" y="128" width="672" height="72" rx="3" class="box"/>
+  <text x="36" y="150" class="t">Where IB/RoCE actually starts = leaving the NVLink domain</text>
+  <text x="36" y="170" class="s">Classic DGX: NVLink = one 8-GPU node → even same-rack node↔node is already IB/RoCE.</text>
+  <text x="36" y="188" class="s">NVL72: NVLink = whole rack (72 GPUs) → IB/RoCE starts rack↔rack (in-pod or cross-pod).</text>
+
+  <rect x="24" y="214" width="330" height="88" rx="3" class="box"/>
+  <text x="36" y="236" class="t">East–West (inside the fence)</text>
+  <text x="36" y="256" class="s">GPU↔GPU grads / acts / KV</text>
+  <text x="36" y="274" class="s">= NVLink (in-domain) + IB/RoCE (out)</text>
+  <text x="36" y="292" class="s">Fat · hard to tap fully</text>
+  <rect x="366" y="214" width="330" height="88" rx="3" class="box"/>
+  <text x="378" y="236" class="t">North–South (to the outside)</text>
+  <text x="378" y="256" class="s">API tokens, SSH, admin, uploads</text>
+  <text x="378" y="274" class="s">Skinny · natural chokepoint</text>
+  <text x="378" y="292" class="s">Best first place for taps</text>
+</svg>
+<p class="cap">NIC sits on the node because that is the scale-out edge for classic topologies — not because IB is “a pod thing.” Cross-pod is just one hop on the same scale-out fabric.</p>
+</div>
+  <figure>
+    <img src="figures/dgx_h100_cluster_topology.png" alt="DGX cluster topology"/>
+    <figcaption>Same hierarchy, drawing form: servers → racks → pods → site. East–West ≈ ladder layers 2–3 inside the fence; North–South exits the site (best first tap chokepoint).</figcaption>
+  </figure>
+
+  <h3>4 · Zoom: one scale-up domain (rack)</h3>
+  <figure>
+    <img src="figures/gb200_nvl72_jensen.jpg" alt="NVIDIA GB200 NVL72 rack on stage"/>
+    <figcaption>Ladder layer 2 at modern density: GB200 NVL72 = 72 Blackwell GPUs + Grace CPUs in one liquid-cooled copper NVLink domain (~130 TB/s). Source: <a href="https://blogs.nvidia.com/blog/blackwell-ai-inference/">NVIDIA Blog</a>.</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/nvlink_copper_spine.jpg" alt="Dense copper interconnect harness for multi-GPU scale-up"/>
+    <figcaption>What layer-2 cabling looks like up close: dense copper (not fiber). Optical conversion mostly starts at the scale-out NIC edge (layer 3). Source: <a href="https://blogs.nvidia.com/blog/blackwell-ai-inference/">NVIDIA Blog</a>.</figcaption>
+  </figure>
+
+  <h3>5 · Zoom: one node (ladder layers 2→3)</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .g { fill: #fff; stroke: #9a5b12; }
+    .wire { stroke: #8a867a; stroke-width: 1.2; fill: none; }
+  </style>
+  <text x="24" y="22" class="h">One 8-GPU node = ladder layers 2→3 (spatial zoom)</text>
+  <rect x="40" y="40" width="520" height="180" rx="4" class="box"/>
+  <text x="56" y="62" class="t">Server / node</text>
+  <rect x="60" y="78" width="56" height="36" rx="2" class="g"/><text x="72" y="100" class="s">GPU0</text>
+  <rect x="128" y="78" width="56" height="36" rx="2" class="g"/><text x="140" y="100" class="s">GPU1</text>
+  <rect x="196" y="78" width="56" height="36" rx="2" class="g"/><text x="208" y="100" class="s">GPU2</text>
+  <rect x="264" y="78" width="56" height="36" rx="2" class="g"/><text x="276" y="100" class="s">GPU3</text>
+  <rect x="60" y="128" width="56" height="36" rx="2" class="g"/><text x="72" y="150" class="s">GPU4</text>
+  <rect x="128" y="128" width="56" height="36" rx="2" class="g"/><text x="140" y="150" class="s">GPU5</text>
+  <rect x="196" y="128" width="56" height="36" rx="2" class="g"/><text x="208" y="150" class="s">GPU6</text>
+  <rect x="264" y="128" width="56" height="36" rx="2" class="g"/><text x="276" y="150" class="s">GPU7</text>
+  <text x="56" y="188" class="s">Layer 2: NVLink / NVSwitch (copper, intra-node)</text>
+  <rect x="360" y="90" width="160" height="70" rx="3" class="box"/>
+  <text x="372" y="114" class="t">NIC → layer 3</text>
+  <text x="372" y="132" class="s">InfiniBand / RoCE</text>
+  <text x="372" y="148" class="s">node ↔ other nodes</text>
+  <path d="M332 120 L360 120" class="wire"/>
+  <text x="580" y="100" class="t">← to fabric</text>
+  <text x="40" y="242" class="s">NVML reads per-GPU sensors inside the box. Cross-node bytes = NIC/NCCL path (layer 3), not NVML alone.</text>
+</svg>
+<p class="cap">Spatial zoom of the interconnect ladder’s layers 2→3. Fowler-style “two 8-GPU nodes” watch the cable between NICs; Rahman-style classifiers watch per-GPU NVML time series.</p>
+</div>
+
+  <h3>6 · Zoom: one board (ladder layers 1→2)</h3>
+  <figure>
+    <img src="figures/gb200_bianca_board_layout.png" alt="GB200 board layout"/>
+    <figcaption>
+      GB200 “Bianca” board (SemiAnalysis). Layer-1/2 callouts:
+      <strong>Blackwell ×2</strong> — AI compute dies (SMs + HBM on-package);
+      <strong>Grace CPU</strong> — Arm host / orchestrator;
+      <strong>LPDDR5X</strong> — Grace system DRAM (not GPU HBM);
+      <strong>NVLink-C2C</strong> — Grace↔GPU coherent link (still layer 1);
+      <strong>NVLink5 connectors</strong> — out to rack scale-up domain (layer 2);
+      <strong>CX-7</strong> — NIC mezzanine → IB/Ethernet scale-out (layer 3; EO starts here on long runs);
+      <strong>Grace–Grace C2C</strong> — board-to-board CPU link;
+      <strong>BMC</strong> — out-of-band management;
+      <strong>MCIO / SlimSAS</strong> — PCIe storage/expansion.
+      FlexHEG near-term retrofits often target the <em>NIC / enclosure</em>, not a GPU-die respin.
+    </figcaption>
+  </figure>
+
+  <h3>7 · Zoom: inside the GPU die — SM</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Streaming multiprocessor">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .g { fill: #fff; stroke: #9a5b12; stroke-width: 1; }
+  </style>
+  <text x="24" y="22" class="h">SM = Streaming Multiprocessor (GPU’s compute tile)</text>
+  <rect x="24" y="40" width="280" height="200" rx="3" class="box"/>
+  <text x="36" y="62" class="t">One GPU die (cartoon)</text>
+  <rect x="44" y="78" width="36" height="28" rx="2" class="g"/>
+  <rect x="88" y="78" width="36" height="28" rx="2" class="g"/>
+  <rect x="132" y="78" width="36" height="28" rx="2" class="g"/>
+  <rect x="176" y="78" width="36" height="28" rx="2" class="g"/>
+  <rect x="220" y="78" width="36" height="28" rx="2" class="g"/>
+  <rect x="44" y="116" width="36" height="28" rx="2" class="g"/>
+  <rect x="88" y="116" width="36" height="28" rx="2" class="g"/>
+  <rect x="132" y="116" width="36" height="28" rx="2" class="g"/>
+  <rect x="176" y="116" width="36" height="28" rx="2" class="g"/>
+  <rect x="220" y="116" width="36" height="28" rx="2" class="g"/>
+  <rect x="44" y="154" width="36" height="28" rx="2" class="g"/>
+  <rect x="88" y="154" width="36" height="28" rx="2" class="g"/>
+  <rect x="132" y="154" width="36" height="28" rx="2" class="g"/>
+  <rect x="176" y="154" width="36" height="28" rx="2" class="g"/>
+  <rect x="220" y="154" width="36" height="28" rx="2" class="g"/>
+  <text x="36" y="210" class="s">H100 ≈ 132 SMs · each SM = many</text>
+  <text x="36" y="226" class="s">CUDA cores + Tensor Cores + schedulers</text>
+
+  <rect x="320" y="40" width="376" height="200" rx="3" class="box"/>
+  <text x="332" y="62" class="t">What “SM util” actually measures</text>
+  <text x="332" y="88" class="s">NVML “SM utilization” ≈ fraction of SMs that</text>
+  <text x="332" y="106" class="s">had ≥1 warp active over the sample window.</text>
+  <text x="332" y="132" class="s">High SM util ⇒ compute units busy.</text>
+  <text x="332" y="150" class="s">Low SM util + high HBM BW ⇒ memory-bound</text>
+  <text x="332" y="168" class="s">(classic decode / bandwidth-limited kernels).</text>
+  <text x="332" y="194" class="s">Does <tspan font-weight="600">not</tspan> say train vs infer, legal vs covert,</text>
+  <text x="332" y="212" class="s">or which model. Just “are SMs awake?”</text>
+</svg>
+<p class="cap">Think of SMs as many small CPUs glued to shared HBM. Prefill matmuls wake lots of SMs; token-by-token decode often waits on memory → SM util can look “idle” while the GPU is still serving.</p>
+</div>
+
+  <h3>8 · Why so many GPUs, and why traffic differs</h3>
+  <p>Frontier training is big because the <em>model state does not fit on one GPU</em>, so you must shard and communicate constantly — mostly on ladder layers 2–3.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Scale intuition (public anchors, ~2024–26)</th><th>Number</th></tr></thead>
+      <tbody>
+        <tr><td>Llama 3.1 405B dense params</td><td class="mono">405×10⁹</td></tr>
+        <tr><td>BF16 weights alone</td><td class="mono">405B × 2 B ≈ 810 GB</td></tr>
+        <tr><td>Naive train state (W + grad + Adam ≈ 16 B/param)</td><td class="mono">≈ 6.5 TB total</td></tr>
+        <tr><td>One H100 HBM</td><td class="mono">80 GB (SXM) / ~94–96 GB (some SKUs)</td></tr>
+        <tr><td>B200 / Blackwell HBM class</td><td class="mono">~180–192 GB/GPU (gen-dependent)</td></tr>
+        <tr><td>One GB200 NVL72 rack</td><td class="mono">72 GPUs · ~13.4 TB HBM aggregate</td></tr>
+        <tr><td>Llama 3.1 405B pretrain cluster (Meta report)</td><td class="mono">up to ~16,384 H100s · ~3.8×10²⁵ FLOP · ~15.6T tokens</td></tr>
+        <tr><td>Rough “why many GPUs”: fit train state + activations</td><td class="mono">405B needs ≫1 GPU; production runs use 10³–10⁴+</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Closed frontier labs (OpenAI / Anthropic / Google) don’t publish exact GPU counts; treat Llama 405B as the best public lower-bound picture of “what a near-frontier dense run looks like,” not the ceiling. MoE frontier runs can advertise huge total params with fewer active params/token — still multi-thousand-GPU jobs.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Collectives that make training “loud” on the network</text>
+  <rect x="24" y="40" width="330" height="150" rx="3" class="box"/>
+  <text x="36" y="64" class="t">All-reduce (DDP heartbeat)</text>
+  <text x="36" y="88" class="s">Each GPU has local gradient gᵢ</text>
+  <text x="36" y="106" class="s">→ everyone gets mean(g)</text>
+  <text x="36" y="124" class="s">Bytes / step ≈ O(model size)</text>
+  <text x="36" y="148" class="s">Big, regular, every step</text>
+  <text x="36" y="172" class="s">Cross-node → IB/RoCE counters spike</text>
+  <rect x="366" y="40" width="330" height="150" rx="3" class="box"/>
+  <text x="378" y="64" class="t">All-gather (FSDP / some TP)</text>
+  <text x="378" y="88" class="s">Each GPU holds a shard</text>
+  <text x="378" y="106" class="s">→ assemble full tensor locally</text>
+  <text x="378" y="124" class="s">Also O(params) class traffic</text>
+  <text x="378" y="148" class="s">Inference usually ships activations</text>
+  <text x="378" y="172" class="s">or KV — O(tokens×hidden), not O(params)/step</text>
+</svg>
+<p class="cap">DiLoCo / LocalSGD: train locally for many steps, sync rarely → average cross-node GB/s can look “inference-quiet” while training still happens.</p>
+</div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .bar { fill: #9a5b12; opacity: 0.35; }
+  </style>
+  <text x="24" y="22" class="h">Inference anatomy: prefill vs decode (and why disagg ships KV)</text>
+  <rect x="40" y="50" width="280" height="40" class="bar"/>
+  <text x="50" y="75" class="t">Prefill — ingest whole prompt, build KV</text>
+  <rect x="330" y="50" width="40" height="40" class="bar"/>
+  <rect x="380" y="50" width="40" height="40" class="bar"/>
+  <rect x="430" y="50" width="40" height="40" class="bar"/>
+  <rect x="480" y="50" width="40" height="40" class="bar"/>
+  <text x="330" y="110" class="s">Decode — one new token at a time</text>
+  <rect x="24" y="130" width="330" height="80" rx="3" class="box"/>
+  <text x="36" y="154" class="t">Same box (usual serving)</text>
+  <text x="36" y="174" class="s">Prefill+decode share GPUs</text>
+  <text x="36" y="194" class="s">Cross-node often quiet</text>
+  <rect x="366" y="130" width="330" height="80" rx="3" class="box"/>
+  <text x="378" y="154" class="t">Disaggregated serving</text>
+  <text x="378" y="174" class="s">Prefill pool → ship KV → decode pool</text>
+  <text x="378" y="194" class="s">Can make NS/EW look “training-loud”</text>
+</svg>
+<p class="cap">SM util: how busy GPU compute units are. Prefill can pin SMs; decode is often memory-bandwidth bound — so SM util alone is a weak train/infer label.</p>
+</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">TP</td><td>Tensor parallelism — split a layer’s matrices across GPUs; exchange activations each layer</td></tr>
+        <tr><td class="mono">DP / DDP</td><td>Data parallel — full model replica per worker; all-reduce gradients</td></tr>
+        <tr><td class="mono">FSDP</td><td>Fully sharded data parallel — shard params; all-gather when needed</td></tr>
+        <tr><td class="mono">NCCL</td><td>NVIDIA collective communications library implementing all-reduce etc.</td></tr>
+        <tr><td class="mono">NVML / DCGM</td><td>Per-GPU sensor APIs (power, SM util, memory…). Not cross-node byte counters</td></tr>
+        <tr><td class="mono">SM util</td><td>Fraction of SMs busy in the sample window — compute busyness, not “is this training?”</td></tr>
+        <tr><td class="mono">Warden</td><td>Active network scrubber on the monitored path (normalize headers/timing to kill stego) — see §4</td></tr>
+        <tr><td class="mono">DiLoCo</td><td>Low-communication training: many local steps, rare outer sync — can evade “fat interconnect” detectors</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>9 · Zero-knowledge proofs (for §§6–7, §9)</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Verification properties">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Four properties (use these words precisely in §§6–8)</text>
+
+  <rect x="24" y="40" width="336" height="88" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Completeness</text>
+  <text x="36" y="82" class="s">Honest compliant prover almost always</text>
+  <text x="36" y="100" class="s">passes. False reject → kills the deal.</text>
+  <text x="36" y="118" class="s">(“If I’m clean, I get accepted.”)</text>
+
+  <rect x="372" y="40" width="324" height="88" rx="3" class="box"/>
+  <text x="384" y="62" class="t">Soundness</text>
+  <text x="384" y="82" class="s">Cheater almost never passes.</text>
+  <text x="384" y="100" class="s">False accept → fake compliance.</text>
+  <text x="384" y="118" class="s">(“Dirty run can’t forge Accept.”)</text>
+
+  <rect x="24" y="144" width="336" height="100" rx="3" class="box"/>
+  <text x="36" y="166" class="t">Confidentiality</text>
+  <text x="36" y="186" class="s">Weights / prompts / activations / customer</text>
+  <text x="36" y="204" class="s">data stay private from the other party</text>
+  <text x="36" y="222" class="s">(and often from each other’s silicon).</text>
+  <text x="36" y="240" class="s">ZK ≈ cryptographic confidentiality of witness.</text>
+
+  <rect x="372" y="144" width="324" height="100" rx="3" class="box"/>
+  <text x="384" y="166" class="t">Assurance</text>
+  <text x="384" y="186" class="s">How sure is the auditor that cheating</text>
+  <text x="384" y="204" class="s">would be caught in the field?</text>
+  <text x="384" y="222" class="s">Includes soundness + sampling rate +</text>
+  <text x="384" y="240" class="s">tap coverage + stego slack (joshc ~1%).</text>
+
+  <rect x="24" y="260" width="672" height="80" rx="3" class="box"/>
+  <text x="36" y="282" class="t">Plan A vs Plan B on these axes</text>
+  <text x="36" y="302" class="s">Plan A (plaintext AE recompute): can be strong on completeness/soundness/assurance if bit-exact + dense sampling —</text>
+  <text x="36" y="320" class="s">but burns confidentiality (weights + challenged I/O enter the AE). Plan B (ZK): keep soundness/completeness goals,</text>
+  <text x="36" y="338" class="s">restore confidentiality of the witness; assurance still needs sampling + good taps — π doesn’t watch untapped cables.</text>
+</svg>
+<p class="cap">Don’t collapse these. A demo can be complete+sound in crypto and still give low assurance if you sample 0.001% of requests or leave EW copper blind.</p>
+</div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">ZK vocabulary (enough to read zkLLM / VerInf / Peigné)</text>
+  <rect x="24" y="36" width="220" height="100" rx="3" class="box"/>
+  <text x="36" y="58" class="t">Statement</text>
+  <text x="36" y="78" class="s">“I ran model W on x</text>
+  <text x="36" y="94" class="s">and got y” (or a bound)</text>
+  <text x="36" y="118" class="s">Public: arch, C=Commit(W)</text>
+  <rect x="256" y="36" width="220" height="100" rx="3" class="box"/>
+  <text x="268" y="58" class="t">Witness</text>
+  <text x="268" y="78" class="s">Secret intermediates:</text>
+  <text x="268" y="94" class="s">weights, activations…</text>
+  <text x="268" y="118" class="s">Prover holds; verifier doesn’t</text>
+  <rect x="488" y="36" width="208" height="100" rx="3" class="box"/>
+  <text x="500" y="58" class="t">Constraints</text>
+  <text x="500" y="78" class="s">Algebraic equations that</text>
+  <text x="500" y="94" class="s">every correct step must</text>
+  <text x="500" y="118" class="s">satisfy (the “circuit”)</text>
+  <rect x="24" y="152" width="340" height="100" rx="3" class="box"/>
+  <text x="36" y="174" class="t">Properties you want</text>
+  <text x="36" y="196" class="s">Completeness: honest prover convinces</text>
+  <text x="36" y="214" class="s">Soundness: cheater almost never passes</text>
+  <text x="36" y="232" class="s">Zero-knowledge: proof leaks ~nothing extra</text>
+  <rect x="376" y="152" width="320" height="100" rx="3" class="box"/>
+  <text x="388" y="174" class="t">In this literature</text>
+  <text x="388" y="196" class="s">zkLLM: prove exact integer circuit</text>
+  <text x="388" y="214" class="s">VerInf: prove unexplained bits ≤ U</text>
+  <text x="388" y="232" class="s">Peigné: ZK for training steps (horizon)</text>
+
+  <rect x="24" y="268" width="672" height="130" rx="3" class="box"/>
+  <text x="36" y="290" class="t">The integer / finite-field constraint (why float GPUs ≠ ZK circuits)</text>
+  <text x="36" y="312" class="s">SNARKs do arithmetic in a prime field 𝔽_p (integers mod p). GPU serving does BF16/FP8 floats with rounding.</text>
+  <text x="36" y="330" class="s">So zkLLM-style systems re-express the forward pass as a quantized / integer circuit, then prove that circuit.</text>
+  <text x="36" y="348" class="s">What you proved: “integer program with Commit(W) produced y.” What you did <tspan font-weight="600">not</tspan> prove: bit-exact match to</text>
+  <text x="36" y="366" class="s">arbitrary float serving on H100/B200. Softmax/nondeterminism → lookups + tolerances, not native IEEE floats.</text>
+  <text x="36" y="384" class="s">VerInf dodges this by proving an unexplained-info bound instead of exact float equality.</text>
+</svg>
+<p class="cap">A “constraint” is a math check over 𝔽_p (e.g. c − a·b = 0), not a governance policy. The integer gap is why “ZK receipt” and “bit-exact AE recompute” are different Plan B / Plan A stories.</p>
+</div>
+  <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
+  <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
+</section>
+
+<section id="wasil">
+  <div class="kicker">Survey · treaty framing</div>
+  <h2><span class="n">1.</span>Wasil et al. — verification method menu</h2>
+  <p class="dek"><a href="https://arxiv.org/abs/2408.16074">arXiv:2408.16074</a> · 2024</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Wasil, Reed, Miller, Barnett et al. — survey aimed at international AI agreements (access assumptions + evasion sketches).</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Survey / coordinate system.</strong> Not a deployable stack. Useful to prevent “we solved verification” talk after reading one mechanism.</p>
+    </div>
+  </div>
+  <p><strong>Problem it frames:</strong> If states agree “don’t secretly train too big / don’t secretly build too many DCs,” what instruments exist? Two violation types: <strong>unauthorized training</strong> and <strong>unauthorized datacenters</strong>.</p>
+  <p><strong>Lineage:</strong> Entry point for the rest of this deck. Later works sit in its hardware-dependent / access-dependent cells (Shavit, FlexHEG, location proofs, workload monitoring).</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.15); }
+  </style>
+  <text x="24" y="24" class="h">A · National Technical Means</text>
+  <rect x="24" y="36" width="210" height="100" rx="4" class="box"/>
+  <text x="36" y="58" class="t">① remote sensing</text>
+  <text x="36" y="76" class="t">② whistleblowers</text>
+  <text x="36" y="94" class="t">③ energy monitoring</text>
+  <text x="36" y="112" class="t">④ customs · ⑤ finance</text>
+  <text x="36" y="128" class="s">little access needed</text>
+
+  <text x="256" y="24" class="h">B · Access-dependent</text>
+  <rect x="256" y="36" width="210" height="100" rx="4" class="box"/>
+  <text x="268" y="58" class="t">⑥ DC inspections</text>
+  <text x="268" y="76" class="t">⑦ fab inspections</text>
+  <text x="268" y="94" class="t">⑧ developer audits</text>
+  <text x="268" y="112" class="s">need consent / entry</text>
+  <text x="268" y="128" class="s">IAEA-flavored</text>
+
+  <text x="488" y="24" class="h">C · Hardware-dependent</text>
+  <rect x="488" y="36" width="208" height="100" rx="4" class="box"/>
+  <text x="500" y="58" class="t">⑨ chip location track</text>
+  <text x="500" y="76" class="t">⑩ on-chip / workload</text>
+  <text x="500" y="94" class="s">pre-agree chip rules</text>
+  <text x="500" y="112" class="s">→ Shavit / FlexHEG</text>
+
+  <text x="24" y="172" class="t">Swiss-cheese model</text>
+  <rect x="24" y="186" width="672" height="18" rx="2" fill="#e8e2d6" stroke="rgba(26,26,24,0.12)"/>
+  <circle cx="80" cy="195" r="5" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="200" cy="195" r="4" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="340" cy="195" r="6" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="480" cy="195" r="4" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="600" cy="195" r="5" fill="#fdfcfb" stroke="#9a5b12"/>
+  <rect x="24" y="214" width="672" height="18" rx="2" fill="#e8e2d6" stroke="rgba(26,26,24,0.12)"/>
+  <circle cx="120" cy="223" r="4" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="280" cy="223" r="5" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="520" cy="223" r="6" fill="#fdfcfb" stroke="#9a5b12"/>
+  <rect x="24" y="242" width="672" height="18" rx="2" fill="#e8e2d6" stroke="rgba(26,26,24,0.12)"/>
+  <circle cx="180" cy="251" r="5" fill="#fdfcfb" stroke="#9a5b12"/>
+  <circle cx="420" cy="251" r="4" fill="#fdfcfb" stroke="#9a5b12"/>
+  <text x="24" y="278" class="s">each layer has holes; stacked layers make covert breach harder (Fearon / Baker: verifiable agreements are more signable)</text>
+</svg>
+<p class="cap">Wasil taxonomy: cooperation cost ↑ left→right; technical bite ↑ left→right. Not a system design — a menu.</p>
+</div>
+  <h3>What to remember technically</h3>
+  <ul>
+    <li>Methods differ in <strong>access assumptions</strong>: unilateral national technical means vs negotiated entry vs pre-agreed chip behavior.</li>
+    <li>Hardware-dependent methods are highest bite and hardest diplomacy.</li>
+    <li>Chip location ≠ training proof. Location answers “where is the silicon?”; workload methods answer “what did it run?”</li>
+  </ul>
+  <p><strong>One Wasil cell — chip location proofs — looks like this:</strong> you are not proving “this GPU trained legally.” You are proving (approximately) “this registered chip is physically near claimed site X,” so a dark training cluster in an undeclared country is harder to hide. Delay-based / multi-anchor checks exploit physics: light in fiber has a max speed, so round-trip time to a trusted probe sets a distance upper bound.</p>
+  <figure>
+    <img src="figures/location_verification_triangulation.png" alt="Location verification triangulation diagram"/>
+    <figcaption>
+      <strong>How to read the figure.</strong>
+      Blue dots = trusted <em>anchors</em> (known-location probes / PoPs).
+      Dashed arcs = “this chip answered me in ≤ T ms ⇒ it cannot be farther than ~c·T/2 in fiber.”
+      Purple blob = intersection of several such bounds (where the chip is allowed to sit).
+      Orange X = true location (ideally inside the blob).
+      Spoofing “I’m in Virginia” while sitting in another country fails if enough distant anchors force the intersection away from Virginia.
+      This is only a <em>where</em> check — still need workload methods (Shavit / joshc / FlexHEG / …) for <em>what ran</em>.
+    </figcaption>
+  </figure>
+</section>
+
+<section id="shavit">
+  <div class="kicker">Classical compute monitoring</div>
+  <h2><span class="n">2.</span>Shavit — Catch a Chinchilla (+ Proof-of-Learning)</h2>
+  <p class="dek"><a href="https://arxiv.org/abs/2303.11341">arXiv:2303.11341</a> · 2023 · PoL primitive: Jia et al. 2021</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Yonadav Shavit — early blueprint for monitoring large training runs via chip-level weight fingerprints + training transcripts + supply-chain coverage.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Blueprint.</strong> Problem decomposition, not an industry-deployed end-to-end system as of 2026.</p>
+    </div>
+  </div>
+  <p><strong>One sentence:</strong> force frontier training onto registered ML chips that leave sparse <em>weight fingerprints</em>; require a transcript that explains those fingerprints (Proof-of-Learning-style checks); audit the supply chain so dark chips can’t skip the net.</p>
+  <p><strong>Lineage:</strong> Classical “what Claim A monitoring could look like.” Gaps it leaves → later work: train↔infer ambiguity (Rahman); cryptographic transcripts (Peigné); active hardware caps instead of after-the-fact snapshots (FlexHEG).</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#m2); }
+  </style>
+  <defs>
+    <marker id="m2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <rect x="40" y="30" width="160" height="70" rx="4" class="box"/>
+  <text x="52" y="54" class="t">① Chip firmware</text>
+  <text x="52" y="74" class="s">sparse weight snapshot</text>
+  <text x="52" y="90" class="s">secure-boot signed FW</text>
+  <path d="M200 65 L250 65" class="arr"/>
+  <rect x="250" y="30" width="180" height="70" rx="4" class="box"/>
+  <text x="262" y="54" class="t">② Transcript + PoL</text>
+  <text x="262" y="74" class="s">data / hparams / ckpts</text>
+  <text x="262" y="90" class="s">spot-check recompute</text>
+  <path d="M430 65 L480 65" class="arr"/>
+  <rect x="480" y="30" width="180" height="70" rx="4" class="box"/>
+  <text x="492" y="54" class="t">③ Supply registry</text>
+  <text x="492" y="74" class="s">known ML chips only</text>
+  <text x="492" y="90" class="s">spot physical audit</text>
+
+  <rect x="120" y="140" width="480" height="130" rx="4" class="box"/>
+  <text x="140" y="168" class="t">PoL check (Jia et al. intuition)</text>
+  <text x="140" y="192" class="s">Claim: W_T came from (W_0, D, A) under claimed optimizer steps</text>
+  <text x="140" y="214" class="s">Verifier samples steps i → recompute / check consistency with snapshots</text>
+  <text x="140" y="236" class="s">Mismatch ⇒ lying about process  ·  Match + illegal FLOP ⇒ rule break</text>
+  <text x="140" y="258" class="s">Refuse audit ≈ adverse inference (audit analogy)</text>
+</svg>
+<p class="cap">Shavit stack: fingerprints on chip + proof the transcript explains them + no dark chips outside the registry.</p>
+</div>
+  <h3>Threat model that matters</h3>
+  <p>Prover is a <strong>covert adversary</strong>: cheats only when it can look compliant. Design goal = make “look compliant while cheating” nearly impossible under random chip audits.</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>On chip</h4>
+      <p>Firmware occasionally hashes / records HBM weight shards. Needs signed firmware + later physical spot checks (remote attestation alone is weak against a physical adversary).</p>
+    </div>
+    <div class="panel">
+      <h4>In the DC</h4>
+      <p>Transcript = data references, hparams, checkpoints, optimizer trajectory. Verifier samples steps; inconsistency or illegal scale ⇒ fail.</p>
+    </div>
+  </div>
+  <h3>Open issues Shavit already flags</h3>
+  <ul>
+    <li>Train vs infer lookalike occupancy of HBM.</li>
+    <li>Legacy chips without secure firmware — small/medium training may escape.</li>
+    <li>Vendor–prover collusion on backdoored firmware.</li>
+  </ul>
+</section>
+
+<section id="rahman">
+  <div class="kicker">Empirical thin layer</div>
+  <h2><span class="n">3.</span>Rahman &amp; Tajdari — train vs infer from NVML</h2>
+  <p class="dek"><a href="https://arxiv.org/abs/2606.19262">arXiv:2606.19262</a> · TAIGR @ ICML 2026</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Robi Rahman (MIRI Technical Governance; ex-Epoch) and Sabiha Tajdari (UVA) — SPAR-originated empirical red-team of GPU workload classifiers.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Empirical paper + public tooling lineage.</strong> Real numbers under adversarial disguise. Solves only a <em>thin slice</em> of Claim A (label train vs infer), not full rule verification.</p>
+    </div>
+  </div>
+  <p><strong>Question:</strong> can you tell training vs inference from GPU telemetry (NVML) without touching weights or data?</p>
+  <p><strong>Lineage:</strong> Attacks the gap Shavit flagged and that FlexHEG/joshc classifiers often assume. Complements interconnect-based detectors (communication volume) — different observation channel.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#m4); }
+  </style>
+  <defs>
+    <marker id="m4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <rect x="40" y="40" width="160" height="70" rx="4" class="box"/>
+  <text x="52" y="68" class="t">GPU workload</text>
+  <text x="52" y="88" class="s">train / infer / mix</text>
+  <path d="M200 75 L250 75" class="arr"/>
+  <rect x="250" y="40" width="180" height="70" rx="4" class="box"/>
+  <text x="262" y="68" class="t">NVML telemetry</text>
+  <text x="262" y="88" class="s">no weights / no data</text>
+  <path d="M430 75 L480 75" class="arr"/>
+  <rect x="480" y="40" width="180" height="70" rx="4" class="box"/>
+  <text x="492" y="68" class="t">Monitor model</text>
+  <text x="492" y="88" class="s">train vs infer label</text>
+
+  <rect x="120" y="140" width="480" height="70" rx="4" class="box"/>
+  <text x="140" y="168" class="t">5 rounds monitor ↔ evader · 20 disguises · 9 GPUs · 4 arch gens</text>
+  <text x="140" y="190" class="s">headline ~98.2% overall · hard disguises collapse to ~43–87% — robust-ish, not magic</text>
+</svg>
+<p class="cap">Thin layer only: “is this training?” not “did this training violate a FLOP license.” Empirically grounded where Shavit/ZK are still blueprints.</p>
+</div>
+  <figure>
+    <img src="figures/workload_monitoring_metrics.png" alt="Workload monitoring metrics"/>
+    <figcaption>Example metric space for workload monitoring. Rahman asks whether this works under disguise.</figcaption>
+  </figure>
+  <h3>Numbers to keep (and not overclaim)</h3>
+  <ul>
+    <li>~98.2% overall accuracy across their matrix.</li>
+    <li>Under the hardest disguises, ~43–87% — robust overall, meaningfully degraded under sophisticated evasion; not “solved.”</li>
+    <li>Method: 5-round monitor–evader loop, multi-GPU / multi-arch — the right evaluation bar for any such detector.</li>
+  </ul>
+</section>
+
+<section id="joshc">
+  <div class="kicker">Near-term slowdowns</div>
+  <h2><span class="n">4.</span>joshc — TAPs, wipes, and covert RL</h2>
+  <p class="dek"><a href="https://www.lesswrong.com/posts/oHiNwWtDPcBLumPWp/how-might-governments-slow-or-halt-ai-training">LessWrong / Alignment Forum</a> · 2026</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>joshc (Alignment Forum / LessWrong) — red-team essay on whether <em>fast, cheap facility mods</em> can slow training before treaty-grade hardware exists.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Red-team / requirements doc.</strong> Not a product. Sets pass/fail bars for prototypes (TAP + recompute + wipe + accounting).</p>
+    </div>
+  </div>
+  <p><strong>Question:</strong> before global FlexHEG-class silicon exists, can governments slow training by pulling InfiniBand, capping rack egress (~100 KB/s), TAP+recomputing outputs, wiping memory, demanding PoW/PoM?</p>
+  <p>Naive lever: training is communication-hungry; inference is text-skinny. joshc’s point: under <em>today’s prototype strength</em>, that lever may fail against modern RL pipelines (rollouts look like inference; updates can hide in a small dark fraction of compute + leaky recompute slack).</p>
+  <p><strong>Lineage:</strong> Stress-tests the “medium” rung (after you’ve seen how thin NVML train↔infer is). Motivates tighter recompute (Cankaya bit-exact / DiFR), better taps, and why FlexHEG remains the longer-term enforcement story.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .bad { fill: #f3e8e0; stroke: #9a5b12; }
+    .ok { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#m3); }
+  </style>
+  <defs>
+    <marker id="m3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="24" class="t">Naive story: training needs fat interconnect; inference needs skinny text</text>
+  <rect x="24" y="44" width="200" height="56" rx="4" class="ok"/>
+  <text x="36" y="68" class="t">pull IB / limit BW</text>
+  <text x="36" y="86" class="s">e.g. ~100 KB/s/rack</text>
+  <path d="M224 72 L270 72" class="arr"/>
+  <rect x="270" y="44" width="200" height="56" rx="4" class="ok"/>
+  <text x="282" y="68" class="t">output recompute</text>
+  <text x="282" y="86" class="s">TAP + spot check M</text>
+  <path d="M470 72 L516 72" class="arr"/>
+  <rect x="516" y="44" width="180" height="56" rx="4" class="ok"/>
+  <text x="528" y="68" class="t">“training slowed”</text>
+  <text x="528" y="86" class="s">hope, not theorem</text>
+
+  <text x="24" y="140" class="t">Covert RL under leaky recompute (~1% error budget + ~5% dark compute)</text>
+  <rect x="24" y="156" width="300" height="80" rx="4" class="ok"/>
+  <text x="36" y="180" class="t">95% “inference” racks</text>
+  <text x="36" y="198" class="s">generate rollouts (looks like serving)</text>
+  <text x="36" y="216" class="s">smuggle top rollouts in error budget</text>
+  <path d="M324 196 L370 196" class="arr"/>
+  <rect x="370" y="156" width="326" height="80" rx="4" class="bad"/>
+  <text x="382" y="180" class="t">~5% dark racks</text>
+  <text x="382" y="198" class="s">actual parameter updates</text>
+  <text x="382" y="216" class="s">push small experts back every few hrs</text>
+
+  <text x="24" y="268" class="t">Thresholds to break this (any one, vs current algos)</text>
+  <text x="24" y="290" class="s">PoW/PoM covers &gt;95% · memory wipe every few minutes · covert channel ≪0.01% of traffic</text>
+</svg>
+<p class="cap">joshc’s killer scenario: compliant-looking RL rollouts + dark updater. Near-term network controls without those thresholds may not buy a real pause.</p>
+</div>
+  <h3>Facility toolkit (where each tool sits)</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 10.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">joshc near-term toolkit (facility mods before FlexHEG silicon)</text>
+  <rect x="16" y="40" width="130" height="130" rx="3" class="box"/>
+  <text x="28" y="64" class="t">Pull IB</text>
+  <text x="28" y="88" class="s">Yank fat fabric;</text>
+  <text x="28" y="106" class="s">force slow copper</text>
+  <text x="28" y="140" class="s">hurts multi-node</text>
+  <text x="28" y="156" class="s">train sync</text>
+  <rect x="156" y="40" width="130" height="130" rx="3" class="box"/>
+  <text x="168" y="64" class="t">BW limiter</text>
+  <text x="168" y="88" class="s">Cap egress</text>
+  <text x="168" y="106" class="s">(~100 KB/s)</text>
+  <text x="168" y="140" class="s">+ TAP sample</text>
+  <rect x="296" y="40" width="140" height="130" rx="3" class="box"/>
+  <text x="308" y="64" class="t">Output recompute</text>
+  <text x="308" y="88" class="s">Replay model M</text>
+  <text x="308" y="106" class="s">on tapped I/O</text>
+  <text x="308" y="140" class="s">Loose match →</text>
+  <text x="308" y="156" class="s">covert channel</text>
+  <rect x="446" y="40" width="130" height="130" rx="3" class="box"/>
+  <text x="458" y="64" class="t">Memory wipe</text>
+  <text x="458" y="88" class="s">Fill RAM with</text>
+  <text x="458" y="106" class="s">known noise;</text>
+  <text x="458" y="124" class="s">challenge; then</text>
+  <text x="458" y="142" class="s">reload whitelist</text>
+  <text x="458" y="158" class="s">via controlled path</text>
+  <rect x="586" y="40" width="118" height="130" rx="3" class="box"/>
+  <text x="598" y="64" class="t">PoW / PoM</text>
+  <text x="598" y="88" class="s">Account FLOPs</text>
+  <text x="598" y="106" class="s">/ memory vs</text>
+  <text x="598" y="124" class="s">declared work</text>
+  <text x="598" y="150" class="s">&gt;95% coverage</text>
+</svg>
+<p class="cap">Whitelist channel = the only high-bandwidth path allowed to reload weights after a wipe — gated by Hash(W)∈registered commitments.</p>
+</div>
+  <h3>Five near-term tools (compressed)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Tool</th><th>Idea</th><th>Author’s read</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Pull IB</td><td>Replace ~400 GB/s fabrics with slow copper</td><td>~1y prep plausible</td></tr>
+        <tr><td class="mono">BW limiter + TAP</td><td>Cap egress; sample traffic</td><td>to ~100 KB/s plausible</td></tr>
+        <tr><td class="mono">Output recompute</td><td>Replay declared model M on tapped I/O</td><td>~1% nondeterminism budget = covert channel</td></tr>
+        <tr><td class="mono">Memory wipe</td><td>Force verifiable fill; reload whitelist model</td><td>needs ≫99.99% coverage — hard</td></tr>
+        <tr><td class="mono">PoW / PoM</td><td>Account for FLOPs/memory spent on declared serving</td><td>useful if &gt;95% coverage</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note bug">
+    <span class="label">Prototype bar</span>
+    <p>If a demo doesn’t close the RL-smuggling channel under realistic slack, it has not purchased a credible pause — regardless of how good benign accuracy looks.</p>
+  </div>
+</section>
+
+<section id="cankaya">
+  <div class="kicker">Near-term retrofit · Plan A</div>
+  <h2><span class="n">5.</span>Cankaya — taps, challenges, and precise replay (Plan A)</h2>
+  <p class="dek">
+    System overview <a href="https://www.lesswrong.com/posts/fgvmKqRGvBteKeDoc/a-system-overview-for-near-term-low-trust-ai-compute">LW</a> ·
+    taps <a href="https://nacicankaya.substack.com/p/research-note-the-fundamentals-and">Substack Apr 2026</a> ·
+    bit-exact <a href="https://arxiv.org/abs/2606.00279">2606.00279</a> ·
+    DiFR (statistical slack) <a href="https://arxiv.org/abs/2511.20621">2511.20621</a>
+  </p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p><strong>Naci Cankaya</strong> (MIRI technical governance) — whole-facility retrofit blueprint: capture I/O → random challenge → evaluate. Bit-exact paper is the Plan A numerics companion; taps note is the capture companion.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p>Overview: <strong>blueprint</strong>. Taps: <strong>feasibility + commodity-tech argument</strong> (NS ready-ish; EW needs pilots). Bit-exact: <strong>empirical + emulator prototype</strong> for inference — not a training verifier; not yet a fielded AE standard.</p>
+    </div>
+  </div>
+  <p><strong>Shared audit question:</strong> was this sampled request run on the whitelist model?</p>
+  <p><strong>Plan A (near-term default):</strong> air-gapped audit environment (AE) holds the whitelist weights and <em>recomputes</em> the challenged forward pass in plaintext, then compares to tapped I/O. For that comparison to be a pass/fail (not a ~1% stego channel à la joshc), you need <strong>precise replay</strong> — ideally bit-exact under recorded metadata, or a disciplined statistical alternative (DiFR).</p>
+  <p><strong>Plan B (later sections):</strong> replace AE recompute with ZK so the peer needn’t see weights — zkLLM (§6) or VerInf (§7). Same challenge loop; different evaluate engine.</p>
+  <p><strong>Lineage:</strong> Turns joshc’s TAP/recompute sketches into an arms-control-shaped architecture. FlexHEG is the longer hardware track; Peigné (§9) is the training-ZK cousin.</p>
+
+  <h3>Properties checklist (before the diagrams)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Property</th><th>Plain English</th><th>Plan A (AE plaintext)</th><th>Plan B (ZK)</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Completeness</td><td>Honest clean prover passes</td><td>Needs bit-exact / DiFR so benign noise ≠ reject</td><td>Honest π verifies</td></tr>
+        <tr><td class="mono">Soundness</td><td>Cheater fails</td><td>Recompute mismatch / wrong W vs C</td><td>Bad witness can’t forge π (or Û bound)</td></tr>
+        <tr><td class="mono">Confidentiality</td><td>Secrets stay secret</td><td><strong>Weak</strong> — W and challenged I/O enter AE</td><td><strong>Stronger</strong> — witness not revealed</td></tr>
+        <tr><td class="mono">Assurance</td><td>Field catch probability</td><td>Soundness × sample rate × tap coverage × stego slack</td><td>Same multipliers; π ≠ free lunch</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Why plaintext recompute is not enough">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Why plaintext AE recompute is not “the endgame”</text>
+  <rect x="24" y="40" width="220" height="120" rx="3" class="box"/>
+  <text x="36" y="62" class="t">1 · IP / data</text>
+  <text x="36" y="84" class="s">Whitelist W and challenged</text>
+  <text x="36" y="102" class="s">x,y enter the AE in clear.</text>
+  <text x="36" y="120" class="s">Rival states / labs hate this.</text>
+  <text x="36" y="144" class="s">→ confidentiality failure</text>
+  <rect x="256" y="40" width="220" height="120" rx="3" class="box"/>
+  <text x="268" y="62" class="t">2 · Mutual distrust</text>
+  <text x="268" y="84" class="s">Whose GPU is the AE?</text>
+  <text x="268" y="102" class="s">Prover won’t trust verifier’s</text>
+  <text x="268" y="120" class="s">box; verifier won’t trust</text>
+  <text x="268" y="144" class="s">prover’s box either.</text>
+  <rect x="488" y="40" width="208" height="120" rx="3" class="box"/>
+  <text x="500" y="62" class="t">3 · AE is still a TCB</text>
+  <text x="500" y="84" class="s">Air-gap ≠ zero leak.</text>
+  <text x="500" y="102" class="s">Need diodes, cross-checks,</text>
+  <text x="500" y="120" class="s">physical monitoring —</text>
+  <text x="500" y="144" class="s">Cankaya’s hard part.</text>
+  <rect x="24" y="180" width="672" height="100" rx="3" class="box"/>
+  <text x="36" y="202" class="t">So why is Plan A still the near-term default?</text>
+  <text x="36" y="224" class="s">Because it is fieldable without frontier-scale ZK: if you can stomach AE confidentiality risk + build bit-exact replay,</text>
+  <text x="36" y="242" class="s">you get real assurance against “swap the model on the wire.” Plan B (zkLLM / VerInf) replaces the AE evaluate step when</text>
+  <text x="36" y="260" class="s">confidentiality is the dealbreaker — it does not remove taps, sampling, or the need for soundness of the statement.</text>
+</svg>
+<p class="cap">Plaintext recompute answers soundness-ish checks by literally redoing the math. ZK answers them with a proof. Same audit question; different confidentiality cost.</p>
+</div>
+  <p><strong>Why plaintext recompute is not enough (even when it “works”):</strong> it can deliver completeness/soundness/assurance under good engineering, but it fails the low-trust confidentiality goal — rival labs/states will not ship frontier weights into the other party’s AE, and neither trusts the other’s silicon inside the cage. That is the explicit motivation for Plan B. Plan A remains the near-term default because ZK at frontier scale is still expensive / immature — not because confidentiality doesn’t matter.</p>
+
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#m6); }
+  </style>
+  <defs>
+    <marker id="m6" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="24" class="h">Same audit question: was this sampled request run on the whitelist model?</text>
+  <rect x="24" y="40" width="200" height="100" rx="4" class="box"/>
+  <text x="36" y="64" class="t">Plan A · Cankaya</text>
+  <text x="36" y="84" class="s">air-gapped AE</text>
+  <text x="36" y="102" class="s">plain recompute</text>
+  <text x="36" y="120" class="s">bit-exact ideal</text>
+  <path d="M224 90 L260 90" class="arr"/>
+  <rect x="260" y="40" width="200" height="100" rx="4" class="box"/>
+  <text x="272" y="64" class="t">Plan B · zkLLM</text>
+  <text x="272" y="84" class="s">exact-circuit ZK</text>
+  <text x="272" y="102" class="s">y = circuit(W,x)</text>
+  <text x="272" y="120" class="s">~13B · &lt;200KB π</text>
+  <path d="M460 90 L496 90" class="arr"/>
+  <rect x="496" y="40" width="200" height="100" rx="4" class="box"/>
+  <text x="508" y="64" class="t">Plan B · VerInf</text>
+  <text x="508" y="84" class="s">Û unexplained bits</text>
+  <text x="508" y="102" class="s">no bit-exact need</text>
+  <text x="508" y="120" class="s">~400B · huge π</text>
+
+  <text x="24" y="172" class="t">Dead-simple memory aid</text>
+  <text x="24" y="196" class="s">Plan A: I watch you recompute.</text>
+  <text x="24" y="216" class="s">zkLLM: you prove the circuit executed (receipt).</text>
+  <text x="24" y="236" class="s">VerInf: you prove the committed model explains the tokens; leftover ≤ Û (score).</text>
+  <text x="24" y="268" class="s">Near-term default in Cankaya: Plan A. zkLLM = early Plan-B instance. VerInf = frontier-scale Plan-B core.</text>
+</svg>
+<p class="cap">Inference side of Claim A / arms-control-like monitoring. Complements Peigné’s training ZK; sits under Cankaya’s tap → challenge → evaluate loop.</p>
+</div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.3; }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.1; marker-end: url(#ca); }
+  </style>
+  <defs>
+    <marker id="ca" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L5,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="20" class="h">Cankaya Plan A sketch — taps + air-gapped audit environment (AE)</text>
+  <rect x="24" y="32" width="200" height="90" rx="3" class="box"/>
+  <text x="36" y="54" class="t">Users / API</text>
+  <text x="36" y="74" class="s">prompts in</text>
+  <text x="36" y="92" class="s">tokens out</text>
+  <path d="M224 70 L260 70" class="arr"/>
+  <rect x="260" y="32" width="220" height="90" rx="3" class="hi"/>
+  <text x="272" y="54" class="t">Monitored GPU pod</text>
+  <text x="272" y="74" class="s">claimed whitelist model</text>
+  <text x="272" y="92" class="s">NS link via warden</text>
+  <path d="M370 122 L370 150" class="arr"/>
+  <rect x="260" y="150" width="220" height="70" rx="3" class="box"/>
+  <text x="272" y="172" class="t">Network tap (FPGA)</text>
+  <text x="272" y="192" class="s">hash+sign payloads only</text>
+  <text x="272" y="208" class="s">not semantic parse</text>
+  <path d="M480 185 L520 185" class="arr"/>
+  <rect x="520" y="150" width="176" height="70" rx="3" class="box"/>
+  <text x="532" y="172" class="t">Verifier ledger</text>
+  <text x="532" y="192" class="s">commitments only</text>
+  <text x="532" y="208" class="s">(may be offshore)</text>
+  <path d="M370 220 L370 248" class="arr"/>
+  <rect x="200" y="248" width="340" height="78" rx="3" class="hi"/>
+  <text x="212" y="270" class="t">AE (air-gapped) — Plan A evaluate</text>
+  <text x="212" y="288" class="s">≥3 heterogeneous TCBs cross-check</text>
+  <text x="212" y="304" class="s">reload W; Hash(W)=C; replay I/O; compare</text>
+  <text x="212" y="318" class="s">executor GPU need not be trusted</text>
+  <rect x="24" y="150" width="200" height="70" rx="3" class="box"/>
+  <text x="36" y="172" class="t">Prover store</text>
+  <text x="36" y="192" class="s">plaintext preimages</text>
+  <text x="36" y="208" class="s">+ manifest / metadata</text>
+</svg>
+<p class="cap">Adapted from Cankaya’s system overview: online evidence capture is continuous; evaluation is random challenges. Plan B swaps the AE plaintext recompute for a ZK proof.</p>
+</div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Cankaya’s four doors on a challenged forward pass</text>
+  <rect x="20" y="40" width="165" height="130" rx="3" class="box"/>
+  <text x="32" y="64" class="t">1 · Weights</text>
+  <text x="32" y="88" class="s">Hash(W) = C</text>
+  <text x="32" y="108" class="s">whitelist model?</text>
+  <text x="32" y="136" class="s">Hard check</text>
+  <rect x="195" y="40" width="165" height="130" rx="3" class="box"/>
+  <text x="207" y="64" class="t">2 · I/O evidence</text>
+  <text x="207" y="88" class="s">preimage matches</text>
+  <text x="207" y="108" class="s">tap commitment</text>
+  <text x="207" y="136" class="s">Hard check</text>
+  <rect x="370" y="40" width="165" height="130" rx="3" class="box"/>
+  <text x="382" y="64" class="t">3 · Recompute</text>
+  <text x="382" y="88" class="s">run W on input;</text>
+  <text x="382" y="108" class="s">output matches?</text>
+  <text x="382" y="136" class="s">Hard (bit-exact ideal)</text>
+  <rect x="545" y="40" width="155" height="130" rx="3" class="box"/>
+  <text x="557" y="64" class="t">4 · Semantics</text>
+  <text x="557" y="88" class="s">blacklist use?</text>
+  <text x="557" y="108" class="s">(CBRN, etc.)</text>
+  <text x="557" y="136" class="s">Soft / inspectors</text>
+</svg>
+<p class="cap">Doors 1–3 can all pass while door 4 fails: whitelist model doing banned things. Soft classifiers are not a substitute for 1–3.</p>
+</div>
+
+  <h3>Network taps (where commitments come from)</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="24" class="h">Where to put network taps (Cankaya Apr 2026 feasibility note)</text>
+  <rect x="24" y="40" width="330" height="120" rx="4" class="box"/>
+  <text x="36" y="64" class="t">North–South (frontend)</text>
+  <text x="36" y="86" class="s">DC ↔ outside world (API, SSH)</text>
+  <text x="36" y="106" class="s">cheap · active warden OK</text>
+  <text x="36" y="126" class="s">cost ≪ 0.01% of facility TCO</text>
+  <text x="36" y="146" class="s">do this first</text>
+  <rect x="366" y="40" width="330" height="120" rx="4" class="box"/>
+  <text x="378" y="64" class="t">East–West (backend)</text>
+  <text x="378" y="86" class="s">GPU↔GPU · storage · all-reduce</text>
+  <text x="378" y="106" class="s">optical split + random sample</text>
+  <text x="378" y="126" class="s">~0.2–1.5% TCO (level-dep.)</text>
+  <text x="378" y="146" class="s">copper scale-up (NVL*) stays blind</text>
+  <text x="24" y="192" class="t">Tap outputs commitments (hash + timestamp + sign), not raw secrets to the peer state.</text>
+  <text x="24" y="214" class="s">Prover can passively re-observe tap egress → near-term no mutually trusted silicon.</text>
+  <text x="24" y="236" class="s">Storage fabric next (~0.3–0.5%): which weights loaded, datasets read, checkpoints written.</text>
+  <text x="24" y="258" class="s">Biggest unknown: residual covert bps if only NS is tapped (Fermi ~10² bps — needs empirics).</text>
+</svg>
+<p class="cap">Evidence capture layer under Cankaya’s blueprint. Source: <a href="https://nacicankaya.substack.com/p/research-note-the-fundamentals-and">Cankaya, secure network taps (Apr 2026)</a>.</p>
+</div>
+  <ul>
+    <li><strong>NS first:</strong> frontend traffic is ~Gb/s-class in the note’s Fermi — commodity FPGA / mid-range NIC; active wardens fit.</li>
+    <li><strong>EW:</strong> full mirror is infeasible; wide optical split + random sampling; need tensor metadata or bytes are meaningless.</li>
+    <li><strong>Copper NVL*:</strong> passive optical taps miss intra-rack scale-up — security falls back onto NS + storage.</li>
+  </ul>
+
+  <h3>Bit-exact inference verification (precise replay)</h3>
+  <p>This is the load-bearing Plan A engineering claim: unmodified serving stacks are often <em>deterministic enough</em> once you freeze the right metadata — so “looks like noise” is usually non-invariance (reduction trees), not irreducible chaos.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="24" class="h">Plan A numerics: close joshc’s “~1% looks like error” channel</text>
+  <rect x="24" y="40" width="330" height="100" rx="4" class="box"/>
+  <text x="36" y="64" class="t">Non-invariance (common)</text>
+  <text x="36" y="86" class="s">Same math, different FP reduction trees</text>
+  <text x="36" y="106" class="s">(batch / kernel / SKU) → different bits</text>
+  <text x="36" y="126" class="s">Deterministic if metadata fixed</text>
+  <rect x="366" y="40" width="330" height="100" rx="4" class="box"/>
+  <text x="378" y="64" class="t">True nondeterminism (rare)</text>
+  <text x="378" y="86" class="s">atomicAdd races (some INT dequant)</text>
+  <text x="378" y="106" class="s">Warp-scheduler order changes</text>
+  <text x="378" y="126" class="s">Avoid / ban those kernels for audit</text>
+  <text x="24" y="168" class="t">Record: SKU · weights · parallel topology · software stack · batch size / step</text>
+  <text x="24" y="190" class="s">Then recompute on same SKU, or CPU-emulate tensor-core + SFU rounding (cross-gen).</text>
+  <text x="24" y="212" class="s">No need for slow “determinism flags” on the live path — audit via metadata + replay.</text>
+  <text x="24" y="234" class="s">Contrast: DiFR = statistical slack; VerInf = don’t require float bit-exact (Û absorbs).</text>
+</svg>
+<p class="cap"><a href="https://arxiv.org/abs/2606.00279">arXiv:2606.00279</a> — bit-exact inference verification (Cankaya).</p>
+</div>
+  <ul>
+    <li>Unmodified vLLM/HF are usually <strong>deterministic</strong> without special determinism flags; “noise” is mostly <strong>non-invariance</strong> (reduction trees), not atomics.</li>
+    <li>CPU emulator can match A100/L40/H100 intermediates when SKU + kernel path are modeled.</li>
+    <li><strong>Metadata checklist:</strong> SKU · weights · parallel topology · software stack · per-forward batch size.</li>
+    <li><strong>DiFR:</strong> if you cannot field bit-exact, keep statistical slack — but then budget the covert channel explicitly (joshc’s warning).</li>
+  </ul>
+  <div class="note">
+    <span class="label">How the pieces lock</span>
+    <p>Tap → I/O commitments · Bit-exact (+ metadata) → close stego slack · AE recompute (Plan A) evaluates samples. §§6–7 swap in ZK at the evaluate step only.</p>
+  </div>
+</section>
+
+<section id="zkllm">
+  <div class="kicker">Plan B · exact-circuit ZK</div>
+  <h2><span class="n">6.</span>zkLLM — prove the integer circuit ran</h2>
+  <p class="dek"><a href="https://arxiv.org/abs/2404.16109">arXiv:2404.16109</a> · Sun, Li, Zhang · ACM CCS 2024 · <a href="https://github.com/jvhs0706/zkllm-ccs2024">code</a></p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Haochen Sun, Jason Li, Hongyang Zhang — first widely cited exact-circuit ZK system for LLM inference at non-toy scale (~13B).</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Published system + limited scale.</strong> Spot-check engine, not “every API request.” Integer/quantized circuit ≠ arbitrary float serving bit-exact.</p>
+    </div>
+  </div>
+  <p><strong>Statement:</strong> there exist weights W matching public commitment C such that the public architecture, run as an <em>integer circuit</em> on public x, yields public y — without revealing W or activations.</p>
+  <p><strong>Lineage:</strong> One Plan B evaluate backend under Cankaya’s challenge loop. Precursor / contrast to VerInf (§7): exact receipt vs unexplained-info score. Complements Plan A when the AE cannot see weights.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <rect x="40" y="20" width="640" height="40" rx="4" class="box"/>
+  <text x="52" y="46" class="t">⑤ full LLM: layer stack → public x,y + Commit(W)=C</text>
+  <rect x="40" y="72" width="640" height="40" rx="4" class="box"/>
+  <text x="52" y="98" class="t">④ zkAttn: Softmax shift + digit exp tables + norm tolerance</text>
+  <rect x="40" y="124" width="640" height="40" rx="4" class="box"/>
+  <text x="52" y="150" class="t">③ tlookup: non-arith ops → set membership via rational identity</text>
+  <rect x="40" y="176" width="640" height="40" rx="4" class="box"/>
+  <text x="52" y="202" class="t">② sumcheck: matmul / big sums via random challenges</text>
+  <rect x="40" y="228" width="640" height="28" rx="4" class="box"/>
+  <text x="52" y="248" class="t">① Hyrax poly commit: hide W, bind C, ProveEval at random points</text>
+</svg>
+<p class="cap">zkLLM composition: verifier never re-runs the model — only checks random algebraic relations against commitments.</p>
+</div>
+  <h3>Numbers (paper anchors)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Rough public figure</th></tr></thead>
+      <tbody>
+        <tr><td>Scale</td><td class="mono">~13B (OPT / LLaMA-2 class)</td></tr>
+        <tr><td>Prove time</td><td class="mono">~1–15 min (CUDA, setting-dependent)</td></tr>
+        <tr><td>Proof size</td><td class="mono">&lt; ~200 KB</td></tr>
+        <tr><td>Verify</td><td class="mono">~1–3 s</td></tr>
+        <tr><td>Commit scheme</td><td>Hyrax (no trusted setup)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Guts (enough to not handwave)</h3>
+  <ul>
+    <li><strong>Hyrax:</strong> polynomial commitment binds W into C; open evaluations at random points.</li>
+    <li><strong>Sumcheck:</strong> big matmuls / sums become interactive algebraic checks.</li>
+    <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table via a rational identity at a random point.</li>
+    <li><strong>zkAttn:</strong> Softmax shift shrinks exp domain; don’t prove exact log-sum-exp — only a <strong>tolerance band</strong> on row sums (fine for execution receipts; dangerous if bolted onto a manipulable unexplained-info score).</li>
+  </ul>
+  <h3>What it does <em>not</em> prove</h3>
+  <ul>
+    <li>Bit-exact match to H100/B200 float serving (that’s Plan A / bit-exact paper).</li>
+    <li>Anything about training — only a forward pass receipt.</li>
+    <li>Frontier 100B+ scale in the published system (see VerInf for the larger demo with a different statement).</li>
+  </ul>
+  <div class="note">
+    <span class="label">Cheat intuition</span>
+    <p>Swap whitelist model → fails vs C. Abuse Softmax tolerance → can still Accept under loose bands. Float nondeterminism is mostly irrelevant because you never claimed float equality.</p>
+  </div>
+</section>
+
+<section id="verinf">
+  <div class="kicker">Plan B · unexplained-info ZK</div>
+  <h2><span class="n">7.</span>VerInf — bound leftover bits, skip float bit-exact</h2>
+  <p class="dek">Petrie 2026 draft · <a href="https://github.com/JamesPetrie/VerInf">github.com/JamesPetrie/VerInf</a> · FLI / FlexHEG author</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p><strong>James Petrie</strong> — same hardware-governance thread as FlexHEG. VerInf is the “replace the recompute cluster with a ZK evaluate engine” instance at frontier demo scale.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Working draft + large demo</strong>, not production audit tooling. Interactive, expensive proofs meant for rare high-stakes spot checks when both parties have serious compute.</p>
+    </div>
+  </div>
+  <p><strong>Statement:</strong> a committed integer model explains a (possibly hidden) token stream well enough that leftover unexplained information is ≤ a public bound Û bits/token — without revealing weights, activations, or plaintext I/O.</p>
+  <p><strong>Lineage:</strong> Other Plan B evaluate backend under Cankaya. Designed precisely because Plan A bit-exact and zkLLM-style exact equality both get brittle or tiny-scale at frontier serving.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="24" class="h">VerInf statement (not bit-exact equality)</text>
+  <rect x="24" y="40" width="330" height="120" rx="4" class="box"/>
+  <text x="36" y="64" class="t">Committed integer model M</text>
+  <text x="36" y="84" class="s">predicts hidden token stream</text>
+  <text x="36" y="104" class="s">well enough that leftover</text>
+  <text x="36" y="124" class="s">info ≤ public Û bits/token</text>
+  <text x="36" y="144" class="s">ZK: no weights / acts / x,y</text>
+  <rect x="370" y="40" width="326" height="120" rx="4" class="box"/>
+  <text x="382" y="64" class="t">Demo anchor (Petrie 2026)</text>
+  <text x="382" y="84" class="s">Llama-4-Maverick ~400B MoE</text>
+  <text x="382" y="104" class="s">1000 tokens · Û ≈ 0.88 b/tok</text>
+  <text x="382" y="124" class="s">π ≈ 94 GB · prove ~14h · verify ~18h</text>
+  <text x="382" y="144" class="s">spot-check scare, not every request</text>
+  <text x="24" y="190" class="t">vs zkLLM</text>
+  <text x="24" y="212" class="s">zkLLM: prove exact integer circuit output y. Softmax via tables + tolerance. Scale ~13B, tiny π.</text>
+  <text x="24" y="232" class="s">VerInf: prove predictive explanation bound. Deliberately skips float bit-exact. Scale ~400B, huge π.</text>
+  <text x="24" y="252" class="s">Both are Cankaya Plan B evaluate engines — after taps/challenge exist. Plan A stays the near-term default.</text>
+</svg>
+<p class="cap"><a href="https://github.com/JamesPetrie/VerInf">VerInf</a> — unexplained-info ZK at frontier demo scale.</p>
+</div>
+  <h3>Why change the statement</h3>
+  <ul>
+    <li>Float nondeterminism + MoE/serving stacks make “y must equal AE recompute” expensive to field at 400B.</li>
+    <li>Exact-circuit ZK at 13B already hurts; naively scaling the zkLLM statement is the wrong lever.</li>
+    <li>Û is an auditable score: too large ⇒ looks like wrong model / stego / garbage; threshold is a policy knob.</li>
+  </ul>
+  <h3>Demo anchors (draft)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Rough figure</th></tr></thead>
+      <tbody>
+        <tr><td>Model</td><td>Llama-4-Maverick ~400B MoE (commit all experts/layer)</td></tr>
+        <tr><td>Sequence</td><td>1000 tokens (500+500), fully hidden in the demo</td></tr>
+        <tr><td>Û</td><td class="mono">≈ 0.88 bits/token (~95% of vocab info explained)</td></tr>
+        <tr><td>Prove / verify</td><td class="mono">~14 h prove · ~94 GB π · ~18 h verify (single high-end box class)</td></tr>
+        <tr><td>Witness stream</td><td class="mono">~7 TB streamed · ~84 GB peak RAM</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>vs zkLLM (cheat table)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Cheat</th><th>Plan A (§5)</th><th>zkLLM (§6)</th><th>VerInf (§7)</th></tr></thead>
+      <tbody>
+        <tr><td>Swap whitelist model</td><td>recompute mismatch</td><td>fails vs C</td><td>Û blows up</td></tr>
+        <tr><td>Float nondeterminism</td><td>pain; bit-exact / metadata</td><td>proves circuit, not float replica</td><td>slack → Û</td></tr>
+        <tr><td>Softmax slack abuse</td><td>if loose match, channel</td><td>still Accept possible</td><td>forbidden design goal; unique shift</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note bug">
+    <span class="label">Cost intuition</span>
+    <p>Spot checks, not every request. Plan A ≈ recompute GPU-time. zkLLM-13B ~minutes + tiny π. VerInf-400B = hours + tens of GB — rare audits when secrecy of weights beats AE plaintext.</p>
+  </div>
+</section>
+
+<section id="flexheg">
+  <div class="kicker">Hardware track · parallel to §§5–7</div>
+  <h2><span class="n">8.</span>FlexHEG trilogy — especially Part II</h2>
+  <p class="dek">
+    Tech <a href="https://arxiv.org/abs/2506.03409">2506.03409</a> ·
+    Overview <a href="https://arxiv.org/abs/2506.15093">2506.15093</a> ·
+    Intl <a href="https://arxiv.org/abs/2506.15100">2506.15100</a> ·
+    <a href="https://www.flexheg.com/">flexheg.com</a> · 2025
+  </p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>James Petrie, Onni Aarne, and collaborators (FLI / ARIA-linked FlexHEG program). Hardware-enabled governance design for accelerators.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Blueprint + early demos</strong> (enclosure / metering ideas). <strong>Not</strong> mass-deployed product silicon. Grant-funded engineering (incl. partners building tap/wipe primitives).</p>
+    </div>
+  </div>
+  <p><strong>FlexHEG</strong> = Flexible Hardware-Enabled Guarantees: a <strong>guarantee processor</strong> that locally enforces / attests rules, plus a <strong>secure enclosure</strong> that makes bypass expensive. Rules should be updatable under multi-party authorization.</p>
+  <p><strong>Lineage:</strong> After the near-term retrofit path (§§5–7): moves Claim A from Shavit-style after-the-fact snapshots toward <em>active</em> guarantees (FLOP caps, licenses, interlocks). Near-term retrofit path often emphasized: NIC / scale-out interlock before in-die changes. Complements Cankaya’s facility-level taps (different layer).</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .shell { fill: none; stroke: #9a5b12; stroke-width: 1.6; stroke-dasharray: 4 3; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <rect x="80" y="36" width="560" height="180" rx="8" class="shell"/>
+  <text x="96" y="58" class="s">secure enclosure (tamper-evident → tamper-responsive)</text>
+  <rect x="120" y="80" width="200" height="100" rx="4" class="box"/>
+  <text x="140" y="110" class="t">Accelerator</text>
+  <text x="140" y="130" class="s">GPU / tray</text>
+  <text x="140" y="150" class="s">HBM · NVLink · PCIe</text>
+  <rect x="380" y="80" width="220" height="100" rx="4" class="box"/>
+  <text x="400" y="110" class="t">Guarantee processor</text>
+  <text x="400" y="130" class="s">count · rules · receipts</text>
+  <text x="400" y="150" class="s">sign attestations</text>
+  <text x="310" y="138" class="t">↔</text>
+  <text x="96" y="236" class="s">Interlock = GP sits on a mandatory data path (NIC-scale is the realistic third-party mount)</text>
+</svg>
+<p class="cap">FlexHEG dual core: local notarization + physical hardness. Privacy: prove compliance without shipping weights abroad.</p>
+</div>
+  <figure>
+    <img src="figures/flexheg_figure4_interlock_design.png" alt="FlexHEG interlock design figure"/>
+    <figcaption>Interlock intuition: put the guarantee processor on a path data must cross.</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/fixed_set_pod_diagram.png" alt="Fixed set pod"/>
+    <figcaption>Fixed-set pod idea: fast links inside a declared set; starved RDMA outside — a governance-shaped topology.</figcaption>
+  </figure>
+  <h3>Integration ladder (speed vs hardness)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Mount</th><th>Deploy speed</th><th>Security</th><th>Who can ship it</th></tr></thead>
+      <tbody>
+        <tr><td>In-die / PCB redesign</td><td>slow (multi-year silicon + fleet churn)</td><td>strongest</td><td>incumbent vendors</td></tr>
+        <tr><td>Retrofit modules</td><td>medium</td><td>medium (detach risk)</td><td>third parties possible</td></tr>
+        <tr><td>Firmware-only</td><td>faster</td><td>weaker vs physical</td><td>needs signed secure boot</td></tr>
+        <tr><td>Pure software</td><td>fastest</td><td>weakest</td><td>anyone — not a treaty root</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure>
+    <img src="figures/attestation_crypto_flow.png" alt="Attestation crypto flow"/>
+    <figcaption>Attestation mental model — local measurement → signed statement → remote verify.</figcaption>
+  </figure>
+</section>
+
+<section id="zk">
+  <div class="kicker">Crypto horizon · training</div>
+  <h2><span class="n">9.</span>Peigné-Lefebvre et al. — ZK verification of frontier <em>training</em></h2>
+  <p class="dek"><a href="https://arxiv.org/abs/2606.05433">arXiv:2606.05433</a> · 2026 · GPAI Policy Lab / FAR.AI · Sorbonne/LIP6</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Pierre Peigné-Lefebvre, Ky Nguyen, and coauthors — argument that ZK verification of frontier <em>training</em> is possible in principle via a BF16/FP32-aware zkVM.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Horizon.</strong> Authors are explicit: no working end-to-end prototype; rough ~36 months to a deployable PoC vs 6–10 years for custom verification silicon; long open-problem list.</p>
+    </div>
+  </div>
+  <p><strong>Idea:</strong> make Shavit’s transcript story cryptographically binding — genesis / step / optional ex-ante proofs without revealing the proprietary run.</p>
+  <p><strong>Lineage:</strong> Different problem than §§5–7 (those audit <em>inference</em> whitelist forward passes). This is the crypto endgame of classical <em>training</em> monitoring. Does not replace near-term FlexHEG/Cankaya work; clarifies what “strong” would mean if telemetry stays porous.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#m5); }
+  </style>
+  <defs>
+    <marker id="m5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <rect x="40" y="50" width="150" height="60" rx="4" class="box"/>
+  <text x="52" y="76" class="t">genesis proof</text>
+  <text x="52" y="94" class="s">W₀ well-formed</text>
+  <path d="M190 80 L240 80" class="arr"/>
+  <rect x="240" y="50" width="150" height="60" rx="4" class="box"/>
+  <text x="252" y="76" class="t">step proofs</text>
+  <text x="252" y="94" class="s">Wᵢ → Wᵢ₊₁ valid</text>
+  <path d="M390 80 L440 80" class="arr"/>
+  <rect x="440" y="50" width="150" height="60" rx="4" class="box"/>
+  <text x="452" y="76" class="t">ex-ante attest</text>
+  <text x="452" y="94" class="s">rules before run</text>
+  <path d="M590 80 L620 80" class="arr"/>
+  <text x="628" y="84" class="t">π</text>
+
+  <text x="40" y="150" class="t">vs Shavit</text>
+  <text x="40" y="172" class="s">Shavit: heuristic / sampling recompute of a claimed transcript</text>
+  <text x="40" y="192" class="s">ZK: cryptographic proof over BF16/FP32 training steps in a zkVM — stronger claim, no E2E prototype yet</text>
+  <text x="40" y="216" class="s">Authors: ~36 months to deployable PoC; custom verify silicon 6–10 years; 13 open problems listed</text>
+</svg>
+<p class="cap">Crypto endgame of the Shavit idea. Treat as research horizon, not near-term pause tooling.</p>
+</div>
+</section>
+
+<section id="synth">
+  <div class="kicker">Synthesis</div>
+  <h2><span class="n">10.</span>Putting the stack in one breath</h2>
+  <p class="dek">What an outsider should be able to repeat after this deck.</p>
+  <pre><code>Claim A = verify no covert frontier training (≠ TEE model-identity or
+confidential-cloud claims B/C). Wasil is the method menu. Shavit is the
+classical chip+transcript blueprint. Rahman measures how far NVML train↔infer
+detectors survive disguise (closes Shavit’s lookalike gap). joshc red-teams cheap
+facility controls against covert RL.
+
+Cankaya is the near-term low-trust retrofit: NS-first taps feed commitments;
+Plan A = AE precise replay (bit-exact metadata; DiFR if needed). Plan B swaps
+the evaluate step for ZK — zkLLM (~13B exact integer circuit) or VerInf
+(~400B unexplained-info bound Û). FlexHEG is the parallel hardware-enforcement
+track (active caps / interlocks), not a substitute for taps+evaluate. Peigné
+sketches ZK *training* as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
+empirics, and prototypes.</code></pre>
+  <h3>Open problems / next-step research (what to do after this deck)</h3>
+  <p>These are not “unsolved math curiosities” — they are the load-bearing gaps between today’s blueprints and a credible pause. Several track cruxes raised against Cankaya’s retrofit (precise replay, sampling economics, perimeter, rare covert adapters, Plan A→B transition, adjudication).</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>#</th><th>Problem</th><th>Why it blocks</th><th>Concrete next step</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">1</td>
+          <td><strong>Precise replay vs softer accept</strong></td>
+          <td>Plan A soundness/completeness hinge on bit-exact (or DiFR slack). Unknown: residual mismatch rate across SKU/driver/batch, and FP cost of chasing zero mismatch vs budgeting a channel.</td>
+          <td>Medium-scale empirics (e.g. ~70B) across heterogeneous GPUs/drivers: exact-match rate vs DiFR-style accept; metadata necessity set; cost/latency of each policy.</td>
+        </tr>
+        <tr>
+          <td class="mono">2</td>
+          <td><strong>Sampling economics</strong></td>
+          <td>Assurance = soundness × sample rate. Appendix-style Fermi needs a real BoM: can Plan A / zkLLM / VerInf hit ~1% overhead at a stated catch probability?</td>
+          <td>Publish cost curves: challenge rate → catch prob → $/request for AE recompute vs zkLLM-13B vs VerInf-400B-class proofs.</td>
+        </tr>
+        <tr>
+          <td class="mono">3</td>
+          <td><strong>Perimeter / NS-only residual</strong></td>
+          <td>NS-first taps leave EW copper and off-perimeter compute undertapped. Bar: residual outside the fence can’t do consequential covert work at high confidence.</td>
+          <td>NS-only red-team budget (joshc-style local RL / DiLoCo): how many covert FLOPs survive; optional interconnect detectors (Fowler-style) as complement.</td>
+        </tr>
+        <tr>
+          <td class="mono">4</td>
+          <td><strong>Rare-trigger / thin adapters</strong></td>
+          <td>Forward-pass recompute can match a whitelist while a rarely activated LoRA / tool path does harm — identity ≠ all governance goals.</td>
+          <td>Red-team: memory probes, NVML anomaly, wipe/accounting, inspector agents under disclosure bounds; measure miss rate for sparse triggers.</td>
+        </tr>
+        <tr>
+          <td class="mono">5</td>
+          <td><strong>Train↔infer under disguise</strong></td>
+          <td>Rahman: hard disguises degrade NVML classifiers. joshc: RL rollouts look like serving. Soft labels alone won’t carry Claim A.</td>
+          <td>Combined channel study: NVML + interconnect bytes + tap commitments under adaptive evade; report ROC under the hardest loop, not only benign accuracy.</td>
+        </tr>
+        <tr>
+          <td class="mono">6</td>
+          <td><strong>Plan A → Plan B transition</strong></td>
+          <td>Plaintext AE burns confidentiality; ZK restores it but is immature/expensive. Stakeholders need a migration path, not a cliff.</td>
+          <td>Timeline + dual-run design: which challenge classes stay on AE, which move to zkLLM/VerInf as prove-time falls; joint ops with both evaluate engines.</td>
+        </tr>
+        <tr>
+          <td class="mono">7</td>
+          <td><strong>Physical security of AE / taps</strong></td>
+          <td>Low-trust Plan A assumes rival TCBs + continuous physical monitoring. If forgeable silently, assurance collapses.</td>
+          <td>Red-team / OSINT: diodes, FPGA wardens, SCIFs at scale, hosting foreign TCBs on sensitive weights — map failure modes to FlexHEG hardware track.</td>
+        </tr>
+        <tr>
+          <td class="mono">8</td>
+          <td><strong>Adjudication &amp; consequences</strong></td>
+          <td>Technical Accept/Reject ≠ treaty breach. Without an escalation ladder + false-positive budget, either everything is excused or everything detonates.</td>
+          <td>Design CBRN-like ladder: anomaly → joint review → deeper disclosure → supervised inspection → predetermined response; name who adjudicates.</td>
+        </tr>
+        <tr>
+          <td class="mono">9</td>
+          <td><strong>Hardware enforcement demos</strong></td>
+          <td>FlexHEG remains the long enforcement story; near-term needs NIC/enclosure interlocks with honest overheads and multi-party rule updates.</td>
+          <td>Ship a NIC-level license/FLOP-cap prototype; measure overhead; stress single-vendor root-of-trust objections.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="label">How to read this list</span>
+    <p><strong>1–5</strong> are mostly empirical / systems (can move in months). <strong>6–7</strong> mix engineering with deployment politics. <strong>8</strong> is institutional. <strong>9</strong> / §8 FlexHEG is the parallel hardware track. A credible pause needs progress on several in parallel — closing only crypto or only taps is not enough.</p>
+  </div>
+  <div class="note">
+    <span class="label">Primary sources (public)</span>
+    <p>
+      Wasil <a href="https://arxiv.org/abs/2408.16074">2408.16074</a> ·
+      Shavit <a href="https://arxiv.org/abs/2303.11341">2303.11341</a> ·
+      joshc <a href="https://www.lesswrong.com/posts/oHiNwWtDPcBLumPWp/how-might-governments-slow-or-halt-ai-training">LW</a> ·
+      FlexHEG <a href="https://www.flexheg.com/">flexheg.com</a> ·
+      Rahman <a href="https://arxiv.org/abs/2606.19262">2606.19262</a> ·
+      Cankaya overview <a href="https://www.lesswrong.com/posts/fgvmKqRGvBteKeDoc/a-system-overview-for-near-term-low-trust-ai-compute">LW</a> ·
+      taps <a href="https://nacicankaya.substack.com/p/research-note-the-fundamentals-and">Substack</a> ·
+      bit-exact <a href="https://arxiv.org/abs/2606.00279">2606.00279</a> ·
+      zkLLM <a href="https://arxiv.org/abs/2404.16109">2404.16109</a> ·
+      VerInf <a href="https://github.com/JamesPetrie/VerInf">GitHub</a> ·
+      DiFR <a href="https://arxiv.org/abs/2511.20621">2511.20621</a> ·
+      Peigné <a href="https://arxiv.org/abs/2606.05433">2606.05433</a>
+    </p>
+  </div>
+</section>
+
+
+</main>
+</div>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('nav.toc a')];
+  const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const id = '#' + e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  sections.forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>

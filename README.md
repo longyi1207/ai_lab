@@ -26,6 +26,13 @@ Small, readable scripts for training, inference, and interpretability: causal se
 from scratch, KV-cache speedup measurement, and a logit-lens walk through a real GPT-2's layers.
 See [`transformer_lab/README.md`](transformer_lab/README.md).
 
+### [`compute_pause_verification/`](compute_pause_verification/) — verifiable AI slowdown briefing
+
+A self-contained PDF/HTML briefing on public research for **Claim A** compute monitoring
+(pause / slowdown verification under low trust): datacenter primer, Cankaya Plan A/B,
+zkLLM, VerInf, FlexHEG, and open follow-up problems. Start with
+[`compute_pause_verification/notes.pdf`](compute_pause_verification/notes.pdf).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
