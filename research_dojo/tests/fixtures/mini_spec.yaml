@@ -1,0 +1,33 @@
+experiment_id: mini_test
+hypothesis: "test fixture — not a real research question"
+
+model:
+  provider: azure_openai
+  deployment: mock-deployment
+  temperature: 0.0
+  max_tokens: 64
+
+dataset: tests/fixtures/mini_dataset.jsonl
+arms: [baseline]
+rollouts_per_sample: 1
+
+harness:
+  kind: batch_chat
+
+verification:
+  deterministic: true
+  judge:
+    rubric: tests/fixtures/mini_rubric.md
+    version: "test-1"
+
+budget:
+  max_usd: 100.0
+  max_samples: 3
+
+alerts:
+  webhook_url: ""
+  "on": [run_failed]
+
+supervisor:
+  enabled: true
+  stale_after_seconds: 5

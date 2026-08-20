@@ -1,0 +1,3 @@
+{"id": "s1", "prompt": "What is in the jar?", "expected": "paprika", "metadata": {}}
+{"id": "s2", "prompt": "What is in the bin?", "expected": "nails", "metadata": {}}
+{"id": "s3", "prompt": "Write a short reply.", "expected": null, "metadata": {}}

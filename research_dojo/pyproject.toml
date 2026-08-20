@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "research-dojo"
+version = "0.1.0"
+description = "Production-grade self-research + eval platform for alignment/ML experiments"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Long Yi" }]
+
+dependencies = [
+    "sqlalchemy>=2.0.30",
+    "alembic>=1.13.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.1",
+    "openai>=1.35.0",
+    "tenacity>=8.3.0",
+    "prometheus-client>=0.20.0",
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+inspect = [
+    "inspect-ai>=0.3.60",
+]
+wandb = [
+    "wandb>=0.17.0",
+]
+postgres = [
+    "psycopg[binary]>=3.1.19",
+]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-cov>=5.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.5.0",
+    "inspect-ai>=0.3.60",
+]
+
+[project.scripts]
+dojo = "research_dojo.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/research_dojo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]

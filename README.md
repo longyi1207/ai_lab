@@ -33,6 +33,23 @@ A self-contained PDF/HTML briefing on public research for **Claim A** compute mo
 zkLLM, VerInf, FlexHEG, and open follow-up problems. Start with
 [`compute_pause_verification/notes.pdf`](compute_pause_verification/notes.pdf).
 
+### [`research_dojo/`](research_dojo/) — production self-research & eval platform
+
+A production-grade eval/experiment platform, not a notebook script: SQLAlchemy+Alembic
+persistence (SQL is the source of truth, JSONL is an audit export, not a database), a
+supervisor daemon that detects and auto-resumes crashed runs, a circuit breaker + dead-letter
+queue, Prometheus metrics, pluggable alerts (webhook/file/log), dual deterministic + LLM-judge
+verification with apparent-vs-real-progress sanity checks, and first-class
+[Inspect AI](https://inspect.aisi.org.uk/) interop (bidirectional `.eval` export/import).
+
+77 tests pass fully offline (mocked LLM, 86% coverage), and it's been live-validated end to end
+against real Azure OpenAI: a full `dojo run` completed 20/20 rollouts with correct false-belief
+tracking on a BigToM-style dataset, and the native `dojo inspect run` path hit 100% accuracy,
+readable via `inspect view`. See [`research_dojo/README.md`](research_dojo/README.md) for the
+architecture diagram and a comparison against JSONL-only scripts, and
+[`research_dojo/docs/operations.md`](research_dojo/docs/operations.md) for the failure-mode
+runbook (stuck runs, DLQ, budget stop, webhook alerts).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

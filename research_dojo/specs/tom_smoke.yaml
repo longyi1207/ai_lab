@@ -1,0 +1,43 @@
+# tom_smoke — smoke-test experiment spec. See docs/spec_schema.md for the
+# full schema; ExperimentSpec (src/research_dojo/config/spec.py) validates
+# this at load time and freezes it into the `runs` table + an artifact.
+experiment_id: tom_smoke_v1
+hypothesis: >
+  BigToM-style false-belief items are answerable under a zero-shot baseline
+  chat completion (no scratchpad, no tools); the deterministic + judge dual
+  verification pipeline agrees with itself on unambiguous items; empathy
+  prompts elicit affect-registering replies distinguishable from matched
+  neutral prompts. See data/README.md for dataset composition and sources.
+
+model:
+  provider: azure_openai
+  deployment: ${AZURE_OPENAI_DEPLOYMENT}
+  temperature: 0.0
+  max_tokens: 256
+
+dataset: data/tom_smoke.jsonl
+arms: [baseline]
+rollouts_per_sample: 1
+
+harness:
+  kind: batch_chat
+  max_steps: 10
+  timeout_seconds: 120
+
+verification:
+  deterministic: true
+  judge:
+    rubric: prompts/judge_rubric.md
+    version: "2026-08-19"
+
+budget:
+  max_usd: 2.0
+  max_samples: 20
+
+alerts:
+  webhook_url: ${DOJO_ALERT_WEBHOOK_URL:-}
+  "on": [run_failed, budget_threshold, sanity_spike]
+
+supervisor:
+  enabled: true
+  stale_after_seconds: 600

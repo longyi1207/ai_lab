@@ -1,0 +1,14 @@
+# Scrape config for `dojo serve --port 9090`. Point any Prometheus at this,
+# locally (`prometheus --config.file=deploy/prometheus.yml`) or via the
+# `docker compose --profile ops` service below.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: research-dojo
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:9090"]
+        labels:
+          service: research-dojo

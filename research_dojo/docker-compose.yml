@@ -1,0 +1,37 @@
+# Optional ops profile — Postgres + Prometheus. Not required for `pytest` or
+# the default single-node SQLite deploy; see docs/operations.md.
+#
+#   docker compose --profile ops up -d
+#   export DOJO_DATABASE_URL=postgresql://dojo:dojo@localhost:5432/dojo
+#   dojo db migrate
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["ops"]
+    environment:
+      POSTGRES_USER: dojo
+      POSTGRES_PASSWORD: dojo
+      POSTGRES_DB: dojo
+    ports:
+      - "5432:5432"
+    volumes:
+      - dojo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dojo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["ops"]
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  dojo_postgres_data:
