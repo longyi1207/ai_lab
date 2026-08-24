@@ -1,0 +1,71 @@
+# Real hardware, CONFIRMED 2026-08-17 (previously speculative — see git history
+# if this drifts further): ONE shared node, 8x NDm A100 v4
+# (Standard_ND96amsr_A100_v4), Azure ML Compute Instance (SSH-enabled, not a
+# raw VM), region Italy North. Access window: 2026-08-21 (morning PT) -
+# 2026-08-23. Shared 3 ways with shortcut_forensics and theory-of-mind/empathy
+# via CUDA_VISIBLE_DEVICES — this project's proposed (not yet final) slice is
+# GPUs 3-5. See docs/REDTEAM.md "Shared-box operation" before changing
+# gpu_indices/nproc below; they must stay consistent with whatever the final
+# reconciled split is.
+#
+# telemetry.synthetic: false => reads real NVML via pynvml (needs
+# `pip install nvidia-ml-py`, already in requirements.txt).
+#
+# Run (once SSH'd into the shared box, in this project's own venv/REMOTE_DIR):
+#   python -m src.run_redteam --config configs/azure_redteam_single_node.yaml
+run_name: azure_redteam_single_node
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8766
+telemetry:
+  synthetic: false
+  hz: 1.0            # matches Rahman & Tajdari's 1Hz NVML sampling rate exactly
+  gpu_indices: [3, 4, 5]  # PROPOSED split, not final — reconcile with shortcut_forensics/theory-of-mind before running. Must match nproc below.
+# steps below are an initial guess (untested on real A100s) tuned for a few
+# 30s/15s-stride windows per workload at ~180s wall time each — the first
+# real run should check actual per-workload wall time and adjust up/down.
+benign_workloads:
+  - name: train_ddp
+    kind: train_ddp
+    steps: 1000
+    warmup_steps: 50
+    batch_size: 4
+    seq_len: 512
+    nproc: 3
+  - name: infer_dp
+    kind: infer_dp
+    steps: 1000
+    batch_size: 8
+    seq_len: 512
+    nproc: 3
+  - name: infer_tp
+    kind: infer_tp
+    steps: 1000
+    batch_size: 2
+    seq_len: 512
+    tp_size: 3   # must be <= nproc (was 4, doesn't fit in a 3-GPU slice)
+    nproc: 3
+adversarial_workloads:
+  - name: kv_disguise
+    kind: kv_disguise
+    steps: 1000
+    batch_size: 4
+    seq_len: 512
+    kv_chunk_tokens: 2048
+    nproc: 3
+  - name: diloco
+    kind: diloco
+    steps: 1000
+    inner_steps: 25
+    batch_size: 4
+    seq_len: 512
+    nproc: 3
+model:
+  backend: tiny  # swap to hf + name_or_path: meta-llama/Llama-3.2-1B once VRAM/HF-token confirmed — see configs/cluster_baseline.yaml for that pattern
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 512
+output_dir: outputs/azure_redteam_single_node

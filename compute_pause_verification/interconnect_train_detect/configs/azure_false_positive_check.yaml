@@ -1,0 +1,43 @@
+# False-positive check (see docs/REDTEAM.md, src/run_false_positive_check.py):
+# heavier-than-baseline but entirely LEGITIMATE inference — bigger batch,
+# longer context — the kind of thing a busy real inference server actually
+# does. Tests whether a classifier hardened on many disguised-training
+# examples starts misclassifying real benign traffic, not whether it can
+# be evaded.
+#
+# Run (GPUs 3-5) against whichever round's classifier is current:
+#   python -m src.run_false_positive_check \
+#     --classifier outputs/azure_redteam_loop_continued3/round_13_grad_accum_25/classifier.joblib \
+#     --config configs/azure_false_positive_check.yaml \
+#     --out outputs/azure_false_positive_check
+run_name: azure_false_positive_check
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+  gpu_indices: [3, 4, 5]
+# NOTE 2026-08-22: first attempt used steps=2000 copied from the training
+# configs without accounting for infer_dp's generate() loop (8 sequential
+# forward passes per step, no real KV-cache in this tiny model) being far
+# more expensive per step than a single training step, especially at
+# batch=32 -- 28+ minutes in and still not through the FIRST workload.
+# Killed it; steps cut ~10-20x below. Empirically re-time before trusting
+# a bigger number again.
+benign_stress_workloads:
+  # much bigger batch than baseline infer_dp (8) -- heavier real throughput
+  - {name: infer_dp_bigbatch, kind: infer_dp, steps: 150, batch_size: 32, seq_len: 512, nproc: 3}
+  # much longer context than baseline (512) -- heavier real memory footprint
+  - {name: infer_dp_longctx, kind: infer_dp, steps: 150, batch_size: 8, seq_len: 2048, nproc: 3}
+  # heavier tensor-parallel inference too, not just data-parallel
+  - {name: infer_tp_heavy, kind: infer_tp, steps: 150, batch_size: 8, seq_len: 1024, tp_size: 3, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 2048
+output_dir: outputs/azure_false_positive_check

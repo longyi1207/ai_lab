@@ -1,0 +1,60 @@
+# Redteam smoke: CPU/Mac, synthetic NVML telemetry — validates the H2
+# pipeline (benign corpus -> classifier -> adversarial red-team) end to
+# end with zero GPU and zero cloud spend. Not a real result: telemetry is
+# fabricated (see src/redteam/telemetry.py:SyntheticTelemetrySource).
+#
+# Run: python -m src.run_redteam --config configs/redteam_smoke.yaml
+run_name: redteam_smoke
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8766   # distinct from the original track's 8765 so both can run side by side
+telemetry:
+  synthetic: true
+  hz: 50.0     # much higher than the real 1Hz spec — tiny CPU smoke workloads finish in <1s,
+               # need enough samples to clear features.py's >=3-samples-per-window floor
+  n_gpus_if_synthetic: 8
+benign_workloads:
+  - name: train_ddp
+    kind: train_ddp
+    steps: 30
+    warmup_steps: 3
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+  - name: infer_dp
+    kind: infer_dp
+    steps: 30
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+  - name: infer_tp
+    kind: infer_tp
+    steps: 30
+    batch_size: 1
+    seq_len: 64
+    tp_size: 2
+    nproc: 2
+adversarial_workloads:
+  - name: kv_disguise
+    kind: kv_disguise
+    steps: 30
+    batch_size: 4
+    seq_len: 64
+    kv_chunk_tokens: 512
+    nproc: 2
+  - name: diloco
+    kind: diloco
+    steps: 30
+    inner_steps: 5
+    batch_size: 4
+    seq_len: 64
+    nproc: 2
+model:
+  backend: tiny
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 64
+output_dir: outputs/redteam_smoke

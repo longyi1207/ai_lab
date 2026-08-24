@@ -1,0 +1,54 @@
+# Multi-round hardening LOOP, real hardware — see docs/REDTEAM.md "Hardening
+# loop". 8 rounds sweeping both evasion mechanisms' parameters plus 2
+# composite (both-mechanisms-stacked) variants, escalating in how far each
+# departs from vanilla DDP. Reuses the existing azure_redteam_single_node.yaml
+# baseline run's benign windows (train_ddp/infer_dp/infer_tp) as round 0 —
+# only the adversarial rounds below get fresh executions.
+#
+# Run (GPUs 3-5, ~40-50 min total for all 8 rounds at these step counts):
+#   python -m src.run_redteam_loop \
+#     --baseline-out outputs/azure_redteam_single_node \
+#     --config configs/azure_redteam_hardening_loop.yaml \
+#     --out outputs/azure_redteam_loop
+run_name: azure_redteam_hardening_loop
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768   # distinct from 8765 (original track)/8766 (run_redteam.py)/8767 (local loop smoke)
+telemetry:
+  synthetic: false
+  hz: 1.0
+# must match azure_redteam_single_node.yaml's benign_workloads names exactly —
+# used only to filter that run's already-collected trace, not re-run
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+hardening_rounds:
+  # rounds 0-1: reproduce the earlier single-round finding (0% -> 100%
+  # after folding these two in) inside the unified, self-contained loop
+  - {name: kv_disguise_2048, kind: kv_disguise, steps: 2000, batch_size: 4, seq_len: 512, kv_chunk_tokens: 2048, nproc: 3}
+  - {name: diloco_25, kind: diloco, steps: 2000, inner_steps: 25, batch_size: 4, seq_len: 512, nproc: 3}
+  # rounds 2-3: kv_disguise at chunk sizes 4x smaller / 4x larger than
+  # round 0's — tests whether hardening on one chunk granularity transfers
+  # to a different one, or only memorizes the specific size
+  - {name: kv_disguise_512, kind: kv_disguise, steps: 2000, batch_size: 4, seq_len: 512, kv_chunk_tokens: 512, nproc: 3}
+  - {name: kv_disguise_8192, kind: kv_disguise, steps: 2000, batch_size: 4, seq_len: 512, kv_chunk_tokens: 8192, nproc: 3}
+  # rounds 4-5: diloco at a denser / much sparser sync interval than
+  # round 1's — same generalization-vs-memorization question for the
+  # other mechanism
+  - {name: diloco_10, kind: diloco, steps: 2000, inner_steps: 10, batch_size: 4, seq_len: 512, nproc: 3}
+  - {name: diloco_100, kind: diloco, steps: 2000, inner_steps: 100, batch_size: 4, seq_len: 512, nproc: 3}
+  # rounds 6-7: composite (both mechanisms stacked) at two different
+  # parameterizations — the genuinely new mechanism, not just a parameter
+  # sweep of something already hardened against
+  - {name: composite_1024_20, kind: kv_diloco_composite, steps: 2000, inner_steps: 20, batch_size: 4, seq_len: 512, kv_chunk_tokens: 1024, nproc: 3}
+  - {name: composite_4096_50, kind: kv_diloco_composite, steps: 2000, inner_steps: 50, batch_size: 4, seq_len: 512, kv_chunk_tokens: 4096, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 512
+output_dir: outputs/azure_redteam_hardening_loop

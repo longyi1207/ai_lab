@@ -1,0 +1,21 @@
+# Local synthetic smoke test for src/run_false_positive_check.py.
+run_name: redteam_false_positive_smoke
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8767
+telemetry:
+  synthetic: true
+  hz: 50.0
+  n_gpus_if_synthetic: 8
+benign_stress_workloads:
+  - {name: infer_dp_bigbatch, kind: infer_dp, steps: 30, batch_size: 16, seq_len: 64, nproc: 2}
+  - {name: infer_dp_longctx, kind: infer_dp, steps: 30, batch_size: 4, seq_len: 256, nproc: 2}
+model:
+  backend: tiny
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 256
+output_dir: outputs/redteam_false_positive_smoke

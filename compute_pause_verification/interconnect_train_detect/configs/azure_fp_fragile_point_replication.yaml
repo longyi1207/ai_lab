@@ -1,0 +1,47 @@
+# Statistical replication check (see docs/REDTEAM.md "Second false-positive
+# fix"): the blind test found 5/6 new points confidently correct
+# (0.01-0.39) but one, infer_dp batch=12/seq=512, landed at 0.409 -- close
+# enough to the 0.5 line to ask whether that's real residual fragility or
+# just noise from a single execution. Every workload here has no fixed
+# random seed (src/workloads/dist_utils.py's random_batch), so repeated
+# runs of the same batch/seq ARE genuine independent replicates, not
+# duplicates.
+#
+# 4 fresh reps of the fragile point (batch=12/seq=512) + 3 reps of a
+# confidently-correct control point (batch=20/seq=512, read 0.012 in the
+# blind test) evaluated against the classifier fix2 actually produced
+# (outputs/azure_redteam_fp_fix2/classifier_fixed.joblib) -- if the
+# control stays tight and low while the fragile point's reps spread wide
+# or average near/above 0.5, that's real evidence of residual fragility,
+# not a fluke reading.
+#
+# Run (GPUs 3-5):
+#   python -m src.run_false_positive_check \
+#     --classifier outputs/azure_redteam_fp_fix2/classifier_fixed.joblib \
+#     --config configs/azure_fp_fragile_point_replication.yaml \
+#     --out outputs/azure_fp_fragile_point_replication
+run_name: azure_fp_fragile_point_replication
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+  gpu_indices: [3, 4, 5]
+benign_stress_workloads:
+  - {name: infer_dp_b12_s512_rep1, kind: infer_dp, steps: 400, batch_size: 12, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b12_s512_rep2, kind: infer_dp, steps: 400, batch_size: 12, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b12_s512_rep3, kind: infer_dp, steps: 400, batch_size: 12, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b12_s512_rep4, kind: infer_dp, steps: 400, batch_size: 12, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b20_s512_rep1, kind: infer_dp, steps: 250, batch_size: 20, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b20_s512_rep2, kind: infer_dp, steps: 250, batch_size: 20, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b20_s512_rep3, kind: infer_dp, steps: 250, batch_size: 20, seq_len: 512, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 4096
+output_dir: outputs/azure_fp_fragile_point_replication

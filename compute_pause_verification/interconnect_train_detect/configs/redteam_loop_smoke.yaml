@@ -1,0 +1,35 @@
+# Local, synthetic, no-GPU smoke test for the multi-round hardening loop.
+# Reuses outputs/redteam_smoke's benign windows as round-0 (run
+# configs/redteam_smoke.yaml first if that dir doesn't exist yet).
+#
+# Run: python -m src.run_redteam_loop --baseline-out outputs/redteam_smoke \
+#   --config configs/redteam_loop_smoke.yaml --out outputs/redteam_loop_smoke
+run_name: redteam_loop_smoke
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8767   # distinct from both 8765 (original track) and 8766 (run_redteam.py)
+telemetry:
+  synthetic: true
+  hz: 50.0
+  n_gpus_if_synthetic: 8
+# must match configs/redteam_smoke.yaml's benign_workloads names exactly —
+# used only to filter the baseline trace, not re-run
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+hardening_rounds:
+  - {name: kv_disguise_a, kind: kv_disguise, steps: 30, batch_size: 4, seq_len: 64, kv_chunk_tokens: 512, nproc: 2}
+  - {name: diloco_a, kind: diloco, steps: 30, inner_steps: 5, batch_size: 4, seq_len: 64, nproc: 2}
+  - {name: kv_disguise_b, kind: kv_disguise, steps: 30, batch_size: 4, seq_len: 64, kv_chunk_tokens: 128, nproc: 2}
+  - {name: diloco_b, kind: diloco, steps: 30, inner_steps: 15, batch_size: 4, seq_len: 64, nproc: 2}
+  - {name: composite_a, kind: kv_diloco_composite, steps: 30, inner_steps: 5, batch_size: 4, seq_len: 64, kv_chunk_tokens: 256, nproc: 2}
+model:
+  backend: tiny
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 64
+output_dir: outputs/redteam_loop_smoke

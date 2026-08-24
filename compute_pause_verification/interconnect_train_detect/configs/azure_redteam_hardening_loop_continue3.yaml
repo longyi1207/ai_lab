@@ -1,0 +1,42 @@
+# Round 12-13: gradient accumulation (src/workloads/grad_accum_disguise.py,
+# new) -- tests whether the "reduced sync frequency = training" tell the
+# classifier learned from diloco (rounds 1, 4, 5) generalizes to a
+# DIFFERENT, far more standard mechanism that produces the same
+# externally-observable effect (fewer AllReduce calls per unit of
+# progress), or whether it's specific to diloco's particular local-SGD +
+# Nesterov-outer-average temporal signature. Combined with the SGD/
+# momentum=0 memory fix (the one prior mechanism that partially worked),
+# at REALISTIC batch/seq (4/512, matching round 8 -- not the OOD-risking
+# extremes from rounds 10-11, see docs/REDTEAM.md's caution about that).
+#
+# Run (GPUs 3-5), resuming from the round-10/11 continuation:
+#   python -m src.run_redteam_loop \
+#     --baseline-out outputs/azure_redteam_single_node \
+#     --config configs/azure_redteam_hardening_loop_continue3.yaml \
+#     --out outputs/azure_redteam_loop_continued3 \
+#     --resume-from outputs/azure_redteam_loop_continued2
+run_name: azure_redteam_hardening_loop_continue3
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+hardening_rounds:
+  # moderate accumulation (sync every 4 micro-steps)
+  - {name: grad_accum_4, kind: grad_accum_disguise, steps: 2000, batch_size: 4, seq_len: 512, accum_steps: 4, nproc: 3}
+  # heavier accumulation, roughly comparable sync interval to diloco_25
+  - {name: grad_accum_25, kind: grad_accum_disguise, steps: 2000, batch_size: 4, seq_len: 512, accum_steps: 25, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 512
+output_dir: outputs/azure_redteam_loop_continued3

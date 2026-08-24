@@ -3,7 +3,13 @@ numpy>=1.26
 pyyaml>=6.0
 requests>=2.31
 psutil>=5.9
+scikit-learn>=1.4   # src/redteam classifier (RandomForest, per Rahman & Tajdari arXiv:2606.19262)
+joblib>=1.3          # src/redteam classifier save/load
+nvidia-ml-py>=12.0   # provides `pynvml` for src/redteam/telemetry.py's real-hardware path.
+                     # Pure ctypes wheel — installs fine with no GPU/driver present (verified
+                     # on Mac); only nvmlInit() at runtime needs a real NVIDIA driver. Moved out
+                     # of the old "GPU nodes only" comment block because that caused a real
+                     # ModuleNotFoundError on first sync to the Aug 2026 Italy North box.
 # GPU nodes:
-# nvidia-ml-py>=12.0
 # transformers>=4.40
 # accelerate>=0.30

@@ -94,10 +94,18 @@ def start_local_monitor(cfg: dict, out: Path, node_name: str) -> tuple[subproces
 
 
 def run_workload_local_rank0(cfg: dict, w: dict, master_addr: str, master_port: int) -> int:
-    """Launch torchrun on this node only — peer node must run matching node_rank=1."""
+    """Launch torchrun on this node only — peer node must run matching node_rank=1.
+
+    `nproc_per_node` normally comes from the shared config (symmetric
+    nodes, today's only real usage: 2×8 GPU AWS). `ICTD_NPROC_PER_NODE`
+    lets one node override its own GPU count without touching the shared
+    config file or this node's peer — e.g. a real 8-GPU node paired with a
+    smaller/cheaper companion node once one becomes available. Unset by
+    default, so existing symmetric runs are unaffected.
+    """
     kind = w["kind"]
     nnodes = int(cfg.get("nnodes", 2))
-    nproc = int(cfg.get("nproc_per_node", 8))
+    nproc = int(os.environ.get("ICTD_NPROC_PER_NODE", cfg.get("nproc_per_node", 8)))
     node_rank = int(os.environ.get("ICTD_NODE_RANK", cfg.get("node_rank", 0)))
     extra = [
         "--name", w.get("name", kind),

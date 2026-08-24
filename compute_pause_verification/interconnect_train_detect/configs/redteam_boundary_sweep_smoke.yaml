@@ -1,0 +1,35 @@
+# Local synthetic smoke test for configs/azure_false_positive_boundary_sweep.yaml
+# -- same workload list/shape (12 points across dp-batch, dp-seq, tp axes),
+# tiny steps + synthetic telemetry, just to catch config/CLI bugs (bad
+# tp_size/nproc combos, block_size too small for the seq sweep, etc.) before
+# spending real GPU time.
+run_name: redteam_boundary_sweep_smoke
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8769
+telemetry:
+  synthetic: true
+  hz: 50.0
+  n_gpus_if_synthetic: 8
+benign_stress_workloads:
+  - {name: infer_dp_baseline_sanity, kind: infer_dp, steps: 5, batch_size: 8, seq_len: 64, nproc: 2}
+  - {name: infer_dp_b16_s512, kind: infer_dp, steps: 5, batch_size: 16, seq_len: 64, nproc: 2}
+  - {name: infer_dp_b24_s512, kind: infer_dp, steps: 5, batch_size: 24, seq_len: 64, nproc: 2}
+  - {name: infer_dp_b32_s512_regression, kind: infer_dp, steps: 5, batch_size: 32, seq_len: 64, nproc: 2}
+  - {name: infer_dp_b48_s512_extrapolate, kind: infer_dp, steps: 5, batch_size: 48, seq_len: 64, nproc: 2}
+  - {name: infer_dp_b8_s1024, kind: infer_dp, steps: 5, batch_size: 8, seq_len: 128, nproc: 2}
+  - {name: infer_dp_b8_s2048_regression, kind: infer_dp, steps: 5, batch_size: 8, seq_len: 128, nproc: 2}
+  - {name: infer_dp_b8_s3072_extrapolate, kind: infer_dp, steps: 5, batch_size: 8, seq_len: 128, nproc: 2}
+  - {name: infer_tp_baseline_sanity, kind: infer_tp, steps: 5, batch_size: 2, seq_len: 64, tp_size: 2, nproc: 2}
+  - {name: infer_tp_b4_s512, kind: infer_tp, steps: 5, batch_size: 4, seq_len: 64, tp_size: 2, nproc: 2}
+  - {name: infer_tp_b8_s512, kind: infer_tp, steps: 5, batch_size: 8, seq_len: 64, tp_size: 2, nproc: 2}
+  - {name: infer_tp_b8_s1536_fresh, kind: infer_tp, steps: 5, batch_size: 8, seq_len: 128, tp_size: 2, nproc: 2}
+model:
+  backend: tiny
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 256
+output_dir: outputs/redteam_boundary_sweep_smoke

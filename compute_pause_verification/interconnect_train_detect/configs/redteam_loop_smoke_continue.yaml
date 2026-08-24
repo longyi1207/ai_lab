@@ -1,0 +1,26 @@
+# Continuation config for testing --resume-from locally (synthetic).
+# Companion to configs/redteam_loop_smoke.yaml — lists only the NEW rounds.
+run_name: redteam_loop_smoke_continue
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8767
+telemetry:
+  synthetic: true
+  hz: 50.0
+  n_gpus_if_synthetic: 8
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+hardening_rounds:
+  - {name: low_mem_a, kind: low_mem_disguise, steps: 30, batch_size: 4, seq_len: 64, chunk_grad_sync: false, nproc: 2}
+  - {name: low_mem_chunked_a, kind: low_mem_disguise, steps: 30, batch_size: 4, seq_len: 64, chunk_grad_sync: true, kv_chunk_tokens: 256, nproc: 2}
+model:
+  backend: tiny
+  n_layer: 4
+  n_head: 4
+  n_embd: 128
+  vocab_size: 256
+  block_size: 64
+output_dir: outputs/redteam_loop_smoke_continue

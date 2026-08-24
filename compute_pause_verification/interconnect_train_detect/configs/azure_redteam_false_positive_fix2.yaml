@@ -1,0 +1,66 @@
+# Second false-positive fix attempt (see docs/REDTEAM.md "Boundary sweep
+# reveals the first fix was narrow, not general"). The first fix
+# (azure_redteam_false_positive_fix.yaml) folded in only 3 negative
+# examples; the boundary sweep then found that the retrained classifier's
+# entire benign/negative class was 39 windows across just 6 distinct
+# configs (vs 263 positive windows across 16 adversarial rounds), with the
+# WHOLE tensor-parallel axis represented by only 2 windows total --
+# nowhere near enough to define a real decision boundary, which is why
+# nearby untested points (batch16/seq512, batch8/seq1024, batch8/seq3072,
+# and 3 of 4 tp points) came back as confident false positives despite the
+# "fix" being declared a success.
+#
+# This run folds in ALL 12 boundary-sweep points as negatives (all
+# genuinely benign inference, regardless of what the classifier said about
+# them) -- broadening the negative class from 6 configs/39 windows to 18
+# configs/~97 windows, with real tp-axis diversity (4 tp configs instead
+# of 1). Then tests on 6 BRAND-NEW points never seen in any prior
+# execution -- true blind generalization test, not a repeat/interpolation
+# of anything already looked at when designing this fix.
+#
+# Run (GPUs 3-5, on the remote box where the adversarial loop's directory
+# chain actually resolves -- _load_prior_loop needs the real chain of
+# loop_report.json files under outputs/azure_redteam_loop_continued{2,3,4,5}):
+#   python -m src.run_redteam_fix_false_positives \
+#     --resume-from outputs/azure_redteam_loop_continued5 \
+#     --false-positive-trace outputs/azure_false_positive_boundary_sweep/trace.jsonl \
+#     --false-positive-names infer_dp_baseline_sanity infer_dp_b16_s512 infer_dp_b24_s512 \
+#       infer_dp_b32_s512_regression infer_dp_b48_s512_extrapolate infer_dp_b8_s1024 \
+#       infer_dp_b8_s2048_regression infer_dp_b8_s3072_extrapolate infer_tp_baseline_sanity \
+#       infer_tp_b4_s512 infer_tp_b8_s512 infer_tp_b8_s1536_fresh \
+#     --config configs/azure_redteam_false_positive_fix2.yaml \
+#     --out outputs/azure_redteam_fp_fix2
+run_name: azure_redteam_false_positive_fix2
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+  gpu_indices: [3, 4, 5]
+baseline_out: outputs/azure_redteam_single_node
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+# 6 genuinely new interpolated points -- none repeat any batch/seq/tp_size
+# combination tested in the boundary sweep or the first fix. Steps
+# calibrated from the boundary sweep's own measured per-step wall-clock
+# time (linear-ish in batch, super-linear in seq for dp; roughly linear in
+# batch for tp) to target ~120-160s wall time each.
+fresh_benign_stress_workloads:
+  - {name: infer_dp_b12_s512_blind, kind: infer_dp, steps: 400, batch_size: 12, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b20_s512_blind, kind: infer_dp, steps: 250, batch_size: 20, seq_len: 512, nproc: 3}
+  - {name: infer_dp_b8_s768_blind, kind: infer_dp, steps: 380, batch_size: 8, seq_len: 768, nproc: 3}
+  - {name: infer_tp_b3_s512_blind, kind: infer_tp, steps: 4200, batch_size: 3, seq_len: 512, tp_size: 3, nproc: 3}
+  - {name: infer_tp_b6_s512_blind, kind: infer_tp, steps: 2300, batch_size: 6, seq_len: 512, tp_size: 3, nproc: 3}
+  - {name: infer_tp_b8_s768_blind, kind: infer_tp, steps: 1000, batch_size: 8, seq_len: 768, tp_size: 3, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 4096
+output_dir: outputs/azure_redteam_fp_fix2

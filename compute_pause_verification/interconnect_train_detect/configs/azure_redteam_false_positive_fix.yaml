@@ -1,0 +1,43 @@
+# Fix for the false-positive gap found by run_false_positive_check.py
+# (see docs/REDTEAM.md) — folds the earlier heavy-inference false positives
+# in as negative training examples, then tests GENERALIZATION with DIFFERENT
+# batch/seq values (not the exact ones folded in — memorizing the specific
+# false-positive trace wouldn't prove anything), plus a regression check
+# against every prior adversarial round.
+#
+# Run (GPUs 3-5):
+#   python -m src.run_redteam_fix_false_positives \
+#     --resume-from outputs/azure_redteam_loop_continued4 \
+#     --false-positive-trace outputs/azure_false_positive_check/trace.jsonl \
+#     --false-positive-names infer_dp_bigbatch infer_dp_longctx infer_tp_heavy \
+#     --config configs/azure_redteam_false_positive_fix.yaml \
+#     --out outputs/azure_redteam_fp_fix
+run_name: azure_redteam_false_positive_fix
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+  gpu_indices: [3, 4, 5]
+baseline_out: outputs/azure_redteam_single_node
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+# different batch/seq from the false positives that got folded in
+# (32/512, 8/2048, 8/1024+tp3) -- genuine held-out generalization test,
+# not a repeat of the same trace. Timing calibrated from the ~1.2s/step
+# measurement taken before (see docs/REDTEAM.md) -- steps kept modest.
+fresh_benign_stress_workloads:
+  - {name: infer_dp_bigbatch_fresh, kind: infer_dp, steps: 150, batch_size: 24, seq_len: 768, nproc: 3}
+  - {name: infer_dp_longctx_fresh, kind: infer_dp, steps: 150, batch_size: 16, seq_len: 1536, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 2048
+output_dir: outputs/azure_redteam_fp_fix

@@ -60,6 +60,31 @@ cp infra/scripts/config.env.example infra/scripts/config.env
 - **p4d.24xlarge**: interconnect-realistic; auto `efa_extra_nics=3`  
 - Spot: `use_spot=true` + `spot_watch.sh` on each node  
 
+## H2: single-node NVML red-team track (Azure) — complete, real hardware
+
+A second, independent track from the cross-node one above — lives in
+`src/redteam/` + `src/run_redteam.py`: a faithful reimplementation of
+Rahman & Tajdari's (arXiv:2606.19262) NVML-telemetry train-vs-infer
+classifier, red-teamed with this repo's own `kv_disguise`/`diloco`/
+`grad_accum_disguise`/`white_box_disguise`/`grad_checkpoint_disguise`
+workloads. Unlike the cross-node track above, this one ran to completion
+on **real hardware** (8×A100 Azure ML Compute Instance, single node): 16
+rounds of an iterative adversarial hardening loop, plus a full
+false-positive investigation (a real gap found, root-caused, fixed,
+validated on blind held-out data, and checked with statistical
+replication — not just a single encouraging number).
+
+Full design, citations, round-by-round data, and honest limitations:
+**[docs/REDTEAM.md](docs/REDTEAM.md)**. Narrative writeup of the whole
+campaign, written for a general audience:
+**[docs/WRITEUP.md](docs/WRITEUP.md)**. Azure single-VM infra:
+`infra/azure/` (parallel to `infra/terraform`, does not modify it).
+
+```bash
+python -m src.run_redteam --config configs/redteam_smoke.yaml   # local, no GPU
+python -m src.run_redteam --config configs/azure_redteam_single_node.yaml  # real node
+```
+
 ## CI
 
 Repo workflow: `.github/workflows/ictd.yml` — pytest + terraform fmt/validate.

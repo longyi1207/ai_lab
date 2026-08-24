@@ -1,0 +1,42 @@
+# Round 10: push the memory-only axis further than round 8 (low_mem_8,
+# P(training) mean=0.586 -- closest to real evasion so far, see
+# docs/REDTEAM.md "Rounds 8-9"). Same SGD/momentum=0 optimizer, no
+# communication disguise (chunking was shown to backfire), but smaller
+# batch_size/seq_len to shrink activation memory too, not just optimizer
+# state -- testing whether a more aggressive memory-minimal real-training
+# configuration can cross below the 0.5 detection threshold.
+#
+# Run (GPUs 3-5), resuming from the round-8/9 continuation:
+#   python -m src.run_redteam_loop \
+#     --baseline-out outputs/azure_redteam_single_node \
+#     --config configs/azure_redteam_hardening_loop_continue2.yaml \
+#     --out outputs/azure_redteam_loop_continued2 \
+#     --resume-from outputs/azure_redteam_loop_continued
+run_name: azure_redteam_hardening_loop_continue2
+mode: redteam
+collector:
+  host: 127.0.0.1
+  port: 8768
+telemetry:
+  synthetic: false
+  hz: 1.0
+benign_workloads:
+  - {name: train_ddp, kind: train_ddp}
+  - {name: infer_dp, kind: infer_dp}
+  - {name: infer_tp, kind: infer_tp}
+hardening_rounds:
+  # batch_size 4->1, seq_len 512->128 (both shrink activation memory,
+  # independent of the optimizer-state fix already applied) -- otherwise
+  # identical to low_mem_8 (SGD momentum=0, unchunked AllReduce)
+  - {name: low_mem_min_10, kind: low_mem_disguise, steps: 2000, batch_size: 1, seq_len: 128, chunk_grad_sync: false, nproc: 3}
+  # a second point on the same axis, less extreme, to see if there's a
+  # gradient (pun intended) rather than a cliff
+  - {name: low_mem_min_11, kind: low_mem_disguise, steps: 2000, batch_size: 2, seq_len: 256, chunk_grad_sync: false, nproc: 3}
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 512
+output_dir: outputs/azure_redteam_loop_continued2

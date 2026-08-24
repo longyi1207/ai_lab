@@ -1,0 +1,30 @@
+# ICTD Azure single-VM tfvars — copy to terraform.tfvars and edit.
+# Account facts (subscription/RG/region) are already fixed for this repo — see
+# ../../../docs/AZURE.md. Only override them here if that changes.
+
+subscription_id     = "27ad7138-6e41-4554-9d72-36eb4502b0bb" # "Azure subscription 1"
+resource_group_name = "IncidentFox"                          # existing RG, referenced not created
+location             = "eastus"
+
+vm_size = "Standard_ND96asr_v4" # ND A100 v4 (8×A100 40GB). Alt: "Standard_ND96isr_H100_v5" (ND H100 v5, 8×H100 80GB) — set to whichever quota actually lands
+
+ssh_public_key_path = "~/.ssh/id_ed25519.pub" # must exist locally; private key assumed at same path minus .pub
+admin_username       = "azureuser"
+allowed_ssh_cidrs    = ["YOUR.IP.ADDR.ESS/32"] # restrict before apply — do not leave 0.0.0.0/0 on a GPU box
+
+os_disk_gb   = 512 # Premium_LRS; HF checkpoints are large
+os_disk_type = "Premium_LRS"
+
+vm_image_publisher = "Canonical"
+vm_image_offer      = "ubuntu-hpc"
+vm_image_sku        = "2204"   # UNVERIFIED — check: az vm image list --publisher Canonical --offer ubuntu-hpc --all -o table
+vm_image_version     = "latest"
+
+use_spot              = false
+spot_max_bid_price    = -1       # -1 = cap at current pay-as-you-go rate (capacity-eviction only)
+spot_eviction_policy  = "Delete" # "Delete" (closest analog to AWS's terminate-on-interrupt) or "Deallocate"
+
+budget_usd         = 250
+budget_email        = ""                    # set to enable an 80% spend alert
+budget_start_date   = "2026-09-01T00:00:00Z" # must be 1st-of-month RFC3339 — verify against azurerm provider schema before apply
+budget_end_date      = "2034-09-01T00:00:00Z" # far-future placeholder — adjust if provider requires a tighter window
