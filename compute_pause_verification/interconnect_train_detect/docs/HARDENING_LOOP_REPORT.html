@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Hardening Loop Report — interconnect_train_detect</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #f0f1f4;
+    --surface: #e4e6ec;
+    --surface-2: #d7dae2;
+    --ink: #1c2029;
+    --ink-dim: #4a4f5c;
+    --slate: #6b7080;
+    --rule: #c3c8d2;
+    --accent: #2d3a66;
+    --accent-soft: #dde1ee;
+    --amber: #a6641c;
+    --rust: #9c3a26;
+    --rust-soft: #ecd3cb;
+    --green: #2f6b4a;
+    --green-soft: #cfdfd1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12151c; --surface: #1b2029; --surface-2: #232a35;
+      --ink: #e8eaef; --ink-dim: #b0b5c0; --slate: #838a99; --rule: #333a48;
+      --accent: #8a9ad6; --accent-soft: #232c46;
+      --amber: #d99a47; --rust: #dc7157; --rust-soft: #3a201c;
+      --green: #6faf87; --green-soft: #1c2f24;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12151c; --surface: #1b2029; --surface-2: #232a35;
+    --ink: #e8eaef; --ink-dim: #b0b5c0; --slate: #838a99; --rule: #333a48;
+    --accent: #8a9ad6; --accent-soft: #232c46;
+    --amber: #d99a47; --rust: #dc7157; --rust-soft: #3a201c;
+    --green: #6faf87; --green-soft: #1c2f24;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    line-height: 1.7; font-size: 17px; -webkit-font-smoothing: antialiased;
+    padding: 0 0 6rem;
+  }
+  .page { max-width: 760px; margin: 0 auto; padding: 3rem 1.4rem 0; }
+  .sans { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  h1, h2, h3 { text-wrap: balance; color: var(--ink); margin: 0; font-weight: 600; }
+  p { margin: 0.9rem 0; }
+  b, strong { font-weight: 600; }
+
+  /* ---- letterhead / title block ---- */
+  .letterhead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.7rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate);
+    border-bottom: 1px solid var(--rule); padding-bottom: 0.7rem; margin-bottom: 2rem;
+  }
+  .letterhead .doc-id { font-family: 'JetBrains Mono', monospace; letter-spacing: 0; color: var(--accent); }
+
+  .title-block { margin-bottom: 2.6rem; }
+  .kicker {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem;
+  }
+  h1.doc-title { font-size: 2.05rem; line-height: 1.28; margin-bottom: 0.9rem; }
+  .subtitle { font-size: 1.08rem; color: var(--ink-dim); font-style: italic; margin-bottom: 1.2rem; }
+  .doc-meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--slate);
+    display: flex; flex-wrap: wrap; gap: 0.3em 1.3em; padding-top: 0.9rem; border-top: 1px solid var(--rule);
+  }
+
+  /* ---- abstract ---- */
+  .abstract {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 1.3rem 1.4rem; margin-bottom: 2.6rem;
+  }
+  .abstract .label {
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem;
+  }
+  .abstract p { margin: 0; font-size: 0.98rem; }
+
+  /* ---- section structure ---- */
+  section { margin-bottom: 2.6rem; }
+  .sec-num {
+    font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600;
+  }
+  h2.sec-title { font-size: 1.32rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--rule); }
+  h3.subsec-title { font-size: 1.05rem; margin: 1.6rem 0 0.5rem; }
+  h3.subsec-title .sec-num { font-size: 0.95rem; }
+
+  /* ---- result tables (per-phase) ---- */
+  .tablewrap { overflow-x: auto; margin: 1rem 0 0.6rem; }
+  table.results {
+    width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    min-width: 460px;
+  }
+  table.results th {
+    text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; color: var(--ink-dim);
+    font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.45rem 0.7rem; border-bottom: 1.5px solid var(--ink);
+  }
+  table.results td {
+    padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--rule); color: var(--ink);
+    font-variant-numeric: tabular-nums; vertical-align: top;
+  }
+  table.results td.mech { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.85rem; }
+  table.results tr:last-child td { border-bottom: 1px solid var(--rule); }
+  .tag {
+    display: inline-block; font-size: 0.68rem; padding: 0.05rem 0.4rem; border-radius: 2px;
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .tag.green { background: var(--green-soft); color: var(--green); }
+  .tag.amber { background: var(--accent-soft); color: var(--amber); }
+  .tag.rust { background: var(--rust-soft); color: var(--rust); }
+  .caption {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; color: var(--slate);
+    margin: 0.5rem 0 0; line-height: 1.55;
+  }
+  .caption b { color: var(--ink-dim); }
+
+  /* ---- Figure 1: the chart ---- */
+  .figure { margin: 1.2rem 0 0.5rem; }
+  .fig-label {
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 0.78rem; color: var(--ink);
+    margin-bottom: 0.9rem;
+  }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.72rem; color: var(--ink-dim);
+    margin: 0 0 1.1rem; padding: 0.7rem 0.9rem; background: var(--surface); border-radius: 3px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .swatch { width: 0.65rem; height: 0.65rem; border-radius: 1px; flex-shrink: 0; }
+  .swatch.green { background: var(--green); }
+  .swatch.amber { background: var(--amber); }
+  .swatch.rust { background: var(--rust); }
+  .flag-mark { font-weight: 700; color: var(--rust); font-family: 'JetBrains Mono', monospace; }
+
+  .phase-block { margin-bottom: 1.7rem; }
+  .phase-block-head {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.76rem; font-weight: 600; color: var(--slate);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;
+  }
+  .rows { display: flex; flex-direction: column; gap: 0.45rem; }
+  .row { display: grid; grid-template-columns: 2.7rem 1fr 3.2rem; align-items: center; gap: 0.55rem; }
+  .row-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--slate); text-align: right; }
+  .row-label {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.78rem; color: var(--ink-dim);
+    margin-bottom: 0.2rem; display: flex; justify-content: space-between; gap: 0.5em;
+  }
+  .row-label .mech { color: var(--ink); font-weight: 500; }
+  .row-label .note { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+  .track { height: 1.05rem; background: var(--surface-2); border-radius: 2px; overflow: hidden; position: relative; }
+  .fill { height: 100%; }
+  .fill.green { background: var(--green); }
+  .fill.amber { background: var(--amber); }
+  .fill.rust { background: var(--rust); }
+  .threshold-line { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink); opacity: 0.3; left: 50%; }
+  .row-val { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; text-align: right; color: var(--ink); font-weight: 600; }
+  .row-flag {
+    font-size: 0.68rem; color: var(--rust); font-family: 'IBM Plex Sans', sans-serif;
+    margin-top: 0.18rem; padding-left: 0.05rem;
+  }
+
+  /* ---- master data table ---- */
+  table.data {
+    width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    min-width: 600px;
+  }
+  table.data th {
+    text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; color: var(--ink-dim);
+    font-size: 0.66rem; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 0.42rem 0.65rem; border-bottom: 1.5px solid var(--ink);
+  }
+  table.data td { padding: 0.42rem 0.65rem; border-bottom: 1px solid var(--rule); color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+  table.data td.mech { color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; }
+  table.data td.flagged { color: var(--rust); }
+  table.data tr:last-child td { border-bottom: 1.5px solid var(--ink); }
+
+  /* ---- findings / limitations lists ---- */
+  ul.findings { margin: 0.9rem 0; padding-left: 1.3rem; }
+  ul.findings li { margin-bottom: 0.7rem; }
+
+  .errata {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 0.9rem 1.1rem; margin: 1.2rem 0; border-radius: 0 3px 3px 0; font-size: 0.92rem;
+  }
+  .errata .label {
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem;
+  }
+
+  /* ---- references ---- */
+  .refs { font-size: 0.92rem; }
+  .refs p { margin: 0.7rem 0; padding-left: 1.6rem; text-indent: -1.6rem; }
+
+  footer.colophon {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 0.76rem; color: var(--slate);
+    border-top: 1px solid var(--rule); padding-top: 1.1rem; margin-top: 2.5rem;
+  }
+
+  @media (max-width: 460px) {
+    .page { padding: 2rem 1rem 0; }
+    h1.doc-title { font-size: 1.6rem; }
+    .row { grid-template-columns: 2.2rem 1fr 2.8rem; }
+    .letterhead { flex-direction: column; gap: 0.3rem; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="letterhead">
+    <span>interconnect_train_detect — H2 red-team track</span>
+    <span class="doc-id">H2-16R · 2026-08-22</span>
+  </div>
+
+  <div class="title-block">
+    <div class="kicker">Technical Report</div>
+    <h1 class="doc-title">Sixteen Rounds of Adversarial Hardening Against an NVML-Telemetry Training Detector</h1>
+    <p class="subtitle">Round-by-round results from red-teaming a from-scratch reimplementation of Rahman &amp; Tajdari's train-vs-infer classifier on real Azure A100 hardware.</p>
+    <div class="doc-meta">
+      <span>8×A100 Azure ML Compute Instance, GPUs 3–5</span>
+      <span>Real hardware execution, no simulation</span>
+      <span>Full data: docs/REDTEAM.md</span>
+    </div>
+  </div>
+
+  <div class="abstract">
+    <div class="label">Abstract</div>
+    <p>
+      We red-team a RandomForest classifier that infers whether a GPU is training or serving inference from per-GPU power/memory/utilization telemetry alone — no code, weights, or network access. Across 16 rounds of an iterative hardening loop (attempt an evasion, fold the caught example into training, retest a fresh execution), every mechanism tried — communication-shape disguises, memory-footprint reduction, cross-mechanism transfer, and a combined adversary — was ultimately caught, with one axis (memory-footprint reduction) coming within reach of a genuine evasion (P(training)=0.588, round 8) before the classifier adapted. Two rounds (10–11) and one combined attempt (14) produced confounded, low-power out-of-distribution readings that should not be read as evidence of evasion difficulty either way — a methodological caution that, on later audit while preparing this report, we found had been under-applied to one earlier round (2) as well.
+    </p>
+  </div>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">1.</span> Method</h2>
+    <p>
+      A RandomForest (400 trees, class-weight balanced — matching Rahman &amp; Tajdari's own model choice) trained on 12 window-level features: structural (mean power, mean utilization), temporal (coefficient of variation and autocorrelation of power/utilization, spectral periodicity), and three physics-based features from the paper's own hardened round: cumulative energy, power–memory correlation, and early memory-allocation timing. Telemetry is sampled at 1&nbsp;Hz via <code>pynvml</code> from a small (~85–100M parameter) transformer running real distributed workloads — data-parallel and tensor-parallel inference, DiLoCo-style low-communication training, and five purpose-built adversarial variants.
+    </p>
+    <p>
+      <b>Protocol.</b> Each round attempts a new evasion strategy, is scored against the classifier hardened on every <i>prior</i> round only, and — regardless of outcome — is then folded into training as a correctly-labeled positive example before the next round runs. This mirrors Rahman &amp; Tajdari's own §4.3 co-evolution methodology. Fresh executions are always used for testing; a round is never evaluated on data just folded into its own training set.
+    </p>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">2.</span> Results</h2>
+
+    <h3 class="subsec-title"><span class="sec-num">2.1</span> Communication-shape evasion (rounds 0–7)</h3>
+    <p>
+      Reshaping how gradients synchronize — chunked AllReduce disguised as KV-cache traffic, DiLoCo's low-frequency outer loop, and both combined — evaded detection exactly once, on the undefended baseline (round 0). After a single fold-in, every subsequent variant of this idea was caught, with confidence trending upward as the classifier accumulated examples of "unusual communication shape."
+    </p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td class="mech">kv_disguise, chunk=2048</td><td>0.10</td><td><span class="tag rust">evaded</span></td></tr>
+          <tr><td>1</td><td class="mech">diloco, inner=25</td><td>0.84</td><td>1st fold-in of R0</td></tr>
+          <tr><td>2</td><td class="mech">kv_disguise, chunk=512</td><td>0.80</td><td><span class="flag-mark">†</span> see §4 errata</td></tr>
+          <tr><td>3</td><td class="mech">kv_disguise, chunk=8192</td><td>0.64</td><td>—</td></tr>
+          <tr><td>4</td><td class="mech">diloco, inner=10</td><td>0.85</td><td>—</td></tr>
+          <tr><td>5</td><td class="mech">diloco, inner=100</td><td>0.96</td><td>—</td></tr>
+          <tr><td>6</td><td class="mech">composite, 1024/20</td><td>1.00</td><td>2 mechanisms stacked</td></tr>
+          <tr><td>7</td><td class="mech">composite, 4096/50</td><td>1.00</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      Root cause, checked against the raw data rather than assumed: raw power does not separate the classes (inference reads slightly <i>higher</i> mean power than training in this data). The generalizing signal is memory — AdamW's momentum/variance state produces a first-30-second memory ramp (5,480–10,392&nbsp;MB across training variants) that no communication-shape change touches, versus 1,528–3,366&nbsp;MB for inference. One example teaches the classifier this once; every later communication-only disguise inherits the same tell for free.
+    </p>
+
+    <h3 class="subsec-title"><span class="sec-num">2.2</span> Memory-footprint evasion (rounds 8–11)</h3>
+    <p>The only axis that ever produced a near-evasion. Replacing AdamW with momentum-free SGD removes persistent optimizer state entirely.</p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>8</td><td class="mech">SGD, momentum=0, b=4/s=512</td><td><b>0.59</b></td><td><span class="tag amber">near coin-flip</span> closest evasion overall</td></tr>
+          <tr><td>9</td><td class="mech">R8 + chunked comms</td><td>1.00</td><td>combining backfired</td></tr>
+          <tr><td>10</td><td class="mech">SGD, b=1/s=128</td><td>0.67</td><td><span class="flag-mark">⚠</span> 135.0&nbsp;W, out-of-band</td></tr>
+          <tr><td>11</td><td class="mech">SGD, b=2/s=256</td><td>0.95</td><td><span class="flag-mark">⚠</span> 208.1&nbsp;W, out-of-band</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      Round 8's memory delta (3,968&nbsp;MB) moved close to inference's own baseline (3,366&nbsp;MB), and confidence dropped to 0.59 — real progress on the targeted feature. Layering communication disguise back on top (round 9) re-triggered the already-learned "unusual comm shape" tell and pushed confidence back to 1.00: the classifier's lesson from §2.1 generalized against this axis too. Rounds 10–11 pushed batch/sequence length further to shrink activation memory as well — confidence rose, non-monotonically, rather than falling. Mean power also dropped to 133–208&nbsp;W, below the 239–351&nbsp;W band the original benign+adversarial baseline run established. A classifier's prediction on an input this far outside its training distribution is not reliable evidence in either direction; we read rounds 10–11 as inconclusive on the evasion question, not as "harder to evade."
+    </p>
+
+    <h3 class="subsec-title"><span class="sec-num">2.3</span> Cross-mechanism transfer (rounds 12–13)</h3>
+    <p>
+      To test whether "infrequent synchronization" was a genuine feature-level pattern or a DiLoCo-specific fingerprint, gradient accumulation — a structurally unrelated technique with no outer-loop momentum state — was used to produce the same external communication-frequency reduction.
+    </p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>12</td><td class="mech">grad. accumulation, every 4 steps</td><td>1.00</td><td>higher confidence than DiLoCo itself</td></tr>
+          <tr><td>13</td><td class="mech">grad. accumulation, every 25 steps</td><td>1.00</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Caught at higher confidence than any DiLoCo round — evidence the classifier generalized a mechanism-agnostic pattern rather than memorizing one library's traffic shape.</p>
+
+    <h3 class="subsec-title"><span class="sec-num">2.4</span> Combined adversary — a confounded result (round 14)</h3>
+    <p>
+      Combined every partial win so far — SGD/momentum=0, realistic batch/sequence length, no communication changes — plus a new axis: deliberate idle gaps between steps, targeting temporal/duty-cycle features no prior round had touched.
+    </p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>14</td><td class="mech">R8 + idle-gap duty cycling</td><td>1.00</td><td><span class="flag-mark">⚠</span> 163.6&nbsp;W, out-of-band</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      Worse than memory-only round 8, not better. The temporal-shaping idea worked on its own terms (power variance rose as intended), but idle sleeping pulled mean power to 163.6&nbsp;W — again outside the reference band. We cannot distinguish "temporal shaping doesn't help" from "this input again left the region the classifier was trained on." Treated as inconclusive, not a negative result.
+    </p>
+
+    <h3 class="subsec-title"><span class="sec-num">2.5</span> Memory evasion, retested without the confound (round 15)</h3>
+    <p>
+      Gradient checkpointing (trading compute for activation memory) at realistic parameters, with no communication or temporal changes — designed specifically to avoid round 14's power confound.
+    </p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>15</td><td class="mech">gradient checkpointing, b=4/s=512</td><td>0.78</td><td>power in-band; larger memory reduction than R8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      Power held at 319&nbsp;W (in-band) and memory delta fell further than round 8's (2,432 vs 3,968&nbsp;MB) — the cleanest memory-axis result in the campaign. Confidence was still higher than round 8's, most likely because the classifier had by this point seen four prior memory-focused rounds: novelty of the axis, not magnitude of the change on one feature, appears to be what determines round difficulty.
+    </p>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">3.</span> Figure 1 — confidence trajectory across all 16 rounds</h2>
+    <div class="figure">
+      <div class="fig-label">P(training) per round, grouped by evasion axis. Reference threshold at 0.5.</div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="swatch green"></span>caught with high confidence (≥0.85)</div>
+        <div class="legend-item"><span class="swatch amber"></span>caught, lower confidence (0.5–0.85)</div>
+        <div class="legend-item"><span class="swatch rust"></span>at or below threshold (&lt;0.5)</div>
+        <div class="legend-item"><span class="flag-mark">⚠</span>&nbsp;power outside 239–351&nbsp;W reference band — reading unreliable</div>
+      </div>
+
+      <div class="phase-block">
+        <div class="phase-block-head">§2.1 Communication-shape axis</div>
+        <div class="rows">
+          <div class="row"><div class="row-badge">R0</div><div><div class="row-label"><span class="mech">kv_disguise chunk=2048</span></div><div class="track"><div class="fill rust" style="width:10.4%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.10</div></div>
+          <div class="row"><div class="row-badge">R1</div><div><div class="row-label"><span class="mech">diloco inner=25</span></div><div class="track"><div class="fill amber" style="width:84.2%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.84</div></div>
+          <div class="row"><div class="row-badge">R2</div><div><div class="row-label"><span class="mech">kv_disguise chunk=512</span></div><div class="track"><div class="fill amber" style="width:79.9%"></div><div class="threshold-line"></div></div><div class="row-flag">⚠ 170.8 W mean power — flagged retroactively (see §4)</div></div><div class="row-val">0.80</div></div>
+          <div class="row"><div class="row-badge">R3</div><div><div class="row-label"><span class="mech">kv_disguise chunk=8192</span></div><div class="track"><div class="fill amber" style="width:64.0%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.64</div></div>
+          <div class="row"><div class="row-badge">R4</div><div><div class="row-label"><span class="mech">diloco inner=10</span></div><div class="track"><div class="fill green" style="width:85.0%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.85</div></div>
+          <div class="row"><div class="row-badge">R5</div><div><div class="row-label"><span class="mech">diloco inner=100</span></div><div class="track"><div class="fill green" style="width:95.9%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.96</div></div>
+          <div class="row"><div class="row-badge">R6</div><div><div class="row-label"><span class="mech">composite 1024/20</span></div><div class="track"><div class="fill green" style="width:99.96%"></div><div class="threshold-line"></div></div></div><div class="row-val">1.00</div></div>
+          <div class="row"><div class="row-badge">R7</div><div><div class="row-label"><span class="mech">composite 4096/50</span></div><div class="track"><div class="fill green" style="width:99.8%"></div><div class="threshold-line"></div></div></div><div class="row-val">1.00</div></div>
+        </div>
+      </div>
+
+      <div class="phase-block">
+        <div class="phase-block-head">§2.2 Memory-footprint axis</div>
+        <div class="rows">
+          <div class="row"><div class="row-badge">R8</div><div><div class="row-label"><span class="mech">SGD momentum=0</span><span class="note">closest evasion</span></div><div class="track"><div class="fill amber" style="width:58.8%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.59</div></div>
+          <div class="row"><div class="row-badge">R9</div><div><div class="row-label"><span class="mech">R8 + chunked comms</span></div><div class="track"><div class="fill green" style="width:99.9%"></div><div class="threshold-line"></div></div></div><div class="row-val">1.00</div></div>
+          <div class="row"><div class="row-badge">R10</div><div><div class="row-label"><span class="mech">SGD, b=1/s=128</span></div><div class="track"><div class="fill amber" style="width:67.5%"></div><div class="threshold-line"></div></div><div class="row-flag">⚠ 135.0 W mean power, out-of-band</div></div><div class="row-val">0.67</div></div>
+          <div class="row"><div class="row-badge">R11</div><div><div class="row-label"><span class="mech">SGD, b=2/s=256</span></div><div class="track"><div class="fill green" style="width:94.7%"></div><div class="threshold-line"></div></div><div class="row-flag">⚠ 208.1 W mean power, out-of-band</div></div><div class="row-val">0.95</div></div>
+        </div>
+      </div>
+
+      <div class="phase-block">
+        <div class="phase-block-head">§2.3 Cross-mechanism transfer</div>
+        <div class="rows">
+          <div class="row"><div class="row-badge">R12</div><div><div class="row-label"><span class="mech">grad. accum., every 4</span></div><div class="track"><div class="fill green" style="width:99.6%"></div><div class="threshold-line"></div></div></div><div class="row-val">1.00</div></div>
+          <div class="row"><div class="row-badge">R13</div><div><div class="row-label"><span class="mech">grad. accum., every 25</span></div><div class="track"><div class="fill green" style="width:99.7%"></div><div class="threshold-line"></div></div></div><div class="row-val">1.00</div></div>
+        </div>
+      </div>
+
+      <div class="phase-block">
+        <div class="phase-block-head">§2.4 Combined adversary</div>
+        <div class="rows">
+          <div class="row"><div class="row-badge">R14</div><div><div class="row-label"><span class="mech">SGD + idle-gap cycling</span><span class="note">confounded</span></div><div class="track"><div class="fill green" style="width:99.8%"></div><div class="threshold-line"></div></div><div class="row-flag">⚠ 163.6 W mean power, out-of-band</div></div><div class="row-val">1.00</div></div>
+        </div>
+      </div>
+
+      <div class="phase-block">
+        <div class="phase-block-head">§2.5 Memory axis, retested cleanly</div>
+        <div class="rows">
+          <div class="row"><div class="row-badge">R15</div><div><div class="row-label"><span class="mech">grad. checkpointing</span><span class="note">power in-band</span></div><div class="track"><div class="fill amber" style="width:77.7%"></div><div class="threshold-line"></div></div></div><div class="row-val">0.78</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">4.</span> Errata</h2>
+    <div class="errata">
+      <div class="label">Correction, added while preparing this report</div>
+      <p style="margin:0;">
+        The original round-by-round writeup (docs/REDTEAM.md) stated that mean power for rounds 10–11 and 14 fell "outside the 240–351&nbsp;W range every real category has ever shown," implying that band held for every round in the campaign. Recomputing power for all 16 rounds to build Figure&nbsp;1 showed this was not quite right: round 2 (kv_disguise, chunk=512) also reads at 170.8&nbsp;W, outside that band, likely because its unusually fine chunking made the run communication-bound enough to lower average power throughout — and it was never flagged at the time. The 239–351&nbsp;W band is accurately described as the range the <i>original benign+adversarial baseline run</i> established, not a literal floor for every round ever executed. docs/REDTEAM.md has been corrected in three places; this report states the band's provenance precisely from the outset.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">5.</span> Table 1 — full round data</h2>
+    <div class="tablewrap">
+      <table class="data">
+        <thead><tr><th>Rd</th><th>Mechanism</th><th>P(train)</th><th>Power (W)</th><th>Mem Δ (MB)</th></tr></thead>
+        <tbody>
+          <tr><td>R0</td><td class="mech">kv_disguise chunk=2048</td><td>0.104</td><td>278.1</td><td>5480</td></tr>
+          <tr><td>R1</td><td class="mech">diloco inner=25</td><td>0.842</td><td>318.0</td><td>5924</td></tr>
+          <tr><td>R2</td><td class="mech">kv_disguise chunk=512</td><td>0.799</td><td class="flagged">170.8 ⚠</td><td>5480</td></tr>
+          <tr><td>R3</td><td class="mech">kv_disguise chunk=8192</td><td>0.640</td><td>309.2</td><td>5480</td></tr>
+          <tr><td>R4</td><td class="mech">diloco inner=10</td><td>0.850</td><td>316.9</td><td>5924</td></tr>
+          <tr><td>R5</td><td class="mech">diloco inner=100</td><td>0.959</td><td>319.3</td><td>5924</td></tr>
+          <tr><td>R6</td><td class="mech">composite 1024/20</td><td>1.000</td><td>302.3</td><td>5926</td></tr>
+          <tr><td>R7</td><td class="mech">composite 4096/50</td><td>0.998</td><td>316.3</td><td>5924</td></tr>
+          <tr><td>R8</td><td class="mech">SGD momentum=0</td><td>0.588</td><td>315.7</td><td>3968</td></tr>
+          <tr><td>R9</td><td class="mech">R8 + chunked comms</td><td>0.999</td><td>278.6</td><td>4808</td></tr>
+          <tr><td>R10</td><td class="mech">SGD b=1/s=128</td><td>0.675</td><td class="flagged">135.0 ⚠</td><td>1904</td></tr>
+          <tr><td>R11</td><td class="mech">SGD b=2/s=256</td><td>0.947</td><td class="flagged">208.1 ⚠</td><td>2080</td></tr>
+          <tr><td>R12</td><td class="mech">grad. accum. every-4</td><td>0.996</td><td>323.3</td><td>4470</td></tr>
+          <tr><td>R13</td><td class="mech">grad. accum. every-25</td><td>0.997</td><td>326.8</td><td>4470</td></tr>
+          <tr><td>R14</td><td class="mech">SGD + idle-gap cycling</td><td>0.998</td><td class="flagged">163.6 ⚠</td><td>3968</td></tr>
+          <tr><td>R15</td><td class="mech">gradient checkpointing</td><td>0.777</td><td>319.3</td><td>2432</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Reference band for mean power, from the original benign+adversarial baseline: 239–351 W.</p>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">6.</span> Discussion</h2>
+    <ul class="findings">
+      <li><b>Communication-shape disguises are self-defeating once caught once.</b> The classifier does not learn to recognize a specific trick — it learns that <i>any</i> unusual synchronization pattern is itself a positive signal, so further disguising makes detection more confident, not less (§2.1, §2.3).</li>
+      <li><b>Memory footprint is the one axis with real, if partial, traction.</b> Removing optimizer state closed most of the gap to inference on the targeted feature and produced the campaign's only near-coin-flip confidence score (round 8). It did not fully evade, because the classifier weighs 12 features jointly.</li>
+      <li><b>Novelty of the evasion axis, not the size of the change, predicts difficulty.</b> Round 15's larger memory reduction than round 8 was caught more confidently, because the classifier had by then seen more memory-focused examples (§2.2, §2.5).</li>
+      <li><b>Out-of-distribution inputs produce meaningless confidence scores in either direction.</b> Four rounds (2, 10, 11, 14) pushed mean power outside the reference band; three were flagged as such at the time, one was not (§4). This is the most transferable methodological lesson of the campaign: check whether an input is still inside the region a model was trained to judge before trusting its confidence score, regardless of whether that confidence reads high or low.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">7.</span> Limitations</h2>
+    <p>
+      All 16 rounds use a small synthetic transformer (~85–100M parameters), not a pretrained model. Every round is a single execution; only the false-positive investigation's boundary point (outside the scope of this report — see docs/REDTEAM.md) received a statistical-replication check. Round 14 produced an inconclusive result rather than a clean pass or fail. The 239–351&nbsp;W reference band derives from one baseline run's five categories, not a swept characterization of the full input space this classifier could plausibly encounter.
+    </p>
+  </section>
+
+  <section class="refs">
+    <h2 class="sec-title"><span class="sec-num">References</span></h2>
+    <p>Rahman, R. &amp; Tajdari, S. (2026). <i>Detecting Hidden ML Training With Zero-Overhead Telemetry.</i> TAIGR @ ICML 2026. arXiv:2606.19262.</p>
+    <p>Seferis, E. &amp; Fist, T. (2026). <i>Detecting Compute Structuring in AI Governance is Likely Feasible.</i> AAAI-26. doi:10.1609/aaai.v40i44.41127.</p>
+    <p>Douillard, A. et al. (2023). <i>DiLoCo: Distributed Low-Communication Training of Language Models.</i> arXiv:2311.08105.</p>
+  </section>
+
+  <footer class="colophon">
+    Full round-by-round narrative, citations, and honest limitations: <span class="mono">docs/REDTEAM.md</span>.
+    General-audience writeup of the whole campaign (this report plus the separate false-positive investigation): <span class="mono">docs/WRITEUP.md</span>.
+  </footer>
+
+</div>
+</body>
+</html>

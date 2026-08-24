@@ -77,8 +77,13 @@ replication — not just a single encouraging number).
 Full design, citations, round-by-round data, and honest limitations:
 **[docs/REDTEAM.md](docs/REDTEAM.md)**. Narrative writeup of the whole
 campaign, written for a general audience:
-**[docs/WRITEUP.md](docs/WRITEUP.md)**. Azure single-VM infra:
-`infra/azure/` (parallel to `infra/terraform`, does not modify it).
+**[docs/WRITEUP.md](docs/WRITEUP.md)**. Formal technical report on the
+16-round hardening loop specifically (per-round tables, a confidence-trajectory
+figure, discussion, limitations, references) — HTML or print-ready PDF:
+**[docs/HARDENING_LOOP_REPORT.html](docs/HARDENING_LOOP_REPORT.html)** /
+**[docs/HARDENING_LOOP_REPORT.pdf](docs/HARDENING_LOOP_REPORT.pdf)**. Azure
+single-VM infra: `infra/azure/` (parallel to `infra/terraform`, does not
+modify it).
 
 ```bash
 python -m src.run_redteam --config configs/redteam_smoke.yaml   # local, no GPU
