@@ -88,7 +88,14 @@ replicated check); an evasion that touches BOTH memory and the temporal/duty-cyc
 without the OOD confound round 14 hit; a benign corpus broad enough to
 make a real, principled claim about where the false-positive boundary
 sits (the second fix, below, is a step in that direction, not a final
-answer).
+answer); re-testing the false-positive finding against a real KV-cached
+inference engine — this project's `generate()` has no KV-cache at all
+(recomputes a full forward pass every step), so the false-positive
+boundary measured here is driven by the same activation-memory scaling
+law training uses, not by KV-cache growth as an earlier draft of this doc
+claimed (see the correction under "False-positive check" below) — and
+should not be assumed to transfer to a real inference stack (vLLM, TGI)
+without checking.
 
 ## Shared-box operation (Aug 21-23 Italy North window)
 
@@ -670,16 +677,40 @@ than train_ddp.** `power_mem_corr` also climbed to 0.878/0.839, close to
 train_ddp's 0.966 and well above baseline infer's 0.804.
 
 **Why, mechanistically**: inference's memory footprint scales with
-batch×context just like training's activation memory does (KV-cache and
-intermediate activations both grow that way) — there's nothing about
-inference *per se* that caps its memory ramp low. The benign training
-corpus for this whole project only ever ran inference at modest
-batch=8/seq=512 while training explored a wider range, so
+batch×context just like training's activation memory does — there's
+nothing about inference *per se* that caps its memory ramp low. The
+benign training corpus for this whole project only ever ran inference at
+modest batch=8/seq=512 while training explored a wider range, so
 `first_30s_mem_delta_mb` distinguishing them was **partly a confound of
 the corpus's own experimental design, not a property of training vs.
 inference as such.** A real inference deployment serving many concurrent
 requests or long conversations would plausibly trip this classifier
 today.
+
+**Correction (2026-08-24), important for external validity, not just
+precision**: an earlier draft of this section attributed part of
+inference's memory growth to KV-cache. Checked against the actual code
+while answering a question about it — wrong. `TinyGPT.generate()`
+(`src/model/tiny_gpt.py`) recomputes a full forward pass over the whole
+context on every generation step (`self(idx[:, -block_size:])`); there is
+no KV-cache anywhere in this codebase (`grep -rn "cache\|kv_cache\|past_key"`
+across `src/model/` and `src/workloads/` returns nothing). So the actual
+mechanism here is that `infer_dp`/`infer_tp`'s memory growth comes
+entirely from the *same* activation-memory scaling law training uses —
+both are running the identical B×T×C×layers forward-pass computation, and
+inference here just never adds training's *extra* gradient+optimizer-state
+memory on top. This makes the false-positive finding *more* robust, not
+less — it isn't a coincidental resemblance between two different memory
+mechanisms (KV-cache vs. activations), it's the same shared mechanism
+being large enough at scale to swamp the smaller training-only increment.
+**But it also narrows what this specific finding can claim**: a real
+inference server with actual KV-caching (vLLM, TGI, etc.) would show a
+substantially cheaper, differently-shaped memory profile than our
+uncached `generate()` loop — cache reads instead of full recomputation
+per step — so the exact false-positive boundary measured in this project
+should not be assumed to transfer to a real production inference stack
+without re-testing against one. Not attempted here; flagged as an
+external-validity gap alongside the "no real HF model" one below.
 
 **This is the most consequential finding of the day, not a footnote**:
 every prior round asked "can an adversary hide training as inference" —

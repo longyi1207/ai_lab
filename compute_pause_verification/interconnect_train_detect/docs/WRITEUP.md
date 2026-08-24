@@ -196,7 +196,15 @@ inconclusive, confounded result rather than a clean pass or fail. And the
 false-positive fix closes the specific gap this campaign found on this
 model and this hardware — it's evidence the *approach* (diversify the
 negative class deliberately) works, not a proof that no false-positive
-gap remains anywhere in the input space.
+gap remains anywhere in the input space. And the inference workload used
+throughout has no KV-cache (it recomputes a full forward pass on every
+generation step) — the false-positive finding is real for this
+implementation, and mechanistically sound (both training and inference
+share the same activation-memory scaling law; inference here just never
+adds training's extra gradient/optimizer-state memory on top), but a
+production inference engine with real KV-caching would show a cheaper,
+differently-shaped memory profile, so the measured boundary should not be
+assumed to transfer without re-testing against one.
 
 ## Where the full data lives
 
