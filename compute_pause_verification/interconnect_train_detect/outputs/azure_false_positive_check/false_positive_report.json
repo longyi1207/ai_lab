@@ -1,0 +1,159 @@
+{
+  "any_false_positive": true,
+  "classifier_path": "/home/azureuser/interconnect_train_detect_outputs/azure_redteam_loop_continued4/round_14_white_box_14/classifier.joblib",
+  "interpretation": "Every workload here is genuinely legitimate inference (is_training=False), just heavier than the baseline infer_dp/infer_tp configs (bigger batch, longer context). n_false_positives > 0 for any workload means the classifier misclassified real, benign inference traffic as training \u2014 the deployment-relevant error mode, not the evasion-relevant one every other round tested.",
+  "per_workload": [
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.8119444444444444,
+      "n_false_positives": 9,
+      "n_windows": 9,
+      "name": "infer_dp_bigbatch",
+      "rows": [
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.995,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.78,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.78,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.7725,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.8,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.8075,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.8,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.7725,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_bigbatch",
+          "p_training": 0.8,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.8247727272727272,
+      "n_false_positives": 11,
+      "n_windows": 11,
+      "name": "infer_dp_longctx",
+      "rows": [
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.9875,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8075,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8075,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8075,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.7925,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_longctx",
+          "p_training": 0.8075,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_tp",
+      "mean_p_training": 0.905,
+      "n_false_positives": 1,
+      "n_windows": 1,
+      "name": "infer_tp_heavy",
+      "rows": [
+        {
+          "name": "infer_tp_heavy",
+          "p_training": 0.905,
+          "predicted_training": true
+        }
+      ]
+    }
+  ],
+  "workload_results": [
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_bigbatch",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_longctx",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp_heavy",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    }
+  ]
+}

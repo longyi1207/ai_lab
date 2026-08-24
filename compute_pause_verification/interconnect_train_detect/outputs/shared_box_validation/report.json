@@ -1,0 +1,107 @@
+{
+  "adversarial_evasion_eval": {
+    "accuracy": 0.0,
+    "fn": 2,
+    "fp": 0,
+    "n_windows": 2,
+    "rows": [
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2975,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.2475,
+        "predicted_training": false
+      }
+    ],
+    "tn": 0,
+    "tp": 0
+  },
+  "in_sample_eval": {
+    "accuracy": 1.0,
+    "fn": 0,
+    "fp": 0,
+    "n_windows": 3,
+    "rows": [
+      {
+        "name": "train_ddp",
+        "p_training": 0.66,
+        "predicted_training": true
+      },
+      {
+        "name": "infer_dp",
+        "p_training": 0.175,
+        "predicted_training": false
+      },
+      {
+        "name": "infer_tp",
+        "p_training": 0.105,
+        "predicted_training": false
+      }
+    ],
+    "tn": 2,
+    "tp": 1
+  },
+  "limitations": [
+    "Real NVML telemetry, but a single hardware config and far fewer runs than Rahman & Tajdari's 1,396-run / 26,496-window corpus \u2014 treat as directional, not a statistically powered replication.",
+    "Feature formulas (esp. cumulative energy, power-memory correlation, memory-plateau timing) are our own reading of the paper's text, not verified against their source (no public repo located as of this run).",
+    "Cross-GPU aggregation (mean+std per signal per tick) is our own design choice \u2014 the paper's exact multi-GPU aggregation wasn't recoverable from the sections we could extract."
+  ],
+  "n_adversarial_windows": 2,
+  "n_benign_windows": 3,
+  "run_name": "shared_box_validation",
+  "telemetry_synthetic": false,
+  "train_result": {
+    "feature_importance": {
+      "autocorr1_power": 0.084,
+      "autocorr1_util": 0.104,
+      "cumulative_energy_j": 0.052,
+      "cv_power": 0.056,
+      "cv_util": 0.03866666666666667,
+      "first_30s_mem_delta_mb": 0.12,
+      "mean_power_w": 0.04,
+      "mean_util_pct": 0.044,
+      "periodicity_power": 0.092,
+      "periodicity_util": 0.12266666666666667,
+      "power_mem_corr": 0.136,
+      "time_to_mem_plateau_s": 0.11066666666666668
+    },
+    "n_neg": 2,
+    "n_pos": 1,
+    "n_train": 3
+  },
+  "workload_results": [
+    {
+      "kind": "train_ddp",
+      "name": "train_ddp",
+      "phase": "benign",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp",
+      "phase": "benign",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp",
+      "phase": "benign",
+      "returncode": 0
+    },
+    {
+      "kind": "kv_disguise",
+      "name": "kv_disguise",
+      "phase": "adversarial",
+      "returncode": 0
+    },
+    {
+      "kind": "diloco",
+      "name": "diloco",
+      "phase": "adversarial",
+      "returncode": 0
+    }
+  ]
+}

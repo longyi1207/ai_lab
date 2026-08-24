@@ -1,6 +1,5 @@
 __pycache__/
 .venv/
-outputs/
 infra/.active/
 infra/terraform/.terraform/
 infra/terraform/*.tfstate*
@@ -16,3 +15,11 @@ infra/azure/scripts/config.env
 *.jsonl
 .DS_Store
 .pytest_cache/
+
+# outputs/ is gitignored in the working repo (local scratch state from
+# every run, including partial/failed ones) but this published copy
+# intentionally includes the curated, final result for every experiment
+# cited in docs/REDTEAM.md -- see "Reproducing this" in that doc. Negate
+# the *.joblib/*.jsonl excludes above specifically for this directory.
+!outputs/**/*.joblib
+!outputs/**/*.jsonl

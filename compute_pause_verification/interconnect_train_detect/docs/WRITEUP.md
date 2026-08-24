@@ -107,8 +107,13 @@ bigger batch size, longer context, the kind of thing a busy real
 inference server does on a normal day — got misclassified as training
 with 81–90% confidence. The mechanism is intuitive in hindsight:
 inference's memory footprint scales with batch × context length just
-like training's does, and the benign training corpus had never included
-large-scale inference to teach the classifier the difference.
+like training's does — the inference workload here has no KV-cache at
+all (it recomputes a full forward pass on every generation step, so
+training and inference share the identical activation-memory scaling
+law; inference just never adds training's extra gradient/optimizer-state
+memory on top — see Limitations for the caveat this creates against real
+KV-cached inference engines) — and the benign training corpus had never
+included large-scale inference to teach the classifier the difference.
 
 **A fix that looked clean and wasn't.** I folded three heavy-inference
 examples in as negative (benign) training data and tested two new points

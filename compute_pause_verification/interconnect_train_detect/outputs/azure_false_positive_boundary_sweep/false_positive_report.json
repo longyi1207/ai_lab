@@ -1,0 +1,639 @@
+{
+  "any_false_positive": true,
+  "classifier_path": "/mnt/interconnect_train_detect/outputs/azure_redteam_fp_fix/classifier_fixed.joblib",
+  "interpretation": "Every workload here is genuinely legitimate inference (is_training=False), just heavier than the baseline infer_dp/infer_tp configs (bigger batch, longer context). n_false_positives > 0 for any workload means the classifier misclassified real, benign inference traffic as training \u2014 the deployment-relevant error mode, not the evasion-relevant one every other round tested.",
+  "per_workload": [
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.12305555555555557,
+      "n_false_positives": 0,
+      "n_windows": 9,
+      "name": "infer_dp_baseline_sanity",
+      "rows": [
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.28,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.2325,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.0725,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.0475,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.0675,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.085,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.145,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.13,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_baseline_sanity",
+          "p_training": 0.0475,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.6958333333333333,
+      "n_false_positives": 9,
+      "n_windows": 9,
+      "name": "infer_dp_b16_s512",
+      "rows": [
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.6925,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.745,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.6825,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.695,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.6725,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.6375,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.6425,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.76,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b16_s512",
+          "p_training": 0.735,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.1061111111111111,
+      "n_false_positives": 1,
+      "n_windows": 9,
+      "name": "infer_dp_b24_s512",
+      "rows": [
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.575,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.0075,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.14,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.1375,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.03,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.0325,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.005,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.02,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b24_s512",
+          "p_training": 0.0075,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.25472222222222224,
+      "n_false_positives": 1,
+      "n_windows": 9,
+      "name": "infer_dp_b32_s512_regression",
+      "rows": [
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.605,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.195,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.155,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.1575,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.1875,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.16,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.24,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.345,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b32_s512_regression",
+          "p_training": 0.2475,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.3219444444444444,
+      "n_false_positives": 0,
+      "n_windows": 9,
+      "name": "infer_dp_b48_s512_extrapolate",
+      "rows": [
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.4975,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.3425,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.3025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.315,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.32,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.3,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.2725,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.275,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b48_s512_extrapolate",
+          "p_training": 0.2725,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.7211111111111111,
+      "n_false_positives": 9,
+      "n_windows": 9,
+      "name": "infer_dp_b8_s1024",
+      "rows": [
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.6925,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.8,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.7975,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.8075,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.7825,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.665,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.665,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.6475,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s1024",
+          "p_training": 0.6325,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.19166666666666665,
+      "n_false_positives": 0,
+      "n_windows": 9,
+      "name": "infer_dp_b8_s2048_regression",
+      "rows": [
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.445,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.2025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.19,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.0175,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.1275,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.275,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.2825,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.0825,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s2048_regression",
+          "p_training": 0.1025,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_dp",
+      "mean_p_training": 0.639,
+      "n_false_positives": 10,
+      "n_windows": 10,
+      "name": "infer_dp_b8_s3072_extrapolate",
+      "rows": [
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.555,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6725,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6825,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.67,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6025,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6125,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6625,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.6575,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.65,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b8_s3072_extrapolate",
+          "p_training": 0.625,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_tp",
+      "mean_p_training": 0.545,
+      "n_false_positives": 1,
+      "n_windows": 2,
+      "name": "infer_tp_baseline_sanity",
+      "rows": [
+        {
+          "name": "infer_tp_baseline_sanity",
+          "p_training": 0.4675,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_baseline_sanity",
+          "p_training": 0.6225,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_tp",
+      "mean_p_training": 0.265,
+      "n_false_positives": 0,
+      "n_windows": 3,
+      "name": "infer_tp_b4_s512",
+      "rows": [
+        {
+          "name": "infer_tp_b4_s512",
+          "p_training": 0.39,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b4_s512",
+          "p_training": 0.1825,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b4_s512",
+          "p_training": 0.2225,
+          "predicted_training": false
+        }
+      ]
+    },
+    {
+      "kind": "infer_tp",
+      "mean_p_training": 0.6345,
+      "n_false_positives": 4,
+      "n_windows": 5,
+      "name": "infer_tp_b8_s512",
+      "rows": [
+        {
+          "name": "infer_tp_b8_s512",
+          "p_training": 0.4675,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s512",
+          "p_training": 0.6825,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s512",
+          "p_training": 0.645,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s512",
+          "p_training": 0.6925,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s512",
+          "p_training": 0.685,
+          "predicted_training": true
+        }
+      ]
+    },
+    {
+      "kind": "infer_tp",
+      "mean_p_training": 0.5410714285714285,
+      "n_false_positives": 4,
+      "n_windows": 7,
+      "name": "infer_tp_b8_s1536_fresh",
+      "rows": [
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.5175,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.7775,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.5625,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.525,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.47,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.4375,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s1536_fresh",
+          "p_training": 0.4975,
+          "predicted_training": false
+        }
+      ]
+    }
+  ],
+  "workload_results": [
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_baseline_sanity",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b16_s512",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b24_s512",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b32_s512_regression",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b48_s512_extrapolate",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b8_s1024",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b8_s2048_regression",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_dp",
+      "name": "infer_dp_b8_s3072_extrapolate",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp_baseline_sanity",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp_b4_s512",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp_b8_s512",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    },
+    {
+      "kind": "infer_tp",
+      "name": "infer_tp_b8_s1536_fresh",
+      "phase": "benign_stress_test",
+      "returncode": 0
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "baseline_out": "/home/azureuser/interconnect_train_detect_outputs/azure_redteam_single_node",
+  "hardened_train_result": {
+    "feature_importance": {
+      "autocorr1_power": 0.010952941474685453,
+      "autocorr1_util": 0.005105388388381193,
+      "cumulative_energy_j": 0.14463762386357631,
+      "cv_power": 0.058263581328307515,
+      "cv_util": 0.092567915054153,
+      "first_30s_mem_delta_mb": 0.24475904893019323,
+      "mean_power_w": 0.09720490255493366,
+      "mean_util_pct": 0.06594747315450111,
+      "periodicity_power": 0.002430797645596468,
+      "periodicity_util": 0.0013479670581471967,
+      "power_mem_corr": 0.02074109030989343,
+      "time_to_mem_plateau_s": 0.2560412702376315
+    },
+    "n_neg": 18,
+    "n_pos": 21,
+    "n_train": 39
+  },
+  "interpretation": "round1_classifier_vs_fresh_heldout.accuracy is the baseline classifier's detection rate on evasion attempts it never saw a version of. round2_hardened_classifier_vs_SAME_fresh_heldout.accuracy is the SAME held-out set scored by a classifier that had round-1's evasion examples folded into training \u2014 an improvement here is attributable to hardening, not to an easier test set, since both numbers are against identical windows.",
+  "limitations": [
+    "One hardening round only (Rahman & Tajdari did 5) \u2014 this shows whether hardening helps at all, not whether it converges to their ~99% multi-GPU detection rate.",
+    "Small N throughout (see docs/REDTEAM.md) \u2014 directional, not statistically powered.",
+    "Fresh held-out windows come from the SAME workload implementations (kv_disguise/diloco) with the same parameters as round 1 \u2014 this tests whether hardening catches a repeat of the same trick, not a genuinely new evasion strategy (that would need a third workload variant)."
+  ],
+  "n_baseline_adversarial_windows_folded_into_training": 15,
+  "n_baseline_benign_windows": 24,
+  "n_heldout_windows": 15,
+  "round1_classifier_vs_fresh_heldout": {
+    "accuracy": 0.0,
+    "fn": 15,
+    "fp": 0,
+    "n_windows": 15,
+    "rows": [
+      {
+        "name": "kv_disguise",
+        "p_training": 0.19,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.225,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.21,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2025,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2075,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.24,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2025,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2025,
+        "predicted_training": false
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 0.2,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.4225,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.4225,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.4275,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.395,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.395,
+        "predicted_training": false
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.41,
+        "predicted_training": false
+      }
+    ],
+    "tn": 0,
+    "tp": 0
+  },
+  "round2_hardened_classifier_vs_SAME_fresh_heldout": {
+    "accuracy": 1.0,
+    "fn": 0,
+    "fp": 0,
+    "n_windows": 15,
+    "rows": [
+      {
+        "name": "kv_disguise",
+        "p_training": 0.9475,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "kv_disguise",
+        "p_training": 1.0,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.9725,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.98,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.9325,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.895,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.9125,
+        "predicted_training": true
+      },
+      {
+        "name": "diloco",
+        "p_training": 0.9325,
+        "predicted_training": true
+      }
+    ],
+    "tn": 0,
+    "tp": 15
+  },
+  "workload_results": [
+    {
+      "kind": "kv_disguise",
+      "name": "kv_disguise",
+      "phase": "adversarial_heldout",
+      "returncode": 0
+    },
+    {
+      "kind": "diloco",
+      "name": "diloco",
+      "phase": "adversarial_heldout",
+      "returncode": 0
+    }
+  ]
+}

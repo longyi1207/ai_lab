@@ -1,0 +1,389 @@
+{
+  "false_positive_trace": "/mnt/interconnect_train_detect/outputs/azure_false_positive_boundary_sweep/trace.jsonl",
+  "fresh_heavy_inference_eval": {
+    "infer_dp_b12_s512_blind": {
+      "accuracy": 0.8888888888888888,
+      "fn": 0,
+      "fp": 1,
+      "mean_p_training": 0.40861111111111115,
+      "n_windows": 9,
+      "rows": [
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.555,
+          "predicted_training": true
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.415,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.3675,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.365,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.395,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.4175,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.4025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.3925,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b12_s512_blind",
+          "p_training": 0.3675,
+          "predicted_training": false
+        }
+      ],
+      "tn": 8,
+      "tp": 0
+    },
+    "infer_dp_b20_s512_blind": {
+      "accuracy": 1.0,
+      "fn": 0,
+      "fp": 0,
+      "mean_p_training": 0.012222222222222225,
+      "n_windows": 9,
+      "rows": [
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0975,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.005,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b20_s512_blind",
+          "p_training": 0.0025,
+          "predicted_training": false
+        }
+      ],
+      "tn": 9,
+      "tp": 0
+    },
+    "infer_dp_b8_s768_blind": {
+      "accuracy": 1.0,
+      "fn": 0,
+      "fp": 0,
+      "mean_p_training": 0.1513888888888889,
+      "n_windows": 9,
+      "rows": [
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.495,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.12,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1375,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1025,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.105,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_dp_b8_s768_blind",
+          "p_training": 0.1025,
+          "predicted_training": false
+        }
+      ],
+      "tn": 9,
+      "tp": 0
+    },
+    "infer_tp_b3_s512_blind": {
+      "accuracy": 1.0,
+      "fn": 0,
+      "fp": 0,
+      "mean_p_training": 0.07625000000000001,
+      "n_windows": 6,
+      "rows": [
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.295,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.0325,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.0475,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.03,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.0275,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b3_s512_blind",
+          "p_training": 0.025,
+          "predicted_training": false
+        }
+      ],
+      "tn": 6,
+      "tp": 0
+    },
+    "infer_tp_b6_s512_blind": {
+      "accuracy": 1.0,
+      "fn": 0,
+      "fp": 0,
+      "mean_p_training": 0.3932142857142858,
+      "n_windows": 7,
+      "rows": [
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.48,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.37,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.36,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.345,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.34,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.43,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b6_s512_blind",
+          "p_training": 0.4275,
+          "predicted_training": false
+        }
+      ],
+      "tn": 7,
+      "tp": 0
+    },
+    "infer_tp_b8_s768_blind": {
+      "accuracy": 1.0,
+      "fn": 0,
+      "fp": 0,
+      "mean_p_training": 0.08958333333333335,
+      "n_windows": 6,
+      "rows": [
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.165,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.035,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.035,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.1125,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.12,
+          "predicted_training": false
+        },
+        {
+          "name": "infer_tp_b8_s768_blind",
+          "p_training": 0.07,
+          "predicted_training": false
+        }
+      ],
+      "tn": 6,
+      "tp": 0
+    }
+  },
+  "interpretation": "fresh_heavy_inference_eval should now show LOW mean_p_training (fixed) for workload variants the classifier never saw folded in as negatives \u2014 this is generalization, not memorization, since the folded-in and fresh-tested batch/seq values differ. regression_check_vs_prior_rounds should stay ~1.0 across every entry \u2014 n_rounds_regressed > 0 means fixing false positives reopened an old evasion, which would make this a bad trade, not a fix.",
+  "n_after_fix": 371,
+  "n_before_fix": 281,
+  "n_false_positive_examples_folded_in": 90,
+  "n_rounds_regressed": 0,
+  "regression_check_vs_prior_rounds": [
+    {
+      "accuracy": 1.0,
+      "n_windows": 17,
+      "round_name": "kv_disguise_2048"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_25"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 63,
+      "round_name": "kv_disguise_512"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 15,
+      "round_name": "kv_disguise_8192"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_10"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_100"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 14,
+      "round_name": "composite_1024_20"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "composite_4096_50"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "low_mem_8"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 17,
+      "round_name": "low_mem_chunked_9"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 6,
+      "round_name": "low_mem_min_10"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 6,
+      "round_name": "low_mem_min_11"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "grad_accum_4"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "grad_accum_25"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 16,
+      "round_name": "white_box_14"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 12,
+      "round_name": "grad_checkpoint_15"
+    }
+  ],
+  "resume_from": "/mnt/interconnect_train_detect/outputs/azure_redteam_loop_continued5"
+}

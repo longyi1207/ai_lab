@@ -36,8 +36,15 @@ adversarial iteration:
 also produces **false positives on legitimate traffic** — heavier-than-
 baseline but genuinely benign inference (bigger batch, longer context)
 was misclassified as training with 81-82% confidence, because inference's
-memory footprint scales with batch×context just like training's does, and
-the benign training corpus never included large-scale inference. A first
+memory footprint scales with batch×context just like training's does —
+this project's `infer_dp`/`infer_tp` workloads have **no KV-cache at all**
+(their `generate()` recomputes a full forward pass every step), so both
+training and inference here share the exact same activation-memory
+scaling law; inference just never adds training's extra
+gradient/optimizer-state memory on top (see "False-positive check" below
+for the full mechanism and its external-validity caveat against real
+KV-cached inference engines) — and the benign training corpus never
+included large-scale inference. A first
 fix (folding in 3 negative examples) looked clean on the two points it was
 tested against — **but this was an illusion of a properly-powered result,
 not one**: a follow-up boundary sweep (12 well-powered points, corrected
@@ -329,6 +336,49 @@ Output: `outputs/<run_name>/{trace.jsonl, classifier.joblib, report.json}`.
 `report.json` includes an explicit `limitations` field restating the caveats
 above so a reader of just the JSON (not this doc) still sees them.
 
+## Reproducing this — what's actually included, and what real reproduction means here
+
+Everything is here except a GPU: all source code (`src/`), every config
+actually run (`configs/azure_*.yaml`), and — unlike a typical run of this
+project, where `outputs/` is gitignored as local scratch state — the raw
+data behind every number in this document. `outputs/` in this repo
+contains the real, non-synthetic result for every experiment cited above:
+`azure_redteam_single_node` (baseline), `azure_redteam_round2` /
+`shared_box_validation` (the two pilot runs), `azure_redteam_loop` +
+`_continued` through `_continued5` (all 16 hardening rounds),
+`azure_false_positive_check` (the original gap), `azure_redteam_fp_fix` /
+`fp_fix2` (both fixes), `azure_false_positive_boundary_sweep`, and
+`azure_fp_fragile_point_replication`. Each directory has the raw 1&nbsp;Hz
+NVML trace (`trace.jsonl`), the trained classifier (`*.joblib`), and the
+full evaluation report (`report.json` / `loop_report.json` /
+`false_positive*.json`) — the same files this document's every number was
+read from, not a summary of them.
+
+**Two different things "reproduce" can mean here, and they need different
+resources:**
+
+- **Verify the numbers in this document are real and correctly computed**
+  — needs no GPU at all. `src/redteam/features.py`'s
+  `extract_redteam_features()` runs on the included `trace.jsonl` files on
+  a laptop CPU; re-running it and re-evaluating the included classifiers
+  against the included traces should reproduce every number in this
+  document exactly, since nothing about that step is stochastic. This is
+  literally how the round-2 power-band correction and the KV-cache
+  correction elsewhere in this doc were found — by re-deriving numbers
+  from these same raw files, not by re-running anything on a GPU.
+- **Re-run the actual experiments from scratch on new hardware** — needs
+  a real CUDA GPU with `pynvml` (any generation; doesn't have to be A100
+  or Azure specifically) and will **not** reproduce bit-identical numbers.
+  None of these workloads set a random seed (`src/workloads/dist_utils.py`'s
+  `random_batch` uses whatever the ambient torch RNG state is), so even
+  literally the same code on the same hardware twice gives different
+  numbers each time — demonstrated directly by the statistical-replication
+  section above (4 reruns of the identical config landed at 0.41/0.23/0.14/0.15,
+  not four copies of 0.41). What should reproduce is the *qualitative*
+  pattern: communication-shape disguises caught after one fold-in, memory
+  reduction the only axis with real traction, extreme parameters producing
+  out-of-band power readings, etc. — not the exact decimal values.
+
 ## Limitations (restated explicitly, not just in code comments)
 
 - Not their trained classifier or weights — a reimplementation from the
@@ -345,7 +395,7 @@ above so a reader of just the JSON (not this doc) still sees them.
   pipeline executes correctly; they say nothing about real evasion
   feasibility. Don't cite smoke-run numbers as findings.
 
-## First real-hardware result (2026-08-22, `outputs/azure_20260822_005148`)
+## First real-hardware result (2026-08-22, `outputs/shared_box_validation`)
 
 1000 steps/workload, GPUs 3-5 of the shared Italy North box, tiny synthetic
 model (not HF). Classifier trained on 24 benign windows (6 `train_ddp`
@@ -379,7 +429,7 @@ evading (4/6).
   (retrain on adversarial examples, repeat) — not done yet, next step if
   this track continues past the Aug 21-23 window.
 
-## First hardening round (2026-08-22, `outputs/azure_20260822_035722`)
+## First hardening round (2026-08-22, `outputs/azure_redteam_round2`)
 
 `src/run_redteam_harden.py` implements one round of Rahman & Tajdari's
 actual methodology (§4.3): fold an evasion strategy's examples into
@@ -414,7 +464,7 @@ the identical held-out set.
   — that would speak to generalization rather than memorization of the
   specific trick.
 
-## Full 8-round hardening loop (2026-08-22, `outputs/azure_20260822_051750/azure_redteam_loop`)
+## Full 8-round hardening loop (2026-08-22, `outputs/azure_redteam_loop`)
 
 `src/run_redteam_loop.py` chains real rounds (each a genuinely different
 evasion parameterization, not a repeat) instead of the single round above.
@@ -472,7 +522,7 @@ the natural next round if this continues, and would be the first round
 against a genuinely different axis of evasion rather than a parametric
 variant.
 
-## Rounds 8-9: memory-touching evasion (2026-08-22, `outputs/azure_20260822_062919/azure_redteam_loop_continued`)
+## Rounds 8-9: memory-touching evasion (2026-08-22, `outputs/azure_redteam_loop_continued`)
 
 `src/workloads/low_mem_disguise.py` (new) swaps AdamW for plain SGD with
 `momentum=0` — torch's SGD allocates a momentum buffer only when
@@ -536,7 +586,7 @@ batch/seq to shrink activation memory too, not just optimizer state) —
 `low_mem_8` at 0.586 is the closest anything has come to genuine evasion
 so far, and it's worth finding out whether it can be pushed under 0.5.
 
-## Rounds 10-11: pushing the memory axis further — a cautionary result (2026-08-22, `outputs/azure_20260822_073959/azure_redteam_loop_continued2`)
+## Rounds 10-11: pushing the memory axis further — a cautionary result (2026-08-22, `outputs/azure_redteam_loop_continued2`)
 
 Two more `low_mem_disguise` variants, same SGD/momentum=0 fix, further
 reducing `batch_size`/`seq_len` to shrink activation memory too (not just
@@ -654,7 +704,7 @@ of compute happens within a window, not adding net idle time on top of it.
 Not attempted yet; flagging as the more carefully-designed follow-up to
 this specific idea, distinct from concluding the idea itself failed.
 
-## False-positive check: a real limitation, not an artifact (2026-08-22, `outputs/azure_20260822_174831/azure_false_positive_check`)
+## False-positive check: a real limitation, not an artifact (2026-08-22, `outputs/azure_false_positive_check`)
 
 Every round so far tested one direction of error (does disguised training
 evade detection?). `src/run_false_positive_check.py` tests the direction

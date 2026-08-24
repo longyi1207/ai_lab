@@ -1,0 +1,1013 @@
+{
+  "baseline_out": "/home/azureuser/interconnect_train_detect_outputs/azure_redteam_single_node",
+  "final_classifier_vs_each_round_held_out": [
+    {
+      "accuracy": 1.0,
+      "n_windows": 17,
+      "round_name": "kv_disguise_2048"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_25"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 63,
+      "round_name": "kv_disguise_512"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 15,
+      "round_name": "kv_disguise_8192"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_10"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "diloco_100"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 14,
+      "round_name": "composite_1024_20"
+    },
+    {
+      "accuracy": 1.0,
+      "n_windows": 13,
+      "round_name": "composite_4096_50"
+    }
+  ],
+  "interpretation": "trajectory[i].pre_hardening_accuracy is round i's evasion strategy scored against the classifier hardened on rounds 0..i-1 only (never having seen round i's specific trick) -- the real 'does this new trick evade the CURRENT defense' signal, analogous to Rahman & Tajdari's Table 5 per-round rates. final_classifier_vs_each_round_held_out re-scores every round's held-out set against the FINAL classifier (hardened on ALL rounds) -- a low score on an EARLY round here would mean later hardening hurt performance on an earlier trick (catastrophic forgetting); training on the cumulative set each round (not just the latest) is specifically meant to avoid this.",
+  "limitations": [
+    "Rounds are parameter variants of 2 mechanisms (kv_disguise chunk size, diloco inner_steps) plus one composite workload \u2014 not 20 independently designed evasion families like Rahman & Tajdari. Directional, not a replication of their scale or rigor.",
+    "Small N per round (see docs/REDTEAM.md) \u2014 single runs per round, not replicated.",
+    "Held-out sets are still the SAME workload implementations with different parameters, not adversarially novel code \u2014 this tests parametric generalization, not robustness to an evader who writes new attack code."
+  ],
+  "n_rounds": 8,
+  "n_rounds_failed": 0,
+  "status": "done",
+  "trajectory": [
+    {
+      "cumulative_training_size": 41,
+      "kind": "kv_disguise",
+      "n_windows_this_round": 17,
+      "name": "kv_disguise_2048",
+      "pre_hardening_accuracy": 0.0,
+      "pre_hardening_eval": {
+        "accuracy": 0.0,
+        "fn": 17,
+        "fp": 0,
+        "n_windows": 17,
+        "rows": [
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.105,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.105,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.0925,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.0925,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.0875,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.075,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1025,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1275,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1125,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.09,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1025,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1225,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.12,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1025,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1025,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1075,
+            "predicted_training": false
+          },
+          {
+            "name": "kv_disguise_2048",
+            "p_training": 0.1125,
+            "predicted_training": false
+          }
+        ],
+        "tn": 0,
+        "tp": 0
+      },
+      "round": 0,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 54,
+      "kind": "diloco",
+      "n_windows_this_round": 13,
+      "name": "diloco_25",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 13,
+        "rows": [
+          {
+            "name": "diloco_25",
+            "p_training": 0.91,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.8675,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.87,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.8375,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.7775,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.86,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.87,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.775,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.825,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.825,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.8675,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_25",
+            "p_training": 0.865,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 13
+      },
+      "round": 1,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 117,
+      "kind": "kv_disguise",
+      "n_windows_this_round": 63,
+      "name": "kv_disguise_512",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 63,
+        "rows": [
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7875,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.795,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.8025,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_512",
+            "p_training": 0.7975,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 63
+      },
+      "round": 2,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 132,
+      "kind": "kv_disguise",
+      "n_windows_this_round": 15,
+      "name": "kv_disguise_8192",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 15,
+        "rows": [
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.8075,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.6275,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.6225,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.6225,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.625,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.6275,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.63,
+            "predicted_training": true
+          },
+          {
+            "name": "kv_disguise_8192",
+            "p_training": 0.6275,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 15
+      },
+      "round": 3,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 145,
+      "kind": "diloco",
+      "n_windows_this_round": 13,
+      "name": "diloco_10",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 13,
+        "rows": [
+          {
+            "name": "diloco_10",
+            "p_training": 0.8475,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.855,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8625,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8125,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.865,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8625,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8675,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8725,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8325,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.8375,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.855,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.83,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_10",
+            "p_training": 0.85,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 13
+      },
+      "round": 4,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 158,
+      "kind": "diloco",
+      "n_windows_this_round": 13,
+      "name": "diloco_100",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 13,
+        "rows": [
+          {
+            "name": "diloco_100",
+            "p_training": 0.975,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.95,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.92,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.925,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.97,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9525,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9525,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9725,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9725,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9525,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9975,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9475,
+            "predicted_training": true
+          },
+          {
+            "name": "diloco_100",
+            "p_training": 0.9725,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 13
+      },
+      "round": 5,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 172,
+      "kind": "kv_diloco_composite",
+      "n_windows_this_round": 14,
+      "name": "composite_1024_20",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 14,
+        "rows": [
+          {
+            "name": "composite_1024_20",
+            "p_training": 0.9975,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 0.9975,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_1024_20",
+            "p_training": 1.0,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 14
+      },
+      "round": 6,
+      "status": "ok"
+    },
+    {
+      "cumulative_training_size": 185,
+      "kind": "kv_diloco_composite",
+      "n_windows_this_round": 13,
+      "name": "composite_4096_50",
+      "pre_hardening_accuracy": 1.0,
+      "pre_hardening_eval": {
+        "accuracy": 1.0,
+        "fn": 0,
+        "fp": 0,
+        "n_windows": 13,
+        "rows": [
+          {
+            "name": "composite_4096_50",
+            "p_training": 0.985,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 0.995,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 0.9975,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          },
+          {
+            "name": "composite_4096_50",
+            "p_training": 1.0,
+            "predicted_training": true
+          }
+        ],
+        "tn": 0,
+        "tp": 13
+      },
+      "round": 7,
+      "status": "ok"
+    }
+  ]
+}
