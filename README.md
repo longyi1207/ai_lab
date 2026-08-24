@@ -26,12 +26,19 @@ Small, readable scripts for training, inference, and interpretability: causal se
 from scratch, KV-cache speedup measurement, and a logit-lens walk through a real GPT-2's layers.
 See [`transformer_lab/README.md`](transformer_lab/README.md).
 
-### [`compute_pause_verification/`](compute_pause_verification/) — verifiable AI slowdown briefing
+### [`compute_pause_verification/`](compute_pause_verification/) — verifiable AI slowdown briefing + a red-teamed detector
 
 A self-contained PDF/HTML briefing on public research for **Claim A** compute monitoring
 (pause / slowdown verification under low trust): datacenter primer, Cankaya Plan A/B,
 zkLLM, VerInf, FlexHEG, and open follow-up problems. Start with
 [`compute_pause_verification/notes.pdf`](compute_pause_verification/notes.pdf).
+
+Paired with a from-scratch reimplementation of one detection method the briefing cites
+(Rahman & Tajdari's NVML-telemetry train-vs-infer classifier), red-teamed for real on an
+8×A100 node: 16 rounds of adversarial hardening plus a full false-positive investigation
+— a real gap found, root-caused, fixed, and validated on blind data rather than trusted on
+one good-looking number. See
+[`compute_pause_verification/interconnect_train_detect/docs/WRITEUP.md`](compute_pause_verification/interconnect_train_detect/docs/WRITEUP.md).
 
 ### [`research_dojo/`](research_dojo/) — production self-research & eval platform
 
