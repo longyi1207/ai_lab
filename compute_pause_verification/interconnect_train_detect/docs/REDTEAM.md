@@ -29,7 +29,7 @@ adversarial iteration:
 |---|---|---|
 | Communication shape (chunk size, sync frequency, composites) | Evaded once (round 0, undefended). After one fold-in, EVERY subsequent variant caught with escalating confidence (0.8→1.0) — the classifier learned "unusual comm pattern" itself as a positive tell, so more disguise = more confident, not less | 0-9, 12-13 |
 | Memory (SGD replacing AdamW, gradient checkpointing) | Partial success — the only axis that ever got close to real evasion. Round 8: mean P(training)=0.586 (near coin-flip). Round 15 (cleaner method, lower memory delta than round 8): 0.777 — caught more confidently once the classifier had seen more memory-focused attempts | 8-9, 15 |
-| Extreme parameter values (batch=1/seq=128, idle-gap duty cycling) | Backfired — pushed mean power to 133-199W/153W, outside the 240-351W range every real category has ever shown. Read as "left the region where the classifier's judgment means anything," not "harder to evade" | 10-11, 14 |
+| Extreme parameter values (batch=1/seq=128, idle-gap duty cycling) | Backfired — pushed mean power to 133-199W/153W, outside the 239-351W range the original benign+adversarial baseline established (round 2's 170.8W, caught later, shows this band isn't a strict universal floor either — see "Rounds 10-11" for the correction). Read as "left the region where the classifier's judgment means anything," not "harder to evade" | 10-11, 14 |
 | Different mechanism, same effect (gradient accumulation vs diloco) | Confirms the classifier learned a genuine mechanism-agnostic pattern, not a diloco-specific signature — grad_accum caught even more confidently (0.996-0.997) than diloco itself | 12-13 |
 
 **The other real result, arguably the most consequential**: the classifier
@@ -421,7 +421,7 @@ folded in.
 |---|---|---|
 | 0 | kv_disguise (chunk=2048) | **0.0** |
 | 1 | diloco (inner=25) | 1.0 |
-| 2 | kv_disguise (chunk=512) | 1.0 |
+| 2 | kv_disguise (chunk=512) | 1.0 — mean power 170.8W, outside the 239-351W baseline band (flagged only later, see "Rounds 10-11") |
 | 3 | kv_disguise (chunk=8192) | 1.0 |
 | 4 | diloco (inner=10) | 1.0 |
 | 5 | diloco (inner=100) | 1.0 |
@@ -542,9 +542,19 @@ optimizer state): `low_mem_min_11` (batch=2, seq=256) and `low_mem_min_10`
 `first_30s_mem_delta_mb` and `power_mem_corr` DID move further toward the
 inference cluster as intended (3,968→2,080→1,904 MB;
 0.836→0.585→0.614) — the memory-shrinking mechanism itself worked exactly
-as designed. **But mean power dropped to 133-199 W, well below every
-single category seen anywhere in this project — benign or adversarial —
-which all sat in the 240-351 W range.** That's very likely due to the
+as designed. **But mean power dropped to 133-199 W, well below the
+239-351 W range the original `azure_redteam_single_node` benign+adversarial
+baseline categories established.** (Correction, added after building a
+visualization of all 16 rounds: this specific 239-351 W band is that
+*original baseline run's* range, not literally every round ever run in
+this project — round 2, `kv_disguise_512`, is a separate, later round that
+also reads at 170.8 W, likely because its very fine chunking made it
+communication-bound enough to lower average power throughout its whole
+run. It was never flagged as OOD at the time. The methodological point
+below stands regardless — checking power against a real reference range
+before trusting a confidence score — the reference range just needs
+naming precisely, and round 2 should have been flagged the same way rounds
+10-11 and 14 were.) That's very likely due to the
 tiny batch/seq starving the GPU (small compute bursts separated by more
 idle time), not a deliberate evasion property, and it's plausible this
 pushed the input outside the region of feature space the classifier was
@@ -610,9 +620,11 @@ features (`cv_power`, `periodicity_power`) that no prior round had touched.
 (0.586), not better.** But the mechanism is diagnosable, not mysterious:
 `cv_power` did rise as intended (0.269→0.392, more burstiness — the
 temporal-shaping idea worked on its own terms) — but **mean power dropped
-to 153.1 W**, again below the 240-351 W range every legitimate category
-(training or inference, disguised or not) has shown anywhere in this
-project. Sleeping for ~half the wall-clock time pulls the *average* power
+to 153.1 W**, again below the 239-351 W range the original baseline run
+established (see the round 2 caveat under "Rounds 10-11" — that band isn't
+a strict floor for every round ever run, but 153.1 W is low enough to
+land well outside it by any reasonable reading). Sleeping for ~half the
+wall-clock time pulls the *average* power
 reading down substantially, since idle periods read as near-zero power —
 an unaccounted-for side effect that likely pushed this into the same kind
 of out-of-distribution territory as rounds 10-11's extreme batch/seq
