@@ -206,6 +206,29 @@ production inference engine with real KV-caching would show a cheaper,
 differently-shaped memory profile, so the measured boundary should not be
 assumed to transfer without re-testing against one.
 
+## Untested evasion vectors that are more realistic than most of what we tried
+
+Four came up while explaining the memory mechanism to someone unfamiliar
+with the project, and are worth recording rather than losing: mixed-precision
+(bf16/fp8) activations — every round here trained in plain fp32, and real
+frontier training almost never does, purely for efficiency reasons
+unrelated to evasion, so the detection margin this campaign measured may
+be inflated by that choice; LoRA/adapter-style fine-tuning, which shrinks
+gradient and optimizer-state memory to a sliver of the full-model case as
+a side effect of normal efficient practice, not disguise, and maps
+directly onto the realistic "hidden fine-tuning" governance concern rather
+than "hidden pretraining"; activation offloading to host memory, which
+would suppress the GPU-memory signal this classifier leans on hardest but
+should show up instead in the PCIe-traffic features already in the
+feature set — untested, so read as a hypothesis, not a result; and
+sequence/activation-parallel sharding across more GPUs, the one that
+targets the detection method's core assumption (per-GPU telemetry, no
+cross-node visibility) rather than any single feature. None of these were
+run. The first two, especially, are higher-priority next steps than
+anything left in the adversarial track, precisely because they require no
+cleverness at all — they're what ordinary efficient training already
+looks like.
+
 ## Where the full data lives
 
 Full round-by-round results, raw config files, and exact commands to

@@ -245,7 +245,7 @@
   <section>
     <h2 class="sec-title"><span class="sec-num">1.</span> Method</h2>
     <p>
-      A RandomForest (400 trees, class-weight balanced — matching Rahman &amp; Tajdari's own model choice) trained on 12 window-level features: structural (mean power, mean utilization), temporal (coefficient of variation and autocorrelation of power/utilization, spectral periodicity), and three physics-based features from the paper's own hardened round: cumulative energy, power–memory correlation, and early memory-allocation timing. Telemetry is sampled at 1&nbsp;Hz via <code>pynvml</code> from a small (~85–100M parameter) transformer running real distributed workloads — data-parallel and tensor-parallel inference, DiLoCo-style low-communication training, and five purpose-built adversarial variants.
+      A RandomForest (400 trees, class-weight balanced — matching Rahman &amp; Tajdari's own model choice) trained on 12 window-level features: structural (mean power, mean utilization), temporal (coefficient of variation and autocorrelation of power/utilization, spectral periodicity), and three physics-based features from the paper's own hardened round: cumulative energy, power–memory correlation, and early memory-allocation timing. Telemetry is sampled at 1&nbsp;Hz via <code>pynvml</code> from a small (109,988,352-parameter, plain fp32) transformer running real distributed workloads — data-parallel and tensor-parallel inference, DiLoCo-style low-communication training, and five purpose-built adversarial variants.
     </p>
     <p>
       <b>Protocol.</b> Each round attempts a new evasion strategy, is scored against the classifier hardened on every <i>prior</i> round only, and — regardless of outcome — is then folded into training as a correctly-labeled positive example before the next round runs. This mirrors Rahman &amp; Tajdari's own §4.3 co-evolution methodology. Fresh executions are always used for testing; a round is never evaluated on data just folded into its own training set.
@@ -454,8 +454,43 @@
   <section>
     <h2 class="sec-title"><span class="sec-num">7.</span> Limitations</h2>
     <p>
-      All 16 rounds use a small synthetic transformer (~85–100M parameters), not a pretrained model. Every round is a single execution; only the false-positive investigation's boundary point (outside the scope of this report — see docs/REDTEAM.md) received a statistical-replication check. Round 14 produced an inconclusive result rather than a clean pass or fail. The 239–351&nbsp;W reference band derives from one baseline run's five categories, not a swept characterization of the full input space this classifier could plausibly encounter.
+      All 16 rounds use a small synthetic transformer (109,988,352 parameters, plain fp32, no mixed precision), not a pretrained model. Every round is a single execution; only the false-positive investigation's boundary point (outside the scope of this report — see docs/REDTEAM.md) received a statistical-replication check. Round 14 produced an inconclusive result rather than a clean pass or fail. The 239–351&nbsp;W reference band derives from one baseline run's five categories, not a swept characterization of the full input space this classifier could plausibly encounter.
     </p>
+  </section>
+
+  <section>
+    <h2 class="sec-title"><span class="sec-num">8.</span> Future work — untested evasion vectors</h2>
+    <p>
+      Surfaced while explaining the memory mechanism behind these results in conversation, not from a 17th round. Recorded here, in priority order, because each is <i>more realistic</i> than several of the 16 rounds actually run — each is standard, non-adversarial large-scale training practice, not a bespoke disguise built to fool this specific classifier.
+    </p>
+    <div class="tablewrap">
+      <table class="results">
+        <thead><tr><th>Priority</th><th>Vector</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="tag rust">high</span></td>
+            <td class="mech">Mixed-precision (bf16/fp8) activations</td>
+            <td>Every round here trained in plain fp32; real frontier training almost never does, for plain efficiency reasons unrelated to evasion. Halves-to-quarters activation memory for free — the detection margin measured in this report may be an artifact of this project's own fp32 choice, not a property of what a real adversary would face.</td>
+          </tr>
+          <tr>
+            <td><span class="tag amber">high</span></td>
+            <td class="mech">LoRA / adapter fine-tuning</td>
+            <td>Freezing the base model and training a small adapter shrinks gradient+optimizer-state memory to a sliver of the full-model case, as a side effect of normal efficient practice. Maps directly onto the realistic "hidden fine-tuning" governance concern, not "hidden pretraining from scratch."</td>
+          </tr>
+          <tr>
+            <td><span class="tag amber">medium</span></td>
+            <td class="mech">Activation offloading to host (CPU) memory</td>
+            <td>Suppresses the GPU-memory signal this classifier leans on hardest, but should increase PCIe traffic — two of the 12 features already measure PCIe TX/RX. Plausibly trades one detected signal for another rather than genuinely evading; a hypothesis from the feature list, not a tested result.</td>
+          </tr>
+          <tr>
+            <td><span class="tag amber">medium</span></td>
+            <td class="mech">Sequence/activation-parallel sharding</td>
+            <td>Shards a training step's activation memory across more GPUs, so any single <i>monitored</i> GPU's footprint drops — not because total memory shrank, but because more GPUs split it. Targets the detection method's core premise (per-GPU telemetry, no cross-node visibility) rather than any one feature.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">None of the four were run. The first two are the higher-value next rounds specifically because they require no adversarial cleverness — they are what ordinary efficient training already looks like.</p>
   </section>
 
   <section class="refs">

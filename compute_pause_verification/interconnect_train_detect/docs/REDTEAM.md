@@ -95,7 +95,12 @@ boundary measured here is driven by the same activation-memory scaling
 law training uses, not by KV-cache growth as an earlier draft of this doc
 claimed (see the correction under "False-positive check" below) — and
 should not be assumed to transfer to a real inference stack (vLLM, TGI)
-without checking.
+without checking; four specific untested evasion vectors that are more
+realistic than most of what actually got tested — mixed-precision (bf16/fp8)
+activations, LoRA/adapter fine-tuning, activation offloading to CPU, and
+sequence/activation-parallel sharding across GPUs — recorded in priority
+order under "Untested evasion vectors worth flagging" near the end of this
+doc rather than left as a vague gesture.
 
 ## Shared-box operation (Aug 21-23 Italy North window)
 
@@ -1007,6 +1012,72 @@ verified the one remaining soft spot is noise around a correct mean, not
 a second hidden gap. Every step checked against the previous one's
 methodology (fresh execution, never re-testing on folded-in data) rather
 than trusting a single encouraging number.
+
+## Untested evasion vectors worth flagging (2026-08-24, threat-model note — not run)
+
+Surfaced while explaining the memory-vs-activation mechanism in
+conversation, not from a new experimental round. Recorded here precisely,
+in priority order, rather than left as a vague "more evasions might
+exist" — each of these is arguably *more realistic* than several of the
+16 rounds actually tested, because each is standard, non-adversarial
+practice in real large-scale training, not a bespoke disguise.
+
+1. **Mixed-precision activations (bf16/fp8) — highest priority, most
+   likely to matter in practice.** Every round in this campaign trained in
+   pure fp32 (confirmed: no `autocast`/`.half()`/`bfloat16` anywhere in
+   `src/model/` or `src/workloads/`). Real frontier training overwhelmingly
+   uses bf16 or fp8 mixed precision for plain efficiency, unrelated to
+   evasion. Doing so would roughly halve-to-quarter activation memory for
+   free, with zero adversarial intent required — meaning the detection
+   margin this whole campaign measured (activation memory dwarfing every
+   other feature, §"how much memory" discussion) is plausibly an artifact
+   of this project's own fp32 choice, not a property of what an adversary
+   would actually face against a real training run already using standard
+   efficient precision. Not tested — no round varied precision.
+
+2. **Parameter-efficient fine-tuning (LoRA / adapters) — second priority,
+   also standard practice, not exotic.** Freezing the base model and
+   training only a small adapter shrinks gradient+optimizer-state memory
+   to a tiny fraction of the full-model case — this campaign's whole
+   gradient/optimizer accounting scales with *trainable* parameter count,
+   and a LoRA-style setup could plausibly pull that memory down toward
+   inference's own footprint without doing anything disguised, since it's
+   just normal efficient fine-tuning. Directly relevant to the governance
+   framing this track sits in, too: a lot of realistic "hidden training"
+   concern is about fine-tuning an existing capable model, not pretraining
+   from scratch, and LoRA-style fine-tuning is exactly the common real-world
+   case for that. Not tested — every round here did full-parameter training.
+
+3. **Activation offloading to host (CPU) memory — a feature-coverage
+   question, not an obvious clean win for the adversary.** Techniques like
+   DeepSpeed ZeRO-Offload move activations to CPU RAM between forward and
+   backward instead of keeping them GPU-resident, directly suppressing the
+   GPU-side memory-ramp signal this classifier leans on hardest. But it
+   should substantially increase PCIe traffic — and `mean_pcie_tx_mbps`/
+   `mean_pcie_rx_mbps` are two of the classifier's 12 features already.
+   Plausible this evasion trades one detected signal for another rather
+   than genuinely evading. This is a hypothesis from reading the feature
+   list, not a tested result — flagged as such, not claimed as a finding.
+
+4. **Sequence/activation-parallel sharding across more GPUs — attacks a
+   structural assumption, not just a feature.** Megatron-style sequence
+   parallelism (or similar activation-partitioning schemes) shards a
+   training step's activation memory across multiple GPUs, so any single
+   *monitored* GPU's activation footprint drops — not because total
+   cluster memory shrank, but because more GPUs are splitting it. This
+   targets the detection methodology's core premise (per-GPU telemetry,
+   no cross-node coordination visibility) more directly than any mechanism
+   actually tested here, all of which stayed within a single node's
+   memory-reduction budget. Not tested — this project never varied the
+   degree of model/activation parallelism.
+
+None of these four were run. If this track continues, (1) and (2) are the
+higher-value next rounds specifically because they require no adversarial
+cleverness at all — they're what a real, non-adversarial efficient
+training/fine-tuning setup already looks like, which makes them the more
+honest test of whether this detection approach would actually hold up
+against realistic modern practice, not just against bespoke disguises
+built to fool it.
 
 ## Not built: same-box network-namespace fallback
 
