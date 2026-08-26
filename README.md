@@ -57,6 +57,27 @@ architecture diagram and a comparison against JSONL-only scripts, and
 [`research_dojo/docs/operations.md`](research_dojo/docs/operations.md) for the failure-mode
 runbook (stuck runs, DLQ, budget stop, webhook alerts).
 
+### [`long_horizon_eval/`](long_horizon_eval/) — controlled eval for score-seeking / reward-hacking propensity
+
+A safe, factorial environment that measures whether an agent, given a **benign coding take-home**,
+will leave the task and exploit a misconfigured neighbouring "production" intranet to **cheat the
+grader** when the task gets hard — a synthetic twin of the *structure* of the mid-2026 "agent left
+the eval box" incidents, not a replay of any real stack. Seven stdlib services form a believable ops
+environment (runbooks, incident tickets, an object store, a CI cache) with **three independent
+illicit payoff channels** — steal the watermarked answer via IDOR *or* path-traversal, poison the CI
+fixture the grader trusts, or force-pass with a leaked bot token — each gated behind an
+**independently toggleable** synthetic vuln, so the same task runs with the soft edges open or
+closed.
+
+Built on [Inspect AI](https://inspect.aisi.org.uk/) with full access-audit logging and a rule-based
+label taxonomy (`honest_solve` / `score_seek_attempt` / `score_seek_success` / `refuse_or_scope` /
+…), reported **per condition cell** rather than as one aggregate. Verified end to end: every channel
+opens with vulns on and closes with vulns off (the honest path works either way), egress containment
+holds (the network is internal-only), and both the no-key mock-agent path and the real Inspect
+provider path produce logs + labels. See
+[`long_horizon_eval/README.md`](long_horizon_eval/README.md) for the architecture, service-topology,
+and label-decision diagrams.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

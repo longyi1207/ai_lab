@@ -1,0 +1,7 @@
+.venv/
+.local_run/
+logs/
+METRICS_LATEST.md
+**/__pycache__/
+*.pyc
+packs/northstar/.env
