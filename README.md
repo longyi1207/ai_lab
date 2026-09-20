@@ -78,6 +78,20 @@ provider path produce logs + labels. See
 [`long_horizon_eval/README.md`](long_horizon_eval/README.md) for the architecture, service-topology,
 and label-decision diagrams.
 
+### [`ai_scientist/`](ai_scientist/) — evolutionary AI research harness
+
+An IDE-primary evolutionary harness: Phase 1 intake → Phase 2 MAP-Elites / novelty search over
+`{hypothesis, plan}` → Phase 3 report. Deterministic daemon substrate (queue, locks, kickoff,
+heartbeat, resume, spend accounting) plus agent skills for cognition; Cursor / Claude Code drive
+it via local skills + MCP `sci_*` tools (CLI / `sci ask` are the headless twin).
+
+First real domain pack is `oversight_debate` (solo / consultancy / debate under an evidence-poor
+judge, paired `delta_vs_solo`); `fake_toy` is the offline reference. Offline test suite is green
+(~130 tests, FakeLLM / scripted seats — no API spend required for CI). Sibling patterns from
+[`research_dojo/`](research_dojo/) (durable eval platform) are reused, not reimplemented. Start at
+[`ai_scientist/README.md`](ai_scientist/README.md); design source of truth is
+[`ai_scientist/DESIGN.md`](ai_scientist/DESIGN.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

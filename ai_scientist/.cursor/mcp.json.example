@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-scientist": {
+      "command": "python",
+      "args": ["-m", "ai_scientist.mcp"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/code/ai_scientist/src"
+      }
+    }
+  }
+}
