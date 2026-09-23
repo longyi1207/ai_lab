@@ -17,15 +17,31 @@ H1: mean cross-node GB/s(train) > infer under benign configs.
 ```
 src/
   monitor/     probes: ib | nccl | proc_net | nvml | synthetic + nccl_hook
-  workloads/   train_ddp, infer_dp, infer_tp (column-parallel), diloco (Nesterov outer), kv_disguise
+  workloads/   train_ddp, infer_dp, infer_tp, diloco (toy), diloco_prod (OpenDiLoCo/streaming), kv_disguise
   detect/      features (rate/FFT/burst), calibrate, stats, power, threshold, evaluate
   dashboard/   Plotly HTML
   run_experiment.py | run_replicates.py | run_grid.py | run_cluster.py
 infra/
   terraform/   VPC, SG, cluster PG, 2×GPU, EFA auto by family, IAM minimal, Budgets alert
   scripts/     launch/bootstrap/sync/run_remote/pull/destroy/cost/autodestroy/spot_watch/…
-configs/       smoke | grid_small | aws_g5 | aws_p4d
+configs/       smoke | diloco_prod | grid_small | aws_g5 | aws_p4d
 ```
+
+## Production DiLoCo (fabric)
+
+Toy `kind: diloco` = per-param Python AllReduce (smoke). Real multi-node:
+
+```bash
+# bucketed NCCL outer sync, H=500, FP16 wire (OpenDiLoCo defaults)
+python -m src.run_cluster --config configs/diloco_prod.yaml
+
+# or directly
+torchrun --nnodes=2 --nproc_per_node=8 --node_rank=$RANK \
+  --master_addr=$MASTER --master_port=29500 \
+  -m src.workloads.diloco_prod --local-steps 500 --reduce-dtype fp16 --streaming
+```
+
+See `configs/diloco_prod.yaml` (`streaming` / `num_fragments` / `fragment_sync_delay`).
 
 ## Local (no AWS)
 

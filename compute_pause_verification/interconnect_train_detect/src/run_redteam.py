@@ -43,6 +43,7 @@ MODULE = {
     "infer_dp": "src.workloads.infer_dp",
     "infer_tp": "src.workloads.infer_tp",
     "diloco": "src.workloads.diloco_train",
+    "diloco_prod": "src.workloads.diloco_prod",
     "kv_disguise": "src.workloads.kv_disguise",
     "kv_diloco_composite": "src.workloads.kv_diloco_composite",
     "low_mem_disguise": "src.workloads.low_mem_disguise",
@@ -91,6 +92,16 @@ def _launch_workload(w: dict, env: dict, py: str, config_path: str) -> int:
         cmd += ["--warmup-steps", str(w.get("warmup_steps", 5))]
     if kind == "diloco":
         cmd += ["--inner-steps", str(w.get("inner_steps", 8))]
+    if kind == "diloco_prod":
+        cmd += [
+            "--local-steps", str(w.get("local_steps", w.get("inner_steps", 500))),
+            "--reduce-dtype", str(w.get("reduce_dtype", "fp16")),
+            "--num-fragments", str(w.get("num_fragments", 4)),
+            "--fragment-sync-delay", str(w.get("fragment_sync_delay", 0)),
+            "--precision", str(w.get("precision", "bf16")),
+        ]
+        if w.get("streaming"):
+            cmd += ["--streaming"]
     if kind == "infer_tp":
         cmd += ["--tp-size", str(w.get("tp_size", 2))]
     if kind == "kv_disguise":

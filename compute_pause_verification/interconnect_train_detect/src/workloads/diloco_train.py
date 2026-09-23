@@ -2,6 +2,10 @@
 
 Inner AdamW for H steps, then outer Nesterov momentum on parameter delta.
 Cross-node traffic ≈ 1/H of DDP — classic Seferis evade.
+
+Smoke / synthetic path (per-param Python AllReduce). For real fabric use
+`src.workloads.diloco_prod` (kind: diloco_prod) — bucketed NCCL, H=500,
+FP16 outer, optional Streaming DiLoCo.
 """
 from __future__ import annotations
 

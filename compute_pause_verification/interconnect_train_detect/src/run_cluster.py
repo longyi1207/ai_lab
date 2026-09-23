@@ -28,6 +28,7 @@ MODULE = {
     "infer_dp": "src.workloads.infer_dp",
     "infer_tp": "src.workloads.infer_tp",
     "diloco": "src.workloads.diloco_train",
+    "diloco_prod": "src.workloads.diloco_prod",
     "kv_disguise": "src.workloads.kv_disguise",
 }
 
@@ -117,6 +118,16 @@ def run_workload_local_rank0(cfg: dict, w: dict, master_addr: str, master_port: 
         extra += ["--warmup-steps", str(w.get("warmup_steps", 10))]
     if kind == "diloco":
         extra += ["--inner-steps", str(w.get("inner_steps", 8))]
+    if kind == "diloco_prod":
+        extra += [
+            "--local-steps", str(w.get("local_steps", w.get("inner_steps", 500))),
+            "--reduce-dtype", str(w.get("reduce_dtype", "fp16")),
+            "--num-fragments", str(w.get("num_fragments", 4)),
+            "--fragment-sync-delay", str(w.get("fragment_sync_delay", 0)),
+            "--precision", str(w.get("precision", "bf16")),
+        ]
+        if w.get("streaming"):
+            extra += ["--streaming"]
     if kind == "infer_tp":
         extra += ["--tp-size", str(w.get("tp_size", 2))]
 

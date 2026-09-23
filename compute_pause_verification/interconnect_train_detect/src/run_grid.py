@@ -21,6 +21,7 @@ MODULE = {
     "infer_dp": "src.workloads.infer_dp",
     "infer_tp": "src.workloads.infer_tp",
     "diloco": "src.workloads.diloco_train",
+    "diloco_prod": "src.workloads.diloco_prod",
     "kv_disguise": "src.workloads.kv_disguise",
 }
 

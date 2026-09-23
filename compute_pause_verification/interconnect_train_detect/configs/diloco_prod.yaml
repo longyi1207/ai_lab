@@ -1,0 +1,59 @@
+# Production DiLoCo — OpenDiLoCo defaults (H=500, FP16 outer).
+# Toy smoke diloco stays in configs/smoke.yaml (kind: diloco).
+#
+# Local multi-proc:
+#   python -m src.run_experiment --config configs/diloco_prod.yaml
+# Cluster (pair with ICTD_NODE_RANK / master):
+#   python -m src.run_cluster --config configs/diloco_prod.yaml
+run_name: diloco_prod
+mode: cluster
+collector:
+  host: 0.0.0.0
+  port: 8765
+  poll_hz: 20
+monitor:
+  backends: [nccl, proc_net, ib]
+  iface: null
+  ib_device: mlx5_0
+nnodes: 2
+nproc_per_node: 8
+master_port: 29500
+workloads:
+  - name: diloco_prod
+    kind: diloco_prod
+    steps: 2000
+    local_steps: 500
+    reduce_dtype: fp16
+    streaming: false
+    batch_size: 1
+    seq_len: 512
+    precision: bf16
+  # Uncomment for Streaming DiLoCo (crush peak / periodicity):
+  # - name: diloco_streaming
+  #   kind: diloco_prod
+  #   steps: 2048
+  #   local_steps: 512
+  #   streaming: true
+  #   num_fragments: 8
+  #   fragment_sync_delay: 4
+  #   reduce_dtype: fp16
+  #   batch_size: 1
+  #   seq_len: 512
+model:
+  backend: tiny
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  vocab_size: 32000
+  block_size: 512
+  # For real HF models on fabric:
+  # backend: hf
+  # name_or_path: meta-llama/Llama-3.2-1B
+  # dtype: bf16
+detect:
+  bandwidth_threshold_gbps: null
+  calibrate: youden
+  alpha: 0.05
+  d_min: 0.8
+  min_window_s: 2.0
+output_dir: outputs/diloco_prod
