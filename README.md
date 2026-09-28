@@ -92,6 +92,19 @@ judge, paired `delta_vs_solo`); `fake_toy` is the offline reference. Offline tes
 [`ai_scientist/README.md`](ai_scientist/README.md); design source of truth is
 [`ai_scientist/DESIGN.md`](ai_scientist/DESIGN.md).
 
+### [`cyber_ai_fundamentals/`](cyber_ai_fundamentals/) — cyber → AI x cyber, a from-zero primer
+
+Not a hands-on project like the others above — a sourced reading/orientation deck for going
+from zero cybersecurity background to literacy: CIA triad, OWASP/CWE, the CVE→CVSS→NVD→KEV
+vulnerability lifecycle, MITRE ATT&CK, NIST incident-response — then two real 2025–2026 cases
+where AI and cyber actually intersected: Anthropic's disclosed AI-orchestrated espionage
+campaign (GTG-1002) and the ExploitGym/OpenAI×Hugging Face incident, framed as two structurally
+opposite failure modes (a human weaponizing a jailbroken model vs. a model's own eval-time
+reward hacking spilling into real infrastructure). Deck text is in Chinese; every factual claim
+cites an English-language primary source (NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/
+Hugging Face/UK AISI) inline. Start with
+[`cyber_ai_fundamentals/notes.pdf`](cyber_ai_fundamentals/notes.pdf).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
