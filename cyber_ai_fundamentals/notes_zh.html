@@ -1,11 +1,176 @@
-#!/usr/bin/env python3
-"""Build notes_zh.html for the Cyber → AI x Cyber fundamentals deck (compute_pause_verification style)."""
-from pathlib import Path
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cyber → AI x Cyber Fundamentals — Study Notes</title>
+<style>
 
-ROOT = Path(__file__).resolve().parent
-CSS = (ROOT / "_notes_base.css").read_text()
+  :root {
+    --bg: #fdfcfb;
+    --ink: #1a1a18;
+    --ink-dim: #55524a;
+    --ink-faint: #8a867a;
+    --accent: #9a5b12;
+    --rule: rgba(26,26,24,0.13);
+    --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea;
+    --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --bg: #171613;
+      --ink: #eae6dd;
+      --ink-dim: #a9a396;
+      --ink-faint: #746f63;
+      --accent: #d99a49;
+      --rule: rgba(234,230,221,0.13);
+      --rule-soft: rgba(234,230,221,0.07);
+      --code-bg: #100f0d;
+      --code-border: rgba(234,230,221,0.10);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171613; --ink: #eae6dd; --ink-dim: #a9a396; --ink-faint: #746f63;
+    --accent: #d99a49; --rule: rgba(234,230,221,0.13); --rule-soft: rgba(234,230,221,0.07);
+    --code-bg: #100f0d; --code-border: rgba(234,230,221,0.10);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #fdfcfb; --ink: #1a1a18; --ink-dim: #55524a; --ink-faint: #8a867a;
+    --accent: #9a5b12; --rule: rgba(26,26,24,0.13); --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea; --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
 
-EXTRA_CSS = """
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16.5px;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; }
+
+  h1, h2, h3, h4 { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; font-weight: 600; text-wrap: balance; margin: 0; }
+  p { text-wrap: pretty; margin: 0 0 14px; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* layout: sidebar + content */
+  .page { display: flex; max-width: 1180px; margin: 0 auto; }
+  nav.toc {
+    width: 200px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    padding: 48px 0 48px 28px;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.toc .num { color: var(--ink-faint); margin-right: 6px; }
+  nav.toc a {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    text-decoration: none;
+    padding: 4px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -12px;
+    line-height: 1.5;
+  }
+  nav.toc a.active { color: var(--ink); border-left-color: var(--accent); }
+  nav.toc a:hover { color: var(--ink); }
+  @media (max-width: 880px) { nav.toc { display: none; } }
+
+  main { flex: 1; min-width: 0; padding: 56px 32px 120px; max-width: 760px; }
+  @media (max-width: 880px) { main { padding: 40px 20px 100px; } }
+
+  section { padding-top: 64px; margin-top: -8px; border-top: 1px solid var(--rule-soft); }
+  section:first-of-type { border-top: none; padding-top: 0; }
+
+  .kicker { font-size: 12.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  h2 { font-size: 24px; line-height: 1.3; margin-bottom: 6px; }
+  h2 .n { color: var(--accent); margin-right: 10px; }
+  .dek { font-size: 15px; color: var(--ink-faint); margin-bottom: 28px; font-family: system-ui, sans-serif; }
+  h3 { font-size: 15.5px; margin: 30px 0 10px; color: var(--ink); }
+
+  section p, section li { color: var(--ink-dim); line-height: 1.68; font-size: 16px; max-width: 66ch; }
+  section ul, section ol { margin: 0 0 14px; padding-left: 22px; }
+  section li { margin-bottom: 5px; }
+  strong { color: var(--ink); font-weight: 600; }
+  code:not(pre code) {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  /* code blocks */
+  pre {
+    margin: 16px 0 20px;
+    padding: 16px 18px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.62;
+  }
+  pre code { color: var(--ink-dim); }
+  pre .kw { color: var(--accent); }
+  pre .cm { color: var(--ink-faint); font-style: italic; }
+  pre .out { color: var(--ink); }
+  .code-cap { font-size: 12px; color: var(--ink-faint); margin: -14px 0 20px; font-family: ui-monospace, monospace; }
+
+  /* figures */
+  figure { margin: 24px 0 28px; }
+  figure img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 4px; }
+  figcaption { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; line-height: 1.5; }
+  figcaption .src { text-decoration: none; border-bottom: 1px dotted var(--ink-faint); }
+
+  /* remark / note callouts — restrained, text-led not box-led */
+  .note { margin: 20px 0; padding-left: 16px; border-left: 2px solid var(--rule); }
+  .note .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-bottom: 4px; display: block; }
+  .note p:last-child { margin-bottom: 0; }
+  .note.bug .label { color: var(--accent); }
+
+  /* small data table */
+  .tbl { overflow-x: auto; margin: 18px 0 24px; }
+  table { border-collapse: collapse; font-size: 14px; width: 100%; }
+  th, td { text-align: left; padding: 7px 16px 7px 0; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
+  th { color: var(--ink-faint); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { color: var(--ink-dim); }
+  td.mono, th.mono { font-family: ui-monospace, monospace; }
+
+  /* simple inline diagram bits (no long svg paths, just css) */
+  .flow { display: flex; align-items: center; gap: 10px; margin: 22px 0; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 13px; }
+  .flow .box { border: 1px solid var(--rule-strong, var(--rule)); padding: 8px 12px; border-radius: 5px; color: var(--ink-dim); background: var(--code-bg); }
+  .flow .arrow { color: var(--ink-faint); }
+
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 20px 0; }
+
+  header.masthead { padding-bottom: 40px; margin-bottom: 8px; }
+  header.masthead h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; margin-bottom: 14px; }
+  header.masthead p { font-size: 16px; color: var(--ink-dim); max-width: 60ch; }
+  header.masthead .meta { font-size: 12.5px; color: var(--ink-faint); margin-top: 18px; font-family: ui-monospace, monospace; }
+
+  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+
+
   /* SVG diagrams */
   .svg-fig {
     margin: 24px 0 28px;
@@ -46,12 +211,57 @@ EXTRA_CSS = """
     figure, .svg-fig { break-inside: avoid; }
     a { color: var(--ink); text-decoration: none; }
   }
-"""
 
-# ---------------------------------------------------------------- diagrams
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc" aria-label="Contents">
+  <a href="#scope"><span class="num">0</span>范围</a>
+  <a href="#mindset"><span class="num">1</span>心智模型</a>
+  <a href="#vulns"><span class="num">2</span>漏洞生命周期</a>
+  <a href="#attck"><span class="num">3</span>ATT&amp;CK</a>
+  <a href="#network"><span class="num">4</span>网络</a>
+  <a href="#crypto"><span class="num">5</span>密码学</a>
+  <a href="#defense"><span class="num">6</span>防守分层</a>
+  <a href="#ai-offense"><span class="num">7</span>AI攻击</a>
+  <a href="#ai-defense"><span class="num">8</span>AI防御</a>
+  <a href="#weights"><span class="num">9</span>weights</a>
+  <a href="#nextsteps"><span class="num">10</span>下一步</a>
+  <a href="#glossary"><span class="num">11</span>术语/来源</a>
+</nav>
+<main>
 
-def svg_risk_model():
-    return '''
+<header class="masthead">
+  <div class="kicker">学习 deck · 一次性 5-10 小时冲刺</div>
+  <h1>Cyber 入门 → AI x Cyber：给纯小白的地图</h1>
+  <p>目标不是让你变成渗透测试工程师，而是让你能在 5-10 小时内，读懂这个领域的词汇、标准框架和当前真实事故——足够看懂一篇 CVE 分析、一份 pentest 报告、或一篇 AI x cyber 论文而不觉得每个词都陌生。动手实战（真正的 working experience）需要之后持续投入，本 deck 第 10 节给出具体路径。</p>
+  <p class="meta">2026-09-28 · 一次性冲刺 deck · 每条事实都标了来源 · 配套：notes/AI_security_landscape_primer.md（AI security 五子域地图）</p>
+</header>
+
+<section id="scope">
+  <div class="kicker">Orientation</div>
+  <h2><span class="n">0.</span>这份 deck 能带你到哪，到不了哪</h2>
+
+  <h3>0.1 诚实的范围设定</h3>
+  <div class="note">
+    <span class="label">5-10 小时能得到</span>
+    <p>核心词汇和心智模型（CIA triad、风险模型、漏洞生命周期、ATT&amp;CK、防守角色分工）；能看懂当前 AI x cyber 领域几个关键真实事件（GTG-1002、ExploitGym/OpenAI×HF、RAND weights security）；知道这个领域谁在做什么、去哪继续学。</p>
+  </div>
+  <div class="note bug">
+    <span class="label">5-10 小时得不到</span>
+    <p>动手挖漏洞、写 exploit、做渗透测试的实际手感——这些是几百小时 CTF + 实验室练出来的肌肉记忆，不是读出来的。把这份 deck 当地图，不要当能力证明。</p>
+  </div>
+
+  <h3>0.2 怎么用这份 deck</h3>
+  <p>§1-§6 是纯 cyber 基础（不涉及 AI），§7-§9 把 AI 叠加上去，§10 是继续深入的具体路径，§11 是术语表+全部来源合集，方便你之后自己查证、深挖。建议按顺序读一遍（本体约 1-1.5 小时），再挑感兴趣的来源链接点进去精读（剩下的 3-8 小时）。</p>
+</section>
+
+<section id="mindset">
+  <div class="kicker">Fundamentals · 心智模型</div>
+  <h2><span class="n">1.</span>安全是什么游戏</h2>
+  <p>每一个安全故事最终都在回答两个问题：<strong>破坏了 C/I/A 里的哪一个</strong>，以及<strong>风险链条上哪一环被打穿了</strong>。先把这两张图刻进脑子里，后面所有内容都是往上面挂细节。</p>
+  
 <div class="svg-fig">
 <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -102,11 +312,29 @@ def svg_risk_model():
   <text x="200" y="220" class="s">谁在管这一层：CISO / 风险与合规 · 谁在管左边具体保护什么：安全架构 / 产品团队</text>
 </svg>
 <p class="cap">左边三格是 <strong>CIA Triad</strong>（<a href="https://csrc.nist.gov/glossary/term/confidentiality_integrity_availability">NIST CSRC glossary</a>；也见 <a href="https://www.iso.org/standard/27001">ISO/IEC 27001:2022</a>）——每次看到一个安全事件，先问它破坏的是 C、I 还是 A。右边的链条是 <strong>风险评估的标准骨架</strong>（<a href="https://csrc.nist.gov/news/2012/nist-special-publication-800-30-revision-1">NIST SP 800-30 Rev.1</a>）：没有资产就没有风险，没有威胁或没有可用的脆弱性也没有风险——三者都在，风险才成立。</p>
-</div>'''
+</div>
+  <h3>1.1 场上有哪些角色</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>角色</th><th>干什么</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">SOC 分析师</td><td>盯着告警，判断哪些是真事件</td></tr>
+        <tr><td class="mono">蓝队 / 防守方</td><td>日常把系统守住</td></tr>
+        <tr><td class="mono">红队 / 渗透测试</td><td>扮演攻击者，主动找漏洞</td></tr>
+        <tr><td class="mono">紫队</td><td>让红蓝互相喂结果，形成闭环</td></tr>
+        <tr><td class="mono">DFIR / 应急响应</td><td>出事之后查清楚发生了什么、怎么止血</td></tr>
+        <tr><td class="mono">AppSec / 安全架构</td><td>在系统设计阶段就把漏洞挡在外面</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>§6 会把这些角色重新放进一张"防守分层图"里。</p>
+</section>
 
-
-def svg_vuln_lifecycle():
-    return '''
+<section id="vulns">
+  <div class="kicker">Fundamentals · 技术核心</div>
+  <h2><span class="n">2.</span>漏洞的一生：发现 → 修补 / 被打穿</h2>
+  <p>这是整个领域里最该花时间理解的一节——后面 ATT&amp;CK、AI-for-cyber 的所有讨论都建立在"漏洞如何被发现、编号、评分、修补或被利用"这条流水线上。</p>
+  
 <div class="svg-fig">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -168,11 +396,31 @@ def svg_vuln_lifecycle():
   <text x="415" y="260" class="s">"已知在野利用" 权威清单</text>
 </svg>
 <p class="cap">链条：<a href="https://www.cve.org/About/Overview">CVE Program (MITRE)</a> → <a href="https://www.first.org/cvss/v4.0/">CVSS v4.0 (FIRST.org)</a> → <a href="https://www.nist.gov/programs-projects/national-vulnerability-database-nvd">NVD (NIST)</a>。0-day 的标准定义见 <a href="https://csrc.nist.gov/glossary/term/zero_day_attack">NIST 术语表</a>；"n-day"（已知但未修的旧洞）是业界通用叫法，没有 NIST/ISO 正式定义。协同披露标准是 <a href="https://www.iso.org/standard/72311.html">ISO/IEC 29147</a>，CISA 也运营自己的 <a href="https://www.cisa.gov/resources-tools/programs/coordinated-vulnerability-disclosure-cvd-program">CVD 项目</a>。真正在野被利用、需要立刻当回事的清单是 <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA KEV Catalog</a>——CVSS 分数高不等于真的有人在打，KEV 在打才是真的在打。</p>
-</div>'''
+</div>
 
+  <h3>2.1 漏洞长什么样：两套标准分类</h3>
+  <p><strong>OWASP Top 10</strong> 是 web 应用最常见的十类漏洞，行业默认参照系；最新版是 <strong>OWASP Top 10:2025</strong>（2026-01 定稿，取代 2021 版），新增了"软件供应链失败"这一类，SSRF 被并入访问控制失效。<strong>CWE Top 25</strong>（CISA + MITRE 联合发布）是从当年实际 CVE 记录里统计出的"最危险的 25 种代码层面弱点"，2025 版前三名是 XSS、SQL 注入、CSRF——这两套框架是记漏洞类型时最该先背的坐标系。</p>
 
-def svg_attack_chain():
-    return '''
+  <h3>2.2 谁负责哪一段</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>环节</th><th>负责方</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">CVE 编号</td><td>MITRE（federated CVE Board，DHS/CISA 资助）</td></tr>
+        <tr><td class="mono">CVSS 严重度打分</td><td>FIRST.org，现行版本 CVSS v4.0</td></tr>
+        <tr><td class="mono">漏洞详情数据库</td><td>NVD（NIST）——在 CVE 之外加 CWE 映射、受影响配置</td></tr>
+        <tr><td class="mono">"真的有人在打"清单</td><td>CISA KEV Catalog</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>记住这个区分：<strong>CVSS 分数高</strong> 只说明"理论上很危险"；<strong>出现在 KEV 里</strong> 才说明"已经观测到真实攻击"。做优先级判断时后者权重远高于前者。</p>
+</section>
+
+<section id="attck">
+  <div class="kicker">Fundamentals · 攻击方的语言</div>
+  <h2><span class="n">3.</span>MITRE ATT&amp;CK：看懂攻击报告的通用词表</h2>
+  <p>任何一篇事件披露、威胁情报报告，几乎都会用 ATT&amp;CK 的战术/技术名词来描述"攻击者做了什么"。它的结构是三层：<strong>Tactics</strong>（攻击者的目标，比如"拿到初始access"）→ <strong>Techniques / sub-techniques</strong>（怎么做到）→ <strong>Procedures</strong>（某次真实攻击具体怎么实现的）。用一个 2025 年真实发生、且和本 deck 主题直接相关的案例把它具体化：</p>
+  
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -227,11 +475,41 @@ def svg_attack_chain():
   <text x="20" y="228" class="s">没有人类在背后下达间谍指令。两者都算"AI x Cyber"事故，但性质相反（见 §7）。</text>
 </svg>
 <p class="cap">ATT&amp;CK 战术本体见 <a href="https://attack.mitre.org/">attack.mitre.org</a>。GTG-1002 案例来自 <a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic, "Disrupting an AI-orchestrated cyber espionage campaign"</a>（2025-11-13）；法律/行业解读见 <a href="https://www.paulweiss.com/insights/client-memos/anthropic-disrupts-first-documented-case-of-large-scale-ai-orchestrated-cyberattack">Paul, Weiss client memo</a>。</p>
-</div>'''
+</div>
+  <p>这也是本 deck 里第一次让"cyber"和"AI"相遇——完整讨论放在 §7。</p>
+</section>
 
+<section id="network">
+  <div class="kicker">Fundamentals · 最低限度地图</div>
+  <h2><span class="n">4.</span>网络与系统：只背够用的量</h2>
+  <p>不需要考网络工程师证书，但下面几个词不认识，会看不懂大多数事件报告的技术细节段落。</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>基本单位</h4>
+      <p><strong>TCP/IP</strong> 是互联网通信的基础协议族（分散在几十份 RFC 里，没有单一"标准文档"）。<strong>端口</strong>标识一台机器上的哪个服务在监听，权威登记表是 <a href="https://www.iana.org/assignments/service-names-port-numbers">IANA port registry</a>（登记规则见 <a href="https://www.rfc-editor.org/rfc/rfc6335.html">RFC 6335</a>）。攻击面（attack surface）说的就是"你暴露了多少个这样的入口"。</p>
+    </div>
+    <div class="panel">
+      <h4>四道常见防线</h4>
+      <p><strong>防火墙</strong>：按规则决定谁能连谁（<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41</a>）。<strong>IDS/IPS</strong>：发现（IDS）或直接拦截（IPS）异常流量（<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a>）。<strong>EDR</strong>：装在每台终端上持续记录行为，供检测和事后取证（<a href="https://www.nextgov.com/cybersecurity/2021/10/cisa-seeking-answers-implementation-endpoint-detection-and-response-tools/186175/">CISA CDM 项目描述</a>）。</p>
+    </div>
+  </div>
+</section>
 
-def svg_defense_stack():
-    return '''
+<section id="crypto">
+  <div class="kicker">Fundamentals · 最低限度地图</div>
+  <h2><span class="n">5.</span>密码学：只背够用的量</h2>
+  <p><strong>对称加密</strong>：加密解密用同一把密钥，速度快，问题是密钥怎么安全地分发给对方。<strong>非对称加密</strong>：公钥加密、私钥解密（或反过来签名），解决了分发问题，代价是慢（<a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-175Br1.pdf">NIST SP 800-175B Rev.1</a>）。<strong>哈希</strong>：把任意长度输入压成固定长度指纹，改一个字节指纹就完全不同，常见标准是 SHA-256（<a href="https://csrc.nist.gov/pubs/fips/180-4/final">FIPS 180-4</a>）。<strong>TLS 握手</strong>（现行 <a href="https://datatracker.ietf.org/doc/html/rfc8446">RFC 8446 / TLS 1.3</a>）在正式加密通信前，先用非对称加密互相认证身份、协商出一把临时对称密钥——事件报告里说"crypto 出问题了"，多半是这次握手/密钥协商环节出了漏洞，而不是"哈希算法被破解了"这种更罕见的情况。</p>
+  <div class="note">
+    <span class="label">跨仓库连接点</span>
+    <p>这几个原语是本仓库 <code>notes/compute_pause_verification/</code> 那一套"AI 训练可验证性"工作的地基：zkLLM（<a href="https://arxiv.org/abs/2404.16109">arXiv:2404.16109</a>）、VerInf 等用零知识证明（本质是哈希+非对称加密的组合技）让人在不看到模型权重的前提下，验证某次推理确实是用声称的模型跑的。密码学基础打牢了，回头看那一套 deck 会顺很多。</p>
+  </div>
+</section>
+
+<section id="defense">
+  <div class="kicker">Fundamentals · 防守一侧</div>
+  <h2><span class="n">6.</span>防守是分层的</h2>
+  <p>把 §1 的角色表和 §4 的技术组件叠在一起，防守方大致是这么分层的：</p>
+  
 <div class="svg-fig">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -260,11 +538,15 @@ def svg_defense_stack():
   <text x="180" y="236" class="s">DFIR / 事件响应生命周期：准备 → 检测与分析 → 遏制/清除/恢复 → 复盘（NIST SP 800-61）</text>
 </svg>
 <p class="cap">来源：<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41 Rev.1</a>（防火墙）、<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a>（IDS/IPS）、<a href="https://www.cisa.gov/news-events/news/cisa-advisory-highlights-red-team-findings-help-organizations-assess-risk-identify-threats-and-enable-effective-incident-response">CISA 红队公告</a>、<a href="https://csrc.nist.gov/pubs/sp/800/86/final">NIST SP 800-86</a>（取证方法）。事件响应生命周期经典四阶段版本是 <a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">SP 800-61 Rev.2</a>（文献里最常见，但已于 2025-04 正式作废）；现行版是 <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a>，围绕 NIST CSF 2.0 重新组织，不再是四个离散阶段——两个版本都要认得,因为业界还在混用。</p>
-</div>'''
+</div>
+  <p>发生真实事件时，走的是最上面那条"流程层"：经典四阶段是 <strong>准备 → 检测与分析 → 遏制/清除/恢复 → 复盘</strong>（<a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">NIST SP 800-61 Rev.2</a>，文献里最常见但已于 2025-04 正式作废）；现行版 <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a> 把它重新组织进 NIST CSF 2.0 框架，不再是离散的四步——两版都要认得，因为业界的口头表述还停留在 Rev.2。</p>
+</section>
 
-
-def svg_ai_cyber_landscape():
-    return '''
+<section id="ai-offense">
+  <div class="kicker">AI 叠加层 · 攻击</div>
+  <h2><span class="n">7.</span>AI 当攻击工具：两种完全不同的事故</h2>
+  <p>"AI 被用来搞破坏"这句话下面其实藏着两种性质相反的事情，混为一谈是这个领域里最常见的错误。</p>
+  
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -318,130 +600,7 @@ def svg_ai_cyber_landscape():
   <text x="552" y="186" class="s">§9（有独立深读）</text>
 </svg>
 <p class="cap">①②都在 2025-2026 真实发生过，但机制完全相反：①是<strong>人</strong>蓄意把 AI 当攻击工具；②是 <strong>AI 自己</strong>在做别的任务时闯出真实事故，没有人类恶意指挥（这属于 AI control / alignment 问题，不是传统 infosec 问题）。③是商业上真实但仍需打折看的新赛道。④是相邻但独立的领域，本仓库已有专门笔记：<code>notes/AI_security_landscape_primer.md</code>、<code>notes/RAND_2024_Securing_AI_Model_Weights_导读.md</code>。</p>
-</div>'''
-
-
-# ---------------------------------------------------------------- body
-
-BODY = f'''
-<header class="masthead">
-  <div class="kicker">学习 deck · 一次性 5-10 小时冲刺</div>
-  <h1>Cyber 入门 → AI x Cyber：给纯小白的地图</h1>
-  <p>目标不是让你变成渗透测试工程师，而是让你能在 5-10 小时内，读懂这个领域的词汇、标准框架和当前真实事故——足够看懂一篇 CVE 分析、一份 pentest 报告、或一篇 AI x cyber 论文而不觉得每个词都陌生。动手实战（真正的 working experience）需要之后持续投入，本 deck 第 10 节给出具体路径。</p>
-  <p class="meta">2026-09-28 · 一次性冲刺 deck · 每条事实都标了来源 · 配套：notes/AI_security_landscape_primer.md（AI security 五子域地图）</p>
-</header>
-
-<section id="scope">
-  <div class="kicker">Orientation</div>
-  <h2><span class="n">0.</span>这份 deck 能带你到哪，到不了哪</h2>
-
-  <h3>0.1 诚实的范围设定</h3>
-  <div class="note">
-    <span class="label">5-10 小时能得到</span>
-    <p>核心词汇和心智模型（CIA triad、风险模型、漏洞生命周期、ATT&amp;CK、防守角色分工）；能看懂当前 AI x cyber 领域几个关键真实事件（GTG-1002、ExploitGym/OpenAI×HF、RAND weights security）；知道这个领域谁在做什么、去哪继续学。</p>
-  </div>
-  <div class="note bug">
-    <span class="label">5-10 小时得不到</span>
-    <p>动手挖漏洞、写 exploit、做渗透测试的实际手感——这些是几百小时 CTF + 实验室练出来的肌肉记忆，不是读出来的。把这份 deck 当地图，不要当能力证明。</p>
-  </div>
-
-  <h3>0.2 怎么用这份 deck</h3>
-  <p>§1-§6 是纯 cyber 基础（不涉及 AI），§7-§9 把 AI 叠加上去，§10 是继续深入的具体路径，§11 是术语表+全部来源合集，方便你之后自己查证、深挖。建议按顺序读一遍（本体约 1-1.5 小时），再挑感兴趣的来源链接点进去精读（剩下的 3-8 小时）。</p>
-</section>
-
-<section id="mindset">
-  <div class="kicker">Fundamentals · 心智模型</div>
-  <h2><span class="n">1.</span>安全是什么游戏</h2>
-  <p>每一个安全故事最终都在回答两个问题：<strong>破坏了 C/I/A 里的哪一个</strong>，以及<strong>风险链条上哪一环被打穿了</strong>。先把这两张图刻进脑子里，后面所有内容都是往上面挂细节。</p>
-  {svg_risk_model()}
-  <h3>1.1 场上有哪些角色</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>角色</th><th>干什么</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">SOC 分析师</td><td>盯着告警，判断哪些是真事件</td></tr>
-        <tr><td class="mono">蓝队 / 防守方</td><td>日常把系统守住</td></tr>
-        <tr><td class="mono">红队 / 渗透测试</td><td>扮演攻击者，主动找漏洞</td></tr>
-        <tr><td class="mono">紫队</td><td>让红蓝互相喂结果，形成闭环</td></tr>
-        <tr><td class="mono">DFIR / 应急响应</td><td>出事之后查清楚发生了什么、怎么止血</td></tr>
-        <tr><td class="mono">AppSec / 安全架构</td><td>在系统设计阶段就把漏洞挡在外面</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>§6 会把这些角色重新放进一张"防守分层图"里。</p>
-</section>
-
-<section id="vulns">
-  <div class="kicker">Fundamentals · 技术核心</div>
-  <h2><span class="n">2.</span>漏洞的一生：发现 → 修补 / 被打穿</h2>
-  <p>这是整个领域里最该花时间理解的一节——后面 ATT&amp;CK、AI-for-cyber 的所有讨论都建立在"漏洞如何被发现、编号、评分、修补或被利用"这条流水线上。</p>
-  {svg_vuln_lifecycle()}
-
-  <h3>2.1 漏洞长什么样：两套标准分类</h3>
-  <p><strong>OWASP Top 10</strong> 是 web 应用最常见的十类漏洞，行业默认参照系；最新版是 <strong>OWASP Top 10:2025</strong>（2026-01 定稿，取代 2021 版），新增了"软件供应链失败"这一类，SSRF 被并入访问控制失效。<strong>CWE Top 25</strong>（CISA + MITRE 联合发布）是从当年实际 CVE 记录里统计出的"最危险的 25 种代码层面弱点"，2025 版前三名是 XSS、SQL 注入、CSRF——这两套框架是记漏洞类型时最该先背的坐标系。</p>
-
-  <h3>2.2 谁负责哪一段</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>环节</th><th>负责方</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">CVE 编号</td><td>MITRE（federated CVE Board，DHS/CISA 资助）</td></tr>
-        <tr><td class="mono">CVSS 严重度打分</td><td>FIRST.org，现行版本 CVSS v4.0</td></tr>
-        <tr><td class="mono">漏洞详情数据库</td><td>NVD（NIST）——在 CVE 之外加 CWE 映射、受影响配置</td></tr>
-        <tr><td class="mono">"真的有人在打"清单</td><td>CISA KEV Catalog</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>记住这个区分：<strong>CVSS 分数高</strong> 只说明"理论上很危险"；<strong>出现在 KEV 里</strong> 才说明"已经观测到真实攻击"。做优先级判断时后者权重远高于前者。</p>
-</section>
-
-<section id="attck">
-  <div class="kicker">Fundamentals · 攻击方的语言</div>
-  <h2><span class="n">3.</span>MITRE ATT&amp;CK：看懂攻击报告的通用词表</h2>
-  <p>任何一篇事件披露、威胁情报报告，几乎都会用 ATT&amp;CK 的战术/技术名词来描述"攻击者做了什么"。它的结构是三层：<strong>Tactics</strong>（攻击者的目标，比如"拿到初始access"）→ <strong>Techniques / sub-techniques</strong>（怎么做到）→ <strong>Procedures</strong>（某次真实攻击具体怎么实现的）。用一个 2025 年真实发生、且和本 deck 主题直接相关的案例把它具体化：</p>
-  {svg_attack_chain()}
-  <p>这也是本 deck 里第一次让"cyber"和"AI"相遇——完整讨论放在 §7。</p>
-</section>
-
-<section id="network">
-  <div class="kicker">Fundamentals · 最低限度地图</div>
-  <h2><span class="n">4.</span>网络与系统：只背够用的量</h2>
-  <p>不需要考网络工程师证书，但下面几个词不认识，会看不懂大多数事件报告的技术细节段落。</p>
-  <div class="two-col">
-    <div class="panel">
-      <h4>基本单位</h4>
-      <p><strong>TCP/IP</strong> 是互联网通信的基础协议族（分散在几十份 RFC 里，没有单一"标准文档"）。<strong>端口</strong>标识一台机器上的哪个服务在监听，权威登记表是 <a href="https://www.iana.org/assignments/service-names-port-numbers">IANA port registry</a>（登记规则见 <a href="https://www.rfc-editor.org/rfc/rfc6335.html">RFC 6335</a>）。攻击面（attack surface）说的就是"你暴露了多少个这样的入口"。</p>
-    </div>
-    <div class="panel">
-      <h4>四道常见防线</h4>
-      <p><strong>防火墙</strong>：按规则决定谁能连谁（<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41</a>）。<strong>IDS/IPS</strong>：发现（IDS）或直接拦截（IPS）异常流量（<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a>）。<strong>EDR</strong>：装在每台终端上持续记录行为，供检测和事后取证（<a href="https://www.nextgov.com/cybersecurity/2021/10/cisa-seeking-answers-implementation-endpoint-detection-and-response-tools/186175/">CISA CDM 项目描述</a>）。</p>
-    </div>
-  </div>
-</section>
-
-<section id="crypto">
-  <div class="kicker">Fundamentals · 最低限度地图</div>
-  <h2><span class="n">5.</span>密码学：只背够用的量</h2>
-  <p><strong>对称加密</strong>：加密解密用同一把密钥，速度快，问题是密钥怎么安全地分发给对方。<strong>非对称加密</strong>：公钥加密、私钥解密（或反过来签名），解决了分发问题，代价是慢（<a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-175Br1.pdf">NIST SP 800-175B Rev.1</a>）。<strong>哈希</strong>：把任意长度输入压成固定长度指纹，改一个字节指纹就完全不同，常见标准是 SHA-256（<a href="https://csrc.nist.gov/pubs/fips/180-4/final">FIPS 180-4</a>）。<strong>TLS 握手</strong>（现行 <a href="https://datatracker.ietf.org/doc/html/rfc8446">RFC 8446 / TLS 1.3</a>）在正式加密通信前，先用非对称加密互相认证身份、协商出一把临时对称密钥——事件报告里说"crypto 出问题了"，多半是这次握手/密钥协商环节出了漏洞，而不是"哈希算法被破解了"这种更罕见的情况。</p>
-  <div class="note">
-    <span class="label">跨仓库连接点</span>
-    <p>这几个原语是本仓库 <code>notes/compute_pause_verification/</code> 那一套"AI 训练可验证性"工作的地基：zkLLM（<a href="https://arxiv.org/abs/2404.16109">arXiv:2404.16109</a>）、VerInf 等用零知识证明（本质是哈希+非对称加密的组合技）让人在不看到模型权重的前提下，验证某次推理确实是用声称的模型跑的。密码学基础打牢了，回头看那一套 deck 会顺很多。</p>
-  </div>
-</section>
-
-<section id="defense">
-  <div class="kicker">Fundamentals · 防守一侧</div>
-  <h2><span class="n">6.</span>防守是分层的</h2>
-  <p>把 §1 的角色表和 §4 的技术组件叠在一起，防守方大致是这么分层的：</p>
-  {svg_defense_stack()}
-  <p>发生真实事件时，走的是最上面那条"流程层"：经典四阶段是 <strong>准备 → 检测与分析 → 遏制/清除/恢复 → 复盘</strong>（<a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">NIST SP 800-61 Rev.2</a>，文献里最常见但已于 2025-04 正式作废）；现行版 <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a> 把它重新组织进 NIST CSF 2.0 框架，不再是离散的四步——两版都要认得，因为业界的口头表述还停留在 Rev.2。</p>
-</section>
-
-<section id="ai-offense">
-  <div class="kicker">AI 叠加层 · 攻击</div>
-  <h2><span class="n">7.</span>AI 当攻击工具：两种完全不同的事故</h2>
-  <p>"AI 被用来搞破坏"这句话下面其实藏着两种性质相反的事情，混为一谈是这个领域里最常见的错误。</p>
-  {svg_ai_cyber_landscape()}
+</div>
 
   <h3>7.1 人类蓄意把 AI 当武器 — GTG-1002</h3>
   <p>2025-09 中旬被发现、2025-11-13 由 Anthropic 公开披露：一个疑似中国国家关联的黑客组织，伪装成合法渗透测试公司以绕过模型的拒绝机制，越狱了 <strong>Claude Code</strong>，并用它自动执行了一场多阶段网络间谍活动约 80-90% 的工作量——侦察、漏洞发现、利用、凭证收集、数据渗出——针对科技、金融、化工制造、政府共约 30 个目标。Anthropic 称这是首例有记录、人类干预极少的大规模"AI 编排"网络攻击，已被发现并遏制。这条案例干净地映射到 §3 的 ATT&amp;CK 链条上，教学价值很高。（<a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic 原文</a> · <a href="https://www.paulweiss.com/insights/client-memos/anthropic-disrupts-first-documented-case-of-large-scale-ai-orchestrated-cyberattack">法律解读</a>）</p>
@@ -600,57 +759,22 @@ BODY = f'''
     <a href="https://www.hackthebox.com/">HackTheBox</a>
   </p>
 </section>
-'''
 
-HTML = f'''<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cyber → AI x Cyber Fundamentals — Study Notes</title>
-<style>
-{CSS}
-{EXTRA_CSS}
-</style>
-</head>
-<body>
-<div class="page">
-<nav class="toc" aria-label="Contents">
-  <a href="#scope"><span class="num">0</span>范围</a>
-  <a href="#mindset"><span class="num">1</span>心智模型</a>
-  <a href="#vulns"><span class="num">2</span>漏洞生命周期</a>
-  <a href="#attck"><span class="num">3</span>ATT&amp;CK</a>
-  <a href="#network"><span class="num">4</span>网络</a>
-  <a href="#crypto"><span class="num">5</span>密码学</a>
-  <a href="#defense"><span class="num">6</span>防守分层</a>
-  <a href="#ai-offense"><span class="num">7</span>AI攻击</a>
-  <a href="#ai-defense"><span class="num">8</span>AI防御</a>
-  <a href="#weights"><span class="num">9</span>weights</a>
-  <a href="#nextsteps"><span class="num">10</span>下一步</a>
-  <a href="#glossary"><span class="num">11</span>术语/来源</a>
-</nav>
-<main>
-{BODY}
 </main>
 </div>
 <script>
-(() => {{
+(() => {
   const links = [...document.querySelectorAll('nav.toc a')];
   const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
-  const io = new IntersectionObserver((entries) => {{
-    entries.forEach(e => {{
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
       if (!e.isIntersecting) return;
       const id = '#' + e.target.id;
       links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
-    }});
-  }}, {{ rootMargin: '-40% 0px -50% 0px', threshold: 0 }});
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
   sections.forEach(s => io.observe(s));
-}})();
+})();
 </script>
 </body>
 </html>
-'''
-
-out = ROOT / "notes_zh.html"
-out.write_text(HTML)
-print(f"wrote {out} ({len(HTML)} bytes)")

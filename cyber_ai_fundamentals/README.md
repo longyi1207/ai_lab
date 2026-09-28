@@ -1,27 +1,25 @@
-# Cyber → AI x Cyber fundamentals — a from-zero primer
+# Cyber -> AI x Cyber fundamentals - a from-zero primer
 
 A sourced primer for going from zero cybersecurity background to literacy in "AI x Cyber":
 core infosec vocabulary and standard frameworks (CIA triad, OWASP/CWE, CVE/CVSS/NVD, MITRE
-ATT&CK, NIST incident-response lifecycle), then two real 2025–2026 cases where AI and cyber
-actually intersected — Anthropic's disclosed AI-orchestrated espionage campaign (GTG-1002)
-and the ExploitGym/OpenAI×Hugging Face incident — plus where AI-for-defense and AI-model-weights
-security currently stand.
-
-**Note on language:** the deck itself is written in Chinese (the author's primary language for
-personal study notes); every factual claim is backed by an English-language primary source
-(NIST, MITRE, CISA, FIRST.org, RAND, Anthropic, OpenAI, Hugging Face, UK AISI) linked inline, so
-the sourcing is checkable even without reading the prose.
+ATT&CK, NIST incident-response lifecycle), then a full case study of the two real 2025-2026
+incidents where AI and cyber actually intersected - Anthropic's disclosed AI-orchestrated
+espionage campaign (GTG-1002) and the ExploitGym/OpenAI x Hugging Face incident - plus where
+AI-for-defense and AI-model-weights security currently stand.
 
 ## Read
 
-- **[`notes.pdf`](notes.pdf)** — print-ready deck
-- **[`notes.html`](notes.html)** — same content, open locally
+- **[`notes.pdf`](notes.pdf)** / **[`notes.html`](notes.html)** - English edition (start here)
+- **[`notes_zh.pdf`](notes_zh.pdf)** / **[`notes_zh.html`](notes_zh.html)** - Chinese edition (the author's primary study-notes language; content matches the English edition section-for-section, maintained in parallel rather than auto-translated)
+- **[`deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)** - a much fuller GTG-1002 case study than either deck has room for: Anthropic's complete six-phase task breakdown, the AI-hallucination-in-offensive-ops caveat, independent security researchers' skepticism (Kevin Beaumont, Daniel Card, Ali Alkhatib - the report published no IoCs), and Anthropic's September 2026 follow-up showing this operating model has since spread to at least five more named threat groups. Written in Chinese, but every source it cites is an English-language primary, linked inline.
+- **[`reports/Anthropic_2025-11_GTG-1002_full_report.pdf`](reports/Anthropic_2025-11_GTG-1002_full_report.pdf)** - the primary source, saved locally for traceability.
 
 ## Rebuild
 
 ```bash
-python3 build_notes.py
-# then print HTML → PDF, e.g. Chrome headless:
+python3 build_notes_en.py   # -> notes.html (English)
+python3 build_notes.py      # -> notes_zh.html (Chinese)
+# then print HTML -> PDF, e.g. Chrome headless:
 # google-chrome --headless --disable-gpu --no-pdf-header-footer \
 #   --print-to-pdf=notes.pdf "file://$(pwd)/notes.html"
 ```
@@ -31,15 +29,16 @@ Depends on: `_notes_base.css`.
 ## Scope
 
 **This is a reading/orientation primer, not a hands-on-skill project.** It says so explicitly in
-its own §0: sufficient to read a CVE writeup, a pentest report, or an AI x cyber paper without
-being lost; not sufficient for actual exploit-writing or penetration-testing skill, which the
-deck's own closing section (§10) points toward (picoCTF → OverTheWire → TryHackMe → HackTheBox,
-CompTIA Security+ → OSCP).
+its own opening section: sufficient to read a CVE writeup, a pentest report, or an AI x cyber
+paper without being lost; not sufficient for actual exploit-writing or penetration-testing skill,
+which the deck's own closing section points toward (picoCTF -> OverTheWire -> TryHackMe ->
+HackTheBox, CompTIA Security+ -> OSCP).
 
-Every claim about a specific benchmark, incident, or organization was verified against a primary
-source before being included (and in two cases — the ExploitGym/CVE-Bench name conflation, and
-the "single agent, months" framing of Anthropic's smart-contract exploit study — corrected from a
-looser secondary-source framing).
+Every claim about a specific benchmark, incident, or organization was checked against a primary
+source before being included. Two corrections worth flagging: the ExploitGym/CVE-Bench naming
+conflation common in secondary sources (they're different benchmarks), and the "single agent,
+months of work" framing of Anthropic's smart-contract exploit study (it's a cross-model benchmark
+result, not a single long-running agent).
 
 ## License
 

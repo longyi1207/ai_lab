@@ -97,13 +97,22 @@ judge, paired `delta_vs_solo`); `fake_toy` is the offline reference. Offline tes
 Not a hands-on project like the others above — a sourced reading/orientation deck for going
 from zero cybersecurity background to literacy: CIA triad, OWASP/CWE, the CVE→CVSS→NVD→KEV
 vulnerability lifecycle, MITRE ATT&CK, NIST incident-response — then two real 2025–2026 cases
-where AI and cyber actually intersected: Anthropic's disclosed AI-orchestrated espionage
-campaign (GTG-1002) and the ExploitGym/OpenAI×Hugging Face incident, framed as two structurally
-opposite failure modes (a human weaponizing a jailbroken model vs. a model's own eval-time
-reward hacking spilling into real infrastructure). Deck text is in Chinese; every factual claim
-cites an English-language primary source (NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/
-Hugging Face/UK AISI) inline. Start with
-[`cyber_ai_fundamentals/notes.pdf`](cyber_ai_fundamentals/notes.pdf).
+where AI and cyber actually intersected, framed as two structurally opposite failure modes: a
+human weaponizing a jailbroken model (Anthropic's disclosed AI-orchestrated espionage campaign,
+GTG-1002) vs. a model's own eval-time reward hacking spilling into real infrastructure
+(ExploitGym/OpenAI×Hugging Face). Every factual claim cites an English-language primary source
+(NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/Hugging Face/UK AISI) inline. Published in
+parallel English and Chinese editions — start with
+[`cyber_ai_fundamentals/notes.pdf`](cyber_ai_fundamentals/notes.pdf) (English) or
+[`notes_zh.pdf`](cyber_ai_fundamentals/notes_zh.pdf) (Chinese).
+
+The GTG-1002 case gets a full standalone deep-dive beyond what either deck has room for —
+Anthropic's complete six-phase task breakdown, the AI-hallucination-in-offensive-ops caveat,
+independent security researchers' skepticism (the report published no IoCs), and a September
+2026 follow-up showing the same operating model has since spread to at least five more named
+threat groups. See
+[`cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)
+(Chinese prose, English-language sources linked throughout).
 
 ## License
 

@@ -1,176 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cyber &rarr; AI x Cyber Fundamentals — Study Notes</title>
-<style>
+#!/usr/bin/env python3
+"""Build notes_en.html — English edition of the Cyber -> AI x Cyber fundamentals deck."""
+from pathlib import Path
 
-  :root {
-    --bg: #fdfcfb;
-    --ink: #1a1a18;
-    --ink-dim: #55524a;
-    --ink-faint: #8a867a;
-    --accent: #9a5b12;
-    --rule: rgba(26,26,24,0.13);
-    --rule-soft: rgba(26,26,24,0.07);
-    --code-bg: #f3f0ea;
-    --code-border: rgba(26,26,24,0.10);
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) {
-      --bg: #171613;
-      --ink: #eae6dd;
-      --ink-dim: #a9a396;
-      --ink-faint: #746f63;
-      --accent: #d99a49;
-      --rule: rgba(234,230,221,0.13);
-      --rule-soft: rgba(234,230,221,0.07);
-      --code-bg: #100f0d;
-      --code-border: rgba(234,230,221,0.10);
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #171613; --ink: #eae6dd; --ink-dim: #a9a396; --ink-faint: #746f63;
-    --accent: #d99a49; --rule: rgba(234,230,221,0.13); --rule-soft: rgba(234,230,221,0.07);
-    --code-bg: #100f0d; --code-border: rgba(234,230,221,0.10);
-    color-scheme: dark;
-  }
-  :root[data-theme="light"] {
-    --bg: #fdfcfb; --ink: #1a1a18; --ink-dim: #55524a; --ink-faint: #8a867a;
-    --accent: #9a5b12; --rule: rgba(26,26,24,0.13); --rule-soft: rgba(26,26,24,0.07);
-    --code-bg: #f3f0ea; --code-border: rgba(26,26,24,0.10);
-    color-scheme: light;
-  }
+ROOT = Path(__file__).resolve().parent
+CSS = (ROOT / "_notes_base.css").read_text()
 
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: 16.5px;
-  }
-  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; }
-
-  h1, h2, h3, h4 { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; font-weight: 600; text-wrap: balance; margin: 0; }
-  p { text-wrap: pretty; margin: 0 0 14px; }
-  a { color: var(--accent); }
-  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* layout: sidebar + content */
-  .page { display: flex; max-width: 1180px; margin: 0 auto; }
-  nav.toc {
-    width: 200px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    padding: 48px 0 48px 28px;
-    height: 100vh;
-    overflow-y: auto;
-  }
-  nav.toc .num { color: var(--ink-faint); margin-right: 6px; }
-  nav.toc a {
-    display: block;
-    font-size: 12.5px;
-    color: var(--ink-faint);
-    text-decoration: none;
-    padding: 4px 0;
-    border-left: 2px solid transparent;
-    padding-left: 10px;
-    margin-left: -12px;
-    line-height: 1.5;
-  }
-  nav.toc a.active { color: var(--ink); border-left-color: var(--accent); }
-  nav.toc a:hover { color: var(--ink); }
-  @media (max-width: 880px) { nav.toc { display: none; } }
-
-  main { flex: 1; min-width: 0; padding: 56px 32px 120px; max-width: 760px; }
-  @media (max-width: 880px) { main { padding: 40px 20px 100px; } }
-
-  section { padding-top: 64px; margin-top: -8px; border-top: 1px solid var(--rule-soft); }
-  section:first-of-type { border-top: none; padding-top: 0; }
-
-  .kicker { font-size: 12.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-  h2 { font-size: 24px; line-height: 1.3; margin-bottom: 6px; }
-  h2 .n { color: var(--accent); margin-right: 10px; }
-  .dek { font-size: 15px; color: var(--ink-faint); margin-bottom: 28px; font-family: system-ui, sans-serif; }
-  h3 { font-size: 15.5px; margin: 30px 0 10px; color: var(--ink); }
-
-  section p, section li { color: var(--ink-dim); line-height: 1.68; font-size: 16px; max-width: 66ch; }
-  section ul, section ol { margin: 0 0 14px; padding-left: 22px; }
-  section li { margin-bottom: 5px; }
-  strong { color: var(--ink); font-weight: 600; }
-  code:not(pre code) {
-    font-family: ui-monospace, "SF Mono", monospace;
-    font-size: 0.88em;
-    background: var(--code-bg);
-    border: 1px solid var(--code-border);
-    border-radius: 4px;
-    padding: 1px 5px;
-    color: var(--ink);
-  }
-
-  /* code blocks */
-  pre {
-    margin: 16px 0 20px;
-    padding: 16px 18px;
-    background: var(--code-bg);
-    border: 1px solid var(--code-border);
-    border-radius: 6px;
-    overflow-x: auto;
-    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.62;
-  }
-  pre code { color: var(--ink-dim); }
-  pre .kw { color: var(--accent); }
-  pre .cm { color: var(--ink-faint); font-style: italic; }
-  pre .out { color: var(--ink); }
-  .code-cap { font-size: 12px; color: var(--ink-faint); margin: -14px 0 20px; font-family: ui-monospace, monospace; }
-
-  /* figures */
-  figure { margin: 24px 0 28px; }
-  figure img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 4px; }
-  figcaption { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; line-height: 1.5; }
-  figcaption .src { text-decoration: none; border-bottom: 1px dotted var(--ink-faint); }
-
-  /* remark / note callouts — restrained, text-led not box-led */
-  .note { margin: 20px 0; padding-left: 16px; border-left: 2px solid var(--rule); }
-  .note .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-bottom: 4px; display: block; }
-  .note p:last-child { margin-bottom: 0; }
-  .note.bug .label { color: var(--accent); }
-
-  /* small data table */
-  .tbl { overflow-x: auto; margin: 18px 0 24px; }
-  table { border-collapse: collapse; font-size: 14px; width: 100%; }
-  th, td { text-align: left; padding: 7px 16px 7px 0; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
-  th { color: var(--ink-faint); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
-  td { color: var(--ink-dim); }
-  td.mono, th.mono { font-family: ui-monospace, monospace; }
-
-  /* simple inline diagram bits (no long svg paths, just css) */
-  .flow { display: flex; align-items: center; gap: 10px; margin: 22px 0; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 13px; }
-  .flow .box { border: 1px solid var(--rule-strong, var(--rule)); padding: 8px 12px; border-radius: 5px; color: var(--ink-dim); background: var(--code-bg); }
-  .flow .arrow { color: var(--ink-faint); }
-
-  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 20px 0; }
-
-  header.masthead { padding-bottom: 40px; margin-bottom: 8px; }
-  header.masthead h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; margin-bottom: 14px; }
-  header.masthead p { font-size: 16px; color: var(--ink-dim); max-width: 60ch; }
-  header.masthead .meta { font-size: 12.5px; color: var(--ink-faint); margin-top: 18px; font-family: ui-monospace, monospace; }
-
-  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
-
-
+EXTRA_CSS = """
   /* SVG diagrams */
   .svg-fig {
     margin: 24px 0 28px;
@@ -211,57 +46,12 @@
     figure, .svg-fig { break-inside: avoid; }
     a { color: var(--ink); text-decoration: none; }
   }
+"""
 
-</style>
-</head>
-<body>
-<div class="page">
-<nav class="toc" aria-label="Contents">
-  <a href="#scope"><span class="num">0</span>Scope</a>
-  <a href="#mindset"><span class="num">1</span>Mental model</a>
-  <a href="#vulns"><span class="num">2</span>Vuln lifecycle</a>
-  <a href="#attck"><span class="num">3</span>ATT&amp;CK</a>
-  <a href="#network"><span class="num">4</span>Network</a>
-  <a href="#crypto"><span class="num">5</span>Crypto</a>
-  <a href="#defense"><span class="num">6</span>Defense layers</a>
-  <a href="#ai-offense"><span class="num">7</span>AI offense</a>
-  <a href="#ai-defense"><span class="num">8</span>AI defense</a>
-  <a href="#weights"><span class="num">9</span>Weights</a>
-  <a href="#nextsteps"><span class="num">10</span>Next steps</a>
-  <a href="#glossary"><span class="num">11</span>Glossary/sources</a>
-</nav>
-<main>
+# ---------------------------------------------------------------- diagrams
 
-<header class="masthead">
-  <div class="kicker">Study deck · one-time 5-10 hour sprint</div>
-  <h1>Cyber fundamentals &rarr; AI x Cyber: a map for absolute beginners</h1>
-  <p>The goal isn't to turn you into a penetration tester — it's to get you, in 5-10 hours, to the point where you know this field's vocabulary, standard frameworks, and current real incidents well enough to read a CVE writeup, a pentest report, or an AI x cyber paper without every term being unfamiliar. Actual hands-on skill (real working experience) takes ongoing practice afterward; §10 gives a concrete path.</p>
-  <p class="meta">2026-09-28 · one-time sprint deck · every claim is sourced · companion: notes/AI_security_landscape_primer.md (the five-subfield map of AI security)</p>
-</header>
-
-<section id="scope">
-  <div class="kicker">Orientation</div>
-  <h2><span class="n">0.</span>What this deck gets you, and what it doesn't</h2>
-
-  <h3>0.1 An honest scope statement</h3>
-  <div class="note">
-    <span class="label">What 5-10 hours gets you</span>
-    <p>Core vocabulary and mental models (the CIA triad, the risk model, the vulnerability lifecycle, ATT&amp;CK, how defense roles divide up); the ability to follow a few key real incidents in current AI x cyber (GTG-1002, ExploitGym/OpenAI x HF, RAND weights security); and a sense of who's doing what in this field and where to go next.</p>
-  </div>
-  <div class="note bug">
-    <span class="label">What 5-10 hours does NOT get you</span>
-    <p>The actual feel of finding vulnerabilities, writing exploits, or doing penetration testing — that's muscle memory built over hundreds of hours of CTFs and labs, not something you read your way into. Treat this deck as a map, not a credential.</p>
-  </div>
-
-  <h3>0.2 How to use this deck</h3>
-  <p>§1-§6 are pure cyber fundamentals (no AI yet); §7-§9 layer AI on top; §10 is a concrete path for going deeper; §11 is a glossary plus every source, for you to verify and dig into later. Suggested approach: read it straight through once (about 1-1.5 hours), then follow whichever source links interest you most (the remaining 3-8 hours).</p>
-</section>
-
-<section id="mindset">
-  <div class="kicker">Fundamentals · mental model</div>
-  <h2><span class="n">1.</span>What game security is actually playing</h2>
-  <p>Every security story ultimately answers two questions: <strong>which of C/I/A did it break</strong>, and <strong>which link in the risk chain got exploited</strong>. Get these two diagrams into your head first; everything after this is detail hung on that frame.</p>
-  
+def svg_risk_model():
+    return '''
 <div class="svg-fig">
 <svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -314,29 +104,11 @@
   <text x="200" y="238" class="s">Who owns what's protected: security architecture / product</text>
 </svg>
 <p class="cap">The three boxes on the left are the <strong>CIA Triad</strong> (<a href="https://csrc.nist.gov/glossary/term/confidentiality_integrity_availability">NIST CSRC glossary</a>; also <a href="https://www.iso.org/standard/27001">ISO/IEC 27001:2022</a>) — every time you see a security incident, ask which of C, I, or A it broke. The chain on the right is the <strong>standard skeleton of risk assessment</strong> (<a href="https://csrc.nist.gov/news/2012/nist-special-publication-800-30-revision-1">NIST SP 800-30 Rev.1</a>): no asset means no risk; no threat, or no exploitable vulnerability, also means no risk — risk only exists when all three are present.</p>
-</div>
-  <h3>1.1 Who's on the field</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Role</th><th>What they do</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">SOC analyst</td><td>Watches alerts, decides which are real incidents</td></tr>
-        <tr><td class="mono">Blue team / defenders</td><td>Keeps the system safe day to day</td></tr>
-        <tr><td class="mono">Red team / pentest</td><td>Plays the attacker, proactively finds gaps</td></tr>
-        <tr><td class="mono">Purple team</td><td>Feeds red and blue's results back into each other</td></tr>
-        <tr><td class="mono">DFIR / incident response</td><td>Figures out what happened and stops the bleeding, after the fact</td></tr>
-        <tr><td class="mono">AppSec / security architecture</td><td>Keeps vulnerabilities out at the design stage</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>§6 puts these roles back into a single "defense-in-layers" diagram.</p>
-</section>
+</div>'''
 
-<section id="vulns">
-  <div class="kicker">Fundamentals · the technical core</div>
-  <h2><span class="n">2.</span>The life of a vulnerability: discovery &rarr; patched / exploited</h2>
-  <p>This is the section most worth your time in the whole field — everything later about ATT&amp;CK and AI-for-cyber rests on this pipeline of "how a vulnerability gets found, numbered, scored, patched, or exploited."</p>
-  
+
+def svg_vuln_lifecycle():
+    return '''
 <div class="svg-fig">
 <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -398,32 +170,12 @@
   <text x="415" y="254" class="t">CISA KEV Catalog</text>
   <text x="415" y="272" class="s">the authoritative "known exploited" list</text>
 </svg>
-<p class="cap">Chain: <a href="https://www.cve.org/About/Overview">CVE Program (MITRE)</a> &rarr; <a href="https://www.first.org/cvss/v4.0/">CVSS v4.0 (FIRST.org)</a> &rarr; <a href="https://www.nist.gov/programs-projects/national-vulnerability-database-nvd">NVD (NIST)</a>. The standard definition of a 0-day is in the <a href="https://csrc.nist.gov/glossary/term/zero_day_attack">NIST glossary</a>; "n-day" (a known but unpatched old vuln) is common industry usage with no formal NIST/ISO definition. Coordinated disclosure's standard is <a href="https://www.iso.org/standard/72311.html">ISO/IEC 29147</a>; CISA also runs its own <a href="https://www.cisa.gov/resources-tools/programs/coordinated-vulnerability-disclosure-cvd-program">CVD program</a>. The list of what's actually being exploited right now, and needs to be treated as urgent, is the <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA KEV Catalog</a> — a high CVSS score means "theoretically dangerous"; appearing in KEV means "someone is actually exploiting this."</p>
-</div>
+<p class="cap">Chain: <a href="https://www.cve.org/About/Overview">CVE Program (MITRE)</a> &rarr; <a href="https://www.first.org/cvss/v4.0/">CVSS v4.0 (FIRST.org)</a> &rarr; <a href="https://www.nist.gov/programs-projects/national-vulnerability-database-nvd">NVD (NIST)</a>. The standard definition of a 0-day is in the <a href="https://csrc.nist.gov/glossary/term/zero_day_attack">NIST glossary</a>; "n-day" (a known but unpatched old vuln) is common industry usage with no formal NIST/ISO definition. Coordinated disclosure\'s standard is <a href="https://www.iso.org/standard/72311.html">ISO/IEC 29147</a>; CISA also runs its own <a href="https://www.cisa.gov/resources-tools/programs/coordinated-vulnerability-disclosure-cvd-program">CVD program</a>. The list of what\'s actually being exploited right now, and needs to be treated as urgent, is the <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA KEV Catalog</a> — a high CVSS score means "theoretically dangerous"; appearing in KEV means "someone is actually exploiting this."</p>
+</div>'''
 
-  <h3>2.1 What a vulnerability looks like: two standard taxonomies</h3>
-  <p>The <strong>OWASP Top 10</strong> is the ten most common web-application vulnerability classes, the industry's default reference frame; the current version is <strong>OWASP Top 10:2025</strong> (finalized 2026-01, superseding the 2021 list), which added a "software supply chain failures" category and folded SSRF into broken access control. The <strong>CWE Top 25</strong> (jointly published by CISA and MITRE) is the "25 most dangerous code-level weaknesses," statistically derived from that year's actual CVE records — the 2025 edition's top three are XSS, SQL injection, and CSRF. These two frameworks are the coordinate system worth memorizing first for vulnerability types.</p>
 
-  <h3>2.2 Who owns which step</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Step</th><th>Owner</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">CVE numbering</td><td>MITRE (a federated CVE Board, funded by DHS/CISA)</td></tr>
-        <tr><td class="mono">CVSS severity score</td><td>FIRST.org, current version CVSS v4.0</td></tr>
-        <tr><td class="mono">Vulnerability detail database</td><td>NVD (NIST) — adds CWE mapping and affected-configuration data on top of the CVE</td></tr>
-        <tr><td class="mono">The "someone's actually exploiting this" list</td><td>CISA KEV Catalog</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>Remember this distinction: a <strong>high CVSS score</strong> only means "theoretically dangerous"; <strong>appearing in KEV</strong> means "real attacks have actually been observed." When triaging priority, the latter should weigh far more than the former.</p>
-</section>
-
-<section id="attck">
-  <div class="kicker">Fundamentals · the attacker's vocabulary</div>
-  <h2><span class="n">3.</span>MITRE ATT&amp;CK: the common language of attack reports</h2>
-  <p>Nearly every incident disclosure or threat-intel report describes "what the attacker did" using ATT&amp;CK's tactic/technique vocabulary. Its structure has three layers: <strong>Tactics</strong> (the attacker's goal, e.g. "get initial access") &rarr; <strong>Techniques / sub-techniques</strong> (how) &rarr; <strong>Procedures</strong> (how one real attack actually implemented it). Here's a real 2025 case, directly relevant to this deck's subject, that makes it concrete:</p>
-  
+def svg_attack_chain():
+    return '''
 <div class="svg-fig">
 <svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -480,41 +232,11 @@
   <text x="20" y="248" class="s">with no human issuing espionage orders. Both are real "AI x Cyber" incidents, opposite in kind (see §7).</text>
 </svg>
 <p class="cap">The ATT&amp;CK tactic taxonomy itself: <a href="https://attack.mitre.org/">attack.mitre.org</a>. The GTG-1002 case is from <a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic, "Disrupting an AI-orchestrated cyber espionage campaign"</a> (2025-11-13); legal/industry read: <a href="https://www.paulweiss.com/insights/client-memos/anthropic-disrupts-first-documented-case-of-large-scale-ai-orchestrated-cyberattack">Paul, Weiss client memo</a>.</p>
-</div>
-  <p>This is also the first place in this deck where "cyber" and "AI" actually meet — the full discussion is in §7.</p>
-</section>
+</div>'''
 
-<section id="network">
-  <div class="kicker">Fundamentals · minimum viable map</div>
-  <h2><span class="n">4.</span>Networks and systems: only as much as you need</h2>
-  <p>You don't need a networking certification, but not knowing the terms below will leave you lost in the technical-detail paragraphs of most incident reports.</p>
-  <div class="two-col">
-    <div class="panel">
-      <h4>The basic unit</h4>
-      <p><strong>TCP/IP</strong> is the underlying protocol family for internet communication (spread across dozens of RFCs, with no single "standard document"). A <strong>port</strong> identifies which service on a machine is listening; the authoritative registry is the <a href="https://www.iana.org/assignments/service-names-port-numbers">IANA port registry</a> (registration rules in <a href="https://www.rfc-editor.org/rfc/rfc6335.html">RFC 6335</a>). "Attack surface" just means "how many of these entry points you're exposing."</p>
-    </div>
-    <div class="panel">
-      <h4>Four common lines of defense</h4>
-      <p><strong>Firewall</strong>: decides who can connect to whom by rule (<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41</a>). <strong>IDS/IPS</strong>: detects (IDS) or directly blocks (IPS) anomalous traffic (<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a>). <strong>EDR</strong>: installed on every endpoint, continuously logging behavior for detection and later forensics (<a href="https://www.nextgov.com/cybersecurity/2021/10/cisa-seeking-answers-implementation-endpoint-detection-and-response-tools/186175/">CISA's CDM program description</a>).</p>
-    </div>
-  </div>
-</section>
 
-<section id="crypto">
-  <div class="kicker">Fundamentals · minimum viable map</div>
-  <h2><span class="n">5.</span>Cryptography: only as much as you need</h2>
-  <p><strong>Symmetric encryption</strong>: one key for both encrypting and decrypting — fast, but the problem is how to safely hand that key to the other party. <strong>Asymmetric encryption</strong>: public key encrypts, private key decrypts (or signs, in reverse) — solves distribution, at the cost of speed (<a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-175Br1.pdf">NIST SP 800-175B Rev.1</a>). <strong>Hashing</strong>: compresses arbitrary-length input into a fixed-length fingerprint; change one byte and the fingerprint is completely different — the common standard is SHA-256 (<a href="https://csrc.nist.gov/pubs/fips/180-4/final">FIPS 180-4</a>). The <strong>TLS handshake</strong> (current version <a href="https://datatracker.ietf.org/doc/html/rfc8446">RFC 8446 / TLS 1.3</a>) uses asymmetric crypto to authenticate both parties and negotiate a temporary symmetric key before real encrypted communication starts — when an incident report says "the crypto broke," it's usually a flaw in this handshake/key-exchange step, not the much rarer case of "the hash algorithm itself got broken."</p>
-  <div class="note">
-    <span class="label">A cross-repo connection point</span>
-    <p>These primitives are the foundation of this repo's own <code>notes/compute_pause_verification/</code> work on "verifiable AI training": zkLLM (<a href="https://arxiv.org/abs/2404.16109">arXiv:2404.16109</a>), VerInf, and similar work use zero-knowledge proofs (essentially a combination of hashing and asymmetric crypto) to let someone verify that a given inference really did run on the claimed model, without ever seeing the model's weights. Get these crypto fundamentals solid and that other deck reads a lot more smoothly.</p>
-  </div>
-</section>
-
-<section id="defense">
-  <div class="kicker">Fundamentals · the defense side</div>
-  <h2><span class="n">6.</span>Defense is layered</h2>
-  <p>Stack §1's role table on top of §4's technical components, and defenders roughly layer like this:</p>
-  
+def svg_defense_stack():
+    return '''
 <div class="svg-fig">
 <svg viewBox="0 0 720 296" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -543,16 +265,12 @@
   <text x="180" y="236" class="s">DFIR lifecycle: Preparation &rarr; Detection &amp; Analysis &rarr;</text>
   <text x="180" y="254" class="s">Containment/Eradication/Recovery &rarr; Post-incident (NIST SP 800-61)</text>
 </svg>
-<p class="cap">Sources: <a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41 Rev.1</a> (firewalls), <a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a> (IDS/IPS), <a href="https://www.cisa.gov/news-events/news/cisa-advisory-highlights-red-team-findings-help-organizations-assess-risk-identify-threats-and-enable-effective-incident-response">CISA red-team advisory</a>, <a href="https://csrc.nist.gov/pubs/sp/800/86/final">NIST SP 800-86</a> (forensic methods). The classic four-phase version of the incident-response lifecycle is <a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">SP 800-61 Rev.2</a> (the one you'll see everywhere in the literature, though formally withdrawn 2025-04); the current version, <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a>, reorganizes it around NIST CSF 2.0 rather than four discrete steps — know both, because industry talk still defaults to Rev.2's language.</p>
-</div>
-  <p>When a real incident happens, it's the top "process layer" that runs: the classic four phases are <strong>Preparation &rarr; Detection &amp; Analysis &rarr; Containment/Eradication/Recovery &rarr; Post-incident</strong> (<a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">NIST SP 800-61 Rev.2</a>, the version you'll see most often in the literature, even though it was formally withdrawn 2025-04); the current version, <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a>, reorganizes this into the NIST CSF 2.0 framework and is no longer four discrete steps — know both versions, because industry's spoken shorthand still defaults to Rev.2.</p>
-</section>
+<p class="cap">Sources: <a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41 Rev.1</a> (firewalls), <a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a> (IDS/IPS), <a href="https://www.cisa.gov/news-events/news/cisa-advisory-highlights-red-team-findings-help-organizations-assess-risk-identify-threats-and-enable-effective-incident-response">CISA red-team advisory</a>, <a href="https://csrc.nist.gov/pubs/sp/800/86/final">NIST SP 800-86</a> (forensic methods). The classic four-phase version of the incident-response lifecycle is <a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">SP 800-61 Rev.2</a> (the one you\'ll see everywhere in the literature, though formally withdrawn 2025-04); the current version, <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a>, reorganizes it around NIST CSF 2.0 rather than four discrete steps — know both, because industry talk still defaults to Rev.2\'s language.</p>
+</div>'''
 
-<section id="ai-offense">
-  <div class="kicker">AI layer · offense</div>
-  <h2><span class="n">7.</span>AI as an attack tool: two completely different kinds of incident</h2>
-  <p>The phrase "AI was used to cause harm" actually hides two opposite-in-kind situations underneath it, and conflating them is the most common mistake in this field.</p>
-  
+
+def svg_ai_cyber_landscape():
+    return '''
 <div class="svg-fig">
 <svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -605,8 +323,131 @@
   <text x="552" y="156" class="s">Force</text>
   <text x="552" y="182" class="s">§9 (own deep-read)</text>
 </svg>
-<p class="cap">Boxes 1 and 2 both really happened in 2025-2026, but the mechanism is opposite: box 1 is a <strong>human</strong> deliberately weaponizing AI as an attack tool; box 2 is the <strong>AI itself</strong> causing real damage while doing something else, with no human directing malice behind it (this is an AI control / alignment problem, not a traditional infosec one). Box 3 is a commercially real but still-discount-it new category. Box 4 is an adjacent but separate field, already covered in this repo's own notes: <code>notes/AI_security_landscape_primer.md</code>, <code>notes/RAND_2024_Securing_AI_Model_Weights_导读.md</code>.</p>
-</div>
+<p class="cap">Boxes 1 and 2 both really happened in 2025-2026, but the mechanism is opposite: box 1 is a <strong>human</strong> deliberately weaponizing AI as an attack tool; box 2 is the <strong>AI itself</strong> causing real damage while doing something else, with no human directing malice behind it (this is an AI control / alignment problem, not a traditional infosec one). Box 3 is a commercially real but still-discount-it new category. Box 4 is an adjacent but separate field, already covered in this repo\'s own notes: <code>notes/AI_security_landscape_primer.md</code>, <code>notes/RAND_2024_Securing_AI_Model_Weights_导读.md</code>.</p>
+</div>'''
+
+
+# ---------------------------------------------------------------- body
+
+BODY = f'''
+<header class="masthead">
+  <div class="kicker">Study deck · one-time 5-10 hour sprint</div>
+  <h1>Cyber fundamentals &rarr; AI x Cyber: a map for absolute beginners</h1>
+  <p>The goal isn't to turn you into a penetration tester — it's to get you, in 5-10 hours, to the point where you know this field's vocabulary, standard frameworks, and current real incidents well enough to read a CVE writeup, a pentest report, or an AI x cyber paper without every term being unfamiliar. Actual hands-on skill (real working experience) takes ongoing practice afterward; §10 gives a concrete path.</p>
+  <p class="meta">2026-09-28 · one-time sprint deck · every claim is sourced · companion: notes/AI_security_landscape_primer.md (the five-subfield map of AI security)</p>
+</header>
+
+<section id="scope">
+  <div class="kicker">Orientation</div>
+  <h2><span class="n">0.</span>What this deck gets you, and what it doesn't</h2>
+
+  <h3>0.1 An honest scope statement</h3>
+  <div class="note">
+    <span class="label">What 5-10 hours gets you</span>
+    <p>Core vocabulary and mental models (the CIA triad, the risk model, the vulnerability lifecycle, ATT&amp;CK, how defense roles divide up); the ability to follow a few key real incidents in current AI x cyber (GTG-1002, ExploitGym/OpenAI x HF, RAND weights security); and a sense of who's doing what in this field and where to go next.</p>
+  </div>
+  <div class="note bug">
+    <span class="label">What 5-10 hours does NOT get you</span>
+    <p>The actual feel of finding vulnerabilities, writing exploits, or doing penetration testing — that's muscle memory built over hundreds of hours of CTFs and labs, not something you read your way into. Treat this deck as a map, not a credential.</p>
+  </div>
+
+  <h3>0.2 How to use this deck</h3>
+  <p>§1-§6 are pure cyber fundamentals (no AI yet); §7-§9 layer AI on top; §10 is a concrete path for going deeper; §11 is a glossary plus every source, for you to verify and dig into later. Suggested approach: read it straight through once (about 1-1.5 hours), then follow whichever source links interest you most (the remaining 3-8 hours).</p>
+</section>
+
+<section id="mindset">
+  <div class="kicker">Fundamentals · mental model</div>
+  <h2><span class="n">1.</span>What game security is actually playing</h2>
+  <p>Every security story ultimately answers two questions: <strong>which of C/I/A did it break</strong>, and <strong>which link in the risk chain got exploited</strong>. Get these two diagrams into your head first; everything after this is detail hung on that frame.</p>
+  {svg_risk_model()}
+  <h3>1.1 Who's on the field</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Role</th><th>What they do</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">SOC analyst</td><td>Watches alerts, decides which are real incidents</td></tr>
+        <tr><td class="mono">Blue team / defenders</td><td>Keeps the system safe day to day</td></tr>
+        <tr><td class="mono">Red team / pentest</td><td>Plays the attacker, proactively finds gaps</td></tr>
+        <tr><td class="mono">Purple team</td><td>Feeds red and blue's results back into each other</td></tr>
+        <tr><td class="mono">DFIR / incident response</td><td>Figures out what happened and stops the bleeding, after the fact</td></tr>
+        <tr><td class="mono">AppSec / security architecture</td><td>Keeps vulnerabilities out at the design stage</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>§6 puts these roles back into a single "defense-in-layers" diagram.</p>
+</section>
+
+<section id="vulns">
+  <div class="kicker">Fundamentals · the technical core</div>
+  <h2><span class="n">2.</span>The life of a vulnerability: discovery &rarr; patched / exploited</h2>
+  <p>This is the section most worth your time in the whole field — everything later about ATT&amp;CK and AI-for-cyber rests on this pipeline of "how a vulnerability gets found, numbered, scored, patched, or exploited."</p>
+  {svg_vuln_lifecycle()}
+
+  <h3>2.1 What a vulnerability looks like: two standard taxonomies</h3>
+  <p>The <strong>OWASP Top 10</strong> is the ten most common web-application vulnerability classes, the industry's default reference frame; the current version is <strong>OWASP Top 10:2025</strong> (finalized 2026-01, superseding the 2021 list), which added a "software supply chain failures" category and folded SSRF into broken access control. The <strong>CWE Top 25</strong> (jointly published by CISA and MITRE) is the "25 most dangerous code-level weaknesses," statistically derived from that year's actual CVE records — the 2025 edition's top three are XSS, SQL injection, and CSRF. These two frameworks are the coordinate system worth memorizing first for vulnerability types.</p>
+
+  <h3>2.2 Who owns which step</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">CVE numbering</td><td>MITRE (a federated CVE Board, funded by DHS/CISA)</td></tr>
+        <tr><td class="mono">CVSS severity score</td><td>FIRST.org, current version CVSS v4.0</td></tr>
+        <tr><td class="mono">Vulnerability detail database</td><td>NVD (NIST) — adds CWE mapping and affected-configuration data on top of the CVE</td></tr>
+        <tr><td class="mono">The "someone's actually exploiting this" list</td><td>CISA KEV Catalog</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Remember this distinction: a <strong>high CVSS score</strong> only means "theoretically dangerous"; <strong>appearing in KEV</strong> means "real attacks have actually been observed." When triaging priority, the latter should weigh far more than the former.</p>
+</section>
+
+<section id="attck">
+  <div class="kicker">Fundamentals · the attacker's vocabulary</div>
+  <h2><span class="n">3.</span>MITRE ATT&amp;CK: the common language of attack reports</h2>
+  <p>Nearly every incident disclosure or threat-intel report describes "what the attacker did" using ATT&amp;CK's tactic/technique vocabulary. Its structure has three layers: <strong>Tactics</strong> (the attacker's goal, e.g. "get initial access") &rarr; <strong>Techniques / sub-techniques</strong> (how) &rarr; <strong>Procedures</strong> (how one real attack actually implemented it). Here's a real 2025 case, directly relevant to this deck's subject, that makes it concrete:</p>
+  {svg_attack_chain()}
+  <p>This is also the first place in this deck where "cyber" and "AI" actually meet — the full discussion is in §7.</p>
+</section>
+
+<section id="network">
+  <div class="kicker">Fundamentals · minimum viable map</div>
+  <h2><span class="n">4.</span>Networks and systems: only as much as you need</h2>
+  <p>You don't need a networking certification, but not knowing the terms below will leave you lost in the technical-detail paragraphs of most incident reports.</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>The basic unit</h4>
+      <p><strong>TCP/IP</strong> is the underlying protocol family for internet communication (spread across dozens of RFCs, with no single "standard document"). A <strong>port</strong> identifies which service on a machine is listening; the authoritative registry is the <a href="https://www.iana.org/assignments/service-names-port-numbers">IANA port registry</a> (registration rules in <a href="https://www.rfc-editor.org/rfc/rfc6335.html">RFC 6335</a>). "Attack surface" just means "how many of these entry points you're exposing."</p>
+    </div>
+    <div class="panel">
+      <h4>Four common lines of defense</h4>
+      <p><strong>Firewall</strong>: decides who can connect to whom by rule (<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-41r1.pdf">NIST SP 800-41</a>). <strong>IDS/IPS</strong>: detects (IDS) or directly blocks (IPS) anomalous traffic (<a href="https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-94.pdf">NIST SP 800-94</a>). <strong>EDR</strong>: installed on every endpoint, continuously logging behavior for detection and later forensics (<a href="https://www.nextgov.com/cybersecurity/2021/10/cisa-seeking-answers-implementation-endpoint-detection-and-response-tools/186175/">CISA's CDM program description</a>).</p>
+    </div>
+  </div>
+</section>
+
+<section id="crypto">
+  <div class="kicker">Fundamentals · minimum viable map</div>
+  <h2><span class="n">5.</span>Cryptography: only as much as you need</h2>
+  <p><strong>Symmetric encryption</strong>: one key for both encrypting and decrypting — fast, but the problem is how to safely hand that key to the other party. <strong>Asymmetric encryption</strong>: public key encrypts, private key decrypts (or signs, in reverse) — solves distribution, at the cost of speed (<a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-175Br1.pdf">NIST SP 800-175B Rev.1</a>). <strong>Hashing</strong>: compresses arbitrary-length input into a fixed-length fingerprint; change one byte and the fingerprint is completely different — the common standard is SHA-256 (<a href="https://csrc.nist.gov/pubs/fips/180-4/final">FIPS 180-4</a>). The <strong>TLS handshake</strong> (current version <a href="https://datatracker.ietf.org/doc/html/rfc8446">RFC 8446 / TLS 1.3</a>) uses asymmetric crypto to authenticate both parties and negotiate a temporary symmetric key before real encrypted communication starts — when an incident report says "the crypto broke," it's usually a flaw in this handshake/key-exchange step, not the much rarer case of "the hash algorithm itself got broken."</p>
+  <div class="note">
+    <span class="label">A cross-repo connection point</span>
+    <p>These primitives are the foundation of this repo's own <code>notes/compute_pause_verification/</code> work on "verifiable AI training": zkLLM (<a href="https://arxiv.org/abs/2404.16109">arXiv:2404.16109</a>), VerInf, and similar work use zero-knowledge proofs (essentially a combination of hashing and asymmetric crypto) to let someone verify that a given inference really did run on the claimed model, without ever seeing the model's weights. Get these crypto fundamentals solid and that other deck reads a lot more smoothly.</p>
+  </div>
+</section>
+
+<section id="defense">
+  <div class="kicker">Fundamentals · the defense side</div>
+  <h2><span class="n">6.</span>Defense is layered</h2>
+  <p>Stack §1's role table on top of §4's technical components, and defenders roughly layer like this:</p>
+  {svg_defense_stack()}
+  <p>When a real incident happens, it's the top "process layer" that runs: the classic four phases are <strong>Preparation &rarr; Detection &amp; Analysis &rarr; Containment/Eradication/Recovery &rarr; Post-incident</strong> (<a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final">NIST SP 800-61 Rev.2</a>, the version you'll see most often in the literature, even though it was formally withdrawn 2025-04); the current version, <a href="https://csrc.nist.gov/pubs/sp/800/61/r3/final">SP 800-61 Rev.3</a>, reorganizes this into the NIST CSF 2.0 framework and is no longer four discrete steps — know both versions, because industry's spoken shorthand still defaults to Rev.2.</p>
+</section>
+
+<section id="ai-offense">
+  <div class="kicker">AI layer · offense</div>
+  <h2><span class="n">7.</span>AI as an attack tool: two completely different kinds of incident</h2>
+  <p>The phrase "AI was used to cause harm" actually hides two opposite-in-kind situations underneath it, and conflating them is the most common mistake in this field.</p>
+  {svg_ai_cyber_landscape()}
 
   <h3>7.1 A human deliberately weaponizes AI — GTG-1002</h3>
   <p>Discovered mid-September 2025, publicly disclosed by Anthropic on 2025-11-13: a suspected China-linked hacking group posed as a legitimate penetration-testing firm to get around the model's refusal behavior, jailbroke <strong>Claude Code</strong>, and used it to autonomously carry out roughly 80-90% of the work in a multi-stage cyber-espionage campaign — reconnaissance, vulnerability discovery, exploitation, credential harvesting, data exfiltration — against roughly 30 targets across tech, finance, chemical manufacturing, and government. Anthropic calls it the first documented large-scale "AI-orchestrated" cyberattack with minimal human intervention, and says it was discovered and contained. This case maps cleanly onto §3's ATT&amp;CK chain, which makes it unusually good for teaching. (<a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic's original post</a> · <a href="https://www.paulweiss.com/insights/client-memos/anthropic-disrupts-first-documented-case-of-large-scale-ai-orchestrated-cyberattack">legal analysis</a>)</p>
@@ -765,22 +606,57 @@
     <a href="https://www.hackthebox.com/">HackTheBox</a>
   </p>
 </section>
+'''
 
+HTML = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cyber &rarr; AI x Cyber Fundamentals — Study Notes</title>
+<style>
+{CSS}
+{EXTRA_CSS}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc" aria-label="Contents">
+  <a href="#scope"><span class="num">0</span>Scope</a>
+  <a href="#mindset"><span class="num">1</span>Mental model</a>
+  <a href="#vulns"><span class="num">2</span>Vuln lifecycle</a>
+  <a href="#attck"><span class="num">3</span>ATT&amp;CK</a>
+  <a href="#network"><span class="num">4</span>Network</a>
+  <a href="#crypto"><span class="num">5</span>Crypto</a>
+  <a href="#defense"><span class="num">6</span>Defense layers</a>
+  <a href="#ai-offense"><span class="num">7</span>AI offense</a>
+  <a href="#ai-defense"><span class="num">8</span>AI defense</a>
+  <a href="#weights"><span class="num">9</span>Weights</a>
+  <a href="#nextsteps"><span class="num">10</span>Next steps</a>
+  <a href="#glossary"><span class="num">11</span>Glossary/sources</a>
+</nav>
+<main>
+{BODY}
 </main>
 </div>
 <script>
-(() => {
+(() => {{
   const links = [...document.querySelectorAll('nav.toc a')];
   const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
+  const io = new IntersectionObserver((entries) => {{
+    entries.forEach(e => {{
       if (!e.isIntersecting) return;
       const id = '#' + e.target.id;
       links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
-    });
-  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+    }});
+  }}, {{ rootMargin: '-40% 0px -50% 0px', threshold: 0 }});
   sections.forEach(s => io.observe(s));
-})();
+}})();
 </script>
 </body>
 </html>
+'''
+
+out = ROOT / "notes.html"
+out.write_text(HTML)
+print(f"wrote {out} ({len(HTML)} bytes)")
