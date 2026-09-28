@@ -114,6 +114,14 @@ threat groups. See
 [`cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)
 (Chinese prose, English-language sources linked throughout).
 
+And where the decks stay at literacy level, [`cyber_ai_fundamentals/labs/ssrf_killchain/`](cyber_ai_fundamentals/labs/ssrf_killchain/)
+turns that abstract Task 1-5 table into a runnable, reproducible lab: a self-built three-service
+Docker target (public SSRF app + internal-only admin API + fake cloud-metadata endpoint) that
+reproduces the Capital One 2019 pattern — SSRF → internal enumeration → cloud IAM credential
+theft — with real tooling, an out-of-band callback verifier, and captured run output, each step
+mapped back to GTG-1002. Sandboxed, self-authored, authorized learning environment; all
+credentials fake.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

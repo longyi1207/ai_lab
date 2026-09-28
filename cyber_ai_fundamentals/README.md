@@ -14,6 +14,12 @@ AI-for-defense and AI-model-weights security currently stand.
 - **[`deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)** - a much fuller GTG-1002 case study than either deck has room for: Anthropic's complete six-phase task breakdown, the AI-hallucination-in-offensive-ops caveat, independent security researchers' skepticism (Kevin Beaumont, Daniel Card, Ali Alkhatib - the report published no IoCs), and Anthropic's September 2026 follow-up showing this operating model has since spread to at least five more named threat groups. Written in Chinese, but every source it cites is an English-language primary, linked inline.
 - **[`reports/Anthropic_2025-11_GTG-1002_full_report.pdf`](reports/Anthropic_2025-11_GTG-1002_full_report.pdf)** - the primary source, saved locally for traceability.
 
+## Hands-on lab (`labs/`)
+
+Where the decks stay at literacy level, this turns the abstract attack phases into runnable code:
+
+- **[`labs/ssrf_killchain/`](labs/ssrf_killchain/)** - a self-contained **SSRF kill-chain lab** that makes the GTG-1002 case study's "Task 1-5" table concrete. A three-service Docker target on an isolated network (a public SSRF-vulnerable web app, an unauthenticated internal admin API with no host port, and a fake cloud-metadata endpoint) reproduces the **Capital One 2019** pattern: SSRF -> internal service enumeration -> cloud IAM credential theft. Every phase maps 1:1 onto GTG-1002's tasks, uses real tooling (nmap, curl, Python), includes an out-of-band callback verifier (the lab-scale analogue of the "neutral third-party callback service" GTG-1002 used to confirm exploits actually worked), and ships the captured real run output under `output/`. All credentials are fake; the whole thing runs in a sandboxed, self-authored, authorized learning environment. The README maps each step to GTG-1002, adds a defender's view, and links authoritative resources (PortSwigger Web Security Academy, HackTricks, OWASP, Capital One post-mortems).
+
 ## Rebuild
 
 ```bash

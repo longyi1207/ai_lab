@@ -1,0 +1,50 @@
+# SSRF kill-chain lab — models the GTG-1002 Task 1-5 flow end to end.
+#
+# Topology:
+#   attacker (your host) ──► ssrf-app  :8888   (the ONLY published port)
+#                               │  (SSRF: fetches any URL server-side)
+#                               ├──► internal-api   (NO host port — internal only)
+#                               └──► metadata        (NO host port — fake cloud IMDS)
+#
+# The whole point: internal-api and metadata are unreachable from your host.
+# You can only touch them by pivoting THROUGH the SSRF in ssrf-app.
+services:
+  ssrf-app:
+    image: python:3.11-slim
+    container_name: ssrf-app
+    working_dir: /app
+    volumes:
+      - ./services/ssrf-app:/app:ro
+    command: python /app/server.py
+    ports:
+      - "8888:80"          # published to host — this is the attack surface
+    networks:
+      - cyberlab
+
+  internal-api:
+    image: python:3.11-slim
+    container_name: internal-api
+    working_dir: /app
+    volumes:
+      - ./services/internal-api:/app:ro
+    command: python /app/server.py
+    networks:
+      cyberlab:
+        aliases: [internal-api, admin.internal]
+    # NOTE: no `ports:` — deliberately not reachable from the host.
+
+  metadata:
+    image: python:3.11-slim
+    container_name: metadata
+    working_dir: /app
+    volumes:
+      - ./services/metadata:/app:ro
+    command: python /app/server.py
+    networks:
+      cyberlab:
+        aliases: [metadata, metadata.internal]
+    # NOTE: no `ports:` — models 169.254.169.254, only reachable on-box.
+
+networks:
+  cyberlab:
+    external: true

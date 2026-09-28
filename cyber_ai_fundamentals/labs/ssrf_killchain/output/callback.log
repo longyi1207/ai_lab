@@ -1,0 +1,2 @@
+[callback] listening on 0.0.0.0:9000 — waiting for the target to call home
+[callback] 16:16:17  INBOUND HIT from 127.0.0.1  path=/ssrf-probe-abc123  UA=LinkPeek-preview/1.3
