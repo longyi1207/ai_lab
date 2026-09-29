@@ -19,9 +19,9 @@ US/China/other governance map by force-of-law.
 
 - **[`notes.pdf`](notes.pdf)** / **[`notes.html`](notes.html)** - English edition (start here)
 - **[`notes_zh.pdf`](notes_zh.pdf)** / **[`notes_zh.html`](notes_zh.html)** - Chinese edition (the author's primary study-notes language; content matches the English edition section-for-section, maintained in parallel rather than auto-translated)
-- **[`deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)** - a much fuller GTG-1002 case study than either deck has room for: Anthropic's complete six-phase task breakdown, the AI-hallucination-in-offensive-ops caveat, independent security researchers' skepticism (Kevin Beaumont, Daniel Card, Ali Alkhatib - the report published no IoCs), and Anthropic's September 2026 follow-up showing this operating model has since spread to at least five more named threat groups. Written in Chinese, but every source it cites is an English-language primary, linked inline.
-- **[`deep_reads/02_extreme_risk_and_safeguards_研究底稿_2026-09.md`](deep_reads/02_extreme_risk_and_safeguards_研究底稿_2026-09.md)** - the research memo behind Part II (§10-§13), from five parallel research passes. The decks are the finished product; this memo is the "footnoted lab notebook" - it preserves every source-confidence flag (items marked as not-independently-verified), extra numbers that didn't fit the decks, and the fuller skeptic case. Chinese prose, English-language primaries linked throughout; anything marked with a warning glyph should be re-checked before quoting.
-- **[`reports/Anthropic_2025-11_GTG-1002_full_report.pdf`](reports/Anthropic_2025-11_GTG-1002_full_report.pdf)** - the primary source, saved locally for traceability.
+- **[`reports/Anthropic_2025-11_GTG-1002_full_report.pdf`](reports/Anthropic_2025-11_GTG-1002_full_report.pdf)** - the primary source for the GTG-1002 case, saved here for traceability.
+
+> The decks occasionally point to fuller `deep_reads/…` notes (a line-by-line GTG-1002 case study and the research memo behind Part II, with every source-confidence flag). Those are the author's private working notes and are **not published in this repo** — the decks themselves are self-contained, and every claim in them carries its own inline primary source.
 
 ## Hands-on lab (`labs/`)
 

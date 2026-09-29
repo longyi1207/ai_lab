@@ -15,9 +15,9 @@ below was captured from a real run (2026-09-28); the raw logs are in [`output/`]
 > disclosed *GTG-1002*, the first documented large-scale cyber-espionage campaign in which an AI
 > agent (a jailbroken Claude Code) autonomously executed ~80-90% of the attack. Anthropic's report
 > broke the campaign into a six-phase task table. This lab reproduces the *structure* of that
-> lifecycle on a safe target, so the abstract phases become something you can run. The full case
-> study lives one level up in [`../../deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](../../deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md).
-> You do not need to have read it first — this README is self-contained.
+> lifecycle on a safe target, so the abstract phases become something you can run. Anthropic's
+> original report is included at [`../../reports/`](../../reports/); you do not need to have read it
+> first — this README is self-contained.
 
 ---
 

@@ -106,18 +106,11 @@ handle cyber misuse (RSP/Preparedness/FSF comparison; the shift from "refuse cyb
 "KYC/trusted-access + accelerate defenders"; why cyber is harder to safeguard than bio), and the
 US/China/other governance map by force-of-law. Every factual claim cites an English-language
 primary source (NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/Hugging Face/UK AISI/CAISI) inline;
-a research memo under `deep_reads/` preserves the source-confidence flags behind Part II. Published
-in parallel English and Chinese editions — start with
+every claim carries its own inline primary source. Published in parallel English and Chinese
+editions — start with
 [`cyber_ai_fundamentals/notes.pdf`](cyber_ai_fundamentals/notes.pdf) (English) or
-[`notes_zh.pdf`](cyber_ai_fundamentals/notes_zh.pdf) (Chinese).
-
-The GTG-1002 case gets a full standalone deep-dive beyond what either deck has room for —
-Anthropic's complete six-phase task breakdown, the AI-hallucination-in-offensive-ops caveat,
-independent security researchers' skepticism (the report published no IoCs), and a September
-2026 follow-up showing the same operating model has since spread to at least five more named
-threat groups. See
-[`cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md`](cyber_ai_fundamentals/deep_reads/01_GTG-1002_Anthropic_2025-11_案例深读.md)
-(Chinese prose, English-language sources linked throughout).
+[`notes_zh.pdf`](cyber_ai_fundamentals/notes_zh.pdf) (Chinese). Anthropic's original GTG-1002 report
+is kept alongside them at [`cyber_ai_fundamentals/reports/`](cyber_ai_fundamentals/reports/).
 
 And where the decks stay at literacy level, [`cyber_ai_fundamentals/labs/ssrf_killchain/`](cyber_ai_fundamentals/labs/ssrf_killchain/)
 turns that abstract Task 1-5 table into a runnable, reproducible lab: a self-built three-service
