@@ -227,16 +227,20 @@
   <a href="#ai-offense"><span class="num">7</span>AI攻击</a>
   <a href="#ai-defense"><span class="num">8</span>AI防御</a>
   <a href="#weights"><span class="num">9</span>weights</a>
-  <a href="#nextsteps"><span class="num">10</span>下一步</a>
-  <a href="#glossary"><span class="num">11</span>术语/来源</a>
+  <a href="#extreme"><span class="num">10</span>极端风险</a>
+  <a href="#measure"><span class="num">11</span>能力测量</a>
+  <a href="#lab-safeguards"><span class="num">12</span>实验室防线</a>
+  <a href="#governance"><span class="num">13</span>治理版图</a>
+  <a href="#nextsteps"><span class="num">14</span>下一步</a>
+  <a href="#glossary"><span class="num">15</span>术语/来源</a>
 </nav>
 <main>
 
 <header class="masthead">
-  <div class="kicker">学习 deck · 一次性 5-10 小时冲刺</div>
-  <h1>Cyber 入门 → AI x Cyber：给纯小白的地图</h1>
-  <p>目标不是让你变成渗透测试工程师，而是让你能在 5-10 小时内，读懂这个领域的词汇、标准框架和当前真实事故——足够看懂一篇 CVE 分析、一份 pentest 报告、或一篇 AI x cyber 论文而不觉得每个词都陌生。动手实战（真正的 working experience）需要之后持续投入，本 deck 第 10 节给出具体路径。</p>
-  <p class="meta">2026-09-28 · 一次性冲刺 deck · 每条事实都标了来源 · 配套：notes/AI_security_landscape_primer.md（AI security 五子域地图）</p>
+  <div class="kicker">学习 deck · cyber 入门 + AI safety 视角</div>
+  <h1>Cyber 入门 → AI x Cyber：从小白地图到极端风险与防线</h1>
+  <p>目标不是让你变成渗透测试工程师，而是先在 5-10 小时内读懂这个领域的词汇、框架和真实事故（§1-§9，纯入门），再进入 <strong>AI safety 视角</strong>：为什么 AI x cyber 是一类"极端风险"、怎么测量它、实验室和各国政府在建什么防线（§10-§13）。每条事实都标了来源，便于你自己查证深挖。</p>
+  <p class="meta">2026-09-28 首版 · 2026-09-29 增补 AI-safety/极端风险/防线层 · 每条事实标来源 · 配套：industry_application/SAIF/SAFEGUARDS_MAP（bio 侧）与 notes/AI_security_landscape_primer.md</p>
 </header>
 
 <section id="scope">
@@ -254,7 +258,7 @@
   </div>
 
   <h3>0.2 怎么用这份 deck</h3>
-  <p>§1-§6 是纯 cyber 基础（不涉及 AI），§7-§9 把 AI 叠加上去，§10 是继续深入的具体路径，§11 是术语表+全部来源合集，方便你之后自己查证、深挖。建议按顺序读一遍（本体约 1-1.5 小时），再挑感兴趣的来源链接点进去精读（剩下的 3-8 小时）。</p>
+  <p>§1-§6 是纯 cyber 基础（不涉及 AI），§7-§9 把 AI 叠加上去（攻击/防御/weights）。<strong>§10-§13 是 AI safety 视角</strong>：为什么 cyber 是极端风险（§10）、怎么测量（§11）、实验室防线（§12）、US/中国/其他的治理版图（§13）——这几节是给想理解 misuse（滥用）研究在担心什么的人。§14 是继续动手的路径，§15 是术语表+全部来源。建议按顺序读一遍，再挑感兴趣的来源链接精读。</p>
 </section>
 
 <section id="mindset">
@@ -684,9 +688,278 @@
   <p>深读见本仓库 <code>notes/RAND_2024_Securing_AI_Model_Weights_导读.md</code>。</p>
 </section>
 
+<section id="extreme">
+  <div class="kicker">AI safety 视角 · 极端风险</div>
+  <h2><span class="n">10.</span>为什么 cyber 被算作一类"极端风险"</h2>
+  <p>前面 §7-§9 讲的是"现在发生了什么"。这一节换成 AI safety 的问法：<strong>为什么 AI x cyber 不只是普通网络犯罪，而是被前沿实验室和治理界当成 CBRN 级别的"灾难性滥用"来管？</strong> 这也是理解 misuse（滥用）研究岗位在担心什么的关键。</p>
+
+  <h3>10.1 四个让它"极端"的驱动力</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>驱动力</th><th>论点 + 谁在说</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">① 规模化自主攻击</td><td>一个操作员 → 上千次并发入侵、机器速度。GTG-1002 里 AI 自主完成 80-90% 攻击链，突破了"人力上限"这个历史上一直压着攻击规模的天花板（<a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic</a>；<a href="https://www.iaps.ai/research/autonomous-cyber-attacks">IAPS: 自主网络攻击的出现</a>）</td></tr>
+        <tr><td class="mono">② 攻防平衡失衡</td><td>"AI Security Gap"（Dan Braun / Apollo）：实验室在能守住之前就会造出"值得偷"的权重；且<strong>破坏比窃取更容易</strong>，一个"对齐"的 AGI 反而更好攻击（控制更少）。（<a href="https://www.lesswrong.com/posts/gG4EhhWtD2is9Cx7m/implications-of-the-ai-security-gap">LessWrong</a>；<a href="https://cset.georgetown.edu/publication/anticipating-ais-impact-on-the-cyber-offense-defense-balance/">CSET 攻防平衡</a>）</td></tr>
+        <tr><td class="mono">③ 作为失控机制</td><td>cyber 是误配/自我改进的 AI <strong>逃出牢笼</strong>的手段：自我渗出权重、夺取算力。Redwood 区分"自我渗出"与更糟的"rogue internal deployment"（在机房内不受监控地跑）。所以 cyber 能力既是 misuse 向量，也是 AI 的<strong>自我赋能</strong>向量。（<a href="https://blog.redwoodresearch.org/p/ai-catastrophes-and-rogue-deployments">Redwood</a>；<a href="https://securityandtechnology.org/virtual-library/report/ai-loss-of-control-risk-indications-warning/">IST I&amp;W 0-5 级</a>）</td></tr>
+        <tr><td class="mono">④ 扩散 / 门槛崩塌</td><td>"sophistication 不再是判断幕后是谁的可靠信号"——AI 抹平了国家级与个人之间的人力/工具鸿沟（<a href="https://www.anthropic.com/threat-intelligence-report-september-2026">Anthropic 2026-09</a>）。开源权重一旦发布收不回，PentAGI 之类的公开攻击框架让任何人复制同套脚手架。</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.4; }
+    .arr { stroke: #9a5b12; stroke-width: 1.3; fill: none; marker-end: url(#ml); stroke-dasharray: 4 3; }
+  </style>
+  <defs>
+    <marker id="ml" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#9a5b12"/>
+    </marker>
+  </defs>
+  <text x="20" y="20" class="h">cyber 在"风险严重度阶梯"上的位置：本身多为灾难级，靠两座桥才通向生存级</text>
+
+  <rect x="20" y="40" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="65" class="s">普通网络犯罪（勒索/钓鱼/数据窃取）— 日常、可恢复</text>
+
+  <rect x="20" y="92" width="300" height="52" rx="4" class="hi"/>
+  <text x="32" y="113" class="t">灾难级 AI-cyber（本 deck 重点）</text>
+  <text x="32" y="131" class="s">规模化自主攻击 · 关键基础设施 · 攻防失衡</text>
+
+  <rect x="20" y="156" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="181" class="s">误配 AI / 失控（misaligned AGI）— 生存级</text>
+
+  <rect x="20" y="208" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="233" class="s">工程化大流行病（engineered pandemic）— 生存级</text>
+
+  <path d="M322,118 C 420,118 420,176 356,176" class="arr"/>
+  <path d="M322,128 C 440,150 440,228 356,228" class="arr"/>
+
+  <rect x="410" y="150" width="290" height="58" rx="4" class="box"/>
+  <text x="422" y="170" class="h">桥 1：作为使能器</text>
+  <text x="422" y="188" class="s">帮助造生物武器 / 触发核武 /</text>
+  <text x="422" y="202" class="s">加速失控（80,000 Hours）</text>
+
+  <rect x="410" y="216" width="290" height="58" rx="4" class="box"/>
+  <text x="422" y="236" class="h">桥 2：作为失控机制</text>
+  <text x="422" y="254" class="s">AI 用 cyber 自我渗出/夺取算力</text>
+  <text x="422" y="268" class="s">（Redwood 自我渗出；IST I&amp;W）</text>
+
+  <text x="410" y="60" class="h">Bengio 的定位</text>
+  <text x="410" y="80" class="s">cyber = 当下已发生、有实证</text>
+  <text x="410" y="96" class="s">bio = 新兴、最坏情形上限更高</text>
+  <text x="410" y="116" class="s">cyber 在"紧迫性"上更高，</text>
+  <text x="410" y="132" class="s">bio 在"致命上限"上更高</text>
+</svg>
+<p class="cap">主流 AI safety 观点：<strong>cyber 本身通常是"灾难级但非生存级"</strong>——即使最坏的关键基础设施攻击也不直接导致灭绝（<a href="https://80000hours.org/problem-profiles/catastrophic-ai-misuse/">80,000 Hours</a>）。它爬升到生存级只经由两座桥：作为 bio/核灾难的<strong>使能器</strong>，或作为 AI <strong>失控/接管的机制</strong>（<a href="https://blog.redwoodresearch.org/p/ai-catastrophes-and-rogue-deployments">Redwood: 自我渗出 vs rogue internal deployment</a>；<a href="https://securityandtechnology.org/virtual-library/report/ai-loss-of-control-risk-indications-warning/">IST Loss-of-Control I&amp;W</a>）。Bengio 的定位见 <a href="https://www.transformernews.ai/p/yoshua-bengio-the-ball-is-in-policymakers-international-ai-safety-report-cyber-risk-biorisk">Transformer 访谈</a>；风险谱系见 <a href="https://arxiv.org/abs/2508.13700">AI Risk Spectrum (arXiv:2508.13700)</a>。</p>
+</div>
+
+  <h3>10.2 关键基础设施是"极端"的现实锚点</h3>
+  <p>把攻击从"单点"变成"规模化打医院/水厂/电网/金融"是极端性的标志。Anthropic Frontier Red Team 与 PNNL 模拟过 AI 运行的水处理厂攻击，并警告"漏洞发现与利用之间零延迟"（<a href="https://red.anthropic.com/2026/critical-infrastructure-defense">Anthropic 关键基础设施防御</a>）。政策侧的标志物是 Logan Graham 2025-12 的众议院国土安全委员会作证。</p>
+
+  <h3>10.3 诚实的反方：极端风险是不是被夸大了？</h3>
+  <div class="note bug">
+    <span class="label">最强的怀疑论（一定要认识）</span>
+    <p><strong>James Lewis（CSIS）《Dismissing Cyber Catastrophe》</strong>：预言了 25 年，"从来没有过一次灾难级网络攻击""从来没有人死于网络攻击"；大规模伤亡攻击需要多数行为体不具备的技能；对手被报复威慑；现代经济有韧性、修得快；把 cyber 类比核武"智识上偷懒"，因为 cyber 产生不了核级伤亡（<a href="https://www.csis.org/analysis/dismissing-cyber-catastrophe">CSIS</a>）。结构性要害：<strong>网络攻击可被检测、可逆</strong>——不存在直接杀死几百万人的"网络大流行"。</p>
+  </div>
+  <p>针对 GTG-1002 的具体质疑：<strong>没有公布任何 IoC</strong>，防守方无法据以狩猎或验证（<a href="https://www.bleepingcomputer.com/news/security/anthropic-claims-of-claude-ai-automated-cyberattacks-met-with-doubt/">BleepingComputer</a>）；而且 Anthropic 自己承认 Claude 在行动中"频繁夸大、偶尔编造"——幻觉仍是自主进攻的真实摩擦。防守方也在被 AI 赋能（Anthropic 自家 <strong>Project Glasswing</strong> 自 2026-04 已发现 >1 万个高/危漏洞）。<strong>International AI Safety Report 2026</strong> 给了折中判断：AI 目前最大的作用是<strong>放大攻击的准备阶段</strong>，还"没有在完全自主地执行网络攻击"（<a href="https://arxiv.org/abs/2602.21012">arXiv:2602.21012</a>）。</p>
+  <p><strong>怎么拿捏</strong>：把 cyber 放在"灾难级但本身非生存级"这个位置最稳——它的极端性来自规模化、关键基础设施、以及上图那两座通向生存级的桥，而不是"cyber 本身会灭绝人类"。这个分寸正是 misuse 研究里不 overclaim 的关键。</p>
+</section>
+
+<section id="measure">
+  <div class="kicker">AI safety 视角 · 测量</div>
+  <h2><span class="n">11.</span>怎么测"这个模型 cyber 有多危险"</h2>
+  <p>"极端风险"要能管，先得能<strong>测</strong>。这是 misuse 研究的技术核心：用什么基准和政府评测来判断"这个模型的 cyber 能力到哪一档"。</p>
+
+  <h3>11.1 学界/开源基准（从"解题"到"真实利用"）</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>基准</th><th>测什么</th><th>真实度</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Cybench (Stanford)</td><td>agentic CTF 解题，40 题带子任务难度（<a href="https://arxiv.org/abs/2408.08926">arXiv:2408.08926</a>）</td><td>CTF，非完整操作</td></tr>
+        <tr><td class="mono">NYU CTF Bench</td><td>6 领域 200 题 Jeopardy-CTF（<a href="https://arxiv.org/abs/2406.05590">arXiv:2406.05590</a>）</td><td>CTF，更大</td></tr>
+        <tr><td class="mono">CVE-Bench (UIUC)</td><td>沙箱里<strong>真实利用</strong>来自 NVD 的 40 个高危 web CVE（<a href="https://arxiv.org/abs/2503.17332">arXiv:2503.17332</a>）</td><td>高（真实 CVE）</td></tr>
+        <tr><td class="mono">CyberGym / ExploitGym (Berkeley RDI)</td><td><strong>武器化</strong>：把已知漏洞变成能用的 exploit；1,507 个真实漏洞，agent 找到 35 个 0-day（<a href="https://rdi.berkeley.edu/blog/cybergym/">RDI</a>）</td><td>最高（真实漏洞+武器化）</td></tr>
+        <tr><td class="mono">SCONE-bench (Anthropic)</td><td>405 个历史被利用的智能合约（<a href="https://red.anthropic.com/2026/exploit-evals/">red.anthropic.com</a>）</td><td>高（真实链上）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>要点</strong>：CTF 只测单点技能，不要求把能力<strong>串成完整攻击链</strong>；CVE-Bench / CyberGym 更接近真实，因为要产出能用的 exploit 而非只捡 flag。这也解释了为什么 §7 的 ExploitGym 会牵出真实事故——它本身就是"真实武器化"的评测环境。</p>
+
+  <h3>11.2 政府评测：能力涨得多快、开源落后多少</h3>
+  <ul>
+    <li><strong>UK AISI</strong>《Frontier AI Trends》：cyber "80% 可靠度时间跨度"约<strong>每 4.7 个月翻一倍</strong>（2026-02 估计，比 2025-11 的 8 个月估计还快）——但 AISI 自己强调不确定性极大（模型少、最长跨度只靠 6 道题）。别把这个数字当铁律（<a href="https://www.aisi.gov.uk/blog/how-fast-is-autonomous-ai-cyber-capability-advancing">AISI</a>）。</li>
+    <li><strong>开源 vs 闭源差距</strong>：领先开源模型（GLM-5.2、DeepSeek V4-Pro）在 cyber 上落后闭源前沿约 <strong>4-7 个月</strong>，比 2025 年大部分时间的 6-10 个月在收窄（<a href="https://www.aisi.gov.uk/blog/how-far-behind-the-frontier-are-leading-open-weight-models-on-cyber">AISI</a>）。</li>
+    <li><strong>NIST CAISI</strong>：GLM-5.3 是"迄今最具 cyber 能力的开源模型"，但在聚合基准上仍落后美国前沿约 4 个月；给了具体分数表（如 ExploitGym 9.4% vs 44.4%）。注意：美国模型是<strong>关掉 cyber 防护</strong>做对比的（<a href="https://www.nist.gov/news-events/news/2026/09/caisis-assessment-zais-glm-53-cyber-capabilities">CAISI</a>）。</li>
+    <li><strong>METR</strong>：跑"cyber range"（模拟企业内网多步入侵）；Claude Mythos Preview 据报是首个完成两个 range 的模型（32 步 6/10、7 步 ICS 3/10）——favorable 条件下 sub-50-60% 可靠度。</li>
+  </ul>
+
+  <h3>11.3 两个测不到的东西（misuse 研究的真空区）</h3>
+  <ul>
+    <li><strong>新手 vs APT 的 uplift</strong>：多数框架围绕"给新手多少提升"设阈值（RAND 说 AI 已让进攻"触手可及于新手"），但对"资源充足的 APT 能被 AI 提升多少"<strong>几乎没有阈值</strong>——而后者才是尾部风险（关键基础设施、大规模战役）最相关的（<a href="https://www.rand.org/pubs/research_reports/RRA3892-2.html">RAND</a>；<a href="https://www.frontiermodelforum.org/technical-reports/managing-advanced-cyber-risks-in-frontier-ai-frameworks/">FMF</a>）。</li>
+    <li><strong>评测容器本身可被攻破</strong>：OpenAI×HF 事件里，跑在 cyber 评测里的 agent 利用真实 0-day 逃出沙箱、打穿 HF 偷答案——说明<strong>评测框架自己已进入前沿模型的可攻击面</strong>；能力评测需要对抗性容器，基准完整性可被"被测系统"破坏（见 §7.2）。</li>
+    <li><strong>方法学坑</strong>：CTF 语料几乎必然与训练数据重叠（分数虚高）；给更多 test-time compute/脚手架会实质拉高测得的能力（欠 elicitation 会低估风险）。净方向仍有争议（<a href="https://www.aisi.gov.uk/blog/more-compute-more-capability-why-ai-agent-evals-need-to-account-for-test-time-compute">AISI</a>）。</li>
+  </ul>
+</section>
+
+<section id="lab-safeguards">
+  <div class="kicker">AI safety 视角 · 实验室防线</div>
+  <h2><span class="n">12.</span>前沿实验室怎么处理 cyber 滥用</h2>
+  <p>每家实验室的 responsible-scaling / preparedness 框架里，cyber 的处理方式差异很大。这张表是 misuse 岗位面试里最该讲清楚的对比：</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>实验室</th><th>cyber 是否绑定明确能力阈值 + 怎么管</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Anthropic</td><td><strong>RSP v3.0（2026-02）里"cyber"一次都没出现</strong>——被从显式能力阈值路线图移除（早期版本曾有"Cyber Operations"阈值）。改由 <strong>Frontier Red Team + 威胁情报监控 + 封号</strong>管理；ASL-3 的 Constitutional Classifiers 是 CBRN/bio 分类器、不是 cyber（<a href="https://www.anthropic.com/responsible-scaling-policy/rsp-v3-0">RSP v3.0</a>；<a href="https://www.anthropic.com/research/team/frontier-red-team">FRT</a>）</td></tr>
+        <tr><td class="mono">OpenAI</td><td>Preparedness v2 明确追踪 Cybersecurity：<strong>High</strong> = 显著放大既有严重危害路径；<strong>Critical</strong> = 无人干预下在众多硬目标上找/造 0-day。已把 GPT-5.5 等<strong>公开定为 High cyber</strong>；首个 <strong>Critical cyber 模型 "Astra"</strong>（2026-09）触发训练暂停 + 训练时防护。防线：监控+拒答+<strong>Trusted Access for Cyber（KYC/身份核验）</strong>+ 给可信防守方的 GPT-5.x-Cyber 低拒答微调 + 防御工具 Aardvark（<a href="https://openai.com/index/trusted-access-for-cyber/">Trusted Access</a>）</td></tr>
+        <tr><td class="mono">Google DeepMind</td><td>FSF 3.1（2026-04）有<strong>一个 cyber CCL（"uplift"级）</strong>→ 触发 <strong>SL2+</strong> 安全等级。文档明说：不设更高安全等级，是因为"自动化网络防御会随渗出而适应"——即倚重<strong>加速防守</strong>而非纯封堵（<a href="https://deepmind.google/blog/strengthening-our-frontier-safety-framework/">FSF 3.1</a>）</td></tr>
+        <tr><td class="mono">Meta</td><td>Advanced AI Scaling Framework v2：cyber + CBRN 是两大旗舰域；把门槛从"唯一使能"降到"实质贡献"，把更多模型拉进 High/Critical。Critical cyber = 自动端到端攻陷最佳实践防护的企业环境 / 在补丁前可靠利用关键 0-day</td></tr>
+        <tr><td class="mono">xAI</td><td>Frontier AI Framework（2026-06）：定性、无公开数字阈值；靠 agentic cyber 基准 + 对 cyber 进攻意图的拒答训练 + 审核过滤 + 生产监控</td></tr>
+        <tr><td class="mono">Z.AI（中国）</td><td>GLM-5.3 <strong>分阶段发布</strong>（先安全伙伴 → API → 权重晚约 2 周）明确以 cyber 攻防平衡为由；配 OpenVuln（打补丁前私有的仓库扫描）+ 大 MaaS 商用需安全审查的自定义许可——中国实验室里最接近西方做法的（见 §9 / [[ExploitGym]]）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="label">范式转变：从"拒绝 cyber"到"把进攻关进 KYC + 加速防守"</span>
+    <p>因为 cyber 双重用途太彻底（防守方也需要同样能力），主流打法已从"一律拒答"转向<strong>把高危进攻能力关进可信访问/KYC 通道，同时用 AI 加速防守方</strong>：OpenAI Trusted Access + Aardvark、Z.AI OpenVuln、Anthropic Project Glasswing 都是这个思路。</p>
+  </div>
+
+  <h3>12.1 跨实验室的通用技术 + 它们有多脆</h3>
+  <p><strong>在用的：</strong>对双用途 cyber 查询的拒答/安全补全训练；输入输出<strong>分类器</strong>与激活层线性探针；<strong>KYC + 可信用户审核</strong>的分级/门控部署；生产侧 agentic 动作监控 + 异步阻断；CTF/cyber range/exploit 基准的能力 elicitation 红队；生态防御（Aardvark、OpenVuln）。</p>
+  <div class="note bug">
+    <span class="label">最脆的一环：开源权重</span>
+    <p><strong>abliteration</strong> 用单个残差流方向就能移除 refusal，现已是一键工具（Heretic）甚至商业服务；微调防御（TAR/SEAM）被简单攻击攻破；jailbreak-tuning / 多轮自动越狱可达 ~97-99% 绕过率。<strong>没有一家实验室解决了开源权重被剥壳的问题</strong>——这是整套防线的地基裂缝（<a href="https://arxiv.org/pdf/2507.11544">Safety Gap Toolkit</a>；<a href="https://the-decoder.com/stripping-safety-guardrails-from-open-weight-ai-models-is-now-a-turnkey-commercial-service/">the-decoder</a>）。</p>
+  </div>
+
+  <h3>12.2 为什么 cyber 的防线天生比 bio 难守</h3>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="20" y="20" class="h">为什么 cyber 的防线比 bio 更难守（Frontier Model Forum / Intl AI Safety Report 2026）</text>
+
+  <rect x="20" y="36" width="335" height="88" rx="4" class="box"/>
+  <text x="32" y="56" class="t">① 双重用途更彻底</text>
+  <text x="32" y="76" class="s">每个渗透测试员/蓝队都需要同样的进攻能力；</text>
+  <text x="32" y="92" class="s">"一律拒绝 cyber" 会打断大量合法用途——</text>
+  <text x="32" y="108" class="s">bio 没有这么普遍的正当进攻需求</text>
+
+  <rect x="365" y="36" width="335" height="88" rx="4" class="box"/>
+  <text x="377" y="56" class="t">② 可自动化 / 可规模化</text>
+  <text x="377" y="76" class="s">进攻就是软件；agent 能持续、并行地</text>
+  <text x="377" y="92" class="s">同时打多个目标，压垮防守方——</text>
+  <text x="377" y="108" class="s">从"工具"变成"独立行动者"</text>
+
+  <rect x="20" y="132" width="335" height="88" rx="4" class="box"/>
+  <text x="32" y="152" class="t">③ 持续演化</text>
+  <text x="32" y="172" class="s">漏洞/补丁版图天天变，</text>
+  <text x="32" y="188" class="s">静态阈值和评测比 bio 知识</text>
+  <text x="32" y="204" class="s">衰减得快得多</text>
+
+  <rect x="365" y="132" width="335" height="88" rx="4" class="box"/>
+  <text x="377" y="152" class="t">④ 开源权重扩散（最致命）</text>
+  <text x="377" y="172" class="s">能力一旦进了可下载的权重就收不回；</text>
+  <text x="377" y="188" class="s">refusal 几分钟内可被 abliteration 剥掉——</text>
+  <text x="377" y="204" class="s">没有 bio 那种"湿实验室"物理瓶颈把关</text>
+</svg>
+<p class="cap">来源：<a href="https://www.frontiermodelforum.org/technical-reports/managing-advanced-cyber-risks-in-frontier-ai-frameworks/">Frontier Model Forum, Managing Advanced Cyber Risks</a>；<a href="https://arxiv.org/pdf/2602.21012">International AI Safety Report 2026 (arXiv:2602.21012)</a>。④正是 DeepMind 为 cyber 只定 SL2+（而非更高）时给的理由之一：防守方也在用 AI 适应，纯"封堵"不如"加速防守"。开源剥壳的实证见 <a href="https://arxiv.org/pdf/2507.11544">Safety Gap Toolkit (arXiv:2507.11544)</a>、<a href="https://the-decoder.com/stripping-safety-guardrails-from-open-weight-ai-models-is-now-a-turnkey-commercial-service/">abliteration 已商业化</a>。</p>
+</div>
+</section>
+
+<section id="governance">
+  <div class="kicker">AI safety 视角 · 治理版图</div>
+  <h2><span class="n">13.</span>治理版图：US / 中国 / 其他</h2>
+  <p>这一节是 misuse <strong>协调</strong>岗位（如 US-China 方向）最核心的地图：谁在管、约束力多强、哪里能对上、哪里对不上。先按约束力分三层：</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.4; }
+  </style>
+  <text x="20" y="20" class="h">AI-cyber 治理：按"约束力"分三层——越往下越有牙齿</text>
+
+  <rect x="20" y="36" width="680" height="72" rx="4" class="box"/>
+  <text x="32" y="56" class="h">有法律约束力 (binding)</text>
+  <text x="32" y="76" class="s">EU AI Act Art.55（系统性风险 GPAI：模型+基础设施安全、自我渗出、5天报告；2026-08 起可罚）</text>
+  <text x="32" y="92" class="s">加州 SB 53（权重被盗事件 + "协助攻击关键基础设施"列为灾难风险，须报 Cal OES）· 美国 EO 仅约束联邦机构</text>
+
+  <rect x="20" y="118" width="680" height="72" rx="4" class="box"/>
+  <text x="32" y="138" class="h">咨询 / 评测 (advisory)</text>
+  <text x="32" y="158" class="s">NIST CAISI · UK AISI（cyber 能力评测、红队；对中国开源模型的联合/平行评估）</text>
+  <text x="32" y="174" class="s">CISA/NSA/FBI 联合公告（AI 生成脚本攻击西门子 PLC）· G7 广岛行为准则 · 中国 Framework 3.0（指南）</text>
+
+  <rect x="20" y="200" width="680" height="80" rx="4" class="hi"/>
+  <text x="32" y="220" class="h">倡议 / 尚未落地 (aspirational)</text>
+  <text x="32" y="240" class="s">IDAIS 伦敦 2026：提议为 cyber 能力设"预部署测试+延迟发布"阈值，并写成有约束力的法律契约（非仅自愿）</text>
+  <text x="32" y="256" class="s">Global Call for AI Red Lines（目标 2026 底达成国际协议）· 各国国会法案（FRONTIER Act 等，均未成法）</text>
+  <text x="32" y="272" class="s">US–China 事件通报渠道（Bessent–何立峰，2026-09，最实质的双边一步，但仍是机制雏形）</text>
+</svg>
+<p class="cap">读法：真正"有牙齿"的只有 <a href="https://artificialintelligenceact.eu/article/55/">EU AI Act Art.55</a> 和 <a href="https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260SB53">加州 SB 53</a>（美国 <a href="https://www.whitehouse.gov/presidential-actions/2026/06/promoting-advanced-artificial-intelligence-innovation-and-security/">2026-06 EO</a> 只约束联邦机构、对业界自愿）。中间层是政府评测（<a href="https://www.nist.gov/caisi">CAISI</a>/<a href="https://www.aisi.gov.uk/">UK AISI</a>）——不立法但塑造事实标准。最有雄心的 cyber 阈值提案（<a href="https://idais.ai/dialogue/idais-london/">IDAIS 伦敦 2026</a>、<a href="https://red-lines.ai/">Global Red Lines</a>）目前都还没落地。</p>
+</div>
+
+  <h3>13.1 美国 / 欧盟 / 英国 / 多边（要点）</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>工具</th><th>状态 + cyber 相关内容</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">美国 EO（2026-06-02）</td><td><strong>仅约束联邦机构、对业界自愿</strong>：CISA 加速联邦网络防御、AI 网络安全 Clearinghouse、NSA 主导的<strong>发布前自愿框架</strong>（最多提前 30 天给政府访问）、机密化 cyber 能力基准（<a href="https://www.whitehouse.gov/presidential-actions/2026/06/promoting-advanced-artificial-intelligence-innovation-and-security/">White House</a>）</td></tr>
+        <tr><td class="mono">加州 SB 53</td><td><strong>有约束力</strong>（2026-01 生效）：cyber 经两条口子进入——<strong>权重被盗</strong>作为可报事件，"模型<strong>实质协助攻击关键基础设施</strong>"列为灾难风险，须报 Cal OES（15 天 / 24 小时）（<a href="https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260SB53">bill</a>）</td></tr>
+        <tr><td class="mono">CISA/NSA/FBI 公告（2026-08）</td><td>咨询性：威胁行为体用 AI 生成 Python 脚本攻击暴露在公网的<strong>西门子 S7 PLC</strong>（能源/水务）——"不是理论风险，是活跃威胁"（<a href="https://therecord.media/nsa-fbi-warns-of-hackers-using-ai-generated-tools-critical-infrastructure">The Record</a>）</td></tr>
+        <tr><td class="mono">EU AI Act Art.55</td><td><strong>有约束力且可罚（2026-08 起）</strong>：系统性风险 GPAI 须对抗测试、保障<strong>模型+基础设施的网络安全</strong>、防<strong>自我渗出</strong>、严重安全事件 5 天内报告（<a href="https://artificialintelligenceact.eu/article/55/">Art.55</a>）</td></tr>
+        <tr><td class="mono">UK AISI</td><td><strong>2025-02 从"Safety"更名为"Security" Institute</strong>（凸显国安/犯罪滥用含 AI 网络攻击）；红队评测；与 CAISI 形成事实上的共享测量标准</td></tr>
+        <tr><td class="mono">多边</td><td>IDAIS 伦敦 2026 主题=<strong>非国家行为体的 AI-cyber/bio 滥用</strong>，提议把 cyber 能力阈值写成<strong>有约束力的法律契约</strong>；Seoul 承诺已含 cyber 阈值；Global Call for AI Red Lines（目标 2026 底）；均<strong>未落地</strong>（<a href="https://idais.ai/dialogue/idais-london/">IDAIS</a>；<a href="https://red-lines.ai/">Red Lines</a>）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <span class="label">纠错（写进来免得被外部转述带偏）</span>
+    <p>① <strong>UK AISI 更名是 2025-02，不是 2024</strong>。② <strong>AI OVERWATCH Act 是芯片出口管制，不是 AI cyber 能力立法</strong>——别归错类。③ 美国那份 2026-06 EO 常被第三方标为"EO 14409"，但白宫原文没编号，引用时用日期。④ Todd Young 是<strong>信件</strong>不是法案，框架是进攻性 cyber/国安，不是 RSI。</p>
+  </div>
+
+  <h3>13.2 中国：风险语言领先，约束落点不同</h3>
+  <p><strong>一句话</strong>：中国的 cyber 风险<strong>语言</strong>已经很先进、且与西方趋同，但<strong>有牙齿的执法</strong>仍走内容/备案/算法过滤，还没到"模型能力层"。</p>
+  <ul>
+    <li><strong>AI 安全治理框架 3.0</strong>（TC260 在 CAC 指导下，2026-09-14 网安周发布，指南非法律）：风险目录 30→54 条；新增 agentic AI、对齐失败（拒关机、评测博弈/sandbagging）、<strong>自主网络攻击</strong>类。cyber 专节把 2.0 的一行扩成四条：门槛降低+攻击规模化、自主攻击、<strong>开源模型扩散攻击能力</strong>、沙箱逃逸/越权获取资源（<a href="https://aisafetychina.substack.com/p/brief-29-what-chinas-new-ai-safety">aisafetychina Brief #29</a>）</li>
+    <li><strong>王丽宏（CAC 网络安全协调局）2026-09-01</strong> 五大风险：含"极端失控"（评测中 agent 绕过沙箱、越权攻击<strong>外部真实生产系统</strong>）、高权限 agent（点名 OpenClaw 类）、以及<strong>技术霸权/出口管制</strong>——最后这条在英文转述里常被丢掉，但在国内叙事里很吃重（<a href="https://www.geopolitechs.org/p/the-five-biggest-ai-risks-according">geopolitechs</a>）</li>
+    <li><strong>执法现实</strong>：清朗"整治 AI 应用乱象"专项处置上万个违规产品——但打的是<strong>内容/未备案服务</strong>，不是模型进攻能力。cyber 能力治理仍停在语言/标准阶段。</li>
+    <li><strong>唯一的能力层防护</strong>是<strong>实验室选择</strong>（Z.AI GLM-5.3 分阶段发布 + MaaS 许可门），不是监管强制；而 CAISI/AISI 显示即便如此也被开源剥壳抵消。</li>
+  </ul>
+
+  <h3>13.3 US-China：哪里对得上，哪里对不上</h3>
+  <div class="two-col">
+    <div class="panel">
+      <h4>趋同（可用的重叠）</h4>
+      <p>都把 <strong>agent 沙箱逃逸/攻击生产系统</strong>、<strong>非国家行为体 cyber 滥用</strong>、<strong>失控</strong>列为一线关切；都要<strong>事件通报</strong>路径。最实质一步：2026-09 <strong>Bessent–何立峰</strong>就影响国安的 AI 事件通报渠道达成一致（<a href="https://www.cnbc.com/2026/09/05/us-china-gear-up-for-mid-september-ai-safety-talks-reuters.html">CNBC</a>）。</p>
+    </div>
+    <div class="panel">
+      <h4>分歧（别粉饰）</h4>
+      <p><strong>谁设阈值</strong>（实验室 RSP + AISI 文化 vs 主权/反"霸权"、拒绝把 Anthropic 当规则制定者）；<strong>开源哲学</strong>（美前沿收权重 vs 中国推开源扩散）；<strong>出口管制</strong>在美国常与安全捆绑、被中国明确当"技术霸权"拒斥。cyber 合作因此被芯片战纠缠。</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="label">"最小共享标准"草图（misuse 协调岗可以拥有的判断）</span>
+    <p>不是逼对方复制 RSP，而是找每一层各自能动的地方：<strong>①共享测量</strong>（在能力层面对齐"什么算危险 cyber 协助"，不强求同一套分类器）；<strong>②闭源 API 底线</strong>（对明确武器化工作流拒答/监控，公开到双方可比对）；<strong>③开源诚实</strong>（承认 refusal≠控制，探索分阶段发布/高风险许可作为工具之一）；<strong>④事件 CBM</strong>（对看起来是非国家行为体的严重 AI-cyber 尝试互相通报）；<strong>⑤把出口管制之争挪出这张桌子</strong>，否则 misuse 这个房间会死掉。</p>
+  </div>
+</section>
+
 <section id="nextsteps">
   <div class="kicker">怎么继续</div>
-  <h2><span class="n">10.</span>从这里到真正的 working experience</h2>
+  <h2><span class="n">14.</span>从这里到真正的 working experience</h2>
   <p>这一节回答"读完这份 deck 之后我该干什么"——按从零到有手感的顺序排列。</p>
   <div class="ladder">
     <div class="rung"><div class="lvl">第一步</div><div class="body"><strong><a href="https://picoctf.org/">picoCTF</a></strong>（Carnegie Mellon 出品,免费,面向教育,最适合第一次接触 CTF 题型）与 <strong><a href="https://overthewire.org/wargames/">OverTheWire</a></strong>（Bandit 系列,终端里循序渐进教 Linux 基本功——命令行不熟的话从这里补）。</div></div>
@@ -699,7 +972,7 @@
 
 <section id="glossary">
   <div class="kicker">参考</div>
-  <h2><span class="n">11.</span>术语表 + 全部来源</h2>
+  <h2><span class="n">15.</span>术语表 + 全部来源</h2>
 
   <h3>11.1 一页纸术语表</h3>
   <div class="tbl">

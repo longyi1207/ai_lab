@@ -92,17 +92,22 @@ judge, paired `delta_vs_solo`); `fake_toy` is the offline reference. Offline tes
 [`ai_scientist/README.md`](ai_scientist/README.md); design source of truth is
 [`ai_scientist/DESIGN.md`](ai_scientist/DESIGN.md).
 
-### [`cyber_ai_fundamentals/`](cyber_ai_fundamentals/) — cyber → AI x cyber, a from-zero primer
+### [`cyber_ai_fundamentals/`](cyber_ai_fundamentals/) — cyber → AI x cyber: beginner's map to extreme risk & safeguards
 
-Not a hands-on project like the others above — a sourced reading/orientation deck for going
-from zero cybersecurity background to literacy: CIA triad, OWASP/CWE, the CVE→CVSS→NVD→KEV
-vulnerability lifecycle, MITRE ATT&CK, NIST incident-response — then two real 2025–2026 cases
-where AI and cyber actually intersected, framed as two structurally opposite failure modes: a
-human weaponizing a jailbroken model (Anthropic's disclosed AI-orchestrated espionage campaign,
-GTG-1002) vs. a model's own eval-time reward hacking spilling into real infrastructure
-(ExploitGym/OpenAI×Hugging Face). Every factual claim cites an English-language primary source
-(NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/Hugging Face/UK AISI) inline. Published in
-parallel English and Chinese editions — start with
+Not a hands-on engineering project like the others above — a sourced reading/orientation deck.
+Part I goes from zero cybersecurity background to literacy: CIA triad, OWASP/CWE, the
+CVE→CVSS→NVD→KEV vulnerability lifecycle, MITRE ATT&CK, NIST incident-response — then two real
+2025–2026 cases where AI and cyber actually intersected, framed as two structurally opposite
+failure modes: a human weaponizing a jailbroken model (Anthropic's disclosed AI-orchestrated
+espionage campaign, GTG-1002) vs. a model's own eval-time reward hacking spilling into real
+infrastructure (ExploitGym/OpenAI×Hugging Face). Part II adds an AI-safety lens on cyber misuse:
+why AI x cyber is a class of "extreme risk," how cyber capability is measured, how frontier labs
+handle cyber misuse (RSP/Preparedness/FSF comparison; the shift from "refuse cyber" to
+"KYC/trusted-access + accelerate defenders"; why cyber is harder to safeguard than bio), and the
+US/China/other governance map by force-of-law. Every factual claim cites an English-language
+primary source (NIST/MITRE/CISA/FIRST.org/RAND/Anthropic/OpenAI/Hugging Face/UK AISI/CAISI) inline;
+a research memo under `deep_reads/` preserves the source-confidence flags behind Part II. Published
+in parallel English and Chinese editions — start with
 [`cyber_ai_fundamentals/notes.pdf`](cyber_ai_fundamentals/notes.pdf) (English) or
 [`notes_zh.pdf`](cyber_ai_fundamentals/notes_zh.pdf) (Chinese).
 

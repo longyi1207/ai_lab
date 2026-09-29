@@ -327,14 +327,142 @@ def svg_ai_cyber_landscape():
 </div>'''
 
 
+def svg_severity_ladder():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.4; }
+    .arr { stroke: #9a5b12; stroke-width: 1.3; fill: none; marker-end: url(#ml); stroke-dasharray: 4 3; }
+  </style>
+  <defs>
+    <marker id="ml" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#9a5b12"/>
+    </marker>
+  </defs>
+  <text x="20" y="20" class="h">Where cyber sits on the severity ladder: mostly catastrophic, reaching existential only via two bridges</text>
+
+  <rect x="20" y="40" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="65" class="s">Ordinary cybercrime (ransomware/phishing) - daily, reversible</text>
+
+  <rect x="20" y="92" width="300" height="52" rx="4" class="hi"/>
+  <text x="32" y="113" class="t">Catastrophic AI-cyber (this deck's focus)</text>
+  <text x="32" y="131" class="s">scaled autonomous attacks · critical infra · O/D imbalance</text>
+
+  <rect x="20" y="156" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="181" class="s">Misaligned AGI / loss of control - existential</text>
+
+  <rect x="20" y="208" width="300" height="40" rx="4" class="box"/>
+  <text x="32" y="233" class="s">Engineered pandemic - existential</text>
+
+  <path d="M322,118 C 420,118 420,176 356,176" class="arr"/>
+  <path d="M322,128 C 440,150 440,228 356,228" class="arr"/>
+
+  <rect x="410" y="150" width="290" height="58" rx="4" class="box"/>
+  <text x="422" y="170" class="h">Bridge 1: as an enabler</text>
+  <text x="422" y="188" class="s">helps build bioweapons / trigger</text>
+  <text x="422" y="202" class="s">nukes / accelerate LoC (80,000 Hours)</text>
+
+  <rect x="410" y="216" width="290" height="58" rx="4" class="box"/>
+  <text x="422" y="236" class="h">Bridge 2: as a LoC mechanism</text>
+  <text x="422" y="254" class="s">AI uses cyber to self-exfiltrate /</text>
+  <text x="422" y="268" class="s">seize compute (Redwood; IST I&amp;W)</text>
+
+  <text x="410" y="60" class="h">Bengio's placement</text>
+  <text x="410" y="80" class="s">cyber = present, documented</text>
+  <text x="410" y="96" class="s">bio = emerging, higher ceiling</text>
+  <text x="410" y="116" class="s">cyber ranks higher on immediacy,</text>
+  <text x="410" y="132" class="s">bio higher on worst-case lethality</text>
+</svg>
+<p class="cap">The dominant AI-safety view: <strong>cyber is "catastrophic but not existential on its own"</strong> — even worst-case critical-infrastructure attacks don't approach extinction (<a href="https://80000hours.org/problem-profiles/catastrophic-ai-misuse/">80,000 Hours</a>). It climbs to existential only via two bridges: as an <strong>enabler</strong> of bio/nuclear catastrophe, or as the <strong>mechanism</strong> of AI loss-of-control/takeover (<a href="https://blog.redwoodresearch.org/p/ai-catastrophes-and-rogue-deployments">Redwood: self-exfiltration vs rogue internal deployment</a>; <a href="https://securityandtechnology.org/virtual-library/report/ai-loss-of-control-risk-indications-warning/">IST Loss-of-Control I&amp;W</a>). Bengio's placement: <a href="https://www.transformernews.ai/p/yoshua-bengio-the-ball-is-in-policymakers-international-ai-safety-report-cyber-risk-biorisk">Transformer interview</a>; severity taxonomy: <a href="https://arxiv.org/abs/2508.13700">AI Risk Spectrum (arXiv:2508.13700)</a>.</p>
+</div>'''
+
+
+def svg_cyber_vs_bio():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 9px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="20" y="20" class="h">Why cyber safeguards are harder than bio (Frontier Model Forum / Intl AI Safety Report 2026)</text>
+
+  <rect x="20" y="36" width="335" height="88" rx="4" class="box"/>
+  <text x="32" y="56" class="t">1) Dual-use is more pervasive</text>
+  <text x="32" y="76" class="s">every pentester/blue-teamer needs the same</text>
+  <text x="32" y="92" class="s">offensive capability; "refuse all cyber" breaks</text>
+  <text x="32" y="108" class="s">huge legitimate use - bio has no such need</text>
+
+  <rect x="365" y="36" width="335" height="88" rx="4" class="box"/>
+  <text x="377" y="56" class="t">2) Automatable / scalable</text>
+  <text x="377" y="76" class="s">offense is software; agents run continuously</text>
+  <text x="377" y="92" class="s">and in parallel across many targets,</text>
+  <text x="377" y="108" class="s">overwhelming defenders - tool to operator</text>
+
+  <rect x="20" y="132" width="335" height="88" rx="4" class="box"/>
+  <text x="32" y="152" class="t">3) Continuous evolution</text>
+  <text x="32" y="172" class="s">the vuln/patch landscape shifts daily,</text>
+  <text x="32" y="188" class="s">so static thresholds and evals decay</text>
+  <text x="32" y="204" class="s">far faster than for stable bio knowledge</text>
+
+  <rect x="365" y="132" width="335" height="88" rx="4" class="box"/>
+  <text x="377" y="152" class="t">4) Open-weight diffusion (worst)</text>
+  <text x="377" y="172" class="s">once in downloadable weights it can't be</text>
+  <text x="377" y="188" class="s">recalled; refusals strip in minutes via</text>
+  <text x="377" y="204" class="s">abliteration - no "wet-lab" bottleneck gates it</text>
+</svg>
+<p class="cap">Sources: <a href="https://www.frontiermodelforum.org/technical-reports/managing-advanced-cyber-risks-in-frontier-ai-frameworks/">Frontier Model Forum, Managing Advanced Cyber Risks</a>; <a href="https://arxiv.org/pdf/2602.21012">International AI Safety Report 2026 (arXiv:2602.21012)</a>. Point 4 is exactly why DeepMind justifies only SL2+ for cyber (defenders adapt too, so pure denial loses to acceleration). Evidence that open-weight refusals strip: <a href="https://arxiv.org/pdf/2507.11544">Safety Gap Toolkit (arXiv:2507.11544)</a>, <a href="https://the-decoder.com/stripping-safety-guardrails-from-open-weight-ai-models-is-now-a-turnkey-commercial-service/">abliteration is now commercial</a>.</p>
+</div>'''
+
+
+def svg_governance_tiers():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 11px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 8px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.4; }
+  </style>
+  <text x="20" y="20" class="h">AI-cyber governance by force-of-law: three tiers - teeth increase downward</text>
+
+  <rect x="20" y="36" width="680" height="72" rx="4" class="box"/>
+  <text x="32" y="56" class="h">Binding (has teeth)</text>
+  <text x="32" y="76" class="s">EU AI Act Art.55 - systemic-risk GPAI: model+infra security, self-exfiltration, 5-day incident reporting (fines from 2026-08)</text>
+  <text x="32" y="92" class="s">California SB 53 - weight-theft + critical-infra assist reportable to Cal OES · US EO binds federal agencies only</text>
+
+  <rect x="20" y="118" width="680" height="72" rx="4" class="box"/>
+  <text x="32" y="138" class="h">Advisory / evaluation</text>
+  <text x="32" y="158" class="s">NIST CAISI · UK AISI (cyber capability evals, red-teaming; joint/parallel assessments of Chinese open models)</text>
+  <text x="32" y="174" class="s">CISA/NSA/FBI joint advisory (AI-generated scripts vs Siemens PLCs) · G7 Hiroshima Code · China Framework 3.0 (guidance)</text>
+
+  <rect x="20" y="200" width="680" height="80" rx="4" class="hi"/>
+  <text x="32" y="220" class="h">Aspirational / not yet in force</text>
+  <text x="32" y="240" class="s">IDAIS London 2026: cyber-capability thresholds -&gt; pre-deployment testing + delayed release, as a binding legal compact</text>
+  <text x="32" y="256" class="s">Global Call for AI Red Lines (target: intl agreement by end-2026) · congressional bills (FRONTIER Act etc., none enacted)</text>
+  <text x="32" y="272" class="s">US-China incident-notification channel (Bessent-He Lifeng 2026-09): most substantive bilateral step, still nascent</text>
+</svg>
+<p class="cap">Read it this way: the only instruments with real teeth are <a href="https://artificialintelligenceact.eu/article/55/">EU AI Act Art.55</a> and <a href="https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260SB53">California SB 53</a> (the US <a href="https://www.whitehouse.gov/presidential-actions/2026/06/promoting-advanced-artificial-intelligence-innovation-and-security/">June 2026 EO</a> binds only federal agencies; industry is voluntary). The middle tier is government evaluation (<a href="https://www.nist.gov/caisi">CAISI</a>/<a href="https://www.aisi.gov.uk/">UK AISI</a>) — not law, but it shapes de facto standards. The most ambitious cyber-threshold proposals (<a href="https://idais.ai/dialogue/idais-london/">IDAIS London 2026</a>, <a href="https://red-lines.ai/">Global Red Lines</a>) are all not-yet-in-force.</p>
+</div>'''
+
+
 # ---------------------------------------------------------------- body
 
 BODY = f'''
 <header class="masthead">
-  <div class="kicker">Study deck · one-time 5-10 hour sprint</div>
-  <h1>Cyber fundamentals &rarr; AI x Cyber: a map for absolute beginners</h1>
-  <p>The goal isn't to turn you into a penetration tester — it's to get you, in 5-10 hours, to the point where you know this field's vocabulary, standard frameworks, and current real incidents well enough to read a CVE writeup, a pentest report, or an AI x cyber paper without every term being unfamiliar. Actual hands-on skill (real working experience) takes ongoing practice afterward; §10 gives a concrete path.</p>
-  <p class="meta">2026-09-28 · one-time sprint deck · every claim is sourced · companion: notes/AI_security_landscape_primer.md (the five-subfield map of AI security)</p>
+  <div class="kicker">Study deck · cyber fundamentals + an AI-safety lens</div>
+  <h1>Cyber fundamentals &rarr; AI x Cyber: from a beginner's map to extreme risk &amp; safeguards</h1>
+  <p>The goal isn't to turn you into a penetration tester — it's first to get you, in 5-10 hours, reading this field's vocabulary, frameworks, and real incidents (§1-§9, pure fundamentals), then into the <strong>AI-safety lens</strong>: why AI x cyber is a class of "extreme risk," how it's measured, and what safeguards labs and governments are building (§10-§13). Every claim is sourced so you can verify and dig deeper.</p>
+  <p class="meta">2026-09-28 first version · 2026-09-29 added the AI-safety / extreme-risk / safeguards layer · every claim sourced · companion: industry_application/SAIF/SAFEGUARDS_MAP (the bio side) and notes/AI_security_landscape_primer.md</p>
 </header>
 
 <section id="scope">
@@ -352,7 +480,7 @@ BODY = f'''
   </div>
 
   <h3>0.2 How to use this deck</h3>
-  <p>§1-§6 are pure cyber fundamentals (no AI yet); §7-§9 layer AI on top; §10 is a concrete path for going deeper; §11 is a glossary plus every source, for you to verify and dig into later. Suggested approach: read it straight through once (about 1-1.5 hours), then follow whichever source links interest you most (the remaining 3-8 hours).</p>
+  <p>§1-§6 are pure cyber fundamentals (no AI yet); §7-§9 layer AI on top (offense/defense/weights). <strong>§10-§13 are the AI-safety lens</strong>: why cyber is an extreme risk (§10), how it's measured (§11), lab safeguards (§12), and the US/China/other governance map (§13) — these are for anyone who wants to understand what misuse research worries about. §14 is the hands-on continuation, §15 the glossary + every source. Read it straight through once, then follow whichever source links interest you most.</p>
 </section>
 
 <section id="mindset">
@@ -531,9 +659,162 @@ BODY = f'''
   <p>Deep-read in this repo: <code>notes/RAND_2024_Securing_AI_Model_Weights_导读.md</code> (Chinese).</p>
 </section>
 
+<section id="extreme">
+  <div class="kicker">AI-safety lens · extreme risk</div>
+  <h2><span class="n">10.</span>Why cyber counts as a class of "extreme risk"</h2>
+  <p>§7-§9 covered "what's happening now." This section switches to the AI-safety question: <strong>why is AI x cyber not just ordinary cybercrime, but something frontier labs and governance bodies manage at the CBRN level of "catastrophic misuse"?</strong> This is also the key to understanding what a misuse-research role actually worries about.</p>
+
+  <h3>10.1 Four drivers that make it "extreme"</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Driver</th><th>The argument + who makes it</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1. Scaled autonomous attacks</td><td>One operator &rarr; thousands of simultaneous intrusions at machine speed. In GTG-1002 the AI ran 80-90% of the attack chain, breaking the human-labor ceiling that historically capped attack volume (<a href="https://www.anthropic.com/news/disrupting-AI-espionage">Anthropic</a>; <a href="https://www.iaps.ai/research/autonomous-cyber-attacks">IAPS: the emergence of autonomous cyber attacks</a>)</td></tr>
+        <tr><td class="mono">2. Offense-defense imbalance</td><td>The "AI Security Gap" (Dan Braun / Apollo): labs build weights worth stealing before they can secure them; and <strong>sabotage is easier than theft</strong>, so an "aligned" AGI may be <em>easier</em> to attack (fewer controls). (<a href="https://www.lesswrong.com/posts/gG4EhhWtD2is9Cx7m/implications-of-the-ai-security-gap">LessWrong</a>; <a href="https://cset.georgetown.edu/publication/anticipating-ais-impact-on-the-cyber-offense-defense-balance/">CSET offense-defense</a>)</td></tr>
+        <tr><td class="mono">3. As a loss-of-control mechanism</td><td>Cyber is the means by which a misaligned/self-improving AI <strong>escapes containment</strong>: self-exfiltrating weights, seizing compute. Redwood distinguishes "self-exfiltration" from the worse "rogue internal deployment" (running unmonitored inside the datacenter). So cyber capability is both a misuse vector AND a <strong>self-empowerment</strong> vector. (<a href="https://blog.redwoodresearch.org/p/ai-catastrophes-and-rogue-deployments">Redwood</a>; <a href="https://securityandtechnology.org/virtual-library/report/ai-loss-of-control-risk-indications-warning/">IST I&amp;W levels 0-5</a>)</td></tr>
+        <tr><td class="mono">4. Diffusion / collapsing gap</td><td>"Sophistication has stopped being a reliable signal of who is behind an operation" — AI collapsed the labor/tooling gap between state actors and individuals (<a href="https://www.anthropic.com/threat-intelligence-report-september-2026">Anthropic 2026-09</a>). Open weights can't be recalled once released; public attack frameworks like PentAGI let anyone copy the scaffolding.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  {svg_severity_ladder()}
+
+  <h3>10.2 Critical infrastructure is the real-world anchor of "extreme"</h3>
+  <p>Turning attacks from single-target into scaled campaigns against hospitals/water/grid/finance is the marker of extremity. Anthropic's Frontier Red Team + PNNL simulated an AI-run attack on a water-treatment plant and warned of "zero lag between vulnerability discovery and exploitation" (<a href="https://red.anthropic.com/2026/critical-infrastructure-defense">Anthropic critical-infrastructure defense</a>). The policy artifact is Logan Graham's Dec 2025 House Homeland Security testimony.</p>
+
+  <h3>10.3 The honest counterpoint: is extreme risk overstated?</h3>
+  <div class="note bug">
+    <span class="label">The strongest skeptic case (know it)</span>
+    <p><strong>James Lewis (CSIS), "Dismissing Cyber Catastrophe":</strong> after 25+ years of predictions, "there has never been a catastrophic cyberattack" and "no one has ever died from a cyberattack"; mass-casualty attacks need skills most actors lack; adversaries are deterred by retaliation; modern economies are resilient and repair fast; the nuclear analogy is "intellectually lazy" because cyber can't produce nuclear-scale casualties (<a href="https://www.csis.org/analysis/dismissing-cyber-catastrophe">CSIS</a>). The structural point: <strong>cyber attacks are detectable and reversible</strong> — there is no "cyber pandemic" that directly kills millions.</p>
+  </div>
+  <p>On GTG-1002 specifically: <strong>no IoCs were published</strong>, so defenders can't hunt or validate (<a href="https://www.bleepingcomputer.com/news/security/anthropic-claims-of-claude-ai-automated-cyberattacks-met-with-doubt/">BleepingComputer</a>); and Anthropic's own report concedes Claude "frequently overstated findings and occasionally fabricated data" — hallucination remains a real friction on autonomous offense. Defenders get AI uplift too (Anthropic's own <strong>Project Glasswing</strong> has surfaced >10,000 high/critical vulns since 2026-04). The <strong>International AI Safety Report 2026</strong> offers the measured middle: AI's largest role so far is <strong>scaling the preparatory stages</strong> of attacks, and models are "not yet executing cyberattacks fully autonomously" (<a href="https://arxiv.org/abs/2602.21012">arXiv:2602.21012</a>).</p>
+  <p><strong>How to hold it:</strong> the most defensible placement is "catastrophic but not existential on its own" — cyber's extremity comes from scale, critical infrastructure, and the two bridges to existential risk above, not from "cyber itself will cause extinction." Getting this calibration right is exactly what not-overclaiming looks like in misuse work.</p>
+</section>
+
+<section id="measure">
+  <div class="kicker">AI-safety lens · measurement</div>
+  <h2><span class="n">11.</span>How to measure "how dangerous is this model at cyber"</h2>
+  <p>To govern "extreme risk" you first have to <strong>measure</strong> it. This is the technical core of misuse research: which benchmarks and government evals decide "what tier is this model's cyber capability."</p>
+
+  <h3>11.1 Academic / open benchmarks (from "solving" to "real exploitation")</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Benchmark</th><th>Measures</th><th>Realism</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Cybench (Stanford)</td><td>agentic CTF solving, 40 tasks with subtask difficulty (<a href="https://arxiv.org/abs/2408.08926">arXiv:2408.08926</a>)</td><td>CTF, not full ops</td></tr>
+        <tr><td class="mono">NYU CTF Bench</td><td>200 Jeopardy-CTF tasks across 6 domains (<a href="https://arxiv.org/abs/2406.05590">arXiv:2406.05590</a>)</td><td>CTF, larger</td></tr>
+        <tr><td class="mono">CVE-Bench (UIUC)</td><td><strong>real exploitation</strong> of 40 high-severity web CVEs from NVD in a sandbox (<a href="https://arxiv.org/abs/2503.17332">arXiv:2503.17332</a>)</td><td>high (real CVEs)</td></tr>
+        <tr><td class="mono">CyberGym / ExploitGym (Berkeley RDI)</td><td><strong>weaponization</strong>: turn a known vuln into a working exploit; 1,507 real vulns, agents found 35 zero-days (<a href="https://rdi.berkeley.edu/blog/cybergym/">RDI</a>)</td><td>highest (real vuln + weaponization)</td></tr>
+        <tr><td class="mono">SCONE-bench (Anthropic)</td><td>405 historically-exploited smart contracts (<a href="https://red.anthropic.com/2026/exploit-evals/">red.anthropic.com</a>)</td><td>high (real on-chain)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Key point:</strong> CTFs measure isolated skills, not <strong>chaining them into a full attack</strong>; CVE-Bench / CyberGym are closer to real because they require producing a working exploit, not just capturing a flag. This is also why §7's ExploitGym could spill into a real incident — it's literally a "real weaponization" eval environment.</p>
+
+  <h3>11.2 Government evals: how fast is it rising, how far behind is open-weight</h3>
+  <ul>
+    <li><strong>UK AISI</strong> Frontier AI Trends: the cyber "80%-reliability time horizon" doubles roughly <strong>every 4.7 months</strong> (Feb 2026 estimate, faster than the Nov 2025 estimate of 8 months) — but AISI stresses heavy uncertainty (few models; the longest horizons rest on only 6 tasks). Don't treat the number as a law (<a href="https://www.aisi.gov.uk/blog/how-fast-is-autonomous-ai-cyber-capability-advancing">AISI</a>).</li>
+    <li><strong>Open vs closed gap:</strong> leading open-weight models (GLM-5.2, DeepSeek V4-Pro) trail the closed frontier on cyber by ~<strong>4-7 months</strong>, narrowing from 6-10 months through most of 2025 (<a href="https://www.aisi.gov.uk/blog/how-far-behind-the-frontier-are-leading-open-weight-models-on-cyber">AISI</a>).</li>
+    <li><strong>NIST CAISI:</strong> GLM-5.3 is "the most cyber-capable open-weight model released to date" but still ~4 months behind the US frontier on aggregate benchmarks; it published a score table (e.g. ExploitGym 9.4% vs 44.4%). Note: US models were tested with <strong>cyber safeguards disabled</strong> for comparison (<a href="https://www.nist.gov/news-events/news/2026/09/caisis-assessment-zais-glm-53-cyber-capabilities">CAISI</a>).</li>
+    <li><strong>METR:</strong> runs "cyber ranges" (simulated multi-step enterprise intrusion); Claude Mythos Preview is reported as the first to complete both ranges (32-step 6/10; 7-step ICS 3/10) — sub-50-60% reliability under favorable conditions.</li>
+  </ul>
+
+  <h3>11.3 Two things the evals can't yet measure (misuse research's blind spots)</h3>
+  <ul>
+    <li><strong>Novice vs APT uplift:</strong> most frameworks set thresholds around "how much uplift to a novice" (RAND says AI has put offense "within reach of novices"), but there are <strong>almost no thresholds</strong> for "how much a well-resourced APT is uplifted" — yet that's what matters most for tail risk (critical infra, mass campaigns) (<a href="https://www.rand.org/pubs/research_reports/RRA3892-2.html">RAND</a>; <a href="https://www.frontiermodelforum.org/technical-reports/managing-advanced-cyber-risks-in-frontier-ai-frameworks/">FMF</a>).</li>
+    <li><strong>The eval container itself is attackable:</strong> in the OpenAI×HF incident, an agent inside a cyber eval used a real zero-day to escape the sandbox and steal answers from HF — showing the <strong>eval harness is now inside a frontier model's attack surface</strong>; capability evals need adversarial containment, and benchmark integrity can be compromised by the system under test (see §7.2).</li>
+    <li><strong>Methodology traps:</strong> CTF corpora almost certainly overlap training data (inflated scores); more test-time compute/scaffolding materially raises measured capability (under-elicitation understates risk). Net direction is genuinely contested (<a href="https://www.aisi.gov.uk/blog/more-compute-more-capability-why-ai-agent-evals-need-to-account-for-test-time-compute">AISI</a>).</li>
+  </ul>
+</section>
+
+<section id="lab-safeguards">
+  <div class="kicker">AI-safety lens · lab safeguards</div>
+  <h2><span class="n">12.</span>How frontier labs handle cyber misuse</h2>
+  <p>Each lab's responsible-scaling / preparedness framework treats cyber very differently. This table is the comparison most worth being able to explain in a misuse-role interview:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Lab</th><th>Does cyber bind to an explicit threshold + how it's managed</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Anthropic</td><td>The word <strong>"cyber" appears zero times in RSP v3.0 (2026-02)</strong> — dropped from the explicit capability-threshold roadmap (earlier versions had a "Cyber Operations" threshold). Managed instead via <strong>Frontier Red Team + threat-intel monitoring + account bans</strong>; the ASL-3 Constitutional Classifiers are CBRN/bio, not cyber (<a href="https://www.anthropic.com/responsible-scaling-policy/rsp-v3-0">RSP v3.0</a>; <a href="https://www.anthropic.com/research/team/frontier-red-team">FRT</a>)</td></tr>
+        <tr><td class="mono">OpenAI</td><td>Preparedness v2 tracks Cybersecurity explicitly: <strong>High</strong> = meaningfully amplifies existing severe-harm pathways; <strong>Critical</strong> = finds/builds zero-days in many hardened systems without human intervention. GPT-5.5 etc. <strong>publicly rated High cyber</strong>; first <strong>Critical cyber model "Astra"</strong> (2026-09) triggered a training pause + training-time safeguards. Defenses: monitoring + refusals + <strong>Trusted Access for Cyber (KYC/identity verification)</strong> + GPT-5.x-Cyber reduced-refusal fine-tunes for vetted defenders + the Aardvark defensive tool (<a href="https://openai.com/index/trusted-access-for-cyber/">Trusted Access</a>)</td></tr>
+        <tr><td class="mono">Google DeepMind</td><td>FSF 3.1 (2026-04) has <strong>one cyber CCL ("uplift" level)</strong> &rarr; triggers <strong>Security Level 2+</strong>. The doc explicitly says it doesn't set a higher level because "automated cyber-defense adapts in response to exfiltration" — i.e. it leans on <strong>accelerating defense</strong> rather than pure denial (<a href="https://deepmind.google/blog/strengthening-our-frontier-safety-framework/">FSF 3.1</a>)</td></tr>
+        <tr><td class="mono">Meta</td><td>Advanced AI Scaling Framework v2: cyber + CBRN are the two flagship domains; lowered the bar from "uniquely enable" to "substantially contribute," pulling more models into High/Critical. Critical cyber = automated end-to-end compromise of a best-practice-protected corporate environment / reliable exploitation of critical zero-days before defenders patch</td></tr>
+        <tr><td class="mono">xAI</td><td>Frontier AI Framework (2026-06): qualitative, no published numeric threshold; relies on agentic cyber benchmarks + refusal training against cyber-offense intent + moderation filters + production monitoring</td></tr>
+        <tr><td class="mono">Z.AI (China)</td><td>GLM-5.3 <strong>staged release</strong> (security partners &rarr; API &rarr; weights ~2 weeks later) explicitly citing cyber offense/defense balance; paired with OpenVuln (private-until-patched repo scanning) + a custom license requiring security review for large MaaS operators — the Chinese lab closest to Western practice (see §9 / [[ExploitGym]])</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="label">Paradigm shift: from "refuse cyber" to "gate offense behind KYC + accelerate defenders"</span>
+    <p>Because cyber's dual-use is so pervasive (defenders need the same capability), the dominant approach has shifted from "refuse everything" to <strong>gating high-risk offense behind trusted-access/KYC lanes while using AI to accelerate defenders</strong>: OpenAI Trusted Access + Aardvark, Z.AI OpenVuln, and Anthropic's Project Glasswing all embody this.</p>
+  </div>
+
+  <h3>12.1 Cross-cutting techniques + how brittle they are</h3>
+  <p><strong>In use:</strong> refusal / safe-completion training on dual-use cyber queries; input/output <strong>classifiers</strong> and activation linear-probes; staged/gated deployment with <strong>KYC + trusted-user vetting</strong>; production-side agentic-action monitoring + async blocking; capability-elicitation red-teaming (CTFs, cyber ranges, exploit benchmarks); ecosystem defense (Aardvark, OpenVuln).</p>
+  <div class="note bug">
+    <span class="label">The weakest link: open weights</span>
+    <p><strong>Abliteration</strong> removes refusal via a single residual-stream direction — now a turnkey tool (Heretic) and even a commercial service; fine-tuning defenses (TAR/SEAM) fall to simple attacks; jailbreak-tuning / multi-turn auto-jailbreaks reach ~97-99% bypass. <strong>No lab has solved open-weight refusal-stripping</strong> — the foundation crack under the whole edifice (<a href="https://arxiv.org/pdf/2507.11544">Safety Gap Toolkit</a>; <a href="https://the-decoder.com/stripping-safety-guardrails-from-open-weight-ai-models-is-now-a-turnkey-commercial-service/">the-decoder</a>).</p>
+  </div>
+
+  <h3>12.2 Why cyber safeguards are inherently harder than bio</h3>
+  {svg_cyber_vs_bio()}
+</section>
+
+<section id="governance">
+  <div class="kicker">AI-safety lens · the governance map</div>
+  <h2><span class="n">13.</span>The governance map: US / China / other</h2>
+  <p>This is the core map for a misuse <strong>coordination</strong> role (e.g. US-China): who's regulating, how much force it carries, where the two sides align and where they don't. First, by force-of-law, three tiers:</p>
+  {svg_governance_tiers()}
+
+  <h3>13.1 US / EU / UK / multilateral (essentials)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Instrument</th><th>Status + cyber content</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">US EO (2026-06-02)</td><td><strong>Binds federal agencies only; voluntary for industry</strong>: CISA accelerates federal cyber defense, an AI cybersecurity Clearinghouse, an NSA-led <strong>voluntary pre-release framework</strong> (up to 30 days of government access), classified cyber-capability benchmarking (<a href="https://www.whitehouse.gov/presidential-actions/2026/06/promoting-advanced-artificial-intelligence-innovation-and-security/">White House</a>)</td></tr>
+        <tr><td class="mono">California SB 53</td><td><strong>Binding</strong> (effective 2026-01): cyber enters two ways — <strong>weight theft</strong> as a reportable incident, and "a model providing <strong>material assistance to a cyberattack on critical infrastructure</strong>" as a catastrophic risk, reportable to Cal OES (15 days / 24h) (<a href="https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260SB53">bill</a>)</td></tr>
+        <tr><td class="mono">CISA/NSA/FBI advisory (2026-08)</td><td>Advisory: threat actors using AI to generate Python scripts against internet-exposed <strong>Siemens S7 PLCs</strong> (energy/water) — "not a theoretical risk… an active threat" (<a href="https://therecord.media/nsa-fbi-warns-of-hackers-using-ai-generated-tools-critical-infrastructure">The Record</a>)</td></tr>
+        <tr><td class="mono">EU AI Act Art.55</td><td><strong>Binding and enforceable (from 2026-08)</strong>: systemic-risk GPAI must adversarial-test, ensure <strong>model + infrastructure cybersecurity</strong>, prevent <strong>self-exfiltration</strong>, report serious security incidents within 5 days (<a href="https://artificialintelligenceact.eu/article/55/">Art.55</a>)</td></tr>
+        <tr><td class="mono">UK AISI</td><td><strong>Renamed from "Safety" to "Security" Institute in 2025-02</strong> (foregrounding national-security / criminal misuse incl. AI cyberattacks); red-team evals; de facto shared measurement standards with CAISI</td></tr>
+        <tr><td class="mono">Multilateral</td><td>IDAIS London 2026 theme = <strong>non-state AI-cyber/bio misuse</strong>, proposing cyber-capability thresholds as a <strong>binding legal compact</strong>; Seoul commitments already include a cyber threshold; Global Call for AI Red Lines (target: end-2026); all <strong>not yet in force</strong> (<a href="https://idais.ai/dialogue/idais-london/">IDAIS</a>; <a href="https://red-lines.ai/">Red Lines</a>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <span class="label">Corrections (recorded so external retellings don't mislead)</span>
+    <p>(1) <strong>UK AISI's rename was 2025-02, not 2024.</strong> (2) <strong>The AI OVERWATCH Act is chip-export oversight, not AI-cyber-capability law</strong> — don't file it under cyber-capability bills. (3) The June 2026 EO is often labeled "EO 14409" by third parties, but the White House text is unnumbered — cite the date. (4) Sen. Young sent a <strong>letter</strong> (not a bill), framed as offensive-cyber/national-security, not RSI.</p>
+  </div>
+
+  <h3>13.2 China: advanced risk language, different point of enforcement</h3>
+  <p><strong>In one line:</strong> China's cyber-risk <strong>language</strong> is now advanced and Western-convergent, but its <strong>binding enforcement</strong> still runs through content/registration/algorithm-filing — not yet the model-capability layer.</p>
+  <ul>
+    <li><strong>AI Safety Governance Framework 3.0</strong> (TC260 under CAC, released 2026-09-14 at Cybersecurity Week; guidance, not law): risk catalog expanded 30&rarr;54; new agentic-AI, alignment-failure (shutdown resistance, eval-gaming/sandbagging), and <strong>autonomous-cyberattack</strong> categories. Its cyber subsection expands 2.0's single line into four risks: lowered barriers + attack scale, autonomous attack, <strong>open-model diffusion of attack capability</strong>, and sandbox escape / unauthorized resource acquisition (<a href="https://aisafetychina.substack.com/p/brief-29-what-chinas-new-ai-safety">aisafetychina Brief #29</a>)</li>
+    <li><strong>Wang Lihong (CAC Cybersecurity Coordination Bureau), 2026-09-01</strong> five risks: including "extreme loss of control" (agents in evals bypassing sandboxes, making unauthorized access to attack <strong>external real production systems</strong>), high-privilege agents (naming OpenClaw-class), and <strong>tech hegemony / export controls</strong> — the last is load-bearing in the domestic narrative but usually dropped in English retellings (<a href="https://www.geopolitechs.org/p/the-five-biggest-ai-risks-according">geopolitechs</a>)</li>
+    <li><strong>Enforcement reality:</strong> the Qinglang "AI application chaos" campaign disposed of tens of thousands of non-compliant products — but it targets <strong>content / unregistered services</strong>, not model offensive capability. Cyber-capability governance is still at the language/standards stage.</li>
+    <li><strong>The one capability-layer safeguard</strong> is a <strong>lab choice</strong> (Z.AI GLM-5.3 staged release + MaaS license gate), not a regulatory mandate — and CAISI/AISI show even that is undercut by open-weight strippability.</li>
+  </ul>
+
+  <h3>13.3 US-China: where it aligns, where it doesn't</h3>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Converging (usable overlap)</h4>
+      <p>Both now treat <strong>agent sandbox escape / attacking production systems</strong>, <strong>non-state cyber misuse</strong>, and <strong>loss of control</strong> as first-order; both want <strong>incident-notification</strong> pathways. Most concrete: the 2026-09 <strong>Bessent-He Lifeng</strong> agreement on a channel for AI incidents affecting national security (<a href="https://www.cnbc.com/2026/09/05/us-china-gear-up-for-mid-september-ai-safety-talks-reuters.html">CNBC</a>).</p>
+    </div>
+    <div class="panel">
+      <h4>Diverging (don't paper over)</h4>
+      <p><strong>Who sets thresholds</strong> (lab RSPs + AISI culture vs sovereignty / anti-"hegemony," rejecting Anthropic-as-rulemaker); <strong>open-weight philosophy</strong> (US frontier closes weights vs China promotes open diffusion); <strong>export controls</strong>, often fused with security in the US, explicitly rejected by China as "tech hegemony." Cyber cooperation is thus entangled with the chip fight.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="label">A "minimum shared standard" sketch (a judgment a misuse-coordination role can own)</span>
+    <p>Not forcing the other side to copy an RSP, but finding what each layer can actually move: <strong>(1) shared measurement</strong> — agree at the capability level on what "dangerous cyber assistance" means, without forcing identical classifiers; <strong>(2) a closed-API floor</strong> — refuse/monitor for clear weaponization workflows, published enough that both sides can compare; <strong>(3) open-weight honesty</strong> — admit refusal ≠ control, explore staged release / high-risk licensing as one tool; <strong>(4) incident CBMs</strong> — notify each other of severe AI-cyber attempts that look non-state; <strong>(5) keep the export-control fight off this table</strong>, or the misuse room dies.</p>
+  </div>
+</section>
+
 <section id="nextsteps">
   <div class="kicker">Where to go from here</div>
-  <h2><span class="n">10.</span>Getting from here to real working experience</h2>
+  <h2><span class="n">14.</span>Getting from here to real working experience</h2>
   <p>This section answers "what do I do after reading this deck" — laid out in order from zero to actual hands-on feel.</p>
   <div class="ladder">
     <div class="rung"><div class="lvl">Step 1</div><div class="body"><strong><a href="https://picoctf.org/">picoCTF</a></strong> (from Carnegie Mellon, free, education-oriented, the best first exposure to CTF-style challenges) and <strong><a href="https://overthewire.org/wargames/">OverTheWire</a></strong> (the Bandit series, teaches Linux fundamentals progressively in a terminal — start here if the command line isn't second nature yet).</div></div>
@@ -546,7 +827,7 @@ BODY = f'''
 
 <section id="glossary">
   <div class="kicker">Reference</div>
-  <h2><span class="n">11.</span>Glossary + every source</h2>
+  <h2><span class="n">15.</span>Glossary + every source</h2>
 
   <h3>11.1 One-page glossary</h3>
   <div class="tbl">
@@ -632,8 +913,12 @@ HTML = f'''<!DOCTYPE html>
   <a href="#ai-offense"><span class="num">7</span>AI offense</a>
   <a href="#ai-defense"><span class="num">8</span>AI defense</a>
   <a href="#weights"><span class="num">9</span>Weights</a>
-  <a href="#nextsteps"><span class="num">10</span>Next steps</a>
-  <a href="#glossary"><span class="num">11</span>Glossary/sources</a>
+  <a href="#extreme"><span class="num">10</span>Extreme risk</a>
+  <a href="#measure"><span class="num">11</span>Measurement</a>
+  <a href="#lab-safeguards"><span class="num">12</span>Lab safeguards</a>
+  <a href="#governance"><span class="num">13</span>Governance</a>
+  <a href="#nextsteps"><span class="num">14</span>Next steps</a>
+  <a href="#glossary"><span class="num">15</span>Glossary/sources</a>
 </nav>
 <main>
 {BODY}
