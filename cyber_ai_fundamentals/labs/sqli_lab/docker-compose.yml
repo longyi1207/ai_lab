@@ -1,0 +1,18 @@
+# SQL-injection lab - one deliberately vulnerable web app (BookNook).
+# Published on host port 8899. SQLite backend, pure stdlib, no pip.
+services:
+  shop-app:
+    image: python:3.11-slim
+    container_name: shop-app
+    working_dir: /app
+    volumes:
+      - ./services/shop-app:/app:ro
+    command: python /app/server.py
+    ports:
+      - "8899:80"
+    networks:
+      - cyberlab
+
+networks:
+  cyberlab:
+    external: true

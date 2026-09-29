@@ -112,13 +112,14 @@ editions — start with
 [`notes_zh.pdf`](cyber_ai_fundamentals/notes_zh.pdf) (Chinese). Anthropic's original GTG-1002 report
 is kept alongside them at [`cyber_ai_fundamentals/reports/`](cyber_ai_fundamentals/reports/).
 
-And where the decks stay at literacy level, [`cyber_ai_fundamentals/labs/ssrf_killchain/`](cyber_ai_fundamentals/labs/ssrf_killchain/)
-turns that abstract Task 1-5 table into a runnable, reproducible lab: a self-built three-service
-Docker target (public SSRF app + internal-only admin API + fake cloud-metadata endpoint) that
-reproduces the Capital One 2019 pattern — SSRF → internal enumeration → cloud IAM credential
-theft — with real tooling, an out-of-band callback verifier, and captured run output, each step
-mapped back to GTG-1002. Sandboxed, self-authored, authorized learning environment; all
-credentials fake.
+And where the decks stay at literacy level, [`cyber_ai_fundamentals/labs/`](cyber_ai_fundamentals/labs/)
+holds three runnable, reproducible Docker labs, each focused on one core tool / vulnerability class,
+each with real captured output and a self-built target on an isolated network (sandboxed, authorized,
+fake credentials): **ssrf_killchain** (nmap/curl/Python — reproduces the Capital One 2019 SSRF →
+internal enumeration → cloud IAM credential theft, mapped to GTG-1002's Task 1-5), **sqli_lab**
+(sqlmap against a deliberately injectable app — detect, dump a hidden users table, auto-crack the
+hashes), and **metasploit_cve_lab** (Metasploit against a real Apache Struts2 S2-045 / CVE-2017-5638
+target — recon, hand-proven root RCE, then confirmed with the module's `check`).
 
 ## License
 

@@ -23,11 +23,16 @@ US/China/other governance map by force-of-law.
 
 > The decks occasionally point to fuller `deep_reads/…` notes (a line-by-line GTG-1002 case study and the research memo behind Part II, with every source-confidence flag). Those are the author's private working notes and are **not published in this repo** — the decks themselves are self-contained, and every claim in them carries its own inline primary source.
 
-## Hands-on lab (`labs/`)
+## Hands-on labs (`labs/`)
 
-Where the decks stay at literacy level, this turns the abstract attack phases into runnable code:
+Where the decks stay at literacy level, these turn abstract attacks into runnable, reproducible code.
+Each lab focuses on one core tool / vulnerability class, ships real captured output under `output/`,
+and runs entirely against a self-built target on an isolated Docker network — a sandboxed,
+authorized learning environment; all credentials are fake.
 
-- **[`labs/ssrf_killchain/`](labs/ssrf_killchain/)** - a self-contained **SSRF kill-chain lab** that makes the GTG-1002 case study's "Task 1-5" table concrete. A three-service Docker target on an isolated network (a public SSRF-vulnerable web app, an unauthenticated internal admin API with no host port, and a fake cloud-metadata endpoint) reproduces the **Capital One 2019** pattern: SSRF -> internal service enumeration -> cloud IAM credential theft. Every phase maps 1:1 onto GTG-1002's tasks, uses real tooling (nmap, curl, Python), includes an out-of-band callback verifier (the lab-scale analogue of the "neutral third-party callback service" GTG-1002 used to confirm exploits actually worked), and ships the captured real run output under `output/`. All credentials are fake; the whole thing runs in a sandboxed, self-authored, authorized learning environment. The README maps each step to GTG-1002, adds a defender's view, and links authoritative resources (PortSwigger Web Security Academy, HackTricks, OWASP, Capital One post-mortems).
+- **[`labs/ssrf_killchain/`](labs/ssrf_killchain/)** — **SSRF kill-chain** (tools: nmap, curl, Python). Makes the GTG-1002 case study's "Task 1-5" table concrete: a three-service Docker target (a public SSRF-vulnerable web app, an unauthenticated internal admin API with no host port, and a fake cloud-metadata endpoint) reproduces the **Capital One 2019** pattern — SSRF → internal service enumeration → cloud IAM credential theft — with each phase mapped 1:1 onto GTG-1002's tasks and an out-of-band callback verifier.
+- **[`labs/sqli_lab/`](labs/sqli_lab/)** — **SQL injection** (tool: **sqlmap**). A deliberately injectable "book search" app (SQLite backend, string-concatenated query). Shows the injection by hand (UNION-reading a hidden `users` table), then with sqlmap, which detects the injection, enumerates the schema, dumps the table, and auto-cracks the md5 password hashes. Includes the one-line parameterized-query fix.
+- **[`labs/metasploit_cve_lab/`](labs/metasploit_cve_lab/)** — **known-CVE exploitation** (tool: **Metasploit**). A real vulnerable target, Apache Struts2 **S2-045 / CVE-2017-5638** (the vulnerability class behind the 2017 Equifax breach): recon with nmap, prove RCE by hand via an OGNL header injection (the command runs as **root**), then confirm the CVE independently with the Metasploit module's `check`.
 
 ## Rebuild
 

@@ -1,0 +1,8 @@
+=== Manual PoC 1: prove OGNL executes (server computes 233*233) ===
+HTTP/1.1 200 OK
+vulhub-poc: 54289
+
+=== Manual PoC 2: real command execution — run 'id' and return output in a header ===
+Server: Jetty(9.2.11.v20150529)
+
+uid=0(root) gid=0(root) groups=0(root)

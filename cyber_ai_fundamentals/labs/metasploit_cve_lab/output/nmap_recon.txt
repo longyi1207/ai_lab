@@ -1,0 +1,5 @@
+Starting Nmap 7.991 ( https://nmap.org ) at 2026-09-28 21:08 -0700
+Nmap scan report for localhost (127.0.0.1)
+PORT     STATE SERVICE VERSION
+8280/tcp open  http    Jetty 9.2.11.v20150529
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .

