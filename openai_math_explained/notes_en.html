@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>OpenAI Math Release, Explained</title>
+<style>
+
+  :root {
+    --bg: #fdfcfb;
+    --ink: #1a1a18;
+    --ink-dim: #55524a;
+    --ink-faint: #8a867a;
+    --accent: #9a5b12;
+    --rule: rgba(26,26,24,0.13);
+    --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea;
+    --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --bg: #171613;
+      --ink: #eae6dd;
+      --ink-dim: #a9a396;
+      --ink-faint: #746f63;
+      --accent: #d99a49;
+      --rule: rgba(234,230,221,0.13);
+      --rule-soft: rgba(234,230,221,0.07);
+      --code-bg: #100f0d;
+      --code-border: rgba(234,230,221,0.10);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171613; --ink: #eae6dd; --ink-dim: #a9a396; --ink-faint: #746f63;
+    --accent: #d99a49; --rule: rgba(234,230,221,0.13); --rule-soft: rgba(234,230,221,0.07);
+    --code-bg: #100f0d; --code-border: rgba(234,230,221,0.10);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #fdfcfb; --ink: #1a1a18; --ink-dim: #55524a; --ink-faint: #8a867a;
+    --accent: #9a5b12; --rule: rgba(26,26,24,0.13); --rule-soft: rgba(26,26,24,0.07);
+    --code-bg: #f3f0ea; --code-border: rgba(26,26,24,0.10);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16.5px;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; }
+
+  h1, h2, h3, h4 { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace; font-weight: 600; text-wrap: balance; margin: 0; }
+  p { text-wrap: pretty; margin: 0 0 14px; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* layout: sidebar + content */
+  .page { display: flex; max-width: 1180px; margin: 0 auto; }
+  nav.toc {
+    width: 200px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    padding: 48px 0 48px 28px;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.toc .num { color: var(--ink-faint); margin-right: 6px; }
+  nav.toc a {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    text-decoration: none;
+    padding: 4px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -12px;
+    line-height: 1.5;
+  }
+  nav.toc a.active { color: var(--ink); border-left-color: var(--accent); }
+  nav.toc a:hover { color: var(--ink); }
+  @media (max-width: 880px) { nav.toc { display: none; } }
+
+  main { flex: 1; min-width: 0; padding: 56px 32px 120px; max-width: 760px; }
+  @media (max-width: 880px) { main { padding: 40px 20px 100px; } }
+
+  section { padding-top: 64px; margin-top: -8px; border-top: 1px solid var(--rule-soft); }
+  section:first-of-type { border-top: none; padding-top: 0; }
+
+  .kicker { font-size: 12.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  h2 { font-size: 24px; line-height: 1.3; margin-bottom: 6px; }
+  h2 .n { color: var(--accent); margin-right: 10px; }
+  .dek { font-size: 15px; color: var(--ink-faint); margin-bottom: 28px; font-family: system-ui, sans-serif; }
+  h3 { font-size: 15.5px; margin: 30px 0 10px; color: var(--ink); }
+
+  section p, section li { color: var(--ink-dim); line-height: 1.68; font-size: 16px; max-width: 66ch; }
+  section ul, section ol { margin: 0 0 14px; padding-left: 22px; }
+  section li { margin-bottom: 5px; }
+  strong { color: var(--ink); font-weight: 600; }
+  code:not(pre code) {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  /* code blocks */
+  pre {
+    margin: 16px 0 20px;
+    padding: 16px 18px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.62;
+  }
+  pre code { color: var(--ink-dim); }
+  pre .kw { color: var(--accent); }
+  pre .cm { color: var(--ink-faint); font-style: italic; }
+  pre .out { color: var(--ink); }
+  .code-cap { font-size: 12px; color: var(--ink-faint); margin: -14px 0 20px; font-family: ui-monospace, monospace; }
+
+  /* figures */
+  figure { margin: 24px 0 28px; }
+  figure img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 4px; }
+  figcaption { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; line-height: 1.5; }
+  figcaption .src { text-decoration: none; border-bottom: 1px dotted var(--ink-faint); }
+
+  /* remark / note callouts — restrained, text-led not box-led */
+  .note { margin: 20px 0; padding-left: 16px; border-left: 2px solid var(--rule); }
+  .note .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-bottom: 4px; display: block; }
+  .note p:last-child { margin-bottom: 0; }
+  .note.bug .label { color: var(--accent); }
+
+  /* small data table */
+  .tbl { overflow-x: auto; margin: 18px 0 24px; }
+  table { border-collapse: collapse; font-size: 14px; width: 100%; }
+  th, td { text-align: left; padding: 7px 16px 7px 0; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
+  th { color: var(--ink-faint); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { color: var(--ink-dim); }
+  td.mono, th.mono { font-family: ui-monospace, monospace; }
+
+  /* simple inline diagram bits (no long svg paths, just css) */
+  .flow { display: flex; align-items: center; gap: 10px; margin: 22px 0; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 13px; }
+  .flow .box { border: 1px solid var(--rule-strong, var(--rule)); padding: 8px 12px; border-radius: 5px; color: var(--ink-dim); background: var(--code-bg); }
+  .flow .arrow { color: var(--ink-faint); }
+
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 20px 0; }
+
+  header.masthead { padding-bottom: 40px; margin-bottom: 8px; }
+  header.masthead h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; margin-bottom: 14px; }
+  header.masthead p { font-size: 16px; color: var(--ink-dim); max-width: 60ch; }
+  header.masthead .meta { font-size: 12.5px; color: var(--ink-faint); margin-top: 18px; font-family: ui-monospace, monospace; }
+
+  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+
+  .svg-fig { margin: 24px 0 28px; padding: 18px 16px 12px; background: var(--code-bg);
+    border: 1px solid var(--rule); border-radius: 4px; }
+  .svg-fig svg { width: 100%; height: auto; display: block; }
+  .svg-fig .cap { font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5; max-width: none; }
+  .ladder { margin: 18px 0 22px; }
+  .ladder .rung { display: grid; grid-template-columns: 74px 1fr; gap: 12px; padding: 9px 0;
+    border-bottom: 1px solid var(--rule-soft); align-items: start; }
+  .ladder .rung:last-child { border-bottom: none; }
+  .ladder .lvl { color: var(--accent); font-weight: 600; font-family: ui-monospace, monospace; font-size: 13px; }
+  .ladder .body { color: var(--ink-dim); line-height: 1.62; font-size: 15px; }
+  .ladder .body strong { color: var(--ink); }
+  .claim { margin: 18px 0; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--code-bg); }
+  .claim .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); display: block; margin-bottom: 4px; }
+  .claim p { margin: 0 0 8px; } .claim p:last-child { margin-bottom: 0; }
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0 22px; }
+  @media (max-width: 720px) { .verdict { grid-template-columns: 1fr; } }
+  .verdict .panel { border: 1px solid var(--rule-soft); border-radius: 4px; padding: 12px 14px 8px; }
+  .verdict .panel h4 { font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--accent); margin: 0 0 8px; }
+  .verdict .panel p, .verdict .panel li { font-size: 14px; max-width: none; }
+  pre { white-space: pre-wrap; word-break: break-all; }
+  .kicker { break-after: avoid; page-break-after: avoid; }
+  .tg { font-family: ui-monospace, monospace; font-size: 11px; color: var(--ink-faint); }
+  blockquote { margin: 14px 0; padding-left: 14px; border-left: 2px solid var(--rule); color: var(--ink-dim); font-style: italic; }
+  @media print {
+    nav.toc { display: none !important; }
+    main { max-width: 100%; padding: 24px 32px; }
+    .svg-fig, .claim, .verdict, table { break-inside: avoid; page-break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a { color: var(--ink); text-decoration: none; }
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc">
+  <a href="#scope"><span class="num">0</span>How to use</a>
+  <a href="#basics"><span class="num">1</span>Primer</a>
+  <a href="#event"><span class="num">2</span>What happened</a>
+  <a href="#verify"><span class="num">3</span>What Lean guarantees</a>
+  <a href="#qrh"><span class="num">4</span>Quasi-Riemann</a>
+  <a href="#pi"><span class="num">5</span>Approximating π</a>
+  <a href="#matmul"><span class="num">6</span>Matrix mult. ω</a>
+  <a href="#ugc"><span class="num">7</span>Unique Games</a>
+  <a href="#bpl"><span class="num">8</span>L = BPL</a>
+  <a href="#color"><span class="num">9</span>Coloring the plane</a>
+  <a href="#thompson"><span class="num">10</span>Thompson group</a>
+  <a href="#ns"><span class="num">11</span>Navier–Stokes</a>
+  <a href="#vlasov"><span class="num">12</span>Plasma</a>
+  <a href="#spin"><span class="num">13</span>Spin glasses</a>
+  <a href="#hodge"><span class="num">14</span>Withdrawals</a>
+  <a href="#synthesis"><span class="num">15</span>Patterns</a>
+  <a href="#ai"><span class="num">16</span>What it means for AI</a>
+  <a href="#reactions"><span class="num">17</span>Reactions</a>
+  <a href="#learn"><span class="num">18</span>Open questions / learn</a>
+  <a href="#sources"><span class="num">19</span>Glossary / sources</a>
+</nav>
+<main>
+
+<header class="masthead">
+  <div class="kicker">Learning deck · for AI researchers without a math background</div>
+  <h1>OpenAI's 719 AI-generated math papers, explained from zero</h1>
+  <p>On 2026-10-06 OpenAI published <strong>722 math manuscripts (372 result families)</strong> generated by an unreleased internal model. Among the claims: the quasi-Riemann hypothesis, the Unique Games Conjecture, matrix-multiplication exponent ω ≤ 9/4, non-amenability of Thompson's group F, and the plane not being 5-colorable — a run of problems open for decades. The next day three manuscripts were withdrawn over a sign error. Mathematicians dubbed it the "Mathocalypse." The goal of this deck: using <strong>only linear algebra, calculus and high-school math</strong>, take 10 representative results far enough that you can judge how big each is, how hard it was, why it matters, and how far it has been verified.</p>
+  <p class="meta">First edition 2026-10-08 · repo snapshot openai/math@fd4aeeb (includes the Oct 7 withdrawals and fixes) · every fact is sourced; [P] = primary material read (paper / repo / Lean source), [R] = secondary reporting, ⚠ = unverified or conflicting · English edition of notes.html (Chinese)</p>
+</header>
+
+<section id="scope">
+  <div class="kicker">Orientation</div>
+  <h2><span class="n">0.</span>What this deck will and won't give you</h2>
+  <div class="note">
+    <span class="label">You will get</span>
+    <p>A "ladder" understanding of each of 10 headline results: start from a toy example you can compute by hand and climb level by level to the real statement; learn how long the problem was stuck and where; see exactly what OpenAI claims, how much the Lean formalization covers, and what human experts have said so far; and what it means for mathematics, for AI, and for AI safety.</p>
+  </div>
+  <div class="note bug">
+    <span class="label">You won't get</span>
+    <p>The ability to judge whether any proof is correct. As of 2026-10-08, <strong>none</strong> of these 10 results has a human domain expert publicly saying "I have read and checked it." "Verification" in this deck means two things only: (1) a static review of the Lean source and statements, and (2) a summary of public reactions. Both are labeled with sources and confidence.</p>
+  </div>
+  <h3>0.1 Reading path</h3>
+  <p>§1 fills in three basics (what mathematicians do, what an "open problem" is, how to judge how big a result is). §2–§3 cover the event and what Lean actually guarantees — <strong>these two sections determine how you should read every "claim" that follows</strong>. §4–§14 are the 10 results, each with the same structure: <em>ladder → problem → why it was hard → what OpenAI claims → verification status → if true</em>; read them in any order. §15–§16 give cross-cutting patterns and implications for AI, §17 collects reactions, §18 lists open questions and a learning path, §19 is the glossary and sources.</p>
+  <h3>0.2 Cheat sheet</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>§</th><th>Result (family no.)</th><th>Open for</th><th>Lean</th><th>One line</th></tr></thead>
+    <tbody>
+      <tr><td>4</td><td>Quasi-Riemann hypothesis (003)</td><td>~125 yrs</td><td>yes</td><td>ζ has no zeros at all in Re s &gt; 7/8</td></tr>
+      <tr><td>5</td><td>Irrationality exponent of π = 2 (017)</td><td>~70 yrs</td><td>yes⚠</td><td>π cannot be approximated "unusually well" by fractions</td></tr>
+      <tr><td>6</td><td>Matrix multiplication ω ≤ 9/4 (107)</td><td>57 yrs</td><td>yes</td><td>a drop of 0.12 at once; the previous 12 years gave 0.0017</td></tr>
+      <tr><td>7</td><td>Unique Games Conjecture (102)</td><td>24 yrs</td><td>yes</td><td>optimality of many approximation algorithms becomes theorem</td></tr>
+      <tr><td>8</td><td>L = RL = BPL (103)</td><td>~30 yrs</td><td>yes</td><td>randomness is useless for small-memory computation</td></tr>
+      <tr><td>9</td><td>The plane is not 5-colorable (158)</td><td>76 yrs (last lower-bound step 2018)</td><td>yes</td><td>chromatic number of the plane ∈ {6, 7}</td></tr>
+      <tr><td>10</td><td>Thompson's group F non-amenable (248)</td><td>47 yrs</td><td>yes</td><td>famous for "proofs" in both directions later withdrawn</td></tr>
+      <tr><td>11</td><td>Navier–Stokes blowup (separate Sept release)</td><td>Millennium Prize problem</td><td>yes</td><td>only the "with forcing" alternative; credit disputed</td></tr>
+      <tr><td>12</td><td>Relativistic Vlasov–Maxwell (362)</td><td>40 yrs</td><td>yes</td><td>large-data global smoothness for a plasma model (one species)</td></tr>
+      <tr><td>13</td><td>Mézard–Parisi formula (221)</td><td>25 yrs</td><td>yes</td><td>free-energy formula for sparse spin glasses (even-arity case)</td></tr>
+      <tr><td>14</td><td>Hodge-related withdrawals (032 etc.)</td><td>—</td><td>no</td><td>one sign error, three papers withdrawn: the risk of no formalization</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="basics">
+  <div class="kicker">Fundamentals · primer</div>
+  <h2><span class="n">1.</span>What do mathematicians actually do?</h2>
+  <p>In one sentence: <strong>they study the structure of abstract objects and establish truths about them by proof</strong>. What separates mathematics from science and engineering is <em>how you know something is right</em>: mathematics by logical proof (once proven, true forever), science by experiment (can be overturned), engineering by "it works and measures well enough."</p>
+  <h3>1.1 Four words</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Word</th><th>Meaning</th><th>Example from this event</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">conjecture</td><td>a statement widely believed but unproven</td><td>the Unique Games Conjecture (Khot 2002)</td></tr>
+      <tr><td class="mono">theorem</td><td>a statement that has been proven</td><td>the Goemans–Williamson 0.878 algorithm</td></tr>
+      <tr><td class="mono">counterexample</td><td>a concrete object showing that a "for all …" conjecture is false</td><td>the 9-dimensional Borsuk counterexample; about 20% of this batch are counterexamples/disproofs</td></tr>
+      <tr><td class="mono">formalization</td><td>writing a proof as code a computer can check step by step (here Lean 4)</td><td>about 300/719 top-line results have Lean proofs</td></tr>
+    </tbody>
+  </table></div>
+  <h3>1.2 Two cultures of mathematics</h3>
+  <p>In <a href="https://www.dpmms.cam.ac.uk/~wtg10/2cultures.pdf">The Two Cultures of Mathematics</a> (2000), Fields medalist Tim Gowers splits mathematicians into <strong>problem-solvers</strong> (who crack specific hard problems, like Erdős problems) and <strong>theory-builders</strong> (who invent new concepts and frameworks, like "group" or "manifold"). Thurston's <a href="https://arxiv.org/abs/math/9404236">On Proof and Progress in Mathematics</a> (1994) goes further: the point of mathematics is not to produce theorems but to <strong>advance human understanding</strong>. These two essays are the key to this controversy — what AI has broken open at scale is the problem-solving culture, and that is what Tao means by "the end of Math 1.0."</p>
+  <h3>1.3 Five questions for judging how big a result is</h3>
+  <ol>
+    <li><strong>How long was it open, and who tried?</strong> A problem open for 50 years with repeated failures by top experts weighs very differently from one posed two years ago.</li>
+    <li><strong>Last step or giant leap?</strong> Moving ω from 2.3713 to 2.3711 is the former; to 2.25 is the latter.</li>
+    <li><strong>How much does it unlock?</strong> If UGC holds, hundreds of "if UGC then …" papers become theorems at once.</li>
+    <li><strong>Is the method new?</strong> New methods often matter more than the result, because they can be reused.</li>
+    <li><strong>Who chose the problem, and how many attempts failed?</strong> The most overlooked question in this event; see §2.3 and §15.</li>
+  </ol>
+</section>
+
+<section id="event">
+  <div class="kicker">The event · timeline and numbers</div>
+  <h2><span class="n">2.</span>What happened</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Date</th><th>Event</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">2025-07</td><td>An OpenAI experimental model and Google DeepMind's Gemini Deep Think reach gold-medal scores at IMO 2025 (35/42) — competition problems with known answers fall. <span class="tg">[R]</span></td></tr>
+      <tr><td class="mono">2026-09-08</td><td>OpenAI announces that ~10,000 agents over 88 hours proved finite-time blowup "with forcing" for 3D Navier–Stokes (166 pages + Lean), sparking a credit dispute (§11). <span class="tg">[P][R]</span></td></tr>
+      <tr><td class="mono">late 2026-09</td><td>The Advisory Group on Mathematics and AI hosted by the Institute for Advanced Study (members include Terence Tao) publishes recommendations for releasing AI-generated mathematics. <span class="tg">[R]</span></td></tr>
+      <tr><td class="mono"><strong>2026-10-06</strong></td><td><a href="https://github.com/openai/math">openai/math</a> released: 722 manuscripts / 372 result families, Apache-2.0, with a Lean library and 10 abridged reasoning summaries. <span class="tg">[P]</span></td></tr>
+      <tr><td class="mono">2026-10-07</td><td>3 manuscripts withdrawn (one sign error, cascading), 14 repaired, 13 re-cited, 6 new formalizations → <strong>719 manuscripts</strong>, "300/719 ≈ 42% of top-line results formalized." A statement from the Association for Human Mathematics (AHM) is reposted on Tao's blog; Scott Aaronson posts <a href="https://scottaaronson.blog/?p=10169">"The Mathocalypse"</a>. <span class="tg">[P][R]</span></td></tr>
+      <tr><td class="mono">2026-10-08</td><td>Tao's blog runs a guest post by Lozano-Robledo, <a href="https://terrytao.wordpress.com/2026/10/08/what-should-we-tell-our-students/">What should we tell our students?</a> <span class="tg">[P]</span></td></tr>
+    </tbody>
+  </table></div>
+  <h3>2.1 How the results were produced</h3>
+  <p>From the README <span class="tg">[P]</span>: "The vast majority of results were obtained with the same procedure using an unreleased internal OpenAI model. On average, each result used three hours of ChatGPT Pro thinking compute… the model was posed approximately 4,000 problems… requiring an appropriate level of significance led to the catalog." In short: <strong>~4,000 open problems → filtered for significance → 372 families</strong>. An OpenAI spokesperson told Scientific American that almost everything came from "a single prompt handed to a single AI agent" <span class="tg">[R]</span>; MIT's Andrew Sutherland responded that until the model can be replicated, "one-shotting" claims should be treated as unverified — "We should ask for receipts."</p>
+  <p><strong>Exceptions</strong>: the README concedes that the zero-free region for ζ (§4) and the Hodge conjecture for CM abelian varieties (§14) were <em>not</em> produced by the fixed procedure, and that the Re s &gt; 11/12 write-up was human-edited. What exactly differed (more compute? human guidance?) is not disclosed ⚠.</p>
+  <h3>2.2 Reconciling the numbers</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Claim</th><th>What it actually means</th></tr></thead>
+    <tbody>
+      <tr><td>"722" vs "719"</td><td>722 at release; 719 after the three Oct 7 withdrawals. Early news used 722.</td></tr>
+      <tr><td>"372 families" vs "377"</td><td>The catalog is numbered 001–377 with 045/061/070/123/163 unused: 372 actual families.</td></tr>
+      <tr><td>"~42% formalized"</td><td>300 <em>top-line results</em> ÷ 719 <em>manuscripts</em> — numerator and denominator in different units. By family, 242/372 ≈ 65% have a Lean scope document.</td></tr>
+      <tr><td>"162 fully + 73 partially formalized"</td><td>Reported by some outlets; source not found ⚠.</td></tr>
+    </tbody>
+  </table></div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 392" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="20" class="h">372 result families by field (orange = this deck covers at least one result in depth)</text>
+<text x="150" y="53" class="z" text-anchor="end">Theoretical CS</text>
+<rect x="160" y="42" width="440" height="14" rx="2" class="boxa"/>
+<text x="606" y="53" class="s">40</text>
+<text x="150" y="73" class="z" text-anchor="end">Combinatorics</text>
+<rect x="160" y="62" width="407" height="14" rx="2" class="boxa"/>
+<text x="573" y="73" class="s">37</text>
+<text x="150" y="93" class="z" text-anchor="end">Algebraic/complex geom.</text>
+<rect x="160" y="82" width="396" height="14" rx="2" class="boxa"/>
+<text x="562" y="93" class="s">36</text>
+<text x="150" y="113" class="z" text-anchor="end">Number theory</text>
+<rect x="160" y="102" width="341" height="14" rx="2" class="boxa"/>
+<text x="507" y="113" class="s">31</text>
+<text x="150" y="133" class="z" text-anchor="end">Probability/stat. mech.</text>
+<rect x="160" y="122" width="319" height="14" rx="2" class="boxa"/>
+<text x="485" y="133" class="s">29</text>
+<text x="150" y="153" class="z" text-anchor="end">Differential geometry</text>
+<rect x="160" y="142" width="319" height="14" rx="2" class="box"/>
+<text x="485" y="153" class="s">29</text>
+<text x="150" y="173" class="z" text-anchor="end">Mathematical physics</text>
+<rect x="160" y="162" width="275" height="14" rx="2" class="boxa"/>
+<text x="441" y="173" class="s">25</text>
+<text x="150" y="193" class="z" text-anchor="end">Operator algebras</text>
+<rect x="160" y="182" width="209" height="14" rx="2" class="box"/>
+<text x="375" y="193" class="s">19</text>
+<text x="150" y="213" class="z" text-anchor="end">Topology</text>
+<rect x="160" y="202" width="198" height="14" rx="2" class="box"/>
+<text x="364" y="213" class="s">18</text>
+<text x="150" y="233" class="z" text-anchor="end">Algebra</text>
+<rect x="160" y="222" width="198" height="14" rx="2" class="box"/>
+<text x="364" y="233" class="s">18</text>
+<text x="150" y="253" class="z" text-anchor="end">Real/complex analysis</text>
+<rect x="160" y="242" width="176" height="14" rx="2" class="box"/>
+<text x="342" y="253" class="s">16</text>
+<text x="150" y="273" class="z" text-anchor="end">PDE</text>
+<rect x="160" y="262" width="176" height="14" rx="2" class="boxa"/>
+<text x="342" y="273" class="s">16</text>
+<text x="150" y="293" class="z" text-anchor="end">Convex/metric geometry</text>
+<rect x="160" y="282" width="165" height="14" rx="2" class="box"/>
+<text x="331" y="293" class="s">15</text>
+<text x="150" y="313" class="z" text-anchor="end">Group theory</text>
+<rect x="160" y="302" width="154" height="14" rx="2" class="boxa"/>
+<text x="320" y="313" class="s">14</text>
+<text x="150" y="333" class="z" text-anchor="end">Dynamics/ergodic theory</text>
+<rect x="160" y="322" width="132" height="14" rx="2" class="box"/>
+<text x="298" y="333" class="s">12</text>
+<text x="150" y="353" class="z" text-anchor="end">Functional analysis</text>
+<rect x="160" y="342" width="121" height="14" rx="2" class="box"/>
+<text x="287" y="353" class="s">11</text>
+<text x="150" y="373" class="z" text-anchor="end">Logic</text>
+<rect x="160" y="362" width="66" height="14" rx="2" class="box"/>
+<text x="232" y="373" class="s">6</text>
+</svg>
+<p class="cap">Source: the 17 subject sections of <a href="https://github.com/openai/math/blob/main/overview.pdf">openai/math overview.pdf</a>, counted entry by entry (total 372). Catalog numbers 045/061/070/123/163 are unused; no reason given.</p>
+</div>
+  <h3>2.3 The one thing to keep in mind: selection effects</h3>
+  <p>Epoch AI's <a href="https://arxiv.org/abs/2609.25050">FrontierMath Erdős</a> (2026-09) took 68 Erdős problems <strong>pre-registered</strong> as open and required Lean proofs; GPT-6 Astra solved 2 (≈3%), all other models 0. OpenAI's release is <strong>post-hoc selection</strong>: of ~4,000 problems it kept the "significant" ones and published no failure list. A rough hit rate is ≤ 9% (by family) — but problem difficulty is not comparable. <strong>Both numbers are right; they answer different questions</strong>: the first asks "given an arbitrary open problem, can it solve it?", the second "given 4,000, how many good results can it pick out?"</p>
+</section>
+
+<section id="verify">
+  <div class="kicker">Verification · before reading any "claim"</div>
+  <h2><span class="n">3.</span>What "has a Lean proof" actually guarantees</h2>
+  <p>Lean is a proof assistant: you write a theorem and its proof as code, and a small <strong>kernel</strong> checks every inference step. If the kernel has no bugs and only accepted axioms are used, passing the check means "this Lean statement is true." The difference from human refereeing is like the difference between a compiler with a type system and code review — the latter misses things; the former doesn't miss <em>what it checks</em>.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="20" class="h">What "has a Lean proof" guarantees: the trust stack, bottom up</text>
+<rect x="20" y="36" width="600" height="46" rx="4" class="boxg"/>
+<text x="34" y="55" class="t">① Lean kernel checks every proof step</text>
+<text x="34" y="72" class="s">this repo: sorry = 0, added axioms = 0, native_decide = 0</text>
+<text x="640" y="64" class="g">strong</text>
+<rect x="20" y="90" width="600" height="46" rx="4" class="boxg"/>
+<text x="34" y="109" class="t">② Only the 3 standard axioms</text>
+<text x="34" y="126" class="s">all 416 Comparator configs allow only propext / Quot.sound / Classical.choice</text>
+<text x="640" y="118" class="g">strong</text>
+<rect x="20" y="144" width="600" height="46" rx="4" class="boxa"/>
+<text x="34" y="163" class="t">③ Lean statement = what the paper claims?</text>
+<text x="34" y="180" class="s">challenge files written by OpenAI (agents); a human must read the definitions</text>
+<text x="640" y="172" class="h">human</text>
+<rect x="20" y="198" width="600" height="46" rx="4" class="boxa"/>
+<text x="34" y="217" class="t">④ Are definitions in deps and patches right?</text>
+<text x="34" y="234" class="s">24 patches (largest ~2 MB) + 11 lana-agents/* dependencies of unknown origin</text>
+<text x="640" y="226" class="h">unaudited</text>
+<rect x="20" y="252" width="600" height="46" rx="4" class="boxr"/>
+<text x="34" y="271" class="t">⑤ The ~58% with no formalization</text>
+<text x="34" y="288" class="s">no machine check at all; the 3 Hodge-related papers withdrawn on 10-07 were here</text>
+<text x="640" y="280" class="r">none</text>
+</svg>
+<p class="cap">①② are guaranteed by the machine; ③④⑤ still need humans. Audit data: source grep of <code>lean/OAI/</code> (122,458 .lean files, ~26M lines) plus Comparator config counts (2026-10-08, commit fd4aeeb); not compiled.</p>
+</div>
+  <h3>3.1 Our static audit of the Lean library <span class="tg">[P]</span></h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>Result</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">sorry (unfinished proof)</td><td>0</td><td>no "fill in later" steps</td></tr>
+      <tr><td class="mono">axiom declarations</td><td>0 (all hits are in comments)</td><td>no smuggled-in axioms</td></tr>
+      <tr><td class="mono">native_decide / implemented_by / extern</td><td>0</td><td>no "trust the compiler" backdoors</td></tr>
+      <tr><td class="mono">decide +kernel</td><td>≈1.31M lines, 5,848 files</td><td>large finite computations done by the kernel — still trusted, but the proofs are enormous</td></tr>
+      <tr><td class="mono">Comparator configs</td><td>416, all allowing only the three standard axioms; only 2 enable the second independent kernel nanoda</td><td>see below</td></tr>
+      <tr><td class="mono">lean/patches/</td><td>24 patches to third-party dependencies (not the Lean kernel, not Mathlib), largest ~2 MB</td><td>patches change definitions and proofs in dependencies ⚠</td></tr>
+      <tr><td class="mono">dependencies</td><td>30, of which 11 are <code>lana-agents/*</code> repos of unknown origin</td><td>an open point in the trust chain ⚠</td></tr>
+      <tr><td class="mono">formalization.yaml</td><td><code>review: status: unchecked</code></td><td>OpenAI's own label: not reviewed</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tg">Scope: lean/OAI/ has 122,458 .lean files, ~26M lines; we only grepped the source and counted configs, without compiling (a full build needs many GB of memory and a Linux sandbox). Independent re-checks: Dave Goldblatt ran the ζ 7/8 proof through Comparator and the nanoda kernel (~63 minutes) <a href="https://github.com/davegoldblatt/openai-zeta-proof-check">[repo]</a>; a third party reviewed the statement of the 9/4 matrix-multiplication theorem <a href="https://github.com/erenciracioglu-dotcom/openai-math-9-4-lean-check">[repo]</a>.</p>
+  <h3>3.2 Comparator: what it guards against, and what it doesn't</h3>
+  <p>The Lean FRO's <a href="https://github.com/leanprover/comparator">Comparator</a> takes a "challenge file" (only the theorem statement, with <code>sorry</code> as the proof, importing only trusted libraries such as Mathlib) and a "solution module": the theorem proven in the solution must be <strong>the same type</strong> as the challenge statement, using only allowed axioms. It guards against swapping the statement, changing definitions or adding axioms inside the proof. It does <strong>not</strong> guard against the challenge statement itself failing to say what the paper claims — and the challenge files were written by OpenAI (its agents). That is why the "verification status" of each section below focuses on <strong>reading the statement line by line</strong>.</p>
+  <div class="note bug">
+    <span class="label">A live counterexample</span>
+    <p>A footnote in OpenAI's plane-coloring paper mentions a May 2026 manuscript that claimed the chromatic number of the plane is 7 with a "formalized theorem" — but that theorem <strong>took a false density bound as a hypothesis</strong>. The formalization was fine; the proven statement was the problem. <span class="tg">[P, as reported in the OpenAI paper; original not read ⚠]</span> This is the same kind of problem as specification gaming in AI: the system perfectly satisfies the written spec, but the spec is not what you wanted.</p>
+  </div>
+</section>
+
+<section id="qrh">
+  <div class="kicker">Number theory · family 003</div>
+  <h2><span class="n">4.</span>The quasi-Riemann hypothesis: a ceiling on the noise in the primes</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body">Count primes by hand: 25 below 100, 168 below 1000, 78,498 below 10⁶. Let π(x) = "number of primes ≤ x."</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Prime number theorem</strong>: π(x) ≈ Li(x) = ∫₂ˣ dt/ln t. Li(10⁶) ≈ 78,626.5 vs the true 78,498 — the ratio tends to 1 (proved 1896). The real question is <strong>how big the error π(x) − Li(x) is</strong>.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>The ζ function encodes all the primes</strong>: ζ(s) = Σ 1/nˢ = ∏ₚ 1/(1−p⁻ˢ). The identity holds because every integer factors uniquely into primes. By hand at s = 2: using only p = 2, 3, 5 gives 1.5625; all primes below 100 give 1.6419; the true value is π²/6 ≈ 1.6449.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body">Extend s to complex numbers s = σ + it. A <strong>zero</strong> is a point where ζ(s) = 0. The non-trivial zeros all lie in the "critical strip" 0 &lt; Re s &lt; 1; the first three are at ½ + 14.13i, ½ + 21.02i, ½ + 25.01i. <strong>Riemann hypothesis (1859)</strong>: all of them lie on Re s = ½.</div></div>
+    <div class="rung"><div class="lvl">Level 4</div><div class="body"><strong>Why zeros control the error</strong>: in the explicit formula each zero ρ = β + iγ contributes an "oscillating noise" term of size about x^β. All zeros with Re ≤ θ ⇒ error about x^θ. The Riemann hypothesis ⇔ error about √x. Think of the zeros as the "spectrum" of the primes, with β setting how fast each frequency's amplitude grows.</div></div>
+    <div class="rung"><div class="lvl">Level 5</div><div class="body"><strong>Previously known zero-free regions</strong>: de la Vallée Poussin (1899) σ &gt; 1 − c/log t; Vinogradov–Korobov (1958) somewhat wider. <strong>Key point: their width shrinks to 0 as the height t → ∞.</strong> No one had ever proven that a <em>fixed</em> δ &gt; 0 exists with no zeros in the whole strip Re s &gt; 1 − δ.</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 330" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<rect x="481.3" y="40" width="158.7" height="260" fill="#fbeceb"/>
+<polygon points="474.1,300.0 487.3,295.7 494.0,291.3 498.2,287.0 501.1,282.7 503.2,278.3 504.8,274.0 506.1,269.7 507.2,265.3 508.1,261.0 508.8,256.7 509.5,252.3 510.0,248.0 510.6,243.7 511.0,239.3 511.4,235.0 511.8,230.7 512.1,226.3 512.4,222.0 512.7,217.7 513.0,213.3 513.2,209.0 513.4,204.7 513.7,200.3 513.9,196.0 514.0,191.7 514.2,187.3 514.4,183.0 514.5,178.7 514.7,174.3 514.8,170.0 515.0,165.7 515.1,161.3 515.2,157.0 515.3,152.7 515.4,148.3 515.5,144.0 515.6,139.7 515.7,135.3 515.8,131.0 515.9,126.7 516.0,122.3 516.1,118.0 516.2,113.7 516.3,109.3 516.3,105.0 516.4,100.7 516.5,96.3 516.5,92.0 516.6,87.7 516.7,83.3 516.7,79.0 516.8,74.7 516.9,70.3 516.9,66.0 517.0,61.7 517.0,57.3 517.1,53.0 517.1,48.7 517.2,44.3 517.2,40.0 528.0,40.0 528.0,300.0" fill="#e4e0d8"/>
+<polyline points="474.1,300.0 487.3,295.7 494.0,291.3 498.2,287.0 501.1,282.7 503.2,278.3 504.8,274.0 506.1,269.7 507.2,265.3 508.1,261.0 508.8,256.7 509.5,252.3 510.0,248.0 510.6,243.7 511.0,239.3 511.4,235.0 511.8,230.7 512.1,226.3 512.4,222.0 512.7,217.7 513.0,213.3 513.2,209.0 513.4,204.7 513.7,200.3 513.9,196.0 514.0,191.7 514.2,187.3 514.4,183.0 514.5,178.7 514.7,174.3 514.8,170.0 515.0,165.7 515.1,161.3 515.2,157.0 515.3,152.7 515.4,148.3 515.5,144.0 515.6,139.7 515.7,135.3 515.8,131.0 515.9,126.7 516.0,122.3 516.1,118.0 516.2,113.7 516.3,109.3 516.3,105.0 516.4,100.7 516.5,96.3 516.5,92.0 516.6,87.7 516.7,83.3 516.7,79.0 516.8,74.7 516.9,70.3 516.9,66.0 517.0,61.7 517.0,57.3 517.1,53.0 517.1,48.7 517.2,44.3 517.2,40.0" class="lng"/>
+<line x1="80" y1="300" x2="640" y2="300" class="ax"/>
+<line x1="154.7" y1="300" x2="154.7" y2="40" class="ax"/>
+<text x="154.7" y="316" class="s" text-anchor="middle">Re=0</text>
+<line x1="341.3" y1="300" x2="341.3" y2="40" class="dash"/>
+<text x="341.3" y="316" class="s" text-anchor="middle">Re=½</text>
+<line x1="528.0" y1="300" x2="528.0" y2="40" class="ax"/>
+<text x="528.0" y="316" class="s" text-anchor="middle">Re=1</text>
+<line x1="481.3" y1="300" x2="481.3" y2="40" class="lnr"/>
+<text x="481.3" y="316" class="r" text-anchor="middle">7/8</text>
+<circle cx="341.3" cy="177.5" r="4" fill="#2f5d8a"/>
+<text x="333.3" y="181.5" class="s" text-anchor="end">½+14.13i</text>
+<circle cx="341.3" cy="117.8" r="4" fill="#2f5d8a"/>
+<text x="333.3" y="121.8" class="s" text-anchor="end">½+21.02i</text>
+<circle cx="341.3" cy="83.2" r="4" fill="#2f5d8a"/>
+<text x="333.3" y="87.2" class="s" text-anchor="end">½+25.01i</text>
+<text x="248.0" y="54" class="s" text-anchor="middle">critical strip 0&lt;Re s&lt;1</text>
+<text x="561.6" y="74.7" class="r" text-anchor="middle">OpenAI claims:</text>
+<text x="561.6" y="88.7" class="r" text-anchor="middle">no zeros at all</text>
+<text x="468.3" y="222.0" class="s" text-anchor="end">grey: known zero-free →</text>
+<text x="468.3" y="234.0" class="s" text-anchor="end">(since 1899; narrows up)</text>
+<text x="50" y="170.0" class="s" text-anchor="end">Im s</text>
+<text x="72" y="300" class="s" text-anchor="end">0</text>
+<text x="72" y="40.0" class="s" text-anchor="end">30</text>
+</svg>
+<p class="cap">Blue dots: the first three non-trivial zeros of ζ (all on Re=½; the Riemann hypothesis says every one is). Grey band: schematic de la Vallée Poussin-type zero-free region (its width shrinks to 0 as the height t grows; curve shape illustrative, constant 0.1). Red region Re s &gt; 7/8: the fixed-width zero-free region claimed by OpenAI family 003. Nobody had previously proven any fixed-width zero-free strip.</p>
+</div>
+  <h3>4.1 The problem</h3>
+  <p><strong>Quasi-Riemann hypothesis</strong>: there is a fixed vertical line Re s = θ &lt; 1 with no zeros to its right. It is a weak form of the Riemann hypothesis (θ = ½), but before 2026 it was just as far out of reach.</p>
+  <h3>4.2 Why it was hard</h3>
+  <p>Classical methods start from positivity of the Euler product for σ &gt; 1 (e.g. the trick 3 + 4cos θ + cos 2θ ≥ 0), and that positivity weakens with height, so the regions obtained necessarily get narrower. The other route, zero-density estimates (e.g. Guth–Maynard 2024, <a href="https://arxiv.org/abs/2405.20552">arXiv:2405.20552</a>), can say "there are few zeros with Re s &gt; σ," but not "there are none." A fixed width needs a genuinely new mechanism.</p>
+  <h3>4.3 What OpenAI claims</h3>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><a href="https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026/paper.pdf">Main paper</a> (2026-09-30, 199 pages): "We prove that all finite-order Hecke L-functions over Q(√−3) and all Dirichlet L-functions are zero-free in the half-plane ℜs &gt; 7/8 … In particular, the Riemann zeta function is zero-free in this half-plane." The paper stresses: "The Riemann hypothesis remains open."</p>
+    <p>The family also includes a separate proof of 11/12 (49 pages, written with human assistance) and a 9-page "uniform exclusion of Landau–Siegel zeros."</p>
+  </div>
+  <p><strong>Method sketch</strong> (introduction only): pass to ℚ(√−3) and build a "completed sum" from Fourier coefficients of the cubic theta series, which can be evaluated two ways (a reflection formula and Poisson summation); a zero with β &gt; 7/8 would make the two estimates contradict each other. Finally the factorization L_F(s, χ∘N) = L(s,χ)·L(s,χχ₋₃) transfers the result to all Dirichlet L-functions.</p>
+  <h3>4.4 Verification status</h3>
+  <div class="verdict">
+    <div class="panel"><h4>Machine</h4><ul>
+      <li>The Lean challenge statement uses only standard Mathlib definitions, e.g. <code>theorem riemannZeta_ne_zero_of_seven_eighths_lt_re {s : ℂ} (hs : 7/8 &lt; s.re) : riemannZeta s ≠ 0</code>. <span class="tg">[P]</span></li>
+      <li>Solution ~2,926 files, 487k lines; sorry/axiom/native_decide all 0. <span class="tg">[P]</span></li>
+      <li>Independent re-check: Goldblatt ran it under two kernels; <code>#print axioms</code> lists only the three standard axioms. <span class="tg">[P]</span></li>
+      <li>⚠ The dependency patch PrimeNumberTheoremAnd-lean4341.patch is ~40k lines and replaces two upstream sorries with proofs — part of the "dependency library" is OpenAI's own code.</li>
+      <li>The paper's later applications (Section 6 corollaries) are outside the formalization.</li></ul></div>
+    <div class="panel"><h4>Humans</h4><ul>
+      <li>Alex Kontorovich (Rutgers; founder of the PrimeNumberTheoremAnd formalization project): "Quasi-RH?!?!???! Are you kidding me? If a human did this, it would be an instant Fields Medal…" <span class="tg">[R]</span></li>
+      <li>Levent Alpöge: "Big, big, big, big props for quasiriemann and no Siegel zeroes." <span class="tg">[R]</span></li>
+      <li>As of 10-08, <strong>no human expert has publicly said they read all 199 pages</strong>. ⚠</li></ul></div>
+  </div>
+  <p><strong>Assessment</strong>: as long as Mathlib's definition of <code>riemannZeta</code> is correct and the Lean kernel has no bug, the theorem is "proven in the machine sense" — an order of magnitude more trustworthy than an unrefereed paper. The remaining risk sits in the build chain (patches and dependencies).</p>
+  <h3>4.5 If true</h3>
+  <ul>
+    <li><strong>A power saving in the prime number theorem</strong>: π(x) − Li(x) = O(x^(7/8) log²x). Going from "width shrinking to 0" to "fixed width" is a qualitative change; but between 7/8 and ½ everything is still unknown.</li>
+    <li><strong>Siegel zeros ruled out</strong>: an obstacle that since 1935 made many constants ineffective disappears (e.g. effective lower bounds for class numbers of imaginary quadratic fields).</li>
+    <li><strong>Algorithmic corollaries</strong> (paper Cor. 1.2): least quadratic non-residue ≤ C(log p)^32 ⇒ square roots mod p and the Miller primality test become <em>unconditional</em> deterministic polynomial-time algorithms. <strong>No impact on practical cryptography</strong> (randomized algorithms are used in practice, AKS 2002 already gave unconditional deterministic primality testing, and RSA and elliptic-curve security are unaffected).</li>
+  </ul>
+</section>
+
+<section id="pi">
+  <div class="kicker">Number theory · family 017 (+ 005)</div>
+  <h2><span class="n">5.</span>How well can fractions approximate π?</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body">22/7 differs from π by 1.26×10⁻³; 355/113 (Zu Chongzhi, 5th century) by only 2.67×10⁻⁷. Compare the benchmark 1/q²: 1/113² ≈ 7.8×10⁻⁵ — 355/113 beats it by nearly 300×.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Continued fractions</strong>: π = [3; 7, 15, 1, 292, 1, 1, …]. The larger the next term, the "unusually better" the previous truncation. 355/113 is followed by 292, which is why it is so accurate.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Dirichlet (1842)</strong>: every irrational number has infinitely many p/q with |x − p/q| &lt; 1/q² (pigeonhole principle). So "exponent 2" is always achievable.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>Irrationality exponent</strong> μ(x) = the largest ν such that |x − p/q| &lt; q^(−ν) has infinitely many solutions. Rationals: 1; Liouville numbers: ∞; <strong>algebraic irrationals (e.g. √2): exactly 2</strong> — Roth's theorem (1955), Fields Medal 1958; e: 2; almost every real number: 2. The hard part is proving it for <em>a specific number</em>.</div></div>
+    <div class="rung"><div class="lvl">Level 4</div><div class="body"><strong>History of upper bounds for π</strong>: Mahler 1953: 42 → Mignotte 1974: 20 → Hata 1993: 8.016 → Salikhov 2008: 7.606 → Zeilberger–Zudilin 2020: 7.103. Seventy years took it from 42 to 7.1 — still far from 2.</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<line x1="70" y1="260" x2="680" y2="260" class="ax"/>
+<line x1="70" y1="260" x2="70" y2="30" class="ax"/>
+<polyline points="70.0,260.0 71.5,260.0 71.5,249.8 73.0,249.8 73.0,248.8 74.6,248.8 74.6,235.4 76.1,235.4 76.1,235.2 77.6,235.2 77.6,235.1 79.2,235.1 79.2,234.7 80.7,234.7 80.7,234.7 82.2,234.7 82.2,234.6 83.7,234.6 83.7,234.6 85.2,234.6 85.2,234.6 86.8,234.6 86.8,234.6 88.3,234.6 88.3,234.5 89.8,234.5 89.8,234.5 91.3,234.5 91.3,234.5 92.9,234.5 92.9,234.5 94.4,234.5 94.4,234.5 95.9,234.5 95.9,234.5 97.5,234.5 97.5,234.5 99.0,234.5 99.0,234.4 100.5,234.4 100.5,234.4 102.0,234.4 102.0,234.4 103.5,234.4 103.5,225.8 105.1,225.8 105.1,225.8 106.6,225.8 106.6,225.8 108.1,225.8 108.1,225.8 109.7,225.8 109.7,225.8 111.2,225.8 111.2,225.8 112.7,225.8 112.7,225.8 114.2,225.8 114.2,225.8 115.8,225.8 115.8,225.8 117.3,225.8 117.3,225.8 118.8,225.8 118.8,225.8 120.3,225.8 120.3,225.8 121.8,225.8 121.8,225.8 123.4,225.8 123.4,225.8 124.9,225.8 124.9,225.8 126.4,225.8 126.4,225.8 128.0,225.8 128.0,225.8 129.5,225.8 129.5,225.8 131.0,225.8 131.0,225.8 132.5,225.8 132.5,225.8 134.1,225.8 134.1,225.8 135.6,225.8 135.6,225.8 137.1,225.8 137.1,225.5 138.6,225.5 138.6,225.5 140.2,225.5 140.2,225.5 141.7,225.5 141.7,225.5 143.2,225.5 143.2,225.5 144.7,225.5 144.7,225.5 146.2,225.5 146.2,225.5 147.8,225.5 147.8,225.5 149.3,225.5 149.3,225.5 150.8,225.5 150.8,225.5 152.4,225.5 152.4,225.5 153.9,225.5 153.9,225.5 155.4,225.5 155.4,225.5 156.9,225.5 156.9,225.5 158.4,225.5 158.4,225.5 160.0,225.5 160.0,225.5 161.5,225.5 161.5,225.5 163.0,225.5 163.0,225.5 164.6,225.5 164.6,225.5 166.1,225.5 166.1,225.5 167.6,225.5 167.6,225.5 169.1,225.5 169.1,225.5 170.7,225.5 170.7,225.5 172.2,225.5 172.2,225.5 173.7,225.5 173.7,225.5 175.2,225.5 175.2,225.5 176.8,225.5 176.8,225.5 178.3,225.5 178.3,225.5 179.8,225.5 179.8,225.5 181.3,225.5 181.3,225.5 182.8,225.5 182.8,225.5 184.4,225.5 184.4,225.5 185.9,225.5 185.9,225.5 187.4,225.5 187.4,225.5 188.9,225.5 188.9,225.5 190.5,225.5 190.5,225.5 192.0,225.5 192.0,225.5 193.5,225.5 193.5,225.5 195.1,225.5 195.1,225.5 196.6,225.5 196.6,225.5 198.1,225.5 198.1,225.5 199.6,225.5 199.6,225.5 201.2,225.5 201.2,225.5 202.7,225.5 202.7,225.5 204.2,225.5 204.2,225.5 205.7,225.5 205.7,225.5 207.2,225.5 207.2,225.5 208.8,225.5 208.8,225.5 210.3,225.5 210.3,225.5 211.8,225.5 211.8,225.5 213.3,225.5 213.3,225.5 214.9,225.5 214.9,225.5 216.4,225.5 216.4,225.5 217.9,225.5 217.9,225.5 219.4,225.5 219.4,225.5 221.0,225.5 221.0,225.5 222.5,225.5 222.5,225.5 224.0,225.5 224.0,225.5 225.6,225.5 225.6,225.5 227.1,225.5 227.1,225.5 228.6,225.5 228.6,225.5 230.1,225.5 230.1,225.5 231.7,225.5 231.7,225.5 233.2,225.5 233.2,225.5 234.7,225.5 234.7,225.5 236.2,225.5 236.2,225.5 237.8,225.5 237.8,225.5 239.3,225.5 239.3,225.5 240.8,225.5 240.8,225.5 242.3,225.5 242.3,225.5 243.8,225.5 243.8,225.5 245.4,225.5 245.4,225.5 246.9,225.5 246.9,225.5 248.4,225.5 248.4,225.5 249.9,225.5 249.9,225.5 251.5,225.5 251.5,225.5 253.0,225.5 253.0,225.5 254.5,225.5 254.5,225.5 256.0,225.5 256.0,225.5 257.6,225.5 257.6,225.5 259.1,225.5 259.1,225.5 260.6,225.5 260.6,225.5 262.1,225.5 262.1,225.5 263.7,225.5 263.7,225.5 265.2,225.5 265.2,225.5 266.7,225.5 266.7,225.5 268.2,225.5 268.2,225.5 269.8,225.5 269.8,225.5 271.3,225.5 271.3,225.5 272.8,225.5 272.8,225.5 274.4,225.5 274.4,225.5 275.9,225.5 275.9,225.5 277.4,225.5 277.4,225.5 278.9,225.5 278.9,225.5 280.4,225.5 280.4,225.5 282.0,225.5 282.0,225.5 283.5,225.5 283.5,225.5 285.0,225.5 285.0,225.5 286.5,225.5 286.5,225.5 288.1,225.5 288.1,225.5 289.6,225.5 289.6,225.5 291.1,225.5 291.1,225.5 292.6,225.5 292.6,225.5 294.2,225.5 294.2,225.5 295.7,225.5 295.7,225.5 297.2,225.5 297.2,225.5 298.8,225.5 298.8,225.5 300.3,225.5 300.3,225.5 301.8,225.5 301.8,225.5 303.3,225.5 303.3,225.5 304.9,225.5 304.9,225.5 306.4,225.5 306.4,225.5 307.9,225.5 307.9,225.5 309.4,225.5 309.4,225.5 311.0,225.5 311.0,225.5 312.5,225.5 312.5,225.5 314.0,225.5 314.0,225.5 315.5,225.5 315.5,225.5 317.1,225.5 317.1,225.5 318.6,225.5 318.6,225.5 320.1,225.5 320.1,225.5 321.6,225.5 321.6,225.5 323.1,225.5 323.1,225.5 324.7,225.5 324.7,225.5 326.2,225.5 326.2,225.5 327.7,225.5 327.7,225.5 329.2,225.5 329.2,225.5 330.8,225.5 330.8,225.5 332.3,225.5 332.3,225.5 333.8,225.5 333.8,225.5 335.4,225.5 335.4,225.5 336.9,225.5 336.9,225.5 338.4,225.5 338.4,225.5 339.9,225.5 339.9,225.5 341.4,225.5 341.4,225.5 343.0,225.5 343.0,225.5 344.5,225.5 344.5,225.5 346.0,225.5 346.0,225.5 347.6,225.5 347.6,225.5 349.1,225.5 349.1,225.5 350.6,225.5 350.6,225.5 352.1,225.5 352.1,225.5 353.7,225.5 353.7,225.5 355.2,225.5 355.2,225.5 356.7,225.5 356.7,225.5 358.2,225.5 358.2,225.5 359.8,225.5 359.8,225.5 361.3,225.5 361.3,225.5 362.8,225.5 362.8,225.5 364.3,225.5 364.3,225.5 365.8,225.5 365.8,225.5 367.4,225.5 367.4,225.5 368.9,225.5 368.9,225.5 370.4,225.5 370.4,225.5 371.9,225.5 371.9,225.5 373.5,225.5 373.5,225.5 375.0,225.5 375.0,225.5 376.5,225.5 376.5,225.5 378.1,225.5 378.1,225.5 379.6,225.5 379.6,225.5 381.1,225.5 381.1,225.5 382.6,225.5 382.6,225.5 384.2,225.5 384.2,225.5 385.7,225.5 385.7,225.5 387.2,225.5 387.2,225.5 388.7,225.5 388.7,225.5 390.2,225.5 390.2,225.5 391.8,225.5 391.8,225.5 393.3,225.5 393.3,225.5 394.8,225.5 394.8,225.5 396.4,225.5 396.4,225.5 397.9,225.5 397.9,225.5 399.4,225.5 399.4,225.5 400.9,225.5 400.9,225.5 402.5,225.5 402.5,225.5 404.0,225.5 404.0,225.5 405.5,225.5 405.5,225.5 407.0,225.5 407.0,225.5 408.6,225.5 408.6,225.5 410.1,225.5 410.1,225.5 411.6,225.5 411.6,225.5 413.1,225.5 413.1,225.5 414.6,225.5 414.6,225.5 416.2,225.5 416.2,225.5 417.7,225.5 417.7,225.5 419.2,225.5 419.2,225.5 420.8,225.5 420.8,225.5 422.3,225.5 422.3,225.5 423.8,225.5 423.8,225.5 425.3,225.5 425.3,225.5 426.8,225.5 426.8,225.5 428.4,225.5 428.4,225.5 429.9,225.5 429.9,225.5 431.4,225.5 431.4,225.5 432.9,225.5 432.9,225.5 434.5,225.5 434.5,225.5 436.0,225.5 436.0,225.5 437.5,225.5 437.5,225.5 439.1,225.5 439.1,225.5 440.6,225.5 440.6,225.5 442.1,225.5 442.1,225.5 443.6,225.5 443.6,225.5 445.1,225.5 445.1,225.5 446.7,225.5 446.7,225.5 448.2,225.5 448.2,225.5 449.7,225.5 449.7,225.5 451.2,225.5 451.2,225.5 452.8,225.5 452.8,225.5 454.3,225.5 454.3,225.5 455.8,225.5 455.8,225.5 457.4,225.5 457.4,225.5 458.9,225.5 458.9,225.5 460.4,225.5 460.4,225.5 461.9,225.5 461.9,225.5 463.4,225.5 463.4,225.5 465.0,225.5 465.0,225.5 466.5,225.5 466.5,225.5 468.0,225.5 468.0,225.5 469.6,225.5 469.6,225.5 471.1,225.5 471.1,225.5 472.6,225.5 472.6,225.5 474.1,225.5 474.1,225.5 475.7,225.5 475.7,225.5 477.2,225.5 477.2,225.5 478.7,225.5 478.7,225.5 480.2,225.5 480.2,225.5 481.8,225.5 481.8,225.5 483.3,225.5 483.3,225.5 484.8,225.5 484.8,225.5 486.3,225.5 486.3,225.5 487.9,225.5 487.9,225.5 489.4,225.5 489.4,225.5 490.9,225.5 490.9,225.5 492.4,225.5 492.4,225.5 493.9,225.5 493.9,225.5 495.5,225.5 495.5,225.5 497.0,225.5 497.0,225.5 498.5,225.5 498.5,225.5 500.0,225.5 500.0,225.5 501.6,225.5 501.6,225.5 503.1,225.5 503.1,225.5 504.6,225.5 504.6,225.5 506.1,225.5 506.1,225.5 507.7,225.5 507.7,225.5 509.2,225.5 509.2,225.5 510.7,225.5 510.7,225.4 512.2,225.4 512.2,225.4 513.8,225.4 513.8,225.4 515.3,225.4 515.3,225.4 516.8,225.4 516.8,225.4 518.3,225.4 518.3,225.4 519.9,225.4 519.9,225.4 521.4,225.4 521.4,225.4 522.9,225.4 522.9,225.4 524.5,225.4 524.5,225.4 526.0,225.4 526.0,225.4 527.5,225.4 527.5,225.4 529.0,225.4 529.0,225.4 530.5,225.4 530.5,225.4 532.1,225.4 532.1,225.4 533.6,225.4 533.6,225.4 535.1,225.4 535.1,225.4 536.7,225.4 536.7,225.4 538.2,225.4 538.2,225.4 539.7,225.4 539.7,225.4 541.2,225.4 541.2,225.4 542.8,225.4 542.8,225.4 544.3,225.4 544.3,225.4 545.8,225.4 545.8,225.4 547.3,225.4 547.3,225.4 548.9,225.4 548.9,225.4 550.4,225.4 550.4,225.4 551.9,225.4 551.9,225.4 553.4,225.4 553.4,225.4 555.0,225.4 555.0,225.4 556.5,225.4 556.5,225.4 558.0,225.4 558.0,225.4 559.5,225.4 559.5,225.4 561.0,225.4 561.0,225.4 562.6,225.4 562.6,225.4 564.1,225.4 564.1,225.4 565.6,225.4 565.6,225.4 567.1,225.4 567.1,225.4 568.7,225.4 568.7,225.4 570.2,225.4 570.2,225.4 571.7,225.4 571.7,225.4 573.2,225.4 573.2,225.4 574.8,225.4 574.8,225.4 576.3,225.4 576.3,225.4 577.8,225.4 577.8,225.4 579.3,225.4 579.3,225.4 580.9,225.4 580.9,225.4 582.4,225.4 582.4,225.4 583.9,225.4 583.9,225.4 585.4,225.4 585.4,225.4 587.0,225.4 587.0,225.4 588.5,225.4 588.5,225.4 590.0,225.4 590.0,225.4 591.5,225.4 591.5,225.4 593.1,225.4 593.1,225.4 594.6,225.4 594.6,225.4 596.1,225.4 596.1,225.4 597.6,225.4 597.6,225.4 599.2,225.4 599.2,225.4 600.7,225.4 600.7,225.4 602.2,225.4 602.2,225.4 603.8,225.4 603.8,225.4 605.3,225.4 605.3,225.4 606.8,225.4 606.8,225.4 608.3,225.4 608.3,225.4 609.9,225.4 609.9,225.4 611.4,225.4 611.4,48.6 612.9,48.6 612.9,48.6 614.4,48.6 614.4,48.6 616.0,48.6 616.0,48.6 617.5,48.6 617.5,48.6 619.0,48.6 619.0,48.6 620.5,48.6 620.5,48.6 622.1,48.6 622.1,48.6 623.6,48.6 623.6,48.6 625.1,48.6 625.1,48.6 626.6,48.6 626.6,48.6 628.1,48.6 628.1,48.6 629.7,48.6 629.7,48.6 631.2,48.6 631.2,48.6 632.7,48.6 632.7,48.6 634.2,48.6 634.2,48.6 635.8,48.6 635.8,48.6 637.3,48.6 637.3,48.6 638.8,48.6 638.8,48.6 640.4,48.6 640.4,48.6 641.9,48.6 641.9,48.6 643.4,48.6 643.4,48.6 644.9,48.6 644.9,48.6 646.4,48.6 646.4,48.6 648.0,48.6 648.0,48.6 649.5,48.6 649.5,48.6 651.0,48.6 651.0,48.6 652.5,48.6 652.5,48.6 654.1,48.6 654.1,48.6 655.6,48.6 655.6,48.6 657.1,48.6 657.1,48.6 658.6,48.6 658.6,48.6 660.2,48.6 660.2,48.6 661.7,48.6 661.7,48.6 663.2,48.6 663.2,48.6 664.8,48.6 664.8,48.6 666.3,48.6 666.3,48.6 667.8,48.6 667.8,48.6 669.3,48.6 669.3,48.6 670.9,48.6 670.9,48.6 672.4,48.6 672.4,48.6 673.9,48.6 673.9,48.6 675.4,48.6 675.4,48.6 677.0,48.6 677.0,48.6 678.5,48.6 678.5,48.6 680.0,48.6 680.0,48.6" class="lna"/>
+<text x="64" y="264.0" class="s" text-anchor="end">0</text>
+<text x="64" y="192.1" class="s" text-anchor="end">10</text>
+<text x="64" y="120.2" class="s" text-anchor="end">20</text>
+<text x="64" y="48.4" class="s" text-anchor="end">30</text>
+<text x="70.0" y="276" class="s" text-anchor="middle">0</text>
+<text x="222.5" y="276" class="s" text-anchor="middle">100</text>
+<text x="375.0" y="276" class="s" text-anchor="middle">200</text>
+<text x="527.5" y="276" class="s" text-anchor="middle">300</text>
+<text x="680.0" y="276" class="s" text-anchor="middle">400</text>
+<text x="115.8" y="191.7" class="s">n=3 jumps to 3.42 (3/1 ≈ π)</text>
+<text x="115.8" y="207.5" class="s">n=22 jumps to 4.75 (22/7)</text>
+<text x="605.4" y="52.6" class="r" text-anchor="end">n=355: one term adds 24.6 → 29.41 (355/113; next continued-fraction term is 292)</text>
+<text x="70" y="20" class="h">Partial sums of the Flint Hills series Σ 1/(n³ sin²n), n ≤ 400 (computed)</text>
+</svg>
+<p class="cap">Each jump happens when n is the numerator of an unusually good fraction approximating π (so sin n is tiny). Whether the series converges depends on how often and how large these jumps are, which is governed by the irrationality exponent of π. Values computed by the build script of this deck.</p>
+</div>
+  <h3>5.1 What OpenAI claims</h3>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><a href="https://github.com/openai/math/blob/main/preprints/The-irrationality-exponent-of-pi-is-2-September-24-2026/paper.pdf">The irrationality exponent of π is 2</a> (2026-09-24, 23 pages): "We prove the conjecture that the irrationality exponent of π is 2. As a consequence, the classical Flint–Hills series Σ 1/(n³ sin²n) converges."</p>
+    <p>Precisely: for every ν &gt; 2 there is Q(ν) such that every q ≥ Q(ν) satisfies |π − p/q| ≥ q^(−ν). The paper notes that Q(ν) is <em>ineffective</em>, and that μ = 2 is not the same as "bounded partial quotients" (the stronger statement remains open).</p>
+  </div>
+  <p><strong>Method</strong>: suppose there are infinitely many approximations with exponent ν &gt; 2; pick several with well-separated denominators and do multivariate interpolation along a logarithmic curve to get a non-zero determinant. Arithmetically it is a non-zero integer (≥ 1); analytically the approximation errors make it tiny — contradiction. Convergence of Flint Hills then follows from an existing human result (Meiburg 2022: μ(π) &lt; 5/2 ⇒ convergence).</p>
+  <p>The <strong>reasoning summary</strong> (<a href="https://github.com/openai/math/blob/main/reasoning_traces/irrationality-exponent-of-pi.pdf">42 pages</a>) is worth reading: the model's initial target was only μ &lt; 5/2; it tried dozens of routes (BBP, modular forms, Padé, p-adic …), repeatedly hit a wall of "height vs denominator cost," and finally used weighted interpolation determinants to reach μ = 62/25 = 2.48 first, then 2. It also borrowed determinant ideas from its own Catalan's-constant manuscript.</p>
+  <h3>5.2 Verification status</h3>
+  <p>Lean: <code>lean/docs/017.md</code> and <code>ComparatorChallenges/PiExponent</code> exist; the solution is ~869 files, 95k lines, grep finds no sorry/axiom <span class="tg">[P]</span>; but it is <strong>not listed in formalization.yaml</strong> ⚠ and has no third-party re-check. The Flint Hills corollary is outside the formalization. No specific comment from number theorists found ⚠.</p>
+  <div class="note">
+    <span class="label">Sidebar: Catalan's constant is irrational (family 005)</span>
+    <p>G = 1 − 1/3² + 1/5² − 1/7² + … ≈ 0.91597. In 1978 Apéry proved ζ(3) irrational (van der Poorten called it "A proof that Euler missed"), but the same idea fails for G: after clearing denominators the linear forms do not tend to 0. The best previous result was "at least one of β(2), β(4), …, β(10) is irrational." OpenAI claims G is irrational (44 pages) with Lean (~574k lines, also not in the yaml ⚠). If it holds, it is one of the most important single-constant irrationality results since Apéry.</p>
+  </div>
+  <h3>5.3 If true</h3>
+  <p>For the first time a specific constant like π gets the optimal exponent that almost every real number has; the 70-year race of upper bounds ends; a Flint Hills puzzle popular for two decades is settled. Practical applications are minimal — the value is in pure mathematics, and in whether "weighted interpolation determinants" extend to constants such as ζ(3) and log 2.</p>
+</section>
+
+<section id="matmul">
+  <div class="kicker">Theoretical CS · family 107</div>
+  <h2><span class="n">6.</span>How fast can matrices be multiplied? ω ≤ 9/4</h2>
+  <p>GPU training is, at its core, matrix multiplication. This section asks how fast it can be in principle.</p>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body">Textbook algorithm: c_ij = Σ_k a_ik·b_kj — n² entries × n multiplications each = <strong>n³</strong>. 2×2 needs 8 multiplications.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Strassen 1969: 2×2 with only 7 multiplications</strong> (see the code block below; check it by hand). The algorithm makes no assumption about what a…h are, so they can be matrix blocks and the algorithm can recurse: T(n) = 7T(n/2) ⇒ n^(log₂7) ≈ <strong>n^2.807</strong>. The one saved multiplication compounds at every level of recursion.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Definition of ω</strong>: the smallest exponent such that n×n matrix multiplication takes about n^ω operations. Clearly 2 ≤ ω ≤ 3 (lower bound 2: just reading 2n² numbers takes that many steps). The mainstream conjecture is ω = 2.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body">"2×2 with 7 multiplications" is equivalent to "the 2×2 matrix multiplication <strong>tensor has rank</strong> ≤ 7." Then: Bini 1979 border rank → Schönhage 1981 → Strassen 1986's <strong>laser method</strong> (carving many independent matrix multiplications out of a high power of a low-rank tensor). Nearly all progress of the last 40 years came from refining the laser method.</div></div>
+  </div>
+<pre><code>A = [[a,b],[c,d]]   B = [[e,f],[g,h]]
+M1=(a+d)(e+h)  M2=(c+d)e  M3=a(f−h)  M4=d(g−e)
+M5=(a+b)h      M6=(c−a)(e+f)          M7=(b−d)(g+h)
+C11=M1+M4−M5+M7   C12=M3+M5   C21=M2+M4   C22=M1−M2+M3+M6
+<span class="cm"># check C12: M3+M5 = af−ah+ah+bh = af+bh ✓</span></code></pre>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<line x1="70" y1="280" x2="640" y2="280" class="ax"/>
+<line x1="70" y1="280" x2="70" y2="40" class="ax"/>
+<line x1="70" y1="280.0" x2="640" y2="280.0" class="grid"/>
+<text x="64" y="284.0" class="s" text-anchor="end">2.00</text>
+<line x1="70" y1="220.0" x2="640" y2="220.0" class="grid"/>
+<text x="64" y="224.0" class="s" text-anchor="end">2.25</text>
+<line x1="70" y1="160.0" x2="640" y2="160.0" class="grid"/>
+<text x="64" y="164.0" class="s" text-anchor="end">2.50</text>
+<line x1="70" y1="100.0" x2="640" y2="100.0" class="grid"/>
+<text x="64" y="104.0" class="s" text-anchor="end">2.75</text>
+<line x1="70" y1="40.0" x2="640" y2="40.0" class="grid"/>
+<text x="64" y="44.0" class="s" text-anchor="end">3.00</text>
+<text x="115.2" y="296" class="s" text-anchor="middle">1970</text>
+<text x="205.7" y="296" class="s" text-anchor="middle">1980</text>
+<text x="296.2" y="296" class="s" text-anchor="middle">1990</text>
+<text x="386.7" y="296" class="s" text-anchor="middle">2000</text>
+<text x="477.1" y="296" class="s" text-anchor="middle">2010</text>
+<text x="567.6" y="296" class="s" text-anchor="middle">2020</text>
+<polyline points="70.0,40.0 106.2,40.0 106.2,86.3 187.6,86.3 187.6,89.0 196.7,89.0 196.7,92.8 214.8,92.8 214.8,154.7 260.0,154.7 260.0,165.0 296.2,165.0 296.2,189.8 513.3,189.8 513.3,190.5 576.7,190.5 576.7,190.5 594.8,190.5 594.8,190.8 603.8,190.8 603.8,190.9 627.3,190.9 627.3,190.9 627.3,190.9" class="ln"/>
+<circle cx="106.2" cy="86.3" r="3" fill="#1a1a18"/>
+<text x="112.2" y="80.3" class="s">Strassen 2.807</text>
+<circle cx="187.6" cy="89.0" r="3" fill="#1a1a18"/>
+<circle cx="196.7" cy="92.8" r="3" fill="#1a1a18"/>
+<circle cx="214.8" cy="154.7" r="3" fill="#1a1a18"/>
+<text x="220.8" y="148.7" class="s">Schönhage 2.522</text>
+<circle cx="260.0" cy="165.0" r="3" fill="#1a1a18"/>
+<text x="266.0" y="159.0" class="s">laser method 2.479</text>
+<circle cx="296.2" cy="189.8" r="3" fill="#1a1a18"/>
+<text x="302.2" y="183.8" class="s">Coppersmith–Winograd 2.376</text>
+<circle cx="513.3" cy="190.5" r="3" fill="#1a1a18"/>
+<text x="519.3" y="184.5" class="s">Le Gall 2.373</text>
+<circle cx="576.7" cy="190.5" r="3" fill="#1a1a18"/>
+<circle cx="594.8" cy="190.8" r="3" fill="#1a1a18"/>
+<circle cx="603.8" cy="190.9" r="3" fill="#1a1a18"/>
+<circle cx="627.3" cy="190.9" r="3" fill="#1a1a18"/>
+<line x1="70" y1="206.1" x2="640" y2="206.1" class="dash"/>
+<text x="97.1" y="220.1" class="s">known barrier for laser-method analyses ≈2.3078 (AFLG 2015)</text>
+<circle cx="629.1" cy="220.0" r="5" fill="#b03a2e"/>
+<text x="619.1" y="240.0" class="r" text-anchor="end">2026-10 OpenAI claims ω ≤ 9/4 = 2.25 (over ℂ, Lean-formalized)</text>
+<text x="79.0" y="274.0" class="s">ω ≥ 2 (lower bound; mainstream conjecture ω = 2)</text>
+<text x="70" y="26" class="h">Upper bounds on the matrix multiplication exponent ω: 57 years</text>
+</svg>
+<p class="cap">Data: Strassen 1969; Pan/Bini/Schönhage 1978–81; Strassen 1986; Coppersmith–Winograd 1990; Le Gall 2014; Alman–Vassilevska Williams 2021; Duan–Wu–Zhou 2023; Alman et al. 2024 (<a href="https://arxiv.org/abs/2404.16349">arXiv:2404.16349</a>); Dupont et al. 2026-08 (<a href="https://arxiv.org/abs/2608.16884">arXiv:2608.16884</a>, using AlphaEvolve). From 2014 to 2026 the bound fell by about 0.0017 in total. The claimed 2.25 drops it by about 0.12 at once and lands below the known laser-method barrier, so it must use a different method: the paper uses the asymptotic-spectrum approach of Strassen.</p>
+</div>
+  <h3>6.1 What OpenAI claims</h3>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><strong>An Upper Bound of 9/4 for the Matrix Multiplication Exponent</strong> (2026-10-02, <strong>only 13 pages</strong>): "We prove that the exponent of matrix multiplication over the complex numbers is at most 9/4." The method is not the laser method but Strassen's <strong>asymptotic spectrum</strong> approach: inequalities for "tensor characters" on polynomial-multiplication tensors, ending in ω ≤ 9/4. The paper says: "its proof does not specify a competitive finite matrix size."</p>
+    <p>Two companions in the family: ω &lt; 2.258 over ℂ (83 pages); ω &lt; 2.371054886 over <em>every field</em>, including positive characteristic (35 pages, still in the laser-method framework, about 1.2×10⁻⁴ better than the previous record).</p>
+  </div>
+  <h3>6.2 Verification status</h3>
+  <p><strong>Statement review</strong> <span class="tg">[P]</span>: the Lean theorem is <code>Arithmetic.omega ℂ ≤ 9/4</code>. Algorithms are modeled as straight-line programs (constant/input/+/−/× gates, each of cost 1), <code>Correct</code> requires outputting A·B for <em>all</em> input matrices, and ω is the standard non-uniform algebraic-complexity definition — consistent with the literature, no hidden assumptions. The solution directory has no sorry/axiom. <strong>Humans</strong>: Aaronson: "a <em>rational</em> exponent for once (!), and via a completely different approach" <span class="tg">[R]</span>; no public comment yet from laser-method experts (Vassilevska Williams, Alman, Le Gall) ⚠.</p>
+  <h3>6.3 If true — and what it means for AI training</h3>
+  <ul>
+    <li><strong>In theory</strong>: solving linear systems, matrix inversion, determinants, transitive closure, bipartite matching, linear-programming solvers and more all have complexities written directly in terms of ω, and would all improve. More importantly it shows that the asymptotic-spectrum route works, making ω = 2 look closer.</li>
+    <li><strong>For GPU / LLM training: essentially no direct impact.</strong> This is a classic "galactic algorithm": huge constants, advantageous only on astronomically large matrices. GPU GEMM uses n³ blocked algorithms, bottlenecked on memory bandwidth and Tensor Core throughput; even Strassen is rarely used in practice (poor numerical stability, irregular memory access).</li>
+    <li><strong>How this differs from AlphaTensor / AlphaEvolve</strong>: those find low-rank decompositions of <em>fixed small sizes</em> (e.g. AlphaEvolve's 2025 4×4 complex scheme with 48 multiplications) — constant-factor optimizations that can land in real kernels. ω is about the <em>exponent</em> as n → ∞. Dupont et al. (2026-08) used AlphaEvolve to tune laser-method parameters, the first time AI touched ω, for a gain of 1.6×10⁻⁴.</li>
+  </ul>
+</section>
+
+<section id="ugc">
+  <div class="kicker">Theoretical CS · family 102</div>
+  <h2><span class="n">7.</span>Unique Games: where is the ceiling for approximation algorithms?</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>NP-hard</strong>: problems like 3SAT and Max-Cut are believed to have no exact polynomial-time algorithms (P ≠ NP).</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Settle for approximation.</strong> Max-Cut: split a graph's vertices into two groups to maximize edges crossing between them. A random split cuts half the edges in expectation. By hand on a triangle: the best cut has 2 edges, a random split expects 1.5, ratio 0.75.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Goemans–Williamson (1995)</strong>: relax each vertex to a unit vector, solve a semidefinite program (SDP), then cut with a random hyperplane — guaranteeing <strong>0.878</strong>.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>Approximation can be hard too</strong>: the PCP theorem (1992–98). Håstad (2001) showed approximating Max-Cut beyond 16/17 ≈ 0.941 is NP-hard. That left a 25-year gap between 0.878 and 0.941.</div></div>
+    <div class="rung"><div class="lvl">Level 4</div><div class="body"><strong>Unique Games</strong>: each vertex picks one of q labels; each edge is a permutation constraint (fix one end and the other is determined). By hand: a triangle, labels {0,1,2}, constraints b=a+1, c=b+1, a=c+1 (mod 3) — going around gives a=a+3=a, fully satisfiable; change the last to a=c+2 and at most 2/3 can be satisfied. Fully satisfiable instances are solvable in polynomial time by propagating along edges; <strong>only "almost satisfiable" is hard</strong>.</div></div>
+  </div>
+  <p><strong>UGC (Khot 2002)</strong>: for every ε, δ &gt; 0, distinguishing "≥ 1−ε satisfiable" from "at most δ satisfiable" is NP-hard.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Max-Cut approximation ratio: what fraction of the optimum can polynomial time guarantee?</text>
+<rect x="513.6" y="76" width="75.8" height="28" fill="#e4e0d8"/>
+<line x1="60" y1="90" x2="660" y2="90" class="ax"/>
+<line x1="60.0" y1="82" x2="60.0" y2="98" class="ln"/>
+<text x="60.0" y="116" class="s" text-anchor="middle">0.5 random split</text>
+<line x1="513.6" y1="82" x2="513.6" y2="98" class="ln"/>
+<text x="513.6" y="68" class="g" text-anchor="middle">0.878 GW 1995 (SDP)</text>
+<line x1="589.4" y1="82" x2="589.4" y2="98" class="ln"/>
+<text x="589.4" y="116" class="r" text-anchor="middle">0.941 Håstad 2001: NP-hard</text>
+<line x1="660.0" y1="82" x2="660.0" y2="98" class="ln"/>
+<text x="660.0" y="68" class="s" text-anchor="middle">1.0</text>
+<text x="551.5" y="134" class="s" text-anchor="middle">grey: true limit unknown 1995–2026</text>
+<text x="551.5" y="148" class="s" text-anchor="middle">UGC true ⇒ the limit is exactly 0.878 (KKMO 2007)</text>
+<text x="20" y="178" class="h">Unique Games completeness ladder: which instances are provably NP-hard?</text>
+<rect x="30" y="190" width="200" height="46" rx="4" class="box"/>
+<text x="42" y="209" class="t">≈1/2 completeness</text>
+<text x="42" y="226" class="s">2-to-2 theorem, 2018</text>
+<rect x="250" y="190" width="200" height="46" rx="4" class="boxr"/>
+<text x="262" y="209" class="t">1−ε completeness = UGC</text>
+<text x="262" y="226" class="s">OpenAI 2026-09 claim + Lean</text>
+<line x1="232" y1="213" x2="246" y2="213" class="arr"/>
+<text x="470" y="209" class="s">Fully satisfiable instances</text>
+<text x="470" y="224" class="s">are easy (propagate along</text>
+<text x="470" y="239" class="s">edges): only "almost" is hard</text>
+</svg>
+<p class="cap">Sources: Goemans–Williamson, JACM 1995; Håstad, JACM 2001; Khot, STOC 2002; Khot–Kindler–Mossel–O'Donnell, SICOMP 2007; Khot–Minzer–Safra, FOCS 2018.</p>
+</div>
+  <h3>7.1 Why it matters so much</h3>
+  <ul>
+    <li><strong>KKMO 2007</strong>: if UGC holds, the limit for Max-Cut is <em>exactly</em> 0.878 — GW is optimal.</li>
+    <li><strong>Khot–Regev 2008</strong>: if UGC holds, approximating Vertex Cover to 2−ε is hard.</li>
+    <li><strong>Raghavendra 2008</strong>: if UGC holds, for <em>every</em> constraint satisfaction problem the basic SDP is the optimal polynomial-time approximation algorithm. One algorithm plus one conjecture fix the approximation limit of a whole class of problems.</li>
+    <li>Evidence against: Arora–Barak–Steurer 2010 gave a subexponential-time algorithm for UG, which made some doubt UGC. The most recent progress was the 2018 <strong>2-to-2 theorem</strong> (Khot–Minzer–Safra et al.), proving the version with completeness about 1/2 — "half of UGC."</li>
+  </ul>
+  <h3>7.2 What OpenAI claims</h3>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><strong>The Unique Games Theorem</strong> (2026-09-23, 58 pages): "We prove the Unique Games Conjecture. For every fixed ε, δ ∈ (0, 1/2), we give a deterministic polynomial-time reduction from 3SAT to Unique Games over a fixed finite alphabet, with completeness at least 1 − ε and soundness at most δ."</p>
+    <p>The family also contains four direct reductions that <em>do not depend on UGC</em>: Max-Cut beyond 0.878 is NP-hard, Vertex Cover below 2 is NP-hard, and so on — which is what Aaronson meant when he observed (paraphrased) that UGC was not actually needed for its most famous consequences.</p>
+  </div>
+  <h3>7.3 Verification status</h3>
+  <p><strong>Statement review</strong> <span class="tg">[P]</span>: the Lean theorem is <code>OAI.UniqueGamesTheorem.theorem11</code>. The input is a binary encoding of a 3SAT formula; the reduction must satisfy <code>Turing.TM2ComputableInPolyTime</code> (Mathlib's multi-tape Turing machines); completeness and soundness are stated cleanly, and the instances are additionally required to be "translation constraints on simple bipartite graphs" — <strong>a stronger, known-equivalent form of UGC; the encoding is faithful</strong>. Solution ~478 files, 187k lines, sorry/axiom 0.</p>
+  <p><strong>Humans</strong> <span class="tg">[R]</span>: Lance Fortnow: "if they hold up, we've seen more progress in TCS in the last 24 hours than in the previous three decades combined." Mark Braverman (Quanta): "Math by press release is not that healthy for math." Dana Moshkovitz reportedly said the paper is so badly written it is impossible to read without AI help (second-hand ⚠). No public statement from Khot himself ⚠.</p>
+  <h3>7.4 If true</h3>
+  <p>For a large class of problems, the question "how well can efficient approximation do?" gets an exact boundary; hundreds of "if UGC then …" papers become theorems. One association for AI safety (<em>my speculation, not an established conclusion</em>): the complexity-theoretic basis of debate-style scalable oversight (Irving–Christiano–Amodei 2018) is interactive proofs and PCPs; UGC pins down the boundary of "a little error makes efficient distinction impossible," which is suggestive for protocols where a weak verifier oversees a strong prover.</p>
+</section>
+
+<section id="bpl">
+  <div class="kicker">Theoretical CS · family 103 (+ 109)</div>
+  <h2><span class="n">8.</span>L = RL = BPL: in small memory, randomness doesn't help</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>What does randomness buy?</strong> To test whether (x+y)² = x²+2xy+y² holds identically, plug in a few random numbers — very fast. A deterministic fast algorithm is still unknown.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>P vs BPP</strong>: the mainstream conjecture is P = BPP (randomness gives no essential speed-up), but an unconditional proof is far away.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>The memory-bounded version</strong>: L = deterministic computation with only O(log n) bits of memory (roughly a few pointers); RL/BPL = the same memory plus random bits. By hand: a random walk of n³ steps from s in an undirected graph needs only "current vertex + counter" and reaches t with high probability ⇒ connectivity ∈ RL (1979).</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>History of derandomization</strong>: Nisan 1992 BPL ⊆ L² → Saks–Zhou 1999 BPL ⊆ L^(3/2) → Hoza 2021 slightly better → <strong>Reingold 2005: undirected connectivity ∈ L</strong> (a milestone in removing randomness from a specific problem). General BPL stayed near the 3/2 power for 25 years.</div></div>
+  </div>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><strong>Exact Derandomization of Logarithmic Space: L = RL = BPL</strong> (2026-09-23, 108 pages): "We prove L = RL = BPL, resolving the derandomization problem for polynomial-time randomized logarithmic space." A stronger version: acceptance probabilities can be estimated deterministically to precision 2^(−q) in space O(log n + q).</p>
+  </div>
+  <p><strong>Verification</strong> <span class="tg">[P]</span>: the Lean theorem is <code>L = RL ∧ RL = BPL</code>; for this family Comparator additionally <strong>locks 20 definitions</strong> (machine, step, space, acceptance probability, L/RL/BPL), so the solution cannot quietly change them. The model is a custom multi-tape Turing machine, space counts work cells visited, and "every coin sequence halts in polynomial time" — the standard BPL definition. sorry/axiom 0. <strong>Humans</strong> <span class="tg">[R]</span>: Aaronson called it "one of the great derandomization conjectures short of P=BPP," adding "its truth was never in serious doubt" — nobody doubted the statement; the difficulty was the proof.</p>
+  <p><strong>If true</strong>: the first natural resource class with randomness removed completely and unconditionally. It does <strong>not</strong> imply P = BPP and is far from P vs NP (Fortnow: "none of these results get us any closer to settling P v NP"). The proof's "low-space, high-precision linear algebra" may matter more than the result.</p>
+  <div class="note">
+    <span class="label">Sidebar: integer multiplication below n log n (family 109)</span>
+    <p>Schoolbook n²; Karatsuba 1962 n^1.585; Schönhage–Strassen 1971 n log n log log n, conjecturing n log n optimal; Harvey–van der Hoeven 2019 (Annals 2021) reached O(n log n). OpenAI claims O(n (log n)^(1−2^(−182))) on multi-tape Turing machines (73 pages, <strong>no Lean</strong>). A saving of 2^(−182) is visible only at astronomical sizes — no practical significance — but it refutes a 50-year "optimality" conjecture (in that model of computation).</p>
+  </div>
+</section>
+
+<section id="color">
+  <div class="kicker">Combinatorics · family 158 (+ 156)</div>
+  <h2><span class="n">9.</span>Coloring the plane: points at distance exactly 1 must differ</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>Graph coloring</strong> (familiar from register allocation and scheduling): adjacent vertices get different colors; how many colors are needed?</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>The unit-distance graph</strong>: <em>every point</em> of the plane is a vertex; points at distance exactly 1 are joined. Its chromatic number is written χ(ℝ²).</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Why 3 colors are not enough</strong>: the Moser spindle (figure below, 7 points). <strong>Why 7 are enough</strong>: tile the plane with hexagons of diameter slightly below 1 and color them periodically with 7 colors; same-colored hexagons are more than 1 apart.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body">So 4 ≤ χ ≤ 7, <strong>stuck from the 1950s until 2018</strong>, when the biogerontologist Aubrey de Grey pushed the lower bound to 5 with a 1581-vertex finite graph (later shrunk to ~509 vertices by Polymath16 and SAT solvers).</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Moser spindle (1961): 7 points, 11 unit-length edges ⇒ 3 colors are not enough</text>
+<line x1="70.0" y1="170.0" x2="165.9" y2="272.0" class="ln"/>
+<line x1="70.0" y1="170.0" x2="206.3" y2="138.0" class="ln"/>
+<line x1="165.9" y1="272.0" x2="206.3" y2="138.0" class="ln"/>
+<line x1="165.9" y1="272.0" x2="302.2" y2="240.0" class="ln"/>
+<line x1="206.3" y1="138.0" x2="302.2" y2="240.0" class="ln"/>
+<line x1="70.0" y1="170.0" x2="206.3" y2="202.0" class="ln"/>
+<line x1="70.0" y1="170.0" x2="165.9" y2="68.0" class="ln"/>
+<line x1="206.3" y1="202.0" x2="165.9" y2="68.0" class="ln"/>
+<line x1="206.3" y1="202.0" x2="302.2" y2="100.0" class="ln"/>
+<line x1="165.9" y1="68.0" x2="302.2" y2="100.0" class="ln"/>
+<line x1="302.2" y1="240.0" x2="302.2" y2="100.0" class="lnr"/>
+<circle cx="70.0" cy="170.0" r="6" fill="#b03a2e"/>
+<text x="79.0" y="162.0" class="t">O</text>
+<circle cx="302.2" cy="240.0" r="6" fill="#b03a2e"/>
+<text x="311.2" y="232.0" class="t">T₁</text>
+<circle cx="302.2" cy="100.0" r="6" fill="#b03a2e"/>
+<text x="311.2" y="92.0" class="t">T₂</text>
+<circle cx="165.9" cy="272.0" r="6" fill="#2f5d8a"/>
+<text x="174.9" y="264.0" class="t">B₁</text>
+<circle cx="206.3" cy="138.0" r="6" fill="#2e7d4f"/>
+<text x="215.3" y="130.0" class="t">C₁</text>
+<circle cx="206.3" cy="202.0" r="6" fill="#2e7d4f"/>
+<text x="215.3" y="194.0" class="t">B₂</text>
+<circle cx="165.9" cy="68.0" r="6" fill="#2f5d8a"/>
+<text x="174.9" y="60.0" class="t">C₂</text>
+<text x="316.2" y="174.0" class="r">|T₁T₂|=1</text>
+<text x="430" y="60" class="t">Argument (with 3 colors)</text>
+<text x="430" y="82" class="z">O, B₁, C₁ pairwise at distance 1 → one color each</text>
+<text x="430" y="100" class="z">T₁ is 1 from B₁, C₁ → T₁ = color of O</text>
+<text x="430" y="118" class="z">likewise T₂ = color of O</text>
+<text x="430" y="136" class="z">but |T₁T₂| = 1 → contradiction ⇒ χ ≥ 4</text>
+<text x="430" y="182" class="t">Known bounds on χ of the plane</text>
+<text x="430" y="204" class="s">1950s  4 ≤ χ ≤ 7 (spindle, hexagons)</text>
+<text x="430" y="222" class="s">2018  5 ≤ χ ≤ 7 (de Grey graph)</text>
+<text x="430" y="240" class="r">2026-09  6 ≤ χ ≤ 7 (OpenAI, Lean)</text>
+</svg>
+<p class="cap">Coordinates computed by the build script: two rhombi, each made of two unit equilateral triangles, share the vertex O, and each tip T is √3 from O. Rotating one rhombus about O by 2·arcsin(1/(2√3)) ≈ 33.6° puts the two tips exactly 1 apart.</p>
+</div>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><strong>The Euclidean plane is not five-colorable</strong> (2026-09-23, 62 pages): "We prove that every coloring of the Euclidean plane with five colors has a monochromatic unit-distance pair, with no regularity assumption on the color classes. Consequently, the chromatic number of the plane is either six or seven."</p>
+  </div>
+  <p><strong>A surprising method</strong>: the standard lower-bound recipe is "find a finite graph and prove it is not k-colorable" (de Grey's route). This paper <strong>exhibits no finite graph at all</strong>, and uses ergodic theory and measure theory instead: first it proves "a genuine k-coloring exists ⇔ a 'weakly measurable' k-coloring exists" (by averaging over translations and rotations, using the <em>amenability</em> of those groups — which connects to §10), then shows no weakly measurable 5-coloring exists. The last step returns to the 1961 Moser spindle.</p>
+  <p><strong>Verification</strong> <span class="tg">[P]</span>: the Lean statement is two lines a person can check at a glance:</p>
+<pre><code>def ProperColoring (k) (c : ℂ → Fin k) : Prop := ∀ x y : ℂ, ‖x - y‖ = 1 → c x ≠ c y
+theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</code></pre>
+  <p>No measurability assumption — <strong>faithful to the original problem</strong>. The proof is ~70 files, 30k lines, no sorry/axiom. Gil Kalai: "raises the lower bound to six, leaving six and seven as the two possible answers," while cautioning that "even Lean verification may have issues" <span class="tg">[R]</span>.</p>
+  <p><strong>If true</strong>: χ(ℝ²) ∈ {6, 7}. A new open problem: by the de Bruijn–Erdős theorem a finite unit-distance graph needing 6 colors must exist, but nobody knows what it looks like — a good target for AI plus SAT. It is also the ideal division of labor: humans review a two-line statement, the machine checks 30,000 lines of proof.</p>
+  <div class="note">
+    <span class="label">Sidebar: Borsuk's conjecture fails in dimension 9 (family 156)</span>
+    <p>A disk cannot be cut into 2 pieces of smaller diameter (one piece always contains an antipodal pair), but 3 pieces suffice. Borsuk asked in 1933: can every bounded set in ℝᵈ be cut into d+1 pieces of smaller diameter? Kahn–Kalai disproved it in 1993 in dimension 1325; the dimension of counterexamples later fell to 64 (2014) and 63 (2026-05, with help from GPT-5.5 Pro). OpenAI claims that the projection matrices uuᵀ of all unit vectors u in ℝ⁴, which live in a 9-dimensional space, <strong>cannot be covered by 10 pieces of smaller diameter</strong> — from 63 straight down to 9 (18 pages, with Lean). Dimensions 4–8 remain open.</p>
+  </div>
+</section>
+
+<section id="thompson">
+  <div class="kicker">Group theory · family 248</div>
+  <h2><span class="n">10.</span>Thompson's group F: a problem "proven" and withdrawn for decades</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body">A <strong>group</strong> is a set of operations that can be composed and undone. Examples: integer addition; the 8 symmetries of a square.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Generators</strong>: a few operations build the whole group. ℤ is generated by "+1"; the <strong>free group F₂</strong> is generated by a and b with no relations at all, and its Cayley graph is an infinite tree with 4 branches at every vertex.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Thompson's group F</strong>: increasing piecewise-linear maps of [0,1] to itself, with breakpoints at k/2ⁿ and slopes powers of 2; the operation is composition. Generated by x₀ (figure below) and x₁.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>Amenable = can you "average fairly"?</strong> Følner criterion: are there finite sets A whose proportion of change under translation by the generators is arbitrarily small? ℤ: yes; F₂: no. Von Neumann introduced the notion in 1929 to explain the <strong>Banach–Tarski paradox</strong> (a ball cut into finitely many pieces reassembled into two balls of the same size) — the paradox comes from a copy of F₂ inside the rotation group.</div></div>
+    <div class="rung"><div class="lvl">Level 4</div><div class="body">"Is every non-amenable group non-amenable because it contains F₂?" No (counterexamples from the 1980s), but those counterexamples are exotic. F contains no F₂ (1985), so if F is non-amenable it is a <strong>natural, finitely presented</strong> counterexample.</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Left: the generator x₀ of the Thompson group F · Right: can you average fairly?</text>
+<rect x="60" y="50" width="220" height="220" fill="none" class="ax"/>
+<line x1="60" y1="270" x2="280" y2="50" class="dash"/>
+<polyline points="60.0,270.0 170.0,215.0 225.0,160.0 280.0,50.0" class="lna"/>
+<circle cx="60.0" cy="270.0" r="3" fill="#9a5b12"/>
+<circle cx="170.0" cy="215.0" r="3" fill="#9a5b12"/>
+<circle cx="225.0" cy="160.0" r="3" fill="#9a5b12"/>
+<circle cx="280.0" cy="50.0" r="3" fill="#9a5b12"/>
+<text x="121.0" y="256.5" class="s">slope ½</text>
+<text x="203.5" y="201.5" class="s">slope 1</text>
+<text x="258.5" y="119.0" class="s">slope 2</text>
+<text x="170.0" y="284" class="s" text-anchor="middle">½</text>
+<text x="225.0" y="284" class="s" text-anchor="middle">¾</text>
+<text x="280.0" y="284" class="s" text-anchor="middle">1</text>
+<text x="54" y="219.0" class="s" text-anchor="end">¼</text>
+<text x="54" y="164.0" class="s" text-anchor="end">½</text>
+<text x="54" y="54.0" class="s" text-anchor="end">1</text>
+<text x="340" y="60" class="t">ℤ: amenable</text>
+<line x1="340" y1="80" x2="600" y2="80" class="ax"/>
+<line x1="400" y1="80" x2="540" y2="80" class="lnb"/>
+<circle cx="400" cy="80" r="4" fill="#b03a2e"/>
+<circle cx="540" cy="80" r="4" fill="#b03a2e"/>
+<text x="340" y="102" class="s">A = {−n…n}: shift by 1 changes 2, 2/(2n+1) → 0</text>
+<text x="340" y="140" class="t">Free group F₂: non-amenable</text>
+<circle cx="470" cy="205" r="3" fill="#1a1a18"/>
+<line x1="470" y1="205" x2="504.0" y2="205.0" class="ln"/>
+<line x1="504.0" y1="205.0" x2="521.6" y2="195.4" class="ln"/>
+<circle cx="521.6" cy="195.4" r="3" fill="#b03a2e"/>
+<line x1="504.0" y1="205.0" x2="524.0" y2="205.0" class="ln"/>
+<circle cx="524.0" cy="205.0" r="3" fill="#b03a2e"/>
+<line x1="504.0" y1="205.0" x2="521.6" y2="214.6" class="ln"/>
+<circle cx="521.6" cy="214.6" r="3" fill="#b03a2e"/>
+<line x1="470" y1="205" x2="470.0" y2="239.0" class="ln"/>
+<line x1="470.0" y1="239.0" x2="479.6" y2="256.6" class="ln"/>
+<circle cx="479.6" cy="256.6" r="3" fill="#b03a2e"/>
+<line x1="470.0" y1="239.0" x2="470.0" y2="259.0" class="ln"/>
+<circle cx="470.0" cy="259.0" r="3" fill="#b03a2e"/>
+<line x1="470.0" y1="239.0" x2="460.4" y2="256.6" class="ln"/>
+<circle cx="460.4" cy="256.6" r="3" fill="#b03a2e"/>
+<line x1="470" y1="205" x2="436.0" y2="205.0" class="ln"/>
+<line x1="436.0" y1="205.0" x2="418.4" y2="214.6" class="ln"/>
+<circle cx="418.4" cy="214.6" r="3" fill="#b03a2e"/>
+<line x1="436.0" y1="205.0" x2="416.0" y2="205.0" class="ln"/>
+<circle cx="416.0" cy="205.0" r="3" fill="#b03a2e"/>
+<line x1="436.0" y1="205.0" x2="418.4" y2="195.4" class="ln"/>
+<circle cx="418.4" cy="195.4" r="3" fill="#b03a2e"/>
+<line x1="470" y1="205" x2="470.0" y2="171.0" class="ln"/>
+<line x1="470.0" y1="171.0" x2="460.4" y2="153.4" class="ln"/>
+<circle cx="460.4" cy="153.4" r="3" fill="#b03a2e"/>
+<line x1="470.0" y1="171.0" x2="470.0" y2="151.0" class="ln"/>
+<circle cx="470.0" cy="151.0" r="3" fill="#b03a2e"/>
+<line x1="470.0" y1="171.0" x2="479.6" y2="153.4" class="ln"/>
+<circle cx="479.6" cy="153.4" r="3" fill="#b03a2e"/>
+<text x="340" y="268" class="s">radius-n ball: ~3ⁿ points, ~2/3 on the boundary</text>
+</svg>
+<p class="cap">x₀ squeezes [0,½] onto [0,¼], shifts [½,¾] onto [¼,½] and stretches [¾,1] onto [½,1]; F is generated by x₀ and x₁. F contains no free subgroup F₂ (Brin–Squier 1985), so the standard key "contains F₂ ⇒ non-amenable" does not apply. That is one reason the problem stayed open for 47 years.</p>
+</div>
+  <h3>10.1 The best case for why Lean matters</h3>
+  <p>Geoghegan conjectured in 1979 that F is non-amenable. Since then proofs have been announced in both directions: in 2009 two arXiv papers appeared almost simultaneously, Akhmedov (non-amenable) and Shavgulidze (amenable); in 2011 Moore showed the latter's errors were "serious and do not seem to be repairable" — after it had been published; <strong>Justin Moore himself claimed amenability in 2012, then withdrew after an error in Lemma 4.13 was pointed out</strong>; Akhmedov's version has never been accepted. <span class="tg">[P, arXiv 1102.0747 / 1209.2063 / 1310.4395]</span></p>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p><strong>Thompson's group F is nonamenable</strong> (2026-09-23, <strong>main text only 13 pages</strong>): "We prove that Thompson's group F is nonamenable. This confirms Geoghegan's conjecture."</p>
+    <p>Idea: borrow a phenomenon from functional analysis — the unit ball of an infinite-dimensional Hilbert space carries a Lipschitz map that moves every point by at least ½ (Benyamini–Sternfeld 1983). If F had Følner sets, averaging over them would yield an approximate fixed point of that map — contradiction. The key tool comes from infinite-dimensional geometry, not the combinatorial counting usual in group theory.</p>
+  </div>
+  <p><strong>Verification</strong> <span class="tg">[P]</span>: the Lean challenge file <strong>defines F from scratch</strong> (increasing homeomorphisms, finitely many dyadic breakpoints, slopes 2^k) and an "invariant mean" (linear, positive, normalized, left-invariant); the theorem says "there is a group structure whose multiplication is composition, and no invariant mean exists." Multiplication is forced to be composition, leaving no room to cheat — <strong>faithful</strong>. Proof ~68 files, 9,500 lines, no sorry/axiom. Kalai cautiously says the paper "announces" the result <span class="tg">[R]</span>; no public comment yet from Geoghegan, Moore or Akhmedov ⚠.</p>
+  <p><strong>Takeaway</strong>: the human history of this problem is a chain of "announce → find error → withdraw," including from top experts. The statement is ~60 lines of definitions a person can audit line by line; for a 13-page paper, past experience suggests the community might need years to reach consensus. Lean replaces "trust the author" with "trust the kernel and the statement."</p>
+</section>
+
+<section id="ns">
+  <div class="kicker">PDE · separate September release (+ family 376)</div>
+  <h2><span class="n">11.</span>Navier–Stokes: can a fluid "blow up" in finite time?</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>ODE vs PDE</strong>: an ODE's unknown is a single number changing in time, x(t); a PDE's unknown is a whole field, such as the velocity u(x,t) at every point and time — like infinitely many coupled ODEs.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Blowup by hand</strong> (figure below): ẋ = x², x(0) = 1 has solution 1/(1−t): 10 at t = 0.9, 100 at t = 0.99, ∞ as t → 1. The equation is perfectly smooth, yet the solution breaks in finite time. Add damping, ẋ = x² − x: small data decays, large data still blows up.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>The NS equations</strong>: ∂ₜu + (u·∇)u − νΔu + ∇p = f, ∇·u = 0. (u·∇)u is nonlinear self-transport (the x² of the toy), νΔu is viscosity (the −x), f is external forcing.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>Why 3D is hard</strong>: the only global conserved quantity is energy, and under 3D scaling the energy bound controls smaller scales less and less — "supercritical." 2D is critical, which is why 2D was settled long ago.</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Finite-time blowup by hand: a smooth equation whose solution reaches infinity in finite time</text>
+<line x1="70" y1="270" x2="420" y2="270" class="ax"/>
+<line x1="70" y1="270" x2="70" y2="40" class="ax"/>
+<line x1="361.7" y1="270" x2="361.7" y2="40" class="dash"/>
+<line x1="272.2" y1="270" x2="272.2" y2="40" class="dash"/>
+<polyline points="70.0,258.5 71.8,258.4 73.5,258.4 75.2,258.3 77.0,258.2 78.8,258.1 80.5,258.1 82.2,258.0 84.0,257.9 85.8,257.9 87.5,257.8 89.2,257.7 91.0,257.6 92.8,257.6 94.5,257.5 96.2,257.4 98.0,257.3 99.8,257.3 101.5,257.2 103.2,257.1 105.0,257.0 106.8,257.0 108.5,256.9 110.2,256.8 112.0,256.7 113.8,256.6 115.5,256.6 117.2,256.5 119.0,256.4 120.8,256.3 122.5,256.2 124.2,256.1 126.0,256.1 127.8,256.0 129.5,255.9 131.2,255.8 133.0,255.7 134.8,255.6 136.5,255.6 138.2,255.5 140.0,255.4 141.8,255.3 143.5,255.2 145.2,255.1 147.0,255.0 148.8,254.9 150.5,254.8 152.2,254.8 154.0,254.7 155.8,254.6 157.5,254.5 159.2,254.4 161.0,254.3 162.8,254.2 164.5,254.1 166.2,254.0 168.0,253.9 169.8,253.8 171.5,253.7 173.2,253.6 175.0,253.5 176.8,253.4 178.5,253.3 180.2,253.2 182.0,253.1 183.8,253.0 185.5,252.9 187.2,252.8 189.0,252.7 190.8,252.6 192.5,252.5 194.2,252.4 196.0,252.3 197.8,252.2 199.5,252.1 201.2,252.0 203.0,251.9 204.8,251.7 206.5,251.6 208.2,251.5 210.0,251.4 211.8,251.3 213.5,251.2 215.2,251.1 217.0,251.0 218.8,250.8 220.5,250.7 222.3,250.6 224.0,250.5 225.8,250.4 227.5,250.3 229.3,250.1 231.0,250.0 232.8,249.9 234.5,249.8 236.2,249.7 238.0,249.5 239.8,249.4 241.5,249.3 243.2,249.2 245.0,249.0 246.8,248.9 248.5,248.8 250.2,248.7 252.0,248.5 253.8,248.4 255.5,248.3 257.2,248.1 259.0,248.0 260.8,247.9 262.5,247.7 264.2,247.6 266.0,247.5 267.8,247.3 269.5,247.2 271.2,247.1 273.0,246.9 274.8,246.8 276.5,246.7 278.2,246.5 280.0,246.4 281.8,246.2 283.5,246.1 285.2,245.9 287.0,245.8 288.8,245.7 290.5,245.5 292.2,245.4 294.0,245.2 295.8,245.1 297.5,244.9 299.2,244.8 301.0,244.6 302.8,244.5 304.5,244.3 306.2,244.1 308.0,244.0 309.8,243.8 311.5,243.7 313.2,243.5 315.0,243.4 316.8,243.2 318.5,243.0 320.2,242.9 322.0,242.7 323.8,242.6 325.5,242.4 327.2,242.2 329.0,242.1 330.8,241.9 332.5,241.7 334.2,241.5 336.0,241.4 337.8,241.2 339.5,241.0 341.2,240.9 343.0,240.7 344.8,240.5 346.5,240.3 348.2,240.1 350.0,240.0 351.8,239.8 353.5,239.6 355.2,239.4 357.0,239.2 358.8,239.1 360.5,238.9 362.2,238.7 364.0,238.5 365.8,238.3 367.5,238.1 369.3,237.9 371.0,237.7 372.8,237.5 374.5,237.3 376.3,237.1 378.0,236.9 379.8,236.7 381.5,236.5 383.3,236.3 385.0,236.1 386.8,235.9 388.5,235.7 390.3,235.5 392.0,235.3 393.8,235.1 395.5,234.9 397.3,234.7 399.0,234.5 400.8,234.3 402.5,234.0 404.2,233.8 406.0,233.6 407.8,233.4 409.5,233.2 411.2,232.9 413.0,232.7 414.8,232.5 416.5,232.3 418.2,232.0 420.0,231.8" class="lng"/>
+<polyline points="70.0,258.5 71.8,258.4 73.5,258.4 75.2,258.3 77.0,258.2 78.8,258.1 80.5,258.1 82.2,258.0 84.0,257.9 85.8,257.8 87.5,257.8 89.2,257.7 91.0,257.6 92.8,257.5 94.5,257.4 96.2,257.4 98.0,257.3 99.8,257.2 101.5,257.1 103.2,257.0 105.0,256.9 106.8,256.8 108.5,256.8 110.2,256.7 112.0,256.6 113.8,256.5 115.5,256.4 117.2,256.3 119.0,256.2 120.8,256.1 122.5,256.0 124.2,255.9 126.0,255.8 127.8,255.7 129.5,255.6 131.2,255.4 133.0,255.3 134.8,255.2 136.5,255.1 138.2,255.0 140.0,254.9 141.8,254.7 143.5,254.6 145.2,254.5 147.0,254.4 148.8,254.2 150.5,254.1 152.2,254.0 154.0,253.8 155.8,253.7 157.5,253.6 159.2,253.4 161.0,253.3 162.8,253.1 164.5,253.0 166.2,252.8 168.0,252.7 169.8,252.5 171.5,252.4 173.2,252.2 175.0,252.0 176.8,251.9 178.5,251.7 180.2,251.5 182.0,251.3 183.8,251.1 185.5,251.0 187.2,250.8 189.0,250.6 190.8,250.4 192.5,250.2 194.2,250.0 196.0,249.8 197.8,249.5 199.5,249.3 201.2,249.1 203.0,248.9 204.8,248.6 206.5,248.4 208.2,248.1 210.0,247.9 211.8,247.6 213.5,247.4 215.2,247.1 217.0,246.8 218.8,246.5 220.5,246.2 222.3,245.9 224.0,245.6 225.8,245.3 227.5,245.0 229.3,244.7 231.0,244.3 232.8,244.0 234.5,243.6 236.2,243.3 238.0,242.9 239.8,242.5 241.5,242.1 243.2,241.7 245.0,241.2 246.8,240.8 248.5,240.4 250.2,239.9 252.0,239.4 253.8,238.9 255.5,238.4 257.2,237.9 259.0,237.3 260.8,236.8 262.5,236.2 264.2,235.6 266.0,234.9 267.8,234.3 269.5,233.6 271.2,232.9 273.0,232.2 274.8,231.4 276.5,230.6 278.2,229.8 280.0,228.9 281.8,228.0 283.5,227.1 285.2,226.1 287.0,225.1 288.8,224.0 290.5,222.9 292.2,221.7 294.0,220.4 295.8,219.1 297.5,217.7 299.2,216.3 301.0,214.7 302.8,213.1 304.5,211.3 306.2,209.5 308.0,207.5 309.8,205.4 311.5,203.1 313.2,200.7 315.0,198.1 316.8,195.3 318.5,192.3 320.2,189.0 322.0,185.4 323.8,181.5 325.5,177.3 327.2,172.5 329.0,167.3 330.8,161.5 332.5,155.0 334.2,147.7 336.0,139.3 337.8,129.8 339.5,118.7 341.2,105.7 343.0,90.3 344.8,71.7 346.5,48.8" class="lnr"/>
+<polyline points="70.0,247.0 71.8,246.9 73.5,246.7 75.2,246.6 77.0,246.4 78.8,246.3 80.5,246.1 82.2,246.0 84.0,245.8 85.8,245.6 87.5,245.5 89.2,245.3 91.0,245.1 92.8,245.0 94.5,244.8 96.2,244.6 98.0,244.4 99.8,244.2 101.5,244.0 103.2,243.8 105.0,243.6 106.8,243.4 108.5,243.2 110.2,243.0 112.0,242.8 113.8,242.6 115.5,242.3 117.2,242.1 119.0,241.9 120.8,241.6 122.5,241.3 124.2,241.1 126.0,240.8 127.8,240.6 129.5,240.3 131.2,240.0 133.0,239.7 134.8,239.4 136.5,239.1 138.2,238.8 140.0,238.4 141.8,238.1 143.5,237.8 145.2,237.4 147.0,237.0 148.8,236.7 150.5,236.3 152.2,235.9 154.0,235.5 155.8,235.1 157.5,234.6 159.2,234.2 161.0,233.7 162.8,233.2 164.5,232.7 166.2,232.2 168.0,231.7 169.8,231.2 171.5,230.6 173.2,230.0 175.0,229.4 176.8,228.8 178.5,228.1 180.2,227.5 182.0,226.8 183.8,226.0 185.5,225.3 187.2,224.5 189.0,223.6 190.8,222.8 192.5,221.9 194.2,220.9 196.0,220.0 197.8,218.9 199.5,217.9 201.2,216.7 203.0,215.5 204.8,214.3 206.5,213.0 208.2,211.6 210.0,210.1 211.8,208.5 213.5,206.9 215.2,205.1 217.0,203.3 218.8,201.3 220.5,199.2 222.3,196.9 224.0,194.5 225.8,191.8 227.5,189.0 229.3,186.0 231.0,182.6 232.8,179.0 234.5,175.1 236.2,170.7 238.0,166.0 239.8,160.7 241.5,154.8 243.2,148.2 245.0,140.7 246.8,132.2 248.5,122.5 250.2,111.1 252.0,97.9 253.8,82.1 255.5,63.0" class="lna"/>
+<polyline points="70.0,264.2 71.8,264.3 73.5,264.3 75.2,264.3 77.0,264.3 78.8,264.3 80.5,264.4 82.2,264.4 84.0,264.4 85.8,264.4 87.5,264.4 89.2,264.4 91.0,264.5 92.8,264.5 94.5,264.5 96.2,264.5 98.0,264.5 99.8,264.5 101.5,264.6 103.2,264.6 105.0,264.6 106.8,264.6 108.5,264.6 110.2,264.6 112.0,264.7 113.8,264.7 115.5,264.7 117.2,264.7 119.0,264.7 120.8,264.7 122.5,264.8 124.2,264.8 126.0,264.8 127.8,264.8 129.5,264.8 131.2,264.9 133.0,264.9 134.8,264.9 136.5,264.9 138.2,264.9 140.0,264.9 141.8,265.0 143.5,265.0 145.2,265.0 147.0,265.0 148.8,265.0 150.5,265.0 152.2,265.1 154.0,265.1 155.8,265.1 157.5,265.1 159.2,265.1 161.0,265.1 162.8,265.2 164.5,265.2 166.2,265.2 168.0,265.2 169.8,265.2 171.5,265.2 173.2,265.3 175.0,265.3 176.8,265.3 178.5,265.3 180.2,265.3 182.0,265.3 183.8,265.4 185.5,265.4 187.2,265.4 189.0,265.4 190.8,265.4 192.5,265.4 194.2,265.5 196.0,265.5 197.8,265.5 199.5,265.5 201.2,265.5 203.0,265.5 204.8,265.6 206.5,265.6 208.2,265.6 210.0,265.6 211.8,265.6 213.5,265.6 215.2,265.7 217.0,265.7 218.8,265.7 220.5,265.7 222.3,265.7 224.0,265.7 225.8,265.7 227.5,265.8 229.3,265.8 231.0,265.8 232.8,265.8 234.5,265.8 236.2,265.8 238.0,265.9 239.8,265.9 241.5,265.9 243.2,265.9 245.0,265.9 246.8,265.9 248.5,266.0 250.2,266.0 252.0,266.0 253.8,266.0 255.5,266.0 257.2,266.0 259.0,266.1 260.8,266.1 262.5,266.1 264.2,266.1 266.0,266.1 267.8,266.1 269.5,266.1 271.2,266.2 273.0,266.2 274.8,266.2 276.5,266.2 278.2,266.2 280.0,266.2 281.8,266.3 283.5,266.3 285.2,266.3 287.0,266.3 288.8,266.3 290.5,266.3 292.2,266.3 294.0,266.4 295.8,266.4 297.5,266.4 299.2,266.4 301.0,266.4 302.8,266.4 304.5,266.4 306.2,266.5 308.0,266.5 309.8,266.5 311.5,266.5 313.2,266.5 315.0,266.5 316.8,266.5 318.5,266.6 320.2,266.6 322.0,266.6 323.8,266.6 325.5,266.6 327.2,266.6 329.0,266.6 330.8,266.7 332.5,266.7 334.2,266.7 336.0,266.7 337.8,266.7 339.5,266.7 341.2,266.7 343.0,266.8 344.8,266.8 346.5,266.8 348.2,266.8 350.0,266.8 351.8,266.8 353.5,266.8 355.2,266.9 357.0,266.9 358.8,266.9 360.5,266.9 362.2,266.9 364.0,266.9 365.8,266.9 367.5,267.0 369.3,267.0 371.0,267.0 372.8,267.0 374.5,267.0 376.3,267.0 378.0,267.0 379.8,267.0 381.5,267.1 383.3,267.1 385.0,267.1 386.8,267.1 388.5,267.1 390.3,267.1 392.0,267.1 393.8,267.1 395.5,267.2 397.3,267.2 399.0,267.2 400.8,267.2 402.5,267.2 404.2,267.2 406.0,267.2 407.8,267.3 409.5,267.3 411.2,267.3 413.0,267.3 414.8,267.3 416.5,267.3 418.2,267.3 420.0,267.3" class="lnb"/>
+<text x="70.0" y="286" class="s" text-anchor="middle">t=0</text>
+<text x="215.8" y="286" class="s" text-anchor="middle">t=0.5</text>
+<text x="361.7" y="286" class="s" text-anchor="middle">t=1</text>
+<text x="272.2" y="300" class="s" text-anchor="middle">ln2≈0.693</text>
+<text x="64" y="274.0" class="s" text-anchor="end">0</text>
+<text x="64" y="159.0" class="s" text-anchor="end">10</text>
+<text x="64" y="44.0" class="s" text-anchor="end">20</text>
+<line x1="440" y1="50" x2="464" y2="50" class="lng"/>
+<text x="470" y="54" class="s">ẋ = x: eᵗ, grows but never blows up</text>
+<line x1="440" y1="70" x2="464" y2="70" class="lnr"/>
+<text x="470" y="74" class="s">ẋ = x²: 1/(1−t), blows up at t=1</text>
+<line x1="440" y1="90" x2="464" y2="90" class="lna"/>
+<text x="470" y="94" class="s">ẋ = x²−x, x₀=2: blows up at t=ln2</text>
+<line x1="440" y1="110" x2="464" y2="110" class="lnb"/>
+<text x="470" y="114" class="s">ẋ = x²−x, x₀=½: decays to 0</text>
+<text x="440" y="148" class="t">Clay alternatives (any one wins)</text>
+<rect x="440" y="158" width="260" height="22" rx="3" class="box"/>
+<text x="448" y="173" class="s">(A) ℝ³, no force: smooth forever</text>
+<rect x="440" y="184" width="260" height="22" rx="3" class="box"/>
+<text x="448" y="199" class="s">(B) 𝕋³, no force: smooth forever</text>
+<rect x="440" y="210" width="260" height="22" rx="3" class="boxr"/>
+<text x="448" y="225" class="s">(C) ℝ³, chosen smooth force: blowup</text>
+<rect x="440" y="236" width="260" height="22" rx="3" class="boxr"/>
+<text x="448" y="251" class="s">(D) 𝕋³, chosen smooth force: blowup</text>
+<text x="440" y="275" class="r">OpenAI 9/8: (C)/(D); (A)/(B) open</text>
+</svg>
+<p class="cap">Left: the x² term plays the role of the nonlinear self-transport in Navier–Stokes, the −x term the role of viscous damping. With small initial data damping wins (blue); with large data the nonlinearity wins (orange). This mirrors what is known for 3D NS: global smooth solutions for small data, unknown for large data. Curves computed from the exact solutions by the build script. Right: the four alternatives in the official Clay problem statement (Fefferman).</p>
+</div>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p>"Finite time blowup for Navier–Stokes" (2026-09-08, 166 pages, plus a separate ~640k-line Lean repository <a href="https://github.com/openai/NavierStokesAndEuler">openai/NavierStokesAndEuler</a>): "For every positive viscosity, we construct a solution … that starts from rest and develops unbounded velocity in finite time while maintaining uniformly bounded kinetic energy." The forcing f is smooth and compactly supported in space-time; the paper says this establishes Clay's <strong>alternative (C) and implies (D)</strong>.</p>
+  </div>
+  <h3>11.1 The key detail: you choose the force</h3>
+  <p>Section 2 of the paper says it plainly: "For any incompressible flow u and pressure p, we can always define the external force f to be the residual … The challenge is to choose a flow that blows up while this residual remains smooth." So (C)/(D) turns the problem into "can you build a flow that blows up while the residual force stays smooth?" — much weaker than whether the fluid blows up <em>on its own</em> (the unforced (A)/(B)). Most analysts regard (A)/(B) as the real question <span class="tg">[R]</span>. This is not cheating — (C) is a legitimate alternative written into Clay's statement — but it is <strong>a gap between specification and intent</strong>, shaped much like specification gaming in AI.</p>
+  <h3>11.2 Verification and disputes</h3>
+  <ul>
+    <li><strong>Lean</strong> <span class="tg">[P]</span>: ~2,659 files, 640k lines, no sorry/axiom; Comparator enables the second kernel nanoda. The statement's structure matches Clay (C)/(D) (decay conditions not compared clause by clause ⚠).</li>
+    <li><strong>Community</strong> <span class="tg">[R]</span>: Clay president Bridson said evaluation will be "deliberately unhurried"; Clay still lists NS as unsolved; no journal submission reported. Clay's rules require publication in a qualifying venue plus a two-year acceptance period.</li>
+    <li><strong>Credit dispute</strong> <span class="tg">[R]</span>: Buckmaster and Alpöge (NYU) had forced blowup for Euler/Boussinesq in August and posted it on September 7; OpenAI acknowledged starting after hearing about their work. Fefferman (author of the Clay statement): "The heroes of the story … are Córdoba and Martínez-Zoroa" (prior work on forced Euler blowup). The first version did not cite Córdoba–Martínez-Zoroa; a revision added it. Gómez-Serrano (NPR): "The paper is not written for humans … as of today, the paper doesn't teach us much."</li>
+  </ul>
+  <div class="note">
+    <span class="label">Related: universal computation in forced Navier–Stokes (family 376)</span>
+    <p>Claim: on the 3-torus there is a smooth forcing "program" such that a fluid particle enters a target region <strong>if and only if</strong> a given Turing machine halts — so this reachability question is undecidable. The paper is candid: "There is an elementary way to force a chosen smooth incompressible velocity…" It recalls Tao's 2016 program (get the fluid itself to build a computer that hands its energy to ever-smaller copies of itself, causing blowup), but 376 puts the "programming" into the forcing and <strong>does not advance</strong> that unforced-blowup program; it does not cite Tao 2016.</p>
+  </div>
+  <p><strong>If true</strong>: one alternative of a Millennium Prize problem is formally closed. Almost no direct impact on weather, turbulence or engineering — engineering solvers never relied on global regularity, and real fluids hand over to molecular scales long before any singularity.</p>
+</section>
+
+<section id="vlasov">
+  <div class="kicker">Mathematical physics · family 362</div>
+  <h2><span class="n">12.</span>Relativistic Vlasov–Maxwell: can a plasma model break down by itself?</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>Plasma</strong>: ionized gas (fusion reactors, the solar wind). Too thin for collisions to matter, so it is described by a <strong>phase-space density</strong> f(t, x, v): how many particles are near position x with momentum v — 6 dimensions plus time.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Self-consistent coupling</strong>: particles feel the Lorentz force (Vlasov equation) → particles form currents → currents generate fields (Maxwell equations) → fields push particles. The nonlinearity comes from this loop.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Relativity</strong> (c = 1): velocity v̂ = p/√(1+p²). p = 1 gives 0.707, p = 10 gives 0.995 — momentum can be arbitrarily large, speed is always &lt; 1.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>Glassey–Strauss 1986</strong>: singularities can only appear at high speed — as long as particle momenta stay bounded on finite time intervals, the solution continues. The whole problem reduces to: <strong>can particles be accelerated to infinite momentum in finite time?</strong> The 40 years since produced only results with restrictions (small data, lower dimension, symmetry).</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Vlasov–Maxwell endgame: each momentum doubling takes ≳1/k time, and Σ1/k diverges</text>
+<line x1="70" y1="230" x2="460" y2="230" class="ax"/>
+<line x1="70" y1="230" x2="70" y2="40" class="ax"/>
+<polyline points="70.0,230.0 70.0,230.0 70.0,192.0 76.5,192.0 76.5,192.0 76.5,173.0 83.0,173.0 83.0,173.0 83.0,160.3 89.5,160.3 89.5,160.3 89.5,150.8 96.0,150.8 96.0,150.8 96.0,143.2 102.5,143.2 102.5,143.2 102.5,136.9 109.0,136.9 109.0,136.9 109.0,131.5 115.5,131.5 115.5,131.5 115.5,126.7 122.0,126.7 122.0,126.7 122.0,122.5 128.5,122.5 128.5,122.5 128.5,118.7 135.0,118.7 135.0,118.7 135.0,115.2 141.5,115.2 141.5,115.2 141.5,112.1 148.0,112.1 148.0,112.1 148.0,109.2 154.5,109.2 154.5,109.2 154.5,106.4 161.0,106.4 161.0,106.4 161.0,103.9 167.5,103.9 167.5,103.9 167.5,101.5 174.0,101.5 174.0,101.5 174.0,99.3 180.5,99.3 180.5,99.3 180.5,97.2 187.0,97.2 187.0,97.2 187.0,95.2 193.5,95.2 193.5,95.2 193.5,93.3 200.0,93.3 200.0,93.3 200.0,91.5 206.5,91.5 206.5,91.5 206.5,89.7 213.0,89.7 213.0,89.7 213.0,88.1 219.5,88.1 219.5,88.1 219.5,86.5 226.0,86.5 226.0,86.5 226.0,85.0 232.5,85.0 232.5,85.0 232.5,83.5 239.0,83.5 239.0,83.5 239.0,82.1 245.5,82.1 245.5,82.1 245.5,80.8 252.0,80.8 252.0,80.8 252.0,79.5 258.5,79.5 258.5,79.5 258.5,78.2 265.0,78.2 265.0,78.2 265.0,77.0 271.5,77.0 271.5,77.0 271.5,75.8 278.0,75.8 278.0,75.8 278.0,74.6 284.5,74.6 284.5,74.6 284.5,73.5 291.0,73.5 291.0,73.5 291.0,72.4 297.5,72.4 297.5,72.4 297.5,71.4 304.0,71.4 304.0,71.4 304.0,70.3 310.5,70.3 310.5,70.3 310.5,69.3 317.0,69.3 317.0,69.3 317.0,68.4 323.5,68.4 323.5,68.4 323.5,67.4 330.0,67.4 330.0,67.4 330.0,66.5 336.5,66.5 336.5,66.5 336.5,65.6 343.0,65.6 343.0,65.6 343.0,64.7 349.5,64.7 349.5,64.7 349.5,63.8 356.0,63.8 356.0,63.8 356.0,63.0 362.5,63.0 362.5,63.0 362.5,62.2 369.0,62.2 369.0,62.2 369.0,61.4 375.5,61.4 375.5,61.4 375.5,60.6 382.0,60.6 382.0,60.6 382.0,59.8 388.5,59.8 388.5,59.8 388.5,59.0 395.0,59.0 395.0,59.0 395.0,58.3 401.5,58.3 401.5,58.3 401.5,57.6 408.0,57.6 408.0,57.6 408.0,56.8 414.5,56.8 414.5,56.8 414.5,56.1 421.0,56.1 421.0,56.1 421.0,55.4 427.5,55.4 427.5,55.4 427.5,54.8 434.0,54.8 434.0,54.8 434.0,54.1 440.5,54.1 440.5,54.1 440.5,53.4 447.0,53.4 447.0,53.4 447.0,52.8 453.5,52.8 453.5,52.8 453.5,52.2 460.0,52.2" class="lna"/>
+<text x="64" y="234.0" class="s" text-anchor="end">0</text>
+<text x="64" y="196.0" class="s" text-anchor="end">1</text>
+<text x="64" y="158.0" class="s" text-anchor="end">2</text>
+<text x="64" y="120.0" class="s" text-anchor="end">3</text>
+<text x="64" y="82.0" class="s" text-anchor="end">4</text>
+<text x="64" y="44.0" class="s" text-anchor="end">5</text>
+<text x="70.0" y="246" class="s" text-anchor="middle">k=0</text>
+<text x="200.0" y="246" class="s" text-anchor="middle">k=20</text>
+<text x="330.0" y="246" class="s" text-anchor="middle">k=40</text>
+<text x="460.0" y="246" class="s" text-anchor="middle">k=60</text>
+<text x="460.0" y="44.2" class="s" text-anchor="end">first 60 terms ≈ 4.68; grows without bound</text>
+<text x="480" y="70" class="z">k = number of momentum doublings so far</text>
+<text x="480" y="90" class="z">doubling k (P≈2ᵏ) takes ≳ 1/(k·log2)</text>
+<text x="480" y="110" class="z">total time ≈ harmonic series → ∞</text>
+<text x="480" y="130" class="z">⇒ finitely many doublings in finite time</text>
+<text x="480" y="150" class="z">⇒ momentum stays bounded, so by</text>
+<text x="480" y="170" class="z">   Glassey–Strauss 1986: no blowup</text>
+</svg>
+<p class="cap">A hand-computable version of the argument skeleton in the reasoning summary of the OpenAI paper (family 362). The real difficulty is proving that each doubling takes at least ~1/log P time (signed momentum-increment estimates plus counting direction changes). Staircase computed by the build script.</p>
+</div>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p>"Global classical solutions of the three-dimensional relativistic Vlasov–Maxwell system" (2026-09-23, 49 pages): "We prove global existence and uniqueness for arbitrary smooth admissible initial data in the three-dimensional, one-species relativistic Vlasov–Maxwell system … without size or symmetry restrictions on the data."</p>
+  </div>
+  <p><strong>Verification</strong> <span class="tg">[P]</span>: the hypotheses of the Lean statement <code>global_classical_solution</code> were checked one by one (f₀ smooth, compactly supported, non-negative; fields with bounded derivatives in L²; the two Gauss constraints), and the conclusion is existence + smoothness + uniqueness. ~207 files, 90k lines, no sorry/axiom. <strong>Scope limit</strong>: only <strong>one particle species</strong>, while real fusion plasmas have at least two (electrons and ions); whether the extension is routine is unclear ⚠. No named comment from plasma-PDE experts found ⚠.</p>
+  <p><strong>The reasoning summary is candid</strong>: the model hit walls repeatedly ("exponent inequality contradiction: H&lt;0.41z vs H&gt;0.496z"), and its last sentence says the conclusion "rests on the occupation bound, direction-count estimate, and cutoff cancellations … the cited continuation theorem alone does not establish those estimates."</p>
+  <p><strong>If true</strong>: a flagship problem open for about 40 years (one species) is solved with machine verification — possibly weightier than most results in the batch. No short-term effect on fusion engineering (PIC and gyrokinetic simulations do not depend on this theorem); what it proves is that the model does not spontaneously create particles of infinite energy — a "model health certificate."</p>
+</section>
+
+<section id="spin">
+  <div class="kicker">Probability and statistical mechanics · family 221</div>
+  <h2><span class="n">13.</span>Sparse spin glasses: from magnets to the energy landscapes of neural networks</h2>
+  <p>This section connects directly to neuroscience and machine learning: the energy function of a Hopfield network is the Hamiltonian of a spin glass.</p>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">Level 0</div><div class="body"><strong>Ising magnet</strong>: a spin σᵢ = ±1 at each site, energy H = −Σ Jᵢⱼσᵢσⱼ. With J &gt; 0 neighbors want to align.</div></div>
+    <div class="rung"><div class="lvl">Level 1</div><div class="body"><strong>Frustration</strong> (figure, left): three spins pairwise "want" to be opposite; none of the 8 configurations satisfies all three bonds; the ground state is 6-fold degenerate.</div></div>
+    <div class="rung"><div class="lvl">Level 2</div><div class="body"><strong>Spin glass</strong>: couplings Jᵢⱼ are <em>random</em> ±, frustration is everywhere, the energy landscape is rugged with exponentially many metastable states. The <strong>SK model</strong> (1975) couples every pair; <strong>Parisi (1979)</strong> gave its free energy via "replica symmetry breaking" — magical physics, not rigorous math; Guerra 2003 + Talagrand 2006 proved it rigorously; Parisi won the 2021 Nobel Prize in Physics.</div></div>
+    <div class="rung"><div class="lvl">Level 3</div><div class="body"><strong>The diluted (sparse) version</strong>: each spin has only finitely many bonds. <strong>Mézard–Parisi (2001)</strong> gave a hierarchical formula via the cavity method; one direction (the upper bound) was proven in 2003–04, but <strong>equality was an open conjecture</strong>. The difficulty: in dense models pairwise overlaps describe the state; sparse models need control of all multi-replica overlaps.</div></div>
+    <div class="rung"><div class="lvl">Level 4</div><div class="body"><strong>Link to random k-SAT</strong>: k-SAT is a sparse spin glass with k-body interactions. Ding–Sly–Sun (2015) rigorously proved the satisfiability threshold for large k — exactly what these physics methods predicted.</div></div>
+  </div>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 275" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Left: the smallest frustrated system · Right: the hierarchical (ultrametric) structure of Parisi</text>
+<line x1="150" y1="60" x2="80" y2="180" class="lnr"/>
+<line x1="150" y1="60" x2="220" y2="180" class="lnr"/>
+<line x1="80" y1="180" x2="220" y2="180" class="lnr" stroke-dasharray="5 4"/>
+<circle cx="150" cy="60" r="14" fill="#f3f0ea" stroke="#1a1a18"/>
+<text x="150" y="65" class="t" text-anchor="middle">↑</text>
+<circle cx="80" cy="180" r="14" fill="#f3f0ea" stroke="#1a1a18"/>
+<text x="80" y="185" class="t" text-anchor="middle">↓</text>
+<circle cx="220" cy="180" r="14" fill="#f3f0ea" stroke="#1a1a18"/>
+<text x="220" y="185" class="t" text-anchor="middle">↓</text>
+<text x="40" y="215" class="s">all three bonds "want" opposite spins</text>
+<text x="40" y="231" class="s">none of the 8 configurations satisfies all three</text>
+<text x="40" y="247" class="s">(dashed bond always fails): 6-fold degenerate</text>
+<text x="40" y="263" class="s">Z(β) = 2e^(−3β) + 6e^β</text>
+<circle cx="520" cy="50" r="4" fill="#1a1a18"/>
+<line x1="520" y1="50" x2="440" y2="120" class="ln"/>
+<circle cx="440" cy="120" r="4" fill="#1a1a18"/>
+<line x1="440" y1="120" x2="395" y2="200" class="ln"/>
+<circle cx="395" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="440" y1="120" x2="425" y2="200" class="ln"/>
+<circle cx="425" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="440" y1="120" x2="455" y2="200" class="ln"/>
+<circle cx="455" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="440" y1="120" x2="485" y2="200" class="ln"/>
+<circle cx="485" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="520" y1="50" x2="600" y2="120" class="ln"/>
+<circle cx="600" cy="120" r="4" fill="#1a1a18"/>
+<line x1="600" y1="120" x2="555" y2="200" class="ln"/>
+<circle cx="555" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="600" y1="120" x2="585" y2="200" class="ln"/>
+<circle cx="585" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="600" y1="120" x2="615" y2="200" class="ln"/>
+<circle cx="615" cy="200" r="4" fill="#2f5d8a"/>
+<line x1="600" y1="120" x2="645" y2="200" class="ln"/>
+<circle cx="645" cy="200" r="4" fill="#2f5d8a"/>
+<text x="660" y="54" class="s">m₀</text><text x="660" y="124" class="s">m₁</text><text x="660" y="204" class="s">states</text>
+<text x="395" y="232" class="s">closer relatives ⇒ larger overlap</text>
+<text x="395" y="248" class="s">diluted: need all multi-replica overlaps</text>
+</svg>
+<p class="cap">Spin glass = random ± couplings + frustration everywhere + exponentially many metastable states. The energy function of a Hopfield network (1982) is exactly such a Hamiltonian; perceptron capacity (Gardner 1988) was computed with the same replica method.</p>
+</div>
+  <div class="claim"><span class="label">Claim [P]</span>
+    <p>"The Mézard–Parisi formula for diluted spin glasses" (2026-09-23, 36 pages): "We prove the Mézard–Parisi hierarchical cavity formula for diluted even-arity Ising models in the Panchenko–Talagrand class." Key trick: shift every branching depth down one level and then average over depths to control multi-replica overlaps. The reasoning summary contains the line: "Aha recursive structure: overfitting shared variable can simulate original model at smaller scale."</p>
+  </div>
+  <p><strong>Verification</strong> <span class="tg">[P]</span>: Lean theorem <code>mezard_parisi</code> (pressure converges to the variational value), with <code>Admissible</code> spelling out the Panchenko–Talagrand hypotheses; ~405 files, 56k lines, no sorry/axiom. <strong>Narrower than the title suggests</strong>: only <strong>even-arity</strong> models with a positivity condition — odd-arity models such as 3-SAT and hard-constraint SAT at zero temperature are excluded, so it does <strong>not</strong> directly extend Ding–Sly–Sun. No named expert comment found ⚠.</p>
+  <h3>13.1 Connections to ML and neuroscience (the honest version)</h3>
+  <ul>
+    <li><strong>Hopfield networks</strong> (1982): memories are energy minima; storage capacity was computed with the replica method (Amit–Gutfreund–Sompolinsky 1985); Hopfield and Hinton shared the 2024 Nobel Prize in Physics.</li>
+    <li><strong>Perceptrons</strong>: Gardner (1988) computed capacity with replicas; family 222 in the same release gives the Ising perceptron free energy and a jamming exponent.</li>
+    <li><strong>Loss landscapes</strong>: the intuition "rugged landscape with hierarchically clustered minima" comes from spin glasses (e.g. Choromanska et al. 2015). But these analogies are mostly <em>heuristic</em>; the theorem does not tell you what SGD will find.</li>
+  </ul>
+</section>
+
+<section id="hodge">
+  <div class="kicker">Cautionary case · family 032 and the Oct 7 withdrawals</div>
+  <h2><span class="n">14.</span>One sign error, three papers withdrawn: the risk of no formalization</h2>
+  <p><strong>The Hodge conjecture</strong> (a Millennium Prize problem), minimally: on a smooth projective complex algebraic variety some "topological holes" can be "filled" by subvarieties defined by algebraic equations; the conjecture says every hole satisfying a certain linear-algebra condition can be filled this way. The case p = 1 has been known since 1924 (Lefschetz).</p>
+  <p>OpenAI claims the rational Hodge conjecture for all <strong>complex-multiplication (CM) abelian varieties</strong> (53 pages) — a special class, not the Millennium problem itself; like the ζ zero-free region it was <strong>not</strong> produced by the fixed procedure, and it has <strong>no Lean</strong>. <span class="tg">[P]</span></p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .z { font: 11px system-ui, sans-serif; fill: #55524a; }
+    .h { font: 600 11.5px ui-monospace, monospace; fill: #9a5b12; }
+    .r { font: 600 11px ui-monospace, monospace; fill: #b03a2e; }
+    .g { font: 600 11px ui-monospace, monospace; fill: #2e7d4f; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .boxr { fill: #fbeceb; stroke: #b03a2e; }
+    .boxg { fill: #eaf5ee; stroke: #2e7d4f; }
+    .boxa { fill: #fff6e9; stroke: #9a5b12; }
+    .ax { stroke: #8a867a; stroke-width: 1; fill: none; }
+    .grid { stroke: rgba(26,26,24,0.08); stroke-width: 1; }
+    .dash { stroke: #8a867a; stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ln { stroke: #1a1a18; stroke-width: 1.6; fill: none; }
+    .lnr { stroke: #b03a2e; stroke-width: 2; fill: none; }
+    .lna { stroke: #9a5b12; stroke-width: 1.8; fill: none; }
+    .lnb { stroke: #2f5d8a; stroke-width: 1.8; fill: none; }
+    .lng { stroke: #8a867a; stroke-width: 1.6; fill: none; }
+    .arr { stroke: #8a867a; stroke-width: 1.2; fill: none; marker-end: url(#mr); }
+    .arrr { stroke: #b03a2e; stroke-width: 1.4; fill: none; marker-end: url(#mrr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/></marker>
+    <marker id="mrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b03a2e"/></marker>
+  </defs>
+<text x="20" y="22" class="h">Oct 7 withdrawals: one sign error propagates through the dependency graph</text>
+<rect x="30" y="50" width="300" height="46" rx="4" class="boxr"/>
+<text x="40" y="69" class="t">Weil classes on abelian eightfolds</text>
+<text x="40" y="86" class="s">sign error: −1 written as +1</text>
+<rect x="30" y="140" width="300" height="46" rx="4" class="boxr"/>
+<text x="40" y="159" class="t">Kuga–Satake for K3 surfaces</text>
+<text x="40" y="176" class="s">depends on the above → withdrawn</text>
+<rect x="30" y="210" width="300" height="46" rx="4" class="boxr"/>
+<text x="40" y="229" class="t">Rational Hodge for products of K3s</text>
+<text x="40" y="246" class="s">depends on the above → withdrawn</text>
+<rect x="420" y="90" width="280" height="46" rx="4" class="boxg"/>
+<text x="430" y="109" class="t">Rational Hodge, CM abelian varieties</text>
+<text x="430" y="126" class="s">not on this chain; not withdrawn; no Lean</text>
+<line x1="180" y1="96" x2="180" y2="136" class="arrr"/>
+<line x1="180" y1="186" x2="180" y2="206" class="arrr"/>
+<line x1="345" y1="40" x2="345" y2="260" class="dash"/>
+<text x="420" y="170" class="s">Family 032 first titled "Hodge and</text>
+<text x="420" y="186" class="s">Kuga–Satake … all K3 surfaces"</text>
+<text x="420" y="202" class="s">→ retitled to the CM-only version afterwards</text>
+<text x="420" y="226" class="r">722 → 719; 14 repaired, 13 re-cited</text>
+</svg>
+<p class="cap">Sources: <a href="https://github.com/openai/math/blob/main/history.md">openai/math history.md</a> (2026-10-07); the family title is compared against CONTENTS.md at the initial commit <code>adc7f12</code>. The withdrawal notice reads: "This withdrawal concerns the proof; it does not assert that the mathematical statement is false."</p>
+</div>
+  <h3>14.1 What happened <span class="tg">[P]</span></h3>
+  <p>history.md (10-07): "In 'Algebraicity of Weil classes on split abelian eightfolds' a sign error invalidates a stabilization-trace cancellation argument and the construction used by two dependent papers." A sign that should have been −1 was taken as +1; a signed count went from the claimed 0 to −2m ≠ 0, so the hypothesis of a key theorem failed, and two dependent K3-surface papers were withdrawn with it. The CM paper does not cite the withdrawn paper and is not on this chain.</p>
+  <h3>14.2 Three lessons</h3>
+  <ol>
+    <li><strong>Unformalized ≈ unverified</strong>: only ~42% of top-line results have Lean. This error was a single sign — missed by human eyes and the model's self-checks, and Lean would certainly have caught it.</li>
+    <li><strong>Errors propagate through the dependency graph</strong>: one lemma fails, three papers fall, 13 downstream papers need new citations — the same structure as error compounding in long agent reasoning chains.</li>
+    <li><strong>Title drift</strong>: family 032 was first titled "Hodge and Kuga–Satake results for all projective K3 surfaces" and only downgraded to the CM version after the withdrawals. When reading bulk AI output, trust the latest commit and history.md, not launch-day news.</li>
+  </ol>
+</section>
+
+<section id="synthesis">
+  <div class="kicker">Synthesis · cross-cutting view</div>
+  <h2><span class="n">15.</span>The 10 results side by side</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Result</th><th>Previous state</th><th>Claimed jump</th><th>Statement faithful?</th><th>Confirmed by human experts</th></tr></thead>
+    <tbody>
+      <tr><td>Quasi-RH 7/8</td><td>no fixed-width zero-free strip at all</td><td>qualitative</td><td>yes (standard Mathlib definitions)</td><td>none</td></tr>
+      <tr><td>μ(π) = 2</td><td>7.103</td><td>straight to the end</td><td>yes (not in yaml ⚠)</td><td>none</td></tr>
+      <tr><td>ω ≤ 9/4</td><td>2.371177</td><td>−0.12, past a known barrier</td><td>yes</td><td>none</td></tr>
+      <tr><td>UGC</td><td>"half" (2-to-2, 2018)</td><td>complete</td><td>yes (stronger form)</td><td>none</td></tr>
+      <tr><td>L = BPL</td><td>near L^(3/2) for 25 years</td><td>complete</td><td>yes (definitions locked)</td><td>none</td></tr>
+      <tr><td>Plane χ ≥ 6</td><td>χ ≥ 5 (2018)</td><td>+1, new method</td><td>yes (two-line statement)</td><td>none</td></tr>
+      <tr><td>Thompson F</td><td>wrong proofs in both directions</td><td>resolved</td><td>yes</td><td>none</td></tr>
+      <tr><td>NS blowup</td><td>forced Euler precursors</td><td>alternatives (C)/(D)</td><td>structure matches</td><td>Clay has not accepted; disputed</td></tr>
+      <tr><td>Vlasov–Maxwell</td><td>40 years of restricted results</td><td>complete, one species</td><td>yes</td><td>none</td></tr>
+      <tr><td>Mézard–Parisi</td><td>upper bound only</td><td>equality, even-arity class</td><td>yes (narrower than title)</td><td>none</td></tr>
+    </tbody>
+  </table></div>
+  <h3>15.1 Five patterns</h3>
+  <ol>
+    <li><strong>Short statements, long proofs</strong>: plane coloring has a two-line statement and a 30k-line proof; quasi-RH a one-line statement and a 487k-line proof. This is the ideal "humans review statements, machines check proofs" split — and it makes human reviewing bandwidth the new bottleneck.</li>
+    <li><strong>Unusually short papers</strong>: 13 pages for 9/4 matrix multiplication and for Thompson's group. Either the methods really are surprisingly lean, or much of the detail lives in Lean rather than in prose for humans — Gómez-Serrano said the NS paper is "not written for humans."</li>
+    <li><strong>Borrowed tools across fields</strong>: Thompson's group via Lipschitz maps from infinite-dimensional geometry; plane coloring via ergodic theory; matrix multiplication via the asymptotic spectrum rather than the dominant laser method of 40 years. This may be a real AI advantage: no human-expert "field inertia."</li>
+    <li><strong>The gap between "satisfying the statement" and "answering the real question"</strong>: NS with freely chosen forcing; 376 putting computation in the forcing; the plane-coloring footnote about a formalized false hypothesis; Mézard–Parisi covering only even arity. Each is "spec vs intent."</li>
+    <li><strong>Selection effects</strong>: results picked from 4,000 problems vs 3% on pre-registered problems (§2.3). Until OpenAI publishes its failure list, "what is this model's real ability on open problems?" cannot be answered.</li>
+  </ol>
+</section>
+
+<section id="ai">
+  <div class="kicker">AI and AI safety perspective</div>
+  <h2><span class="n">16.</span>What this means for AI</h2>
+  <h3>16.1 Better at math ≠ smarter across the board — but a leading indicator</h3>
+  <p>Mathematics has a unique advantage for AI: <strong>answers can be machine-checked</strong> (Lean), which lets reinforcement learning iterate massively — try, get feedback, improve. Chollet's question goes to the heart of it: does progress in these "verifiable domains" transfer to unverifiable ones? A reasonable reading: <strong>any intellectual work that can be automatically checked will fall at a similar pace next</strong>; mathematics is just the first.</p>
+  <h3>16.2 The trust bottleneck moves from "proof" to "specification"</h3>
+  <p>Once there is a Lean proof, the question shifts from "is the proof right?" to "is the statement encoded right?" This is isomorphic to a core problem in alignment research: a system can perfectly optimize the objective you wrote down, and what you wrote down may not be what you want. The line-by-line reading of Lean statements done throughout this deck is a form of <strong>spec review</strong> — an increasingly important and scarce human job.</p>
+  <h3>16.3 Knowledge that can be verified but not understood</h3>
+  <p>In the words of the IAS advisory group: <em>"It is now the case that AI can output mathematical arguments in situations without the human who prompted it being able to understand the arguments, verify them, or take responsibility for them."</em> <span class="tg">[R]</span> Mathematics is where this situation appears first and most cleanly (because verification is perfect). Generalized to science, humans may move from "understanders" to "checkers." Tao's Math 2.0 — putting exposition, community building and opening new directions on a par with problem-solving — is at bottom an answer to "what do humans do in this new division of labor?"</p>
+  <h3>16.4 Two sides for safety research</h3>
+  <div class="verdict">
+    <div class="panel"><h4>Good news</h4><ul>
+      <li><strong>Verifying is easier than discovering</strong>: if future AI can give formal proofs about its own behavior ("this action will not do X"), humans need not understand all of its capabilities, only check the proofs — the core idea behind the Guaranteed Safe AI agenda, which becomes more feasible as mathematical AI improves.</li>
+      <li>This Lean library is itself the first real sample of "large-scale AI output + machine verification," and its failure modes can be studied.</li></ul></div>
+    <div class="panel"><h4>Bad news</h4><ul>
+      <li>The hardest parts of alignment ("what does this AI really want?", "is the outcome good for humans?") cannot be written in Lean. Verifiable domains racing ahead while unverifiable ones lag is itself a risk.</li>
+      <li>The verifiable parts of AI R&amp;D (kernel optimization, proofs, benchmarks) will be the first to be automated at scale — the "AI improves AI" loop is most likely to start there.</li></ul></div>
+  </div>
+  <h3>16.5 Governance: a precedent of unilateral dumping</h3>
+  <p>The community had begun forming norms through the IAS advisory group (disclose model name, prompts, reasoning chains, compute time and cost, how problems were chosen, failure rates on comparable problems). OpenAI followed some of them, then released 700+ papers at once. AHM's phrase "a demonstration of power" is pointed, but it names a structural problem: <strong>a frontier company unilaterally decides how a capability enters the public domain, and the affected community can only react afterwards</strong>.</p>
+</section>
+
+<section id="reactions">
+  <div class="kicker">Reactions · in their words</div>
+  <h2><span class="n">17.</span>What people said</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Who</th><th>Quote</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Levent Alpöge (Anthropic)</td><td>"It's obviously the most significant moment in mathematical history." (later adding there would be "sad stories" of people being scooped)</td><td>X <span class="tg">[R]</span></td></tr>
+      <tr><td>Terence Tao</td><td>"Problems are being solved autonomously by AI prompters who have no interest in the broader field itself"; proposes Math 1.0 → 2.0</td><td>Fortune <span class="tg">[R]</span></td></tr>
+      <tr><td>Dan Litt (Toronto)</td><td>"My view is that this is great for mathematics," while worrying that an "AI has solved math" perception could discourage young people</td><td>Fortune <span class="tg">[R]</span></td></tr>
+      <tr><td>Tristan Buckmaster (NYU)</td><td>"There's likely to be a bunch of results where they take someone's work and then take it to completion"</td><td>Fortune <span class="tg">[R]</span></td></tr>
+      <tr><td>Scott Aaronson</td><td>Post "The Mathocalypse"; on L = BPL: "its truth was never in serious doubt"</td><td><a href="https://scottaaronson.blog/?p=10169">blog</a> <span class="tg">[R]</span></td></tr>
+      <tr><td>Lance Fortnow</td><td>"if they hold up, we've seen more progress in TCS in the last 24 hours than in the previous three decades combined"</td><td>Computational Complexity blog <span class="tg">[R]</span></td></tr>
+      <tr><td>Mark Braverman</td><td>"Math by press release is not that healthy for math."</td><td>Quanta <span class="tg">[R]</span></td></tr>
+      <tr><td>François Chollet</td><td>Asks whether gains in RLVR-friendly domains generalize, or whether non-verifiable domains stay bottlenecked on human data</td><td>X (paraphrase) <span class="tg">[R]</span></td></tr>
+      <tr><td>AHM</td><td>"Releasing over 700 files at once is not a demonstration of scholarship, but a demonstration of power."; urges mathematicians to stop working with OpenAI</td><td><a href="https://terrytao.wordpress.com/2026/10/07/ahm-statement-on-openais-october-6-release-of-mathematical-documents/">reposted on Tao's blog</a> (Tao notes he does not endorse it) <span class="tg">[P]</span></td></tr>
+      <tr><td>Álvaro Lozano-Robledo</td><td>"Keep calm and carry on studying math."; LLMs "may work within the confines of the convex hull of ideas that are currently available in the literature"</td><td><a href="https://terrytao.wordpress.com/2026/10/08/what-should-we-tell-our-students/">guest post on Tao's blog</a> <span class="tg">[P]</span></td></tr>
+      <tr><td>Andrew Sutherland (MIT)</td><td>"We should ask for receipts."</td><td>via Scientific American <span class="tg">[R]</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="tg">Note: "The Future of Mathematics" on Tao's blog (10-05) is a guest post by Jeremy Avigad, not by Tao; some coverage conflated the two.</p>
+</section>
+
+<section id="learn">
+  <div class="kicker">Next steps</div>
+  <h2><span class="n">18.</span>Open questions and how to keep learning</h2>
+  <h3>18.1 What to watch</h3>
+  <ol>
+    <li>Will OpenAI publish the list of ~4,000 problems and the failures? (This decides whether "what is the real capability?" can be answered.)</li>
+    <li>How many errors like the Weil-class paper remain in the ~58% that is unformalized? How will the withdrawal rate evolve?</li>
+    <li>Who reviews the faithfulness of the Lean statements? When does <code>review: unchecked</code> change? Who audits the <code>lana-agents</code> dependencies and the large patches?</li>
+    <li>When will the first human domain expert give an independent "read and confirmed" verdict on a headline result (quasi-RH, UGC, Thompson F)?</li>
+    <li>What priority norms should govern "completing someone else's work" (the Buckmaster episode)?</li>
+    <li>Chromatic number of the plane: what does a finite unit-distance graph needing 6 colors look like?</li>
+  </ol>
+  <h3>18.2 Learning path (starting from linear algebra + calculus)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Stage</th><th>Material</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>1 · What math is</td><td>Gowers, <em>Mathematics: A Very Short Introduction</em></td><td>150 pages by a Fields medalist: abstraction, proof, what "hard" means</td></tr>
+      <tr><td>1 · Roots of this debate</td><td>Thurston, <a href="https://arxiv.org/abs/math/9404236">On Proof and Progress in Mathematics</a>; Gowers, <a href="https://www.dpmms.cam.ac.uk/~wtg10/2cultures.pdf">The Two Cultures of Mathematics</a>; Tao, <a href="https://arxiv.org/abs/math/0702396">What is good mathematics?</a></td><td>after these, "Math 1.0 → 2.0" makes complete sense</td></tr>
+      <tr><td>2 · Touch a proof</td><td>Natural Number Game (Kevin Buzzard, free online)</td><td>prove commutativity of addition from scratch in Lean — then §3 makes full sense</td></tr>
+      <tr><td>2 · Learn proofs systematically</td><td>MIT 6.042 Mathematics for Computer Science (OCW + free textbook)</td><td>designed for CS backgrounds: proof methods, discrete math, probability</td></tr>
+      <tr><td>3 · Intuition</td><td>3Blue1Brown: <em>Essence of linear algebra</em>; visualizing the Riemann zeta function</td><td>the figure in §4 is a static version of that episode</td></tr>
+      <tr><td>3 · Following the news</td><td>Quanta Magazine (math); <em>The Princeton Companion to Mathematics</em> (as a reference)</td><td>every piece explains why a problem is hard and where people were stuck</td></tr>
+      <tr><td>4 · ML-adjacent</td><td>Bubeck, <a href="https://arxiv.org/abs/1405.4980">Convex Optimization: Algorithms and Complexity</a>; Prince, <em>Understanding Deep Learning</em> (free)</td><td>convergence proofs for optimization; intro to deep-learning theory</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="sources">
+  <div class="kicker">Glossary and sources</div>
+  <h2><span class="n">19.</span>Glossary and sources</h2>
+  <h3>19.1 Glossary</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Term</th><th>In one line</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">Lean / Mathlib</td><td>a proof assistant / its community math library</td></tr>
+      <tr><td class="mono">sorry / axiom</td><td>in Lean: "leave this step empty" / "assume this is true" — both weaken a proof</td></tr>
+      <tr><td class="mono">Comparator</td><td>tool checking "the theorem proven = the challenge statement, using only allowed axioms"</td></tr>
+      <tr><td class="mono">zero-free region</td><td>a region where ζ or an L-function has no zeros</td></tr>
+      <tr><td class="mono">irrationality exponent μ</td><td>how "unusually well" a number can be approximated by fractions</td></tr>
+      <tr><td class="mono">ω</td><td>the optimal exponent of matrix multiplication, 2 ≤ ω ≤ 3</td></tr>
+      <tr><td class="mono">approximation ratio</td><td>the fraction of the optimum a polynomial-time algorithm guarantees</td></tr>
+      <tr><td class="mono">L / RL / BPL</td><td>log-space deterministic / one-sided randomized / two-sided randomized computation</td></tr>
+      <tr><td class="mono">amenable</td><td>a group admits a translation-invariant "average"</td></tr>
+      <tr><td class="mono">blowup</td><td>a solution of a smooth equation going to infinity in finite time</td></tr>
+      <tr><td class="mono">replica symmetry breaking (RSB)</td><td>Parisi's description of the hierarchical state structure of spin glasses</td></tr>
+      <tr><td class="mono">galactic algorithm</td><td>asymptotically faster, but only better at astronomical sizes</td></tr>
+    </tbody>
+  </table></div>
+  <h3>19.2 Main sources</h3>
+  <p><strong>Primary</strong>: <a href="https://github.com/openai/math">openai/math</a> (README, history.md, overview.pdf, CONTENTS.md, lean/, preprints/, reasoning_traces/; snapshot fd4aeeb, 2026-10-08) · <a href="https://github.com/openai/NavierStokesAndEuler">openai/NavierStokesAndEuler</a> · <a href="https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf">Clay NS official statement (Fefferman)</a> · <a href="https://github.com/leanprover/comparator">leanprover/comparator</a> · independent re-checks <a href="https://github.com/davegoldblatt/openai-zeta-proof-check">davegoldblatt/openai-zeta-proof-check</a>, <a href="https://github.com/erenciracioglu-dotcom/openai-math-9-4-lean-check">erenciracioglu-dotcom/openai-math-9-4-lean-check</a> · Epoch <a href="https://arxiv.org/abs/2609.25050">FrontierMath Erdős (arXiv:2609.25050)</a>.</p>
+  <p><strong>Coverage and commentary</strong>: <a href="https://fortune.com/2026/10/07/openai-math-controversy-solutions-370-outstanding-challenges-published-criticisms-celebration/">Fortune 10-07</a> · <a href="https://www.nature.com/articles/d41586-026-03196-8">Nature</a> (paywalled, full text not read ⚠) · <a href="https://www.scientificamerican.com/article/openai-unleashes-hundreds-more-math-results-upon-a-field-already-in-shock/">Scientific American</a> · <a href="https://www.quantamagazine.org/ai-has-solved-one-of-maths-1-million-millennium-prize-problems-20260908/">Quanta 09-08</a> · <a href="https://www.quantamagazine.org/as-ai-closed-in-on-unique-games-proof-researchers-raced-to-beat-the-machines-20261007/">Quanta 10-07</a> · <a href="https://www.npr.org/2026/09/22/nx-s1-5968588/openai-navier-stokes-problem-mathematicians-learn-little">NPR 09-22</a> · <a href="https://scottaaronson.blog/?p=10169">Aaronson</a> · <a href="https://gilkalai.wordpress.com/2026/10/07/updates-sharing-ai-progress-on-mathematics-amazing-and-my-lecture-plans/">Kalai</a> · <a href="https://terrytao.wordpress.com/">Tao's blog</a> · <a href="https://www.latent.space/p/ainews-quasi-riemann-hypothesis-openai">Latent Space</a>.</p>
+  <p><strong>Classic references</strong>: Strassen 1969; Coppersmith–Winograd 1990; Alman et al. <a href="https://arxiv.org/abs/2404.16349">arXiv:2404.16349</a>; Ambainis–Filmus–Le Gall <a href="https://arxiv.org/abs/1411.5414">arXiv:1411.5414</a>; Goemans–Williamson 1995; Khot 2002; KKMO 2007; Raghavendra 2008; Khot–Minzer–Safra 2018; Nisan 1992; Saks–Zhou 1999; Reingold 2008; Roth 1955; Zeilberger–Zudilin <a href="https://arxiv.org/abs/1912.06345">arXiv:1912.06345</a>; Meiburg <a href="https://arxiv.org/abs/2208.13356">arXiv:2208.13356</a>; Guth–Maynard <a href="https://arxiv.org/abs/2405.20552">arXiv:2405.20552</a>; de Grey <a href="https://arxiv.org/abs/1804.02385">arXiv:1804.02385</a>; Moore <a href="https://arxiv.org/abs/1102.0747">arXiv:1102.0747</a>; Tao 2016 <a href="https://arxiv.org/abs/1402.0290">arXiv:1402.0290</a>; Glassey–Strauss 1986; Parisi 1979; Talagrand 2006; Mézard–Parisi 2001; Ding–Sly–Sun 2015.</p>
+</section>
+
+</main>
+</div>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('nav.toc a')];
+  const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const id = '#' + e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  sections.forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>
