@@ -121,6 +121,18 @@ internal enumeration → cloud IAM credential theft, mapped to GTG-1002's Task 1
 hashes), and **metasploit_cve_lab** (Metasploit against a real Apache Struts2 S2-045 / CVE-2017-5638
 target — recon, hand-proven root RCE, then confirmed with the module's `check`).
 
+### [`openai_math_explained/`](openai_math_explained/) — OpenAI's Oct-2026 AI-generated math release, explained from zero
+
+A sourced reading deck (Chinese), like `cyber_ai_fundamentals`. On 2026-10-06 OpenAI released 722
+(now 719) AI-generated math manuscripts claiming results such as the quasi-Riemann hypothesis, the
+Unique Games Conjecture, matrix-multiplication exponent ω ≤ 9/4 and non-amenability of Thompson's
+group F. The deck takes 10 headline results and builds each one up from a hand-computable toy
+example to the real statement, then gives its history, OpenAI's exact claim, and its verification
+status. Each Lean statement is read line by line for faithfulness. A static audit of the 26M-line
+Lean library is summarized, and a withdrawn-papers case study is included. It closes with what
+this means for AI and AI safety (specification review, verification without understanding,
+selection effects). Start with [`openai_math_explained/notes.pdf`](openai_math_explained/notes.pdf).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
