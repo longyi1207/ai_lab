@@ -123,19 +123,28 @@ target — recon, hand-proven root RCE, then confirmed with the module's `check`
 
 ### [`openai_math_explained/`](openai_math_explained/) — OpenAI's Oct-2026 AI-generated math release, explained from zero
 
-A sourced reading deck in parallel English and Chinese editions, like `cyber_ai_fundamentals`. On 2026-10-06 OpenAI released 722
-(now 719) AI-generated math manuscripts claiming results such as the quasi-Riemann hypothesis, the
-Unique Games Conjecture, matrix-multiplication exponent ω ≤ 9/4 and non-amenability of Thompson's
-group F. The deck takes 10 headline results and builds each one up from a hand-computable toy
-example to the real statement, then gives its history, OpenAI's exact claim, and its verification
-status. Each Lean statement is read line by line for faithfulness. A static audit of the 26M-line
-Lean library is summarized, and a withdrawn-papers case study is included. It closes with what
-this means for AI and AI safety (specification review, verification without understanding,
-selection effects). Part II (§17–§22) looks ahead: three trend curves (METR task
-length, open-problem solve rate, formal-proof cost) with scenarios, why the bottleneck moves from
-proofs to statements and specs, implications for debate, SLT, Guaranteed Safe AI and neurosymbolic
-systems, and a T0–T4 timeline to 2030 with falsifiers. Part III (§23–§32, both editions) has one long
-from-zero chapter per result, with hand-checkable exercises and the scripts behind every computed number. Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
+A sourced reading deck in parallel English and Chinese editions, like `cyber_ai_fundamentals`.
+
+**Part I (§0–§16): the release.** On 2026-10-06 OpenAI released 722 (now 719) AI-generated math
+manuscripts. They claim results such as the quasi-Riemann hypothesis, the Unique Games Conjecture,
+the matrix-multiplication exponent ω ≤ 9/4 and the non-amenability of Thompson's group F. The deck
+takes 10 headline results, one section each. Each section builds the result up from basic concepts,
+with hand-checkable examples and exercises. It then gives OpenAI's exact claim and how far it is
+verified, reading each Lean statement line by line. Part I also summarizes a static audit of the
+26M-line Lean library, studies the withdrawn papers, and asks what the release means for AI.
+
+**Part II (§17–§23): what happens if AI solves mathematics at scale.**
+- §17 calibrates with history: 14 cases of math becoming real-world impact, with their lag times.
+  It explains when math is and is not the bottleneck, reviews the AI-for-science record so far, and
+  sets out three capability curves.
+- §18–§22 each pick the problems that matter most in one field: computing, cryptography and quantum;
+  physics, chemistry and materials; biology, medicine and neuroscience; AI theory and alignment;
+  economics, society and governance. For each problem they ask whether math is the bottleneck, what
+  AI changes, what the deeper impacts are, and when.
+- §23 gives the cross-field picture, a top 10 and a timeline to the 2030s.
+
+Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or
+[`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
 
 ## License
 

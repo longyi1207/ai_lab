@@ -251,7 +251,7 @@ def svg_moser():
                               '但 T₁、T₂ 相距 1 → 矛盾 ⇒ χ ≥ 4']):
         out.append(f'<text x="{tx}" y="{82+i*18}" class="z">{line}</text>')
     out.append(f'<text x="{tx}" y="182" class="t">平面色数 χ 的已知范围</text>')
-    for i, (yr, txt, cls) in enumerate([('1950s', '4 ≤ χ ≤ 7（菱形对 + 六边形 7 色铺砌）', 's'),
+    for i, (yr, txt, cls) in enumerate([('1950–61', '4 ≤ χ ≤ 7（菱形对 + 六边形 7 色铺砌）', 's'),
                                         ('2018', '5 ≤ χ ≤ 7（de Grey，1581 点的有限图）', 's'),
                                         ('2026-09', '6 ≤ χ ≤ 7（OpenAI 声称，Lean 已形式化）', 'r')]):
         out.append(f'<text x="{tx}" y="{204+i*18}" class="{cls}">{yr}  {txt}</text>')

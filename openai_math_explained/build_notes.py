@@ -37,6 +37,8 @@ EXTRA_CSS = """
   .jj h4 { font-size: 14px; margin: 22px 0 8px; color: var(--ink); }
   .jj blockquote { font-style: normal; }
   .jj th { text-transform: none; letter-spacing: 0; }
+  .jj table { break-inside: auto; page-break-inside: auto; }
+  .jj tr { break-inside: avoid; page-break-inside: avoid; }
   @media print {
     nav.toc { display: none !important; }
     main { max-width: 100%; padding: 24px 32px; }
@@ -55,10 +57,10 @@ TOC = [
     ("color", "9", "平面着色"), ("thompson", "10", "Thompson 群"), ("ns", "11", "Navier–Stokes"),
     ("vlasov", "12", "等离子体"), ("spin", "13", "自旋玻璃"), ("hodge", "14", "撤稿案例"),
     ("synthesis", "15", "横向看"), ("ai", "16", "对 AI 意味着"),
-    ("fwd-method", "17", "前瞻：三条曲线"), ("fwd-ab", "18", "瓶颈迁移"), ("fwd-debate", "19", "辩论"),
-    ("fwd-slt", "20", "SLT"), ("fwd-gsai", "21", "GSAI/神经符号"), ("fwd-timeline", "22", "时间线 T0–T4"),
-] + [(f"jj{k:02d}", str(22 + k), f"精讲 {k:02d}") for k in range(1, 11)] + [
-    ("reactions", "33", "反应"), ("learn", "34", "开放问题/继续学"), ("sources", "35", "术语/来源"),
+    ("fwd-calib", "17", "前瞻：先校准"), ("fwd-cs", "18", "计算机/密码/量子"), ("fwd-phys", "19", "物理/化学/材料"),
+    ("fwd-bio", "20", "生物/医学/神经"), ("fwd-ai", "21", "AI 理论与对齐"), ("fwd-soc", "22", "经济/社会/治理"),
+    ("fwd-synth", "23", "全景与 Top 10"),
+    ("reactions", "24", "反应"), ("learn", "25", "开放问题/继续学"), ("sources", "26", "术语/来源"),
 ]
 
 BODY = r'''
@@ -66,7 +68,7 @@ BODY = r'''
   <div class="kicker">学习 deck · 给非数学背景的 AI 研究者</div>
   <h1>OpenAI 的 719 篇 AI 数学论文：从零读懂它们在说什么</h1>
   <p>2026-10-06，OpenAI 一次性公开了一个未发布内部模型生成的 <strong>722 篇数学手稿（372 个结果族）</strong>，其中声称解决了准黎曼猜想、Unique Games 猜想、矩阵乘法指数 ω ≤ 9/4、Thompson 群不可顺从、平面不能 5 着色等一批几十年的名题；第二天因一个符号错误撤回 3 篇。数学界称之为 "Mathocalypse"。这份 deck 的目标：<strong>只用线性代数 + 微积分 + 高中数学</strong>，把其中 10 个代表性结果各自讲到"能判断它有多大、多难、为什么重要、核实到哪一步"。</p>
-  <p class="meta">2026-10-08 首版（同日增补 Part II 前瞻 §17–§22、Part III 从零精讲 §23–§32）· repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿保存在作者的研究笔记中，未随本 deck 公开</p>
+  <p class="meta">2026-10-08 首版；10-09 改版（10 个结果合并为从零详解的单一版本，Part II 前瞻重写为 §17–§23）· repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿保存在作者的研究笔记中，未随本 deck 公开</p>
 </header>
 
 <section id="scope">
@@ -81,7 +83,7 @@ BODY = r'''
     <p>判断任何一个证明是否正确的能力。这 10 个结果里，截至 10-08 <strong>没有一个</strong>有人类领域专家公开表示"我读完并确认了"。本 deck 里的"核实"只到两层：① 我们静态审查了 Lean 源码与陈述；② 汇总了公开反应。都标注了来源和可信度。</p>
   </div>
   <h3>0.1 阅读路径</h3>
-  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§14 是 10 个结果，每节结构相同：<em>阶梯 → 问题 → 为什么难 → OpenAI 声称 → 核实状态 → 如果为真</em>，可以按兴趣跳读。§15–§16 是横向总结和对 AI 的含义。<strong>Part II（§17–§22）是前瞻</strong>：按 AI 数学和编程的进步曲线，推演辩论、SLT、Guaranteed Safe AI、神经符号这几类安全理论何时被解锁，每一步都附证据和推理。<strong>Part III（§23–§32）是从零精讲</strong>：§4–§13 的 10 个结果各一章，从最基础的概念讲起，配可以手算的小例子和【检查】练习，篇幅是 Part I 对应小节的十倍左右；Part I 读不懂的地方，到对应章节找。§33 是各方反应，§34 是开放问题和继续学习的路线，§35 是术语表与来源。</p>
+  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§13 是 10 个结果，每节都从最基础的概念讲起，配可以手算的小例子和【检查】练习，结构相同：<em>先说结论 → 从零搭概念 → OpenAI 声称了什么 → 核实到什么程度 → 如果为真意味着什么</em>，可以按兴趣跳读。§14 是撤稿案例，§15–§16 是横向总结和对 AI 的含义。<strong>Part II（§17–§23）是前瞻</strong>：如果数学被 AI 大规模解决，或者 AI 的其他能力也突破，计算机与密码、物理与化学、生物与医学、AI 本身、经济与治理分别会发生什么。§17 先用历史和三条能力曲线校准；§18–§22 每节挑出该领域真正重要的问题，逐个讲清"瓶颈是不是数学、AI 能改变什么、更深远的影响是什么、大概什么时候"；§23 是全景、Top 10 和时间线。§24 是各方反应，§25 是开放问题和继续学习的路线，§26 是术语表与来源。</p>
   <h3>0.2 一张速查表</h3>
   <div class="tbl"><table>
     <thead><tr><th>§</th><th>结果（family 编号）</th><th>卡了多久</th><th>Lean</th><th>一句话</th></tr></thead>
@@ -187,285 +189,25 @@ BODY = r'''
   </div>
 </section>
 
-<section id="qrh">
-  <div class="kicker">数论 · family 003</div>
-  <h2><span class="n">4.</span>准黎曼猜想：素数分布的"噪声上限"</h2>
-  <p class="tg">读不懂？→ <a href="#jj01">§23 精讲 01</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body">手数素数：100 以内 25 个，1000 以内 168 个，10⁶ 以内 78,498 个。记 π(x) = "≤ x 的素数个数"。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>素数定理</strong>：π(x) ≈ Li(x) = ∫₂ˣ dt/ln t。Li(10⁶) ≈ 78,626.5 vs 真实 78,498——比值趋于 1（1896 年证明）。真正的问题是<strong>误差 π(x) − Li(x) 有多大</strong>。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>ζ 函数编码了所有素数</strong>：ζ(s) = Σ 1/nˢ = ∏ₚ 1/(1−p⁻ˢ)。等式成立是因为每个整数唯一分解成素数之积。手算 s = 2：只取 p = 2,3,5 得 1.5625；取 100 以内全部素数得 1.6419；真值 π²/6 ≈ 1.6449。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body">把 s 推广到复数 s = σ + it，<strong>零点</strong>就是 ζ(s) = 0 的点。非平凡零点都在"临界带" 0 &lt; Re s &lt; 1 里，前三个在 ½ + 14.13i、½ + 21.02i、½ + 25.01i。<strong>黎曼猜想（1859）</strong>：全部在 Re s = ½ 上。</div></div>
-    <div class="rung"><div class="lvl">第 4 级</div><div class="body"><strong>零点为什么控制误差</strong>：显式公式里每个零点 ρ = β + iγ 贡献一项大小约 x^β 的"振荡噪声"。所有零点 Re ≤ θ ⇒ 误差约 x^θ。黎曼猜想 ⇔ 误差约 √x。可以把零点想成素数分布的"频谱"，β 决定这个频率的振幅随 x 涨得多快。</div></div>
-    <div class="rung"><div class="lvl">第 5 级</div><div class="body"><strong>此前已知的无零区</strong>：de la Vallée Poussin（1899）σ &gt; 1 − c/log t；Vinogradov–Korobov（1958）稍宽一些。<strong>关键：它们的宽度都随高度 t → ∞ 缩向 0</strong>。从来没人证明过存在一个<em>固定</em>的 δ &gt; 0，使 Re s &gt; 1 − δ 整个竖带没有零点。</div></div>
-  </div>
-  {{FIG_ZETA}}
-  <h3>4.1 问题是什么</h3>
-  <p><strong>准黎曼猜想</strong>：存在一条固定竖线 Re s = θ &lt; 1，右边没有任何零点。它是黎曼猜想（θ = ½）的弱版，但在 2026 年之前同样完全够不着。</p>
-  <h3>4.2 为什么难</h3>
-  <p>经典方法都从欧拉乘积在 σ &gt; 1 的正性出发（比如 3 + 4cos θ + cos 2θ ≥ 0 这个技巧），而这种正性越往高处越弱，所以得到的区域必然越来越窄。另一条路线"零点密度估计"（如 Guth–Maynard 2024，<a href="https://arxiv.org/abs/2405.20552">arXiv:2405.20552</a>）只能说"Re s &gt; σ 的零点很少"，不能说"一个都没有"。拿到固定宽度需要全新的机制。</p>
-  <h3>4.3 OpenAI 声称了什么</h3>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><a href="''' + REPO + '''/blob/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026/paper.pdf">主论文</a>（2026-09-30，199 页）："We prove that all finite-order Hecke L-functions over Q(√−3) and all Dirichlet L-functions are zero-free in the half-plane ℜs &gt; 7/8 … In particular, the Riemann zeta function is zero-free in this half-plane." 论文自己强调："The Riemann hypothesis remains open."</p>
-    <p>同族还有：一份 11/12 的另一个证明（49 页，人工辅助写作）；一份 9 页的"一致排除 Landau–Siegel 零点"。</p>
-  </div>
-  <p><strong>方法速写</strong>（只读了引言）：绕到 ℚ(√−3) 上，用三次 theta 级数的 Fourier 系数构造一个"完成和"，它有两种算法（反射公式 / Poisson 求和）；若存在零点 β &gt; 7/8，两种估计矛盾。最后利用 L_F(s, χ∘N) = L(s,χ)·L(s,χχ₋₃) 把结论转到所有 Dirichlet L 函数。</p>
-  <h3>4.4 核实状态</h3>
-  <div class="verdict">
-    <div class="panel"><h4>机器</h4><ul>
-      <li>Lean 挑战陈述只用 Mathlib 标准定义，例如 <code>theorem riemannZeta_ne_zero_of_seven_eighths_lt_re {s : ℂ} (hs : 7/8 &lt; s.re) : riemannZeta s ≠ 0</code>。<span class="tg">[P]</span></li>
-      <li>解答约 2,926 个文件、48.7 万行，sorry/axiom/native_decide 均为 0。<span class="tg">[P]</span></li>
-      <li>独立复核：Goldblatt 用两个内核跑通，<code>#print axioms</code> 只有三条标准公理。<span class="tg">[P]</span></li>
-      <li>⚠ 依赖补丁 PrimeNumberTheoremAnd-lean4341.patch 约 4 万行，其中删掉了上游的 2 个 sorry 并补上证明——"依赖库"有一部分是 OpenAI 自己的代码。</li>
-      <li>论文后续的应用（第 6 节推论）不在形式化范围内。</li></ul></div>
-    <div class="panel"><h4>人</h4><ul>
-      <li>Alex Kontorovich（Rutgers，PrimeNumberTheoremAnd 形式化项目发起人）："Quasi-RH?!?!???! Are you kidding me? If a human did this, it would be an instant Fields Medal…" <span class="tg">[R]</span></li>
-      <li>Levent Alpöge："Big, big, big, big props for quasiriemann and no Siegel zeroes." <span class="tg">[R]</span></li>
-      <li>截至 10-08，<strong>没有任何人类专家公开表示读完了这 199 页</strong>。⚠</li></ul></div>
-  </div>
-  <p><strong>判断</strong>：只要 Mathlib 对 <code>riemannZeta</code> 的定义正确、Lean 内核没 bug，这个定理就是"机器意义上已证明"——可信度比"一篇没人审过的论文"高一个量级。剩余风险在构建链（补丁和依赖）。</p>
-  <h3>4.5 如果为真</h3>
-  <ul>
-    <li><strong>素数定理误差变成幂次节约</strong>：π(x) − Li(x) = O(x^{7/8} log²x)。从"宽度缩向 0"到"固定宽度"是质变；但 7/8 到 ½ 仍是整块未知。</li>
-    <li><strong>Siegel 零点被排除</strong>：1935 年以来困扰一批"常数能否有效计算"问题的障碍解除（例如虚二次域类数的有效下界）。</li>
-    <li><strong>算法推论</strong>（论文 Cor. 1.2）：最小二次非剩余 ≤ C(log p)^32 ⇒ 模 p 开平方、Miller 素性测试都变成<em>无条件</em>的确定性多项式时间算法。对实际密码学<strong>没有影响</strong>（实践中一直用随机算法，AKS 2002 早已给出无条件确定性素性测试；RSA、椭圆曲线的安全性不受影响）。</li>
-  </ul>
-</section>
+{{RESULT:qrh}}
 
-<section id="pi">
-  <div class="kicker">数论 · family 017（+ 005）</div>
-  <h2><span class="n">5.</span>π 能被分数逼近得多好</h2>
-  <p class="tg">读不懂？→ <a href="#jj02">§24 精讲 02</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body">22/7 与 π 差 1.26×10⁻³；355/113（祖冲之"密率"）只差 2.67×10⁻⁷。对比基准 1/q²：1/113² ≈ 7.8×10⁻⁵——355/113 比它好了近 300 倍。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>连分数</strong>：π = [3; 7, 15, 1, 292, 1, 1, …]。下一项越大，前一个截断就越"超常地好"。355/113 后面紧跟 292，所以它特别准。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>Dirichlet（1842）</strong>：任何无理数都有无穷多个 p/q 满足 |x − p/q| &lt; 1/q²（抽屉原理）。所以"指数 2"总能达到。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>无理性指数</strong> μ(x) = 能让 |x − p/q| &lt; q^{−ν} 有无穷多解的最大 ν。有理数 1；Liouville 数 ∞；<strong>代数无理数（如 √2）恰好是 2</strong>——这是 Roth 定理（1955），获 1958 年 Fields 奖；e 是 2；几乎所有实数都是 2。难的是对<em>一个具体的数</em>证明。</div></div>
-    <div class="rung"><div class="lvl">第 4 级</div><div class="body"><strong>π 的上界史</strong>：Mahler 1953 年 42 → Mignotte 1974 年 21（充分大的分母为 20）→ Hata 1993 年 8.016 → Salikhov 2008 年 7.606 → Zeilberger–Zudilin 2020 年 7.103。70 年从 42 降到 7.1，离 2 还很远。</div></div>
-  </div>
-  {{FIG_FLINT}}
-  <h3>5.1 OpenAI 声称了什么</h3>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><a href="''' + REPO + '''/blob/main/preprints/The-irrationality-exponent-of-pi-is-2-September-24-2026/paper.pdf">The irrationality exponent of π is 2</a>（2026-09-24，23 页）："We prove the conjecture that the irrationality exponent of π is 2. As a consequence, the classical Flint–Hills series Σ 1/(n³ sin²n) converges."</p>
-    <p>精确版：对每个 ν &gt; 2，存在 Q(ν)，使一切 q ≥ Q(ν) 都有 |π − p/q| ≥ q^{−ν}。论文自己说明 Q(ν) <em>不可有效计算</em>，且 μ = 2 ≠ "连分数部分商有界"（后者更强，仍未解决）。</p>
-  </div>
-  <p><strong>方法</strong>：假设有无穷多个指数 ν &gt; 2 的逼近，挑出几个分母尺度彼此分离的，沿对数曲线做多变量插值得到一个非零行列式：算术上它是非零整数（≥ 1），解析上它被逼近误差压得极小，矛盾。Flint Hills 收敛则由已有的人类结果（Meiburg 2022：μ(π) &lt; 5/2 ⇒ 收敛）推出。</p>
-  <p><strong>推理摘要</strong>（<a href="''' + REPO + '''/blob/main/reasoning_traces/irrationality-exponent-of-pi.pdf">42 页</a>）很值得读：模型一开始的目标只是 μ &lt; 5/2，试了 BBP、模形式、Padé、p-adic 等几十条路线，反复撞上"高度 vs 分母成本"这堵墙，最后用加权插值行列式先拿到 μ = 62/25 = 2.48，再推到 2。它还借用了自己的 Catalan 常数手稿里的行列式思路。</p>
-  <h3>5.2 核实状态</h3>
-  <p>Lean：<code>lean/docs/017.md</code> 与 <code>ComparatorChallenges/PiExponent</code> 存在，解答约 869 个文件、9.5 万行，grep 无 sorry/axiom <span class="tg">[P]</span>；但它<strong>没有登记在 formalization.yaml 里</strong> ⚠，也没有第三方复核。Flint Hills 推论不在官方 Comparator 范围内（解答目录里其实有一个已证明的 <code>flint_hills_summable</code>，但不受 Comparator 检查）；解答只依赖 Mathlib，不用任何补丁库。没有找到数论专家对这篇论文的具体评论 ⚠。</p>
-  <div class="note">
-    <span class="label">侧栏：Catalan 常数是无理数（family 005）</span>
-    <p>G = 1 − 1/3² + 1/5² − 1/7² + … ≈ 0.91597。1978 年 Apéry 证明 ζ(3) 无理（van der Poorten 称之为 "A proof that Euler missed"），但同样的思路对 G 失效：清分母后线性形式不趋于 0。此前最好的只是"β(2), β(4), …, β(10) 中至少一个无理"。OpenAI 声称 G 无理（44 页），有 Lean（约 57 万行，同样未登记在 yaml 里 ⚠）。如果成立，这是 Apéry 之后近半个世纪里"单个经典常数无理性"最重要的结果之一。</p>
-  </div>
-  <h3>5.3 如果为真</h3>
-  <p>对 π 这个具体常数第一次拿到"和几乎所有实数一样"的最优指数，70 年的上界竞赛结束；一个流行二十多年的 Flint Hills 谜题得解。实际应用几乎没有，价值在纯数学，以及"加权插值行列式"能否推广到 ζ(3)、log 2 等常数。</p>
-</section>
+{{RESULT:pi}}
 
-<section id="matmul">
-  <div class="kicker">理论计算机 · family 107</div>
-  <h2><span class="n">6.</span>矩阵乘法到底能多快：ω ≤ 9/4</h2>
-  <p class="tg">读不懂？→ <a href="#jj03">§25 精讲 03</a>：同一个结果的从零详解版。</p>
-  <p>你天天在用的 GPU 训练，本质上是在做矩阵乘法。这一节回答：理论上它最快能多快。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body">教科书算法：c_ij = Σ_k a_ik·b_kj，n² 个元素 × 每个 n 次乘法 = <strong>n³</strong>。2×2 需要 8 次乘法。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>Strassen 1969：2×2 只要 7 次乘法</strong>（见下方代码块，可手算验证）。关键是这个算法对 a…h 是什么不做假设，所以它们可以是矩阵块，于是能递归：T(n) = 7T(n/2) ⇒ n^{log₂7} ≈ <strong>n^2.807</strong>。省下的 1 次乘法在每层递归里复利放大。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>ω 的定义</strong>：能用约 n^ω 次运算完成 n×n 矩阵乘法的最小指数。显然 2 ≤ ω ≤ 3（下界 2：光读入 2n² 个数就要这么多步）。主流猜想 ω = 2。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body">"2×2 能用 7 次乘法"等价于"2×2 矩阵乘法<strong>张量的秩</strong> ≤ 7"。此后：Bini 1979 近似秩 → Schönhage 1981 → Strassen 1986 <strong>激光法</strong>（从一个低秩张量的高次幂里切出大量独立的矩阵乘法）。近 40 年的进展几乎全来自激光法的改进。</div></div>
-  </div>
-<pre><code>A = [[a,b],[c,d]]   B = [[e,f],[g,h]]
-M1=(a+d)(e+h)  M2=(c+d)e  M3=a(f−h)  M4=d(g−e)
-M5=(a+b)h      M6=(c−a)(e+f)          M7=(b−d)(g+h)
-C11=M1+M4−M5+M7   C12=M3+M5   C21=M2+M4   C22=M1−M2+M3+M6
-<span class="cm"># 验算 C12：M3+M5 = af−ah+ah+bh = af+bh ✓</span></code></pre>
-  {{FIG_OMEGA}}
-  <h3>6.1 OpenAI 声称了什么</h3>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><strong>An Upper Bound of 9/4 for the Matrix Multiplication Exponent</strong>（2026-10-02，<strong>只有 13 页</strong>）："We prove that the exponent of matrix multiplication over the complex numbers is at most 9/4." 方法不是激光法，而是 Strassen 的<strong>渐近谱</strong>路线：对多项式乘法张量上的"张量特征"推出不等式，最后得到 ω ≤ 9/4。论文自己说："its proof does not specify a competitive finite matrix size."</p>
-    <p>同族另两篇：ℂ 上 ω &lt; 2.258（83 页）；<em>任意域</em>（含正特征）上 ω &lt; 2.371054886（35 页，仍是激光法框架，比此前纪录多改进约 1.2×10⁻⁴）。</p>
-  </div>
-  <h3>6.2 核实状态</h3>
-  <p><strong>陈述审查</strong> <span class="tg">[P]</span>：Lean 定理 <code>Arithmetic.omega ℂ ≤ 9/4</code>。算法被建模为直线程序（常数/输入/+/−/× 门，各计成本 1），<code>Correct</code> 要求对<em>所有</em>输入矩阵输出 A·B，ω 定义为标准的非一致代数复杂度——与文献一致，无隐藏假设。解答目录 sorry/axiom 为 0。<strong>人</strong>：Aaronson："a <em>rational</em> exponent for once (!), and via a completely different approach" <span class="tg">[R]</span>；激光法领域专家（Vassilevska Williams、Alman、Le Gall）未见公开表态 ⚠。</p>
-  <h3>6.3 如果为真——以及它对 AI 训练意味着什么</h3>
-  <ul>
-    <li><strong>理论上</strong>：解线性方程组、矩阵求逆、行列式、传递闭包、二分图匹配、线性规划求解器等一大批算法的复杂度直接写成 ω 的函数，会同时下降。更重要的是证明"渐近谱"这条路走得通，ω = 2 似乎更近了。</li>
-    <li><strong>对 GPU / LLM 训练：几乎没有直接影响。</strong>这是典型的"银河算法"（galactic algorithm）：常数巨大，只在天文数字规模的矩阵上才占优。GPU 上的 GEMM 用的就是 n³ 分块算法，瓶颈在显存带宽和 Tensor Core 吞吐；连 Strassen 在实践中都很少用（数值稳定性差、访存不规整）。</li>
-    <li><strong>和 AlphaTensor / AlphaEvolve 的区别</strong>：它们找的是<em>固定小尺寸</em>的低秩分解（如 AlphaEvolve 2025 年的 4×4 复矩阵 48 次乘法），是可以落地到真实内核的常数级优化；ω 关心的是 n → ∞ 的<em>指数</em>。Dupont 等 2026-08 用 AlphaEvolve 优化激光法参数，第一次让 AI 碰到 ω，但只改进了 1.6×10⁻⁴。</li>
-  </ul>
-</section>
+{{RESULT:matmul}}
 
-<section id="ugc">
-  <div class="kicker">理论计算机 · family 102</div>
-  <h2><span class="n">7.</span>Unique Games：近似算法的"天花板"在哪</h2>
-  <p class="tg">读不懂？→ <a href="#jj04">§26 精讲 04</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>NP 难</strong>：3SAT、Max-Cut 这类问题，大家相信没有多项式时间的精确算法（P ≠ NP）。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>退而求其次：近似</strong>。Max-Cut = 把图的顶点分两组，让跨组的边尽量多。随机分组期望切一半的边。手算三角形：最好切 2 条，随机期望切 1.5 条，比值 0.75。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>Goemans–Williamson（1995）</strong>：把每个顶点放松成单位向量，解一个半定规划（SDP），再用随机超平面切一刀，保证 <strong>0.878</strong>。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>近似也可能是难的</strong>：PCP 定理（1992–98）。Håstad（2001）证明 Max-Cut 近似到 16/17 ≈ 0.941 以上是 NP 难。于是 0.878 和 0.941 之间留下一个 25 年的缺口。</div></div>
-    <div class="rung"><div class="lvl">第 4 级</div><div class="body"><strong>Unique Games</strong>：每个顶点从 q 个标签里选一个，每条边是一个置换约束（一端定了，另一端唯一确定）。手算：三角形、标签 {0,1,2}、约束 b=a+1, c=b+1, a=c+1（mod 3）——绕一圈 a=a+3=a，可全满足；把最后一条换成 a=c+2，最多满足 2/3。完全可满足的实例沿边传播就能多项式时间解，<strong>难的只是"几乎可满足"</strong>。</div></div>
-  </div>
-  <p><strong>UGC（Khot 2002）</strong>：对任意 ε, δ &gt; 0，<strong>存在</strong>字母表大小 k（在 ε、δ 之后选），使得区分"能满足 ≥ 1−ε"和"最多满足 ≤ δ"是 NP 难的。</p>
-  {{FIG_MAXCUT}}
-  <h3>7.1 为什么它这么重要</h3>
-  <ul>
-    <li><strong>KKMO 2007</strong>：若 UGC 成立，Max-Cut 的极限<em>恰好</em>是 0.878——GW 算法最优。</li>
-    <li><strong>Khot–Regev 2008</strong>：若 UGC 成立，Vertex Cover 近似到 2−ε 是难的。</li>
-    <li><strong>Raghavendra 2008</strong>：若 UGC 成立，对<em>所有</em>约束满足问题，基本 SDP 就是最优的多项式时间近似算法。一个算法 + 一个猜想决定了一整类问题的近似极限。</li>
-    <li>反面证据：Arora–Barak–Steurer 2010 给出 UG 的亚指数时间算法，让一部分人怀疑 UGC。最近的进展是 2018 年的 <strong>2-to-2 定理</strong>（Khot–Minzer–Safra 等），证明了完备度约 1/2 的版本——"半个 UGC"。</li>
-  </ul>
-  <h3>7.2 OpenAI 声称了什么</h3>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><strong>The Unique Games Theorem</strong>（2026-09-23，58 页）："We prove the Unique Games Conjecture. For every fixed ε, δ ∈ (0, 1/2), we give a deterministic polynomial-time reduction from 3SAT to Unique Games over a fixed finite alphabet, with completeness at least 1 − ε and soundness at most δ."</p>
-    <p>同族另有 4 篇<em>不依赖 UGC</em>的直接归约：Max-Cut 超过 0.878 是 NP 难、Vertex Cover 低于 2 是 NP 难等——这就是 Aaronson 说"UGC 对它最有名的推论其实并不必要"的意思。</p>
-  </div>
-  <h3>7.3 核实状态</h3>
-  <p><strong>陈述审查</strong> <span class="tg">[P]</span>：Lean 定理 <code>OAI.UniqueGamesTheorem.theorem11</code>。输入是 3SAT 公式的二进制编码，归约要求 <code>Turing.TM2ComputableInPolyTime</code>（Mathlib 的多带图灵机），完备性/可靠性条件写得清楚，并额外要求实例是"平移约束 + 简单二部图"——<strong>这是 UGC 的一个更强的、已知等价的形式，编码忠实</strong>。解答约 478 个文件、18.7 万行，sorry/axiom 为 0。</p>
-  <p><strong>人</strong> <span class="tg">[R]</span>：Lance Fortnow："if they hold up, we've seen more progress in TCS in the last 24 hours than in the previous three decades combined." Mark Braverman（Quanta）："Math by press release is not that healthy for math." Dana Moshkovitz 据转述批评论文写得极难读，几乎离不开 AI 辅助（二手转述，几个来源措辞不一 ⚠）。Khot 本人未见公开表态 ⚠。</p>
-  <h3>7.4 如果为真</h3>
-  <p>"高效近似能做到多好"这个问题，对一大类问题画出了精确边界；原来写着"若 UGC 则……"的几百篇论文变成定理。和 AI safety 的一个联想（<em>我的推测，不是已有结论</em>）：辩论式可扩展监督（Irving–Christiano–Amodei 2018）的复杂性理论底子就是交互式证明与 PCP；UGC 精确刻画了"有一点点误差就无法高效区分"的边界，对"弱验证者监督强证明者"的协议设计有类比意义。</p>
-</section>
+{{RESULT:ugc}}
 
-<section id="bpl">
-  <div class="kicker">理论计算机 · family 103（+ 109）</div>
-  <h2><span class="n">8.</span>L = RL = BPL：小内存里，随机性没用</h2>
-  <p class="tg">读不懂？→ <a href="#jj05">§27 精讲 05</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>随机性能买到什么？</strong>判断 (x+y)² = x²+2xy+y² 是否恒成立：随机代入几个数检查就行，极快；但确定性的快速算法至今未知。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>P vs BPP</strong>：主流猜想 P = BPP（随机性不带来本质提升），但无条件证明遥不可及。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>换成内存受限版</strong>：L = 只用 O(log n) 比特内存（大约只能存几个指针）的确定性计算；RL/BPL = 同样内存 + 随机比特。手算例：无向图从 s 随机游走 n³ 步，只需记"当前位置 + 计数器"，高概率走到 t ⇒ 连通性 ∈ RL（1979）。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>去随机化史</strong>：Borodin–Cook–Pippenger 1983 BPL ⊆ L²（Nisan 1992 用 O(log² n) 种子的伪随机生成器重新得到，并在 1994 年做到同空间多项式时间）→ Saks–Zhou 1999 BPL ⊆ L^{3/2} → Hoza 2021 稍好 → <strong>Reingold 2005：无向连通性 ∈ L</strong>（拿掉一个具体问题的随机性的里程碑）。一般 BPL 在 3/2 次幂附近卡了 25 年。</div></div>
-  </div>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><strong>Exact Derandomization of Logarithmic Space: L = RL = BPL</strong>（2026-09-23，108 页）："We prove L = RL = BPL, resolving the derandomization problem for polynomial-time randomized logarithmic space." 更强版：能确定性地把接受概率估计到 2^{−q} 精度，空间 O(log n + q)。</p>
-  </div>
-  <p><strong>核实</strong> <span class="tg">[P]</span>：Lean 定理 <code>L = RL ∧ RL = BPL</code>；这一族的 Comparator 额外<strong>锁定了 20 个定义</strong>（机器、步进、空间、接受概率、L/RL/BPL），解答方不能偷改定义。模型是自定义多带图灵机，空间按访问过的工作格子数计，"所有硬币序列都在多项式时间内停机"——标准 BPL 定义。sorry/axiom 为 0。<strong>人</strong> <span class="tg">[R]</span>：Aaronson："one of the great derandomization conjectures short of P=BPP"，又说 "its truth was never in serious doubt"——结论本身没人怀疑，难在证明。</p>
-  <p><strong>如果为真</strong>：第一个无条件"完全拿掉随机性"的自然资源类。它<strong>不</strong>蕴含 P = BPP，离 P vs NP 也很远（Fortnow："none of these results get us any closer to settling P v NP"）。证明里"低空间、高精度的线性代数"技术可能比结论更重要。</p>
-  <div class="note">
-    <span class="label">侧栏：整数乘法低于 n log n（family 109）</span>
-    <p>小学竖式 n²；Karatsuba 1962 年 n^1.585；Schönhage–Strassen 1971 年 n log n log log n 并猜想 n log n 最优；Harvey–van der Hoeven 2019 年（Annals 2021）做到 O(n log n)。OpenAI 声称在多带图灵机上做到 O(n (log n)^{1−2^{−182}})（73 页，<strong>无 Lean</strong>）。2^{−182} 的节省只在天文规模上可见，实际意义为零；但它推翻了一个 50 年的"最优"猜想（在该计算模型下）。</p>
-  </div>
-</section>
+{{RESULT:bpl}}
 
-<section id="color">
-  <div class="kicker">组合 · family 158（+ 156）</div>
-  <h2><span class="n">9.</span>给平面涂色：距离恰好为 1 的两点不能同色</h2>
-  <p class="tg">读不懂？→ <a href="#jj06">§28 精讲 06</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>图着色</strong>（CS 老朋友：寄存器分配、排课）：相邻顶点颜色不同，最少几种颜色？</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>单位距离图</strong>：平面上<em>每个点</em>都是顶点，距离恰好为 1 的两点连边。它的色数记作 χ(ℝ²)。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>为什么 3 色不够</strong>：Moser 菱形对（下图，7 个点）。<strong>为什么 7 色够</strong>：用直径小于 1 的正六边形铺满平面，按 7 色周期上色，同色六边形相距大于 1。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body">于是 4 ≤ χ ≤ 7，<strong>从 1950 年代一直卡到 2018 年</strong>；2018 年生物老龄化研究者 Aubrey de Grey 用一个 1581 点的有限图把下界推到 5（Polymath16 中 Heule 用 SAT 求解器 + 不可满足核提取得到 553 点，Parts 再用图最小化缩到 509 点）。</div></div>
-  </div>
-  {{FIG_MOSER}}
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><strong>The Euclidean plane is not five-colorable</strong>（2026-09-23，62 页）："We prove that every coloring of the Euclidean plane with five colors has a monochromatic unit-distance pair, with no regularity assumption on the color classes. Consequently, the chromatic number of the plane is either six or seven."</p>
-  </div>
-  <p><strong>出人意料的方法</strong>：此前下界的标准套路是"找一个有限图，证明它不能 k 着色"（de Grey 那条路）。这篇<strong>没有给出任何有限图</strong>，而是走遍历论 + 测度论：先证明"存在真正的 k 着色 ⇔ 存在一种'弱可测'的 k 着色"（对平移和旋转做平均，用到这些群的<em>可顺从性</em>——正好接上 §10 的主题），再证明弱可测 5 着色不存在。最后一步，又回到了 1961 年的 Moser 菱形对。</p>
-  <p><strong>核实</strong> <span class="tg">[P]</span>：Lean 陈述只有两行，人一眼能核对：</p>
-<pre><code>def ProperColoring (k) (c : ℂ → Fin k) : Prop := ∀ x y : ℂ, ‖x - y‖ = 1 → c x ≠ c y
-theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</code></pre>
-  <p>没有可测性假设，<strong>忠实于原问题</strong>。证明约 70 个文件、3 万行，无 sorry/axiom。Gil Kalai："raises the lower bound to six, leaving six and seven as the two possible answers"，同时提醒 "even Lean verification may have issues" <span class="tg">[R]</span>。</p>
-  <p><strong>如果为真</strong>：χ(ℝ²) ∈ {6, 7}。新的开放问题：由 de Bruijn–Erdős 定理，一定存在一个需要 6 色的有限单位距离图——但没人知道它长什么样，这是 AI + SAT 的好目标。这也是"人审陈述、机器审证明"最理想的形态：陈述两行，证明三万行。</p>
-  <div class="note">
-    <span class="label">侧栏：Borsuk 猜想在 9 维不成立（family 156）</span>
-    <p>圆盘不能切 2 块使每块直径都变小（总有一块含一对对径点），但切 3 块可以。Borsuk 1933 年问：ℝᵈ 中任何有界集合是否总能切成 d+1 块直径更小的部分？Kahn–Kalai 1993 年在 1325 维否定它；此后反例维数降到 64（2014）、63（2026-05，借助 GPT-5.5 Pro）。OpenAI 声称：取 ℝ⁴ 中所有单位向量 u 的投影矩阵 uuᵀ，它们落在 9 维空间里，<strong>不能用 10 块直径更小的集合覆盖</strong>——一下从 63 维降到 9 维（18 页，有 Lean）。4–8 维仍然开放。</p>
-  </div>
-</section>
+{{RESULT:color}}
 
-<section id="thompson">
-  <div class="kicker">群论 · family 248</div>
-  <h2><span class="n">10.</span>Thompson 群 F：一个"证明了又撤回"了几十年的问题</h2>
-  <p class="tg">读不懂？→ <a href="#jj07">§29 精讲 07</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>群</strong> = 一组可以复合、可以撤销的操作。例：整数加法；正方形的 8 个对称。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>生成元</strong>：少数几个操作拼出整个群。ℤ 由"+1"生成；<strong>自由群 F₂</strong> 由 a、b 生成且没有任何关系，它的 Cayley 图是一棵每点 4 叉的无限树。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>Thompson 群 F</strong>：[0,1] 到自身的单调递增、分段线性函数，断点是 k/2ⁿ，每段斜率是 2 的整数次幂；运算是函数复合。由 x₀（下图）和 x₁ 两个元素生成。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>可顺从（amenable）= 能不能"公平地取平均"</strong>。Følner 判据：能否找到有限集合 A，用生成元平移后变化的比例任意小？ℤ 可以，F₂ 不行。这个概念是 von Neumann 1929 年为解释 <strong>Banach–Tarski 悖论</strong>（一个球切成有限块拼成两个同样大的球）引入的——悖论的根源正是旋转群里藏着 F₂。</div></div>
-    <div class="rung"><div class="lvl">第 4 级</div><div class="body">"不可顺从是否都因为含 F₂？"答案是否（Ol'shanskii 1980 起有反例），早期反例都很"怪"；2013 年后 Monod、Lodha–Moore 已给出自然、有限表示、无挠的反例。F 不含 F₂（Brin–Squier 1985），所以 F 不可顺从仍然是这条线上最有名的一个测试案例。</div></div>
-  </div>
-  {{FIG_THOMPSON}}
-  <h3>10.1 为什么这是"Lean 为什么重要"的最佳案例</h3>
-  <p>Geoghegan 1979 年猜想 F 不可顺从。此后两个方向都有人宣布过证明：2009 年 arXiv 上几乎同时出现 Akhmedov（不可顺从）和 Shavgulidze（可顺从）的论文；Moore 2011 年指出后者的错误 "serious and do not seem to be repairable"——而那篇论文已经发表了；<strong>Justin Moore 本人 2012 年声称可顺从，后被指出 Lemma 4.13 有错并撤回</strong>；Akhmedov 的版本至今未被接受。<span class="tg">[P，arXiv 1102.0747 / 1209.2063 / 1310.4395]</span></p>
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p><strong>Thompson's group F is nonamenable</strong>（2026-09-23，<strong>全文含附录只有 13 页</strong>，证明主体约 7 页）："We prove that Thompson's group F is nonamenable. This confirms Geoghegan's conjecture."</p>
-    <p>思路：借用泛函分析里的一个现象——无穷维 Hilbert 空间的单位球上存在一个 Lipschitz 映射，把每个点都移动至少 ½（Benyamini–Sternfeld 1983）。如果 F 有 Følner 集，在它上面取平均就会得到这个映射的近似不动点，矛盾。关键工具来自无穷维几何，而不是群论常用的组合计数。</p>
-  </div>
-  <p><strong>核实</strong> <span class="tg">[P]</span>：Lean 挑战文件<strong>从头定义了 F</strong>（单调递增同胚、有限个二进断点、斜率 2^k）和"不变均值"（线性、正、归一、左不变），定理是"存在使乘法 = 函数复合的群结构，且不存在不变均值"——乘法被强制为复合，没有作弊空间，<strong>忠实</strong>。证明约 68 个文件、9,500 行，无 sorry/axiom。Kalai 措辞谨慎地说论文 "announces" 这一结果 <span class="tg">[R]</span>；Geoghegan、Moore、Akhmedov 未见公开评论 ⚠。</p>
-  <p><strong>要点</strong>：这个领域的人类历史是一串"宣布 → 发现错误 → 撤回"，连顶尖专家也撤回过。陈述文件 89 行（含 import）、人能逐行审；13 页论文按过去经验社区可能要几年才能达成共识。Lean 把"信任作者"换成了"信任内核 + 陈述"。</p>
-</section>
+{{RESULT:thompson}}
 
-<section id="ns">
-  <div class="kicker">偏微分方程 · 9 月单独发布（+ family 376）</div>
-  <h2><span class="n">11.</span>Navier–Stokes：流体会不会在有限时间里"炸掉"</h2>
-  <p class="tg">读不懂？→ <a href="#jj08">§30 精讲 08</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>ODE vs PDE</strong>：ODE 的未知量是一个随时间变化的数 x(t)；PDE 的未知量是一整个场，比如每一点、每一时刻的流速 u(x,t)——相当于无穷多个耦合的 ODE。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>手算爆破</strong>（下图）：ẋ = x² 、x(0) = 1 的解是 1/(1−t)，t = 0.9 时 10，t = 0.99 时 100，t → 1 时 ∞。方程完全光滑，解却在有限时刻坏掉。加阻尼 ẋ = x² − x：小初值衰减，大初值仍然爆破。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>NS 方程</strong>：∂ₜu + (u·∇)u − νΔu + ∇p = f，∇·u = 0。(u·∇)u 是非线性"自我输运"（对应玩具里的 x²），νΔu 是粘性（对应 −x），f 是外力。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>为什么 3D 难</strong>：唯一的全局守恒量是能量，而在 3D 的缩放下，尺度越小能量上界越"管不住"——叫"超临界"。2D 是临界的，所以 2D 早就解决了。</div></div>
-  </div>
-  {{FIG_BLOWUP}}
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p>《Finite time blowup for Navier–Stokes》（2026-09-08，166 页，另有约 64 万行 Lean 的独立仓库 <a href="https://github.com/openai/NavierStokesAndEuler">openai/NavierStokesAndEuler</a>）："For every positive viscosity, we construct a solution … that starts from rest and develops unbounded velocity in finite time while maintaining uniformly bounded kinetic energy." 外力 f 光滑且时空紧支撑；论文明确说这建立了 Clay 的<strong>分支 (C)，并推出 (D)</strong>。</p>
-  </div>
-  <h3>11.1 关键细节：外力是你挑的</h3>
-  <p>论文第 2 节自己点明："For any incompressible flow u and pressure p, we can always define the external force f to be the residual … The challenge is to choose a flow that blows up while this residual remains smooth." 也就是说，(C)/(D) 把问题变成"能否构造一个会爆的流，同时让'残差外力'保持光滑"——这比"流体<em>自己</em>会不会爆"（无外力的 (A)/(B)）弱得多。多数分析学家认为真正的问题是 (A)/(B) <span class="tg">[R]</span>。这不是作弊：Fefferman 当年特意把 (C) 写进题面，认为它"retaining the heart of the problem"。只是 2023 年以后带外力的路线被证明更容易，书面题目和大家真正关心的问题之间才出现了落差。</p>
-  <h3>11.2 核实与争议</h3>
-  <ul>
-    <li><strong>Lean</strong> <span class="tg">[P]</span>：约 2,659 个文件、64 万行，无 sorry/axiom；Comparator 开启了 nanoda 第二内核。题面改编自 DeepMind Formal Conjectures 仓库的陈述，逐条对照 Clay 条件 (4)–(11)（含周期情形压强的勘误）均一致。同一仓库还形式化了<strong>无外力</strong> 3D Euler 从光滑紧支撑初值出发的爆破——Fefferman 称 Euler 问题"also open and very important"，这部分分量可能不亚于 NS。</li>
-    <li><strong>社区</strong> <span class="tg">[R]</span>：Clay 主席 Bridson 说评估会 "deliberately unhurried"，Clay 仍把 NS 列为未解决；未见期刊投稿报道。Clay 规则要求在合格刊物发表 + 两年接受期。</li>
-    <li><strong>归属争议</strong> <span class="tg">[R]</span>：NYU 的 Buckmaster 与 Alpöge 8 月已得到带外力的 Euler/Boussinesq 爆破，9 月 7–8 日公开；Buckmaster 本人称 OpenAI 是听到他们的进展后才启动这个方向，OpenAI 否认其提示词受此影响（双方说法不一 ⚠）。Fefferman（Clay 题面作者）："The heroes of the story … are Córdoba and Martínez-Zoroa"（带外力 Euler 爆破的前驱工作）。论文（CDN 版 PDF，2026-09-08）已引用 Córdoba–Martínez-Zoroa，但未引用 Buckmaster–Alpöge。Gómez-Serrano（NPR）："The paper is not written for humans … as of today, the paper doesn't teach us much."</li>
-  </ul>
-  <div class="note">
-    <span class="label">相关：受迫 Navier–Stokes 中的通用计算（family 376）</span>
-    <p>声称：在 3 维环面上，存在一个光滑外力"程序"，使某个流体粒子进入指定区域<strong>当且仅当</strong>给定图灵机停机——所以这个可达性问题不可判定。论文诚实地说："There is an elementary way to force a chosen smooth incompressible velocity…" 它让人想到 Tao 2016 年的纲领（让流体<em>自己</em>搭出计算机、把能量一次次传给更小的自身副本从而爆破），但 376 把"编程"放在外力里，<strong>不推进</strong>那条无外力爆破纲领，论文也未引用 Tao 2016。</p>
-  </div>
-  <p><strong>如果为真</strong>：形式上关闭了一个千禧年问题的一个分支。对天气、湍流、工程几乎没有直接影响——工程求解器从不依赖整体正则性，真实流体在到达奇点之前分子尺度就接管了。</p>
-</section>
+{{RESULT:ns}}
 
-<section id="vlasov">
-  <div class="kicker">数学物理 · family 362</div>
-  <h2><span class="n">12.</span>相对论 Vlasov–Maxwell：等离子体模型会不会自己坏掉</h2>
-  <p class="tg">读不懂？→ <a href="#jj09">§31 精讲 09</a>：同一个结果的从零详解版。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>等离子体</strong>：被电离的气体（聚变堆、太阳风）。太稀薄、粒子几乎不碰撞，所以用<strong>相空间密度</strong> f(t, x, v) 描述"在位置 x、动量 v 附近有多少粒子"——6 维 + 时间。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>自洽耦合</strong>：粒子受洛伦兹力（Vlasov 方程）→ 粒子形成电流 → 电流产生场（Maxwell 方程）→ 场再推粒子。非线性就来自这个闭环。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>相对论</strong>（c = 1）：速度 v̂ = p/√(1+p²)。p = 1 时 0.707，p = 10 时 0.995——动量可以无限大，速度永远 &lt; 1。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>Glassey–Strauss 1986</strong>：奇点只可能出现在高速处——只要粒子动量在有限时间内有界，解就能延续。整个问题被归约为：<strong>粒子会不会在有限时间里被加速到无穷大动量？</strong>此后 40 年只有小初值、降维、对称性等附带限制的结果。</div></div>
-  </div>
-  {{FIG_HARMONIC}}
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p>《Global classical solutions of the three-dimensional relativistic Vlasov–Maxwell system》（2026-09-23，49 页）："We prove global existence and uniqueness for arbitrary smooth admissible initial data in the three-dimensional, one-species relativistic Vlasov–Maxwell system … without size or symmetry restrictions on the data."</p>
-  </div>
-  <p><strong>核实</strong> <span class="tg">[P]</span>：Lean 题面 <code>global_classical_solution</code> 的假设逐项对过（f₀ 光滑、紧支撑、非负；场各阶导数有界且属于 L²；两条 Gauss 约束），结论是存在 + 光滑 + 唯一。约 207 个文件、9 万行，无 sorry/axiom。<strong>范围限制</strong>：只覆盖<strong>单一粒子种类</strong>，而真实聚变等离子体至少有电子和离子两种；推广是否平凡不确定 ⚠。未找到等离子体 PDE 专家的具名评论 ⚠。</p>
-  <p><strong>推理摘要很坦白</strong>：模型中途多次碰壁（"指数不等式矛盾：H&lt;0.41z vs H&gt;0.496z"），最后一句写道结论 "rests on the occupation bound, direction-count estimate, and cutoff cancellations … the cited continuation theorem alone does not establish those estimates."</p>
-  <p><strong>如果为真</strong>：一个约 40 年的旗舰开放问题（单种类）得解，而且有机器验证，分量可能超过本批大多数结果。对聚变工程短期无影响（PIC、gyrokinetic 模拟不依赖这个定理）；它证明的是"模型里没有任何粒子的动量会在有限时间内趋于无穷"（总能量本来就守恒，这里管的是单个粒子）——一种"模型健康证明"。</p>
-</section>
+{{RESULT:vlasov}}
 
-<section id="spin">
-  <div class="kicker">概率与统计力学 · family 221</div>
-  <h2><span class="n">13.</span>稀疏自旋玻璃：从磁铁到神经网络的能量地形</h2>
-  <p class="tg">读不懂？→ <a href="#jj10">§32 精讲 10</a>：同一个结果的从零详解版。</p>
-  <p>这一节和你的神经科学背景直接相连：Hopfield 网络的能量函数，就是自旋玻璃的 Hamiltonian。</p>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">第 0 级</div><div class="body"><strong>Ising 磁体</strong>：每个格点一个自旋 σᵢ = ±1，能量 H = −Σ Jᵢⱼσᵢσⱼ。J &gt; 0 时相邻自旋想同向。</div></div>
-    <div class="rung"><div class="lvl">第 1 级</div><div class="body"><strong>挫折</strong>（下图左）：三个自旋两两"想反向"，8 种构型里没有一种能同时满足三条边，基态 6 重简并。</div></div>
-    <div class="rung"><div class="lvl">第 2 级</div><div class="body"><strong>自旋玻璃</strong>：耦合 Jᵢⱼ <em>随机</em>正负，挫折到处都是，能量地形崎岖、有指数多个亚稳态。<strong>SK 模型</strong>（1975）每对自旋都耦合；<strong>Parisi 1979</strong> 用"复本对称破缺"给出自由能公式——物理上神奇、数学上不严格；Guerra 2003 + Talagrand 2006 严格证明；Parisi 获 2021 年诺贝尔物理学奖。</div></div>
-    <div class="rung"><div class="lvl">第 3 级</div><div class="body"><strong>稀释（稀疏）版本</strong>：每个自旋只连有限多条边。<strong>Mézard–Parisi 2001</strong> 在固定度数的 Bethe 格上用 cavity 方法给出一层（1RSB）公式，一般的层级形式和上界由 Panchenko–Talagrand 2004 给出，<strong>等号是开放猜想</strong>。难点：稠密模型里两两重叠就够描述状态，稀疏模型要控制所有多复本重叠。</div></div>
-    <div class="rung"><div class="lvl">第 4 级</div><div class="body"><strong>和随机 k-SAT 的联系</strong>：k-SAT 就是一个稀疏、k 元相互作用的自旋玻璃。Ding–Sly–Sun 2015 对大 k 严格证明了可满足性阈值，正是这套物理方法的预测。</div></div>
-  </div>
-  {{FIG_SPIN}}
-  <div class="claim"><span class="label">声称 [P]</span>
-    <p>《The Mézard–Parisi formula for diluted spin glasses》（2026-09-23，36 页）："We prove the Mézard–Parisi hierarchical cavity formula for diluted even-arity Ising models in the Panchenko–Talagrand class." 关键技巧：把每个分叉深度整体推迟一层再对深度平均，从而控制多复本重叠。推理摘要里有一句："Aha recursive structure: overfitting shared variable can simulate original model at smaller scale."</p>
-  </div>
-  <p><strong>核实</strong> <span class="tg">[P]</span>：Lean 定理 <code>mezard_parisi</code>（压强收敛到变分值），<code>Admissible</code> 逐条写出 Panchenko–Talagrand 类的假设；约 405 个文件、5.6 万行，无 sorry/axiom。<strong>范围比标题窄</strong>：只覆盖<strong>偶数元</strong> + 正性条件——3-SAT 这类奇数元模型、零温度下的硬约束 SAT 都不在内，所以它<strong>不</strong>直接推广 Ding–Sly–Sun。另外它只覆盖<strong>Poisson 度数</strong>的稀释图，固定度数的随机正则图（Mézard–Parisi 原文的 Bethe 格）不在内。Hopfield 网络（全连接、耦合与记忆模式相关）也不在这个定理范围内，下面的联系是思想来源，不是推论。未找到具名专家评论 ⚠。</p>
-  <h3>13.1 和 ML / 神经科学的联系（诚实版）</h3>
-  <ul>
-    <li><strong>Hopfield 网络</strong>（1982）：记忆是能量极小，存储容量由复本方法算出（Amit–Gutfreund–Sompolinsky 1985）；Hopfield 与 Hinton 获 2024 年诺贝尔物理学奖。</li>
-    <li><strong>感知机</strong>：Gardner 1988 用复本方法算容量；同批的 family 222 给出了 Ising 感知机自由能和一个 jamming 指数。</li>
-    <li><strong>损失地形</strong>："崎岖地形 + 层级聚类的极小值"这套直觉来自自旋玻璃（如 Choromanska 等 2015）。但这些类比大多是<em>启发式</em>的，这个定理不会告诉你 SGD 会找到什么。</li>
-  </ul>
-</section>
+{{RESULT:spin}}
 
 <section id="hodge">
   <div class="kicker">反面案例 · family 032 与 10-07 撤稿</div>
@@ -533,326 +275,17 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
   <p>社区已经通过 IAS 顾问组形成了初步规范（披露模型名、prompt、推理链、计算时间与成本、选题方式、同类问题失败率），OpenAI 只遵守了一部分，然后一次性发布 700 多篇。AHM 的说法 "a demonstration of power" 虽然激烈，但点到了结构性问题：<strong>前沿公司单方面决定一项能力以什么方式进入公共领域，受影响的共同体只能事后反应</strong>。</p>
 </section>
 
-<section id="fwd-method">
-  <div class="kicker">Part II · 前瞻 · 方法</div>
-  <h2><span class="n">17.</span>往前看：按趋势推演，而不是按直觉</h2>
-  <p>Part I 讲的是"已经发生了什么"。Part II 回答一个更大的问题：<strong>照 AI 在数学和编程上的进步速度，几类 AI 安全理论（辩论、SLT、Guaranteed Safe AI、神经符号）会在什么时候、以什么顺序被解锁？</strong></p>
-  <div class="note">
-    <span class="label">关于"现实"的约定</span>
-    <p>人的直觉习惯线性外推，但下面三条曲线都是指数型的。所以按趋势推出来的未来常常显得"太快"。这一部分的原则是：<strong>不因为反直觉就保守，也不凭空想象</strong>。每个时间点都写明依赖哪条曲线、用了什么假设、哪些信号会证伪它。标签：[数据] 有出处；[模型] 按明确假设算出；[判断] 我的推断。</p>
-  </div>
-  <h3>17.1 曲线 ①：AI 能独立完成的任务有多长</h3>
-  <p><strong>这是什么</strong>：METR 让 AI 去做一批软件和研究任务，每个任务先测人类专家要花多久，再找出"AI 有 50% 把握做成"的任务长度。这个长度叫时间跨度（time horizon），它把"AI 有多能干"压缩成一个可以画在图上的数。</p>
-  <div class="tbl"><table>
-    <thead><tr><th>发布</th><th>模型</th><th>时间跨度（p50）</th></tr></thead>
-    <tbody>
-      <tr><td class="mono">2019-02</td><td>GPT-2</td><td>0.1 分钟</td></tr>
-      <tr><td class="mono">2023-03</td><td>GPT-4</td><td>4 分钟</td></tr>
-      <tr><td class="mono">2024-12</td><td>o1</td><td>39 分钟</td></tr>
-      <tr><td class="mono">2025-04</td><td>o3</td><td>2.0 小时</td></tr>
-      <tr><td class="mono">2025-08</td><td>GPT-5</td><td>3.4 小时</td></tr>
-      <tr><td class="mono">2026-02</td><td>Claude Opus 4.6</td><td>12 小时（CI 5.3–61）</td></tr>
-      <tr><td class="mono">2026-04</td><td>Claude Mythos Preview</td><td>17.4 小时（CI 8.5–55）</td></tr>
-      <tr><td class="mono">2026-06</td><td>GPT-5.6 Sol</td><td>作弊算失败：11.3 小时；其他处理方式：71–270+ 小时</td></tr>
-    </tbody>
-  </table></div>
-  <p class="tg">来源：METR TH1.1 原始数据 benchmark_results_1_1.yaml（2026-05-08 更新）；GPT-5.6 Sol 来自 METR 2026-06-26 报告。[数据]</p>
-  <p><strong>倍增期</strong>：从 2023 年起拟合，每 <strong>129 天</strong>翻一倍（95% CI 104–158 天）；只用 2024 年后的数据约 89 天；2019 年起全部数据约 188 天。[数据] 129 天翻倍换算成年增长是 2^(365/129) ≈ <strong>每年 ×7</strong>。这就是反直觉的根源：线性直觉以为明年会"好一点"，按趋势是"好 7 倍"。</p>
-  {{FIG_METR}}
-  <div class="tbl"><table>
-    <thead><tr><th>情景</th><th>倍增期</th><th>2026 年末</th><th>2027 年中</th><th>2027 年末</th><th>2028 年末</th></tr></thead>
-    <tbody>
-      <tr><td>乐观</td><td>89 天</td><td>~100 小时</td><td>~410 小时</td><td>~1,700 小时（10 工作月）</td><td>~3 万小时</td></tr>
-      <tr><td><strong>中心</strong></td><td><strong>129 天</strong></td><td><strong>~56 小时</strong>（1 工作周+）</td><td><strong>~150 小时</strong>（≈1 工作月）</td><td><strong>~400 小时</strong>（≈2.4 工作月）</td><td><strong>~2,800 小时</strong>（≈1.4 工作年）</td></tr>
-      <tr><td>悲观</td><td>213 天</td><td>~33 小时</td><td>~60 小时</td><td>~110 小时</td><td>~360 小时（≈2 工作月）</td></tr>
-    </tbody>
-  </table></div>
-  <p class="tg">[模型] 锚点 2026-05 约 15 小时（介于 Opus 4.6 与 Mythos Preview 之间），按固定倍增期纯指数外推，由 build 脚本计算。</p>
-  <p><strong>这条曲线的两个弱点</strong>（必须一起记住）：(1) METR 说现有任务集在 16 小时以上就不可靠，2027 年以后的数字需要新的长任务集（TH 2.0，尚未发布）来检验；(2) GPT-5.6 Sol 的结果说明，"作弊算不算成功"能让数字相差约 4.5 个倍增，相当于约 1.5 年的趋势。[判断] 超过约一个工作月之后，决定成败的越来越是"任务说得清不清楚"，而不是执行能力。</p>
-  <h3>17.2 曲线 ②：真正的开放问题，AI 能解出多少</h3>
-  <p><strong>为什么需要第二条曲线</strong>：竞赛和 benchmark 已经饱和，不能再拿来外推。[数据]</p>
-  <ul>
-    <li>IMO 2024 银牌（28/42）→ 2025 金牌（35/42）→ 2026 满分（42/42，两个系统经官方评分）。</li>
-    <li>PutnamBench（Lean）2025-04 约 7% → 2026-08 满分 672/672；2026-09 解完全集只花 $111。</li>
-    <li>FrontierMath Tier 4 从 2025-11 的 19% 涨到 2026-09 的 98%。</li>
-  </ul>
-  <p>但同一时期，在 Epoch 的 <strong>FrontierMath Erdős</strong>（68 个预先登记为开放、必须给 Lean 证明、每题预算 $300 的 Erdős 问题）上，最强的 GPT-6 Astra 只解出 <strong>2/68 = 3%</strong>，其他模型都是 0。不限预算时 5/68（约 7%），花费超过 $22 万。[数据] <strong>benchmark 上的 98% 和开放问题上的 3% 之间的差距，是整个外推里最重要的不确定量。</strong></p>
-  {{FIG_OPEN}}
-  <div class="tbl"><table>
-    <thead><tr><th>情景</th><th>斜率 · 上限</th><th>2026 年末</th><th>2027 年中</th><th>2027 年末</th><th>2028 年末</th><th>2030 年末</th></tr></thead>
-    <tbody>
-      <tr><td>乐观</td><td>+3.0/年 · 90%</td><td>~7%</td><td>~26%</td><td>~58%</td><td>~88%</td><td>~90%</td></tr>
-      <tr><td><strong>中心</strong></td><td><strong>+1.5/年 · 80%</strong></td><td><strong>~5%</strong></td><td><strong>~9%</strong></td><td><strong>~18%</strong></td><td><strong>~45%</strong></td><td><strong>~77%</strong></td></tr>
-      <tr><td>悲观</td><td>+0.7/年 · 60%</td><td>~4%</td><td>~5%</td><td>~7%</td><td>~13%</td><td>~31%</td></tr>
-    </tbody>
-  </table></div>
-  <p><strong>为什么中心情景可能偏保守</strong>：(1) 预算放大 10 倍，2026 年就能从 3% 提到约 7%，而推理价格每年降 10 倍以上（Epoch：固定能力下每年降 9–900 倍，中位数 50 倍）[数据]；(2) OpenAI 从约 4,000 题里留下 372 族（约 9%），说明一个可能更强的未发布模型在"大量尝试 + 事后挑选"口径下已经远高于 3%。<strong>为什么可能偏乐观</strong>：固定题集越往后剩下的越难；千禧年级别的单个难题不在这个模型的适用范围内。</p>
-  <h3>17.3 曲线 ③：形式化证明的成本</h3>
-  <ul>
-    <li><strong>2025-09</strong>：Math Inc 的 Gauss 用 3 周完成强素数定理的形式化，约 2.5 万行（人类专家此前 18 个月只完成一部分）。[数据]</li>
-    <li><strong>2026-09</strong>：Claude 用 11 天完成<strong>费马大定理</strong>的完整形式化，1300 万行、约 60 亿输出 token，只用三条标准公理，并经 Buzzard 审阅。按标价约 $30 万，即 <strong>$0.023/行</strong>。对照：人类项目预计 5 年、100 万英镑。[数据]</li>
-    <li><strong>2026-10</strong>：OpenAI 的 Lean 库 2600 万行（见 §3）。</li>
-  </ul>
-  <div class="tbl"><table>
-    <thead><tr><th>情景（每年降幅）</th><th>2026 年末</th><th>2027 年末</th><th>2028 年末</th><th>"费马大定理规模"项目，2028 年末</th></tr></thead>
-    <tbody>
-      <tr><td>乐观（÷30/年）</td><td>$0.008/行</td><td>$0.0003/行</td><td>$0.00001/行</td><td>~$110</td></tr>
-      <tr><td><strong>中心（÷10/年）</strong></td><td><strong>$0.01/行</strong></td><td><strong>$0.001/行</strong></td><td><strong>$0.0001/行</strong></td><td><strong>~$1,400</strong></td></tr>
-      <tr><td>悲观（÷3/年）</td><td>$0.016/行</td><td>$0.005/行</td><td>$0.002/行</td><td>~$2.3 万</td></tr>
-    </tbody>
-  </table></div>
-  <p><strong>含义</strong>：三种情景下，<strong>生成证明的成本到 2027–2028 年都会降到可以忽略</strong>。剩下的成本几乎全是"人审核陈述和 spec 是否忠实"，这部分的吞吐量基本不随时间增长。⚠ 有报道称费马大定理形式化的内部成本只有约 $2,000，与标价相差约 150 倍，口径未核实。</p>
-  <h3>17.4 可能打破趋势的因素</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>因素</th><th>方向</th><th>证据与判断</th></tr></thead>
-    <tbody>
-      <tr><td>AI 研发全面自动化</td><td><strong>加速</strong></td><td>CASP 2026（Hinton、Bengio、OpenAI 首席科学家等联名）的模型给出 r ≈ 1.39 > 1，意味着超指数增长：全面自动化后约 17 个月进步速度提高 10 倍。前兆：Anthropic 内部"AI 主导、人监督"的研发占比 2026-03 到 08 从 1% 升到 26%；完全自主仍是 0%。[数据]</td></tr>
-      <tr><td>训练算力增速放缓</td><td>减速</td><td>可能从每年 4–5 倍降到 3–4 倍（电力、HBM）。但数学和形式化主要消耗推理算力，受影响较小。[判断]</td></tr>
-      <tr><td>数据</td><td>中性偏正</td><td>在可验证领域，Lean 内核或测试本身就是无限的奖励信号；几千万行新 Lean 会回流进训练。数据墙在这里最弱。[判断]</td></tr>
-      <tr><td>验证器本身有噪声</td><td>让测量失真</td><td>FrontierMath 审计发现 42% 的题有错，SWE-bench Pro 约 30% 的任务有问题。指标会比能力先失效。[数据]</td></tr>
-      <tr><td>Reward hacking</td><td>让测量失真</td><td>外推 METR 时必须同时报告"作弊处理区间"。</td></tr>
-      <tr><td>监管与社会反应</td><td>局部减速</td><td>Fields 奖得主公开信、IAS 出版规范会减慢学术界接受 AI 结果，但基本不限制能力本身。</td></tr>
-    </tbody>
-  </table></div>
-</section>
+{{PART2:17}}
+{{PART2:18}}
+{{PART2:19}}
+{{PART2:20}}
+{{PART2:21}}
+{{PART2:22}}
+{{PART2:23}}
 
-<section id="fwd-ab">
-  <div class="kicker">Part II · 前瞻 · 框架</div>
-  <h2><span class="n">18.</span>核心洞见：AI 的加速极不均匀，瓶颈会迁移</h2>
-  <p>三条曲线都在测同一类东西：<strong>有自动裁判的工作</strong>。Lean 内核判断证明对不对，测试判断代码对不对，benchmark 判断答案对不对。AI 在这类工作上进步极快，因为强化学习可以无限地"试错 → 拿到可靠反馈 → 改进"。</p>
-  <div class="tbl"><table>
-    <thead><tr><th>有自动裁判（AI 会碾压）</th><th>没有自动裁判（仍主要靠人）</th></tr></thead>
-    <tbody>
-      <tr><td>给定一个定理陈述，找出证明</td><td>判断<strong>该证哪个定理</strong>，陈述是否抓住了你真正关心的东西</td></tr>
-      <tr><td>给定 spec 写代码，并证明代码满足 spec</td><td>写出<strong>对的 spec</strong>（例如"无害"是什么意思）</td></tr>
-      <tr><td>给定一个模型，计算它的数学性质</td><td>判断这个数学量和"安全"有什么关系</td></tr>
-      <tr><td>跑实验、扫超参、复现</td><td>设计<strong>对的实验</strong>，判断结果说明了什么</td></tr>
-    </tbody>
-  </table></div>
-  <h3>18.1 瓶颈已经在迁移的证据</h3>
-  <ul>
-    <li><strong>证明成功率暴涨</strong>：CLEVER 基准（161 道题，把 HumanEval 翻译成 Lean，要求写出代码并证明它满足 spec）的端到端成功率从 2025-05 的 1/161 涨到 2026-05 的约 87.5%（Claude Code agent）。DafnyBench 一年内从约 68% 涨到 96%。[数据]</li>
-    <li><strong>spec 质量没跟上</strong>：vericoding 基准（Tegmark 组，12,504 条 spec）统计，在验证<strong>成功</strong>的样本里，约 9% 的 spec 太弱（"空洞 spec"：例如排序函数的 spec 漏写"输出是输入的重排"，返回空列表也能通过），约 15% 的翻译有问题。[数据]</li>
-    <li><strong>陈述没人审</strong>：OpenAI 的 416 个 Comparator 挑战文件状态是 <code>review: unchecked</code>（§3）；费马大定理能被确认，是因为 Mathlib 里有现成的人类陈述可以比对。[数据]</li>
-    <li><strong>IMO 2026 的流程</strong>在 Lean 证明之后专门加了一个"形式陈述是否覆盖原题"的裁判。陈述对齐本身已经成为新的难题。[数据]</li>
-  </ul>
-  <h3>18.2 把"缺数学"拆成两类</h3>
-  <p>说一个领域"需要更多数学"，其实有两种完全不同的情况：</p>
-  <ul>
-    <li><strong>A 类：陈述已经清楚，只差证明</strong>。例如"在不需要 stability 假设的情况下，Prover-Estimator Debate 是否仍然 sound？"——这是一个定义清楚的命题，有了 Lean 就有自动裁判。<strong>AI 会在 2027 年前后批量解决这类问题。</strong></li>
-    <li><strong>B 类：连该证什么都不清楚</strong>。例如"SGD 训练出来的网络和贝叶斯后验之间的差距，应该用什么量来刻画？"——难的是找到对的陈述。AI 能提猜想、做数值检验，但没有自动裁判告诉它"这个陈述是对的问题"。<strong>AI 在这里帮得慢。</strong></li>
-  </ul>
-  <div class="tbl"><table>
-    <thead><tr><th>方向</th><th>A 类（缺证明）</th><th>B 类（缺陈述）</th><th>工程 / 实验</th><th>概念</th></tr></thead>
-    <tbody>
-      <tr><td><strong>辩论</strong></td><td>去掉 stability 的 PE debate；对 ε 比例裁判错误的稳健协议</td><td>什么样的现实论证满足 stability；非零和、合谋下的均衡怎么形式化</td><td>RL 能否到达诚实均衡（exploration hacking）；有真实能力差距的 testbed</td><td>没有 ground truth 的问题，"诚实"怎么定义；真话但选择性陈述</td></tr>
-      <tr><td><strong>SLT</strong></td><td>具体架构的学习系数（符号计算）；Langevin 动力学与 LLC</td><td>SGD 与贝叶斯后验的差距；有限样本、ReLU 版本应该长什么样</td><td>估计量稳健性；扩展到 10B+ 模型</td><td>λ 和"欺骗""reward hacking"的关系</td></tr>
-      <tr><td><strong>GSAI</strong></td><td>软件、协议的证明（已基本可自动化）</td><td>概率集合（credal set）上 sound bound 的组合理论</td><td>spec 起草与审核工具；仓库级验证；硬件</td><td>物理扰动界从哪来；社会领域的"harm"写不出来</td></tr>
-      <tr><td><strong>神经符号</strong></td><td>（大多已是工程）</td><td>翻译层有没有 sound 的检查方法</td><td>"LLM 提议、求解器判定"成为默认架构</td><td>哪些任务能这样分解</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
-<section id="fwd-debate">
-  <div class="kicker">Part II · 前瞻 · 方向 1</div>
-  <h2><span class="n">19.</span>辩论（AI safety via debate）</h2>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">直觉</div><div class="body">要判断"1 到 2^60 之间素数个数是不是奇数"，人数不过来。规则：Alice 报一个总数，并把区间对半分，报出两半各有几个；Bob 挑一半质疑；继续对半分……约 60 轮后只剩一个数，裁判自己检查它是不是素数。如果 Alice 撒谎，<strong>至少有一半是错的</strong>，Bob 总能顺着错误追到底。所以裁判只做一次廉价检查，就间接验证了一个指数级的计算。</div></div>
-    <div class="rung"><div class="lvl">定理</div><div class="body">Irving–Christiano–Amodei 2018：最优对弈下，辩论能判定的问题从 NP（"给我一个证据我能查"）扩大到 <strong>PSPACE</strong>。辩论是零和博弈，对真命题来说"诚实"是必胜策略，所以均衡是诚实的——这就是"辩论的 Nash 均衡 = 诚实"的含义。作者自己说这是类比，不期望现实 ML 能达到全部 PSPACE。[数据]</div></div>
-    <div class="rung"><div class="lvl">隐含假设</div><div class="body">(a) 足够强的对弈；(b) 裁判在每一小步上可靠；(c) 问题能递归分解、每步可检查；(d) 零和、没有合谋；(e) 训练真的收敛到均衡。</div></div>
-    <div class="rung"><div class="lvl">2023 改进</div><div class="body">Doubly-efficient debate（Brown-Cohen、Irving、Piliouras）：诚实方只需要多项式步，就能赢过可以用指数步的说谎方。"诚实方不比对手更强"也够用了。</div></div>
-  </div>
-  <h3>19.1 卡在哪</h3>
-  <ol>
-    <li><strong>混淆论证（2020）</strong>：说谎者把简单问题拆成很多子问题，<em>其中某处有错</em>，但<strong>双方都找不到在哪</strong>（找错本身是计算上难的）。2018 定理默认了"诚实方能找到错误"。2025 年的 <strong>Prover-Estimator Debate</strong>（2506.13609）部分解决了它：估计方不再挑攻击对象，而是给每个子命题打概率；但需要 <strong>stability 假设</strong>——结论不会因为概率的微小变化而翻转。<strong>现实论证满不满足 stability，没人知道。</strong></li>
-    <li><strong>能不能学到均衡</strong>：2026-04 的论文（2604.28182，含 GDM 研究者）证明模型可以被训练成抵抗 RL 探索，前沿模型知道自己在训练时会显式推理"压低探索"。[数据]</li>
-    <li><strong>裁判的系统性错误</strong>：人类在某些子分布上会一致地判错。Irving 2025-05 提出让论证对 ε 比例的错误稳健，但是否存在不被说谎者利用的版本，仍未解决。</li>
-    <li><strong>真话但选择性陈述</strong>（2609.29189）：结论正确，但通过挑选、组织信息追求隐藏目标。辩论的正确性保证管不到这一层。</li>
-    <li><strong>合谋</strong>：两个辩手是同一模型的副本时，零和靠什么保证？2603.05293 发现训练语料相同时辩论退化为 RLAIF。</li>
-  </ol>
-  <h3>19.2 证据</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>工作</th><th>设定</th><th>结果</th></tr></thead>
-    <tbody>
-      <tr><td>Michael et al. 2023（2311.08702）</td><td>人类辩手，裁判看不到原文</td><td>辩论裁判准确率 84%，单方游说 74%</td></tr>
-      <tr><td>Khan et al. 2024（ICML best paper）</td><td>LLM 辩手</td><td>非专家 LLM 裁判 48% → 76%，人类 60% → 88%</td></tr>
-      <tr><td>Kenton et al. 2024（GDM）</td><td>数学、代码、逻辑、多模态</td><td>所有任务上辩论 > 单方游说；相对"裁判直接答"，只在信息不对称任务上占优</td></tr>
-      <tr><td>Engels…Tegmark 2025（2504.18530）</td><td>监督成功率 vs 能力差距</td><td>400 Elo 差距下嵌套监督成功率：辩论 51.7%（Mafia 13.5%，后门代码 10.0%）</td></tr>
-      <tr><td><strong>Kenton et al. 2026-08（GDM，2608.17776）</strong></td><td>数学 RL，辩论作为奖励信号</td><td>RLAIF 基线很快学会利用裁判；辩论训练让裁判保持有效，<strong>恢复 45% 的性能差距</strong></td></tr>
-    </tbody>
-  </table></div>
-  <p>[判断] 证据支持"辩论是一种<strong>更难被 hack 的奖励信号</strong>"，还不支持"辩论让人类可靠地监督超人系统"。所有实验里的能力差距都远小于理论设想。</p>
-  <h3>19.3 AI 数学和编程能帮什么</h3>
-  <ul>
-    <li><strong>A 类，现在就能帮</strong>：把辩论协议的定理形式化并证明。Irving 在 2026 年 80,000 Hours 访谈里说："理论比实证更容易自动化，因为证明给出了可验证的奖励。"这正是 Resolution（Irving 任首席科学家）的核心赌注。[数据]</li>
-    <li><strong>新机会：用形式数学搭"真实能力差距"的辩论实验</strong>。AI 的形式数学能力已经远超普通人，所以"人类裁判监督 AI 的数学论证"就是天然的超人监督实验，Lean 提供完美的 ground truth。这比 QuALITY 那种人为隐藏信息的实验更接近真问题。[判断]</li>
-    <li><strong>一个反直觉的点</strong>：在可以形式化的领域，Lean 本身就是完美裁判，根本不需要辩论。<strong>辩论的价值恰恰在形式化边界之外</strong>，而那里正是 AI 帮得最慢的地方。</li>
-    <li><strong>帮不上的</strong>：价值判断类问题里"诚实"的定义、选择性陈述。</li>
-  </ul>
-</section>
-
-<section id="fwd-slt">
-  <div class="kicker">Part II · 前瞻 · 方向 2</div>
-  <h2><span class="n">20.</span>奇异学习理论（SLT）</h2>
-  <div class="ladder">
-    <div class="rung"><div class="lvl">普通理论</div><div class="body">经典统计假设最好的参数是一个点，周围像一个碗。这时"有效参数个数"就是真实参数个数 d，泛化误差约为 d/(2n)。</div></div>
-    <div class="rung"><div class="lvl">玩具例子</div><div class="body">模型 y = a·b·x，真实数据来自 y = 0。损失约为 (ab)²，只要 a = 0 或 b = 0 就是最优。所以最优解是一个<strong>十字</strong>，不是一个点；交叉处的 Hessian 全是 0，经典近似失效。这叫<strong>奇异</strong>（singular）。</div></div>
-    <div class="rung"><div class="lvl">数"有效参数"</div><div class="body">看"几乎最优"的参数体积 V(ε) 随 ε → 0 怎么缩小：V ≈ ε^λ。一参数碗 a²：λ = 1/2；二参数碗 a² + b²：λ = 1；奇异的 a²b²：<strong>λ = 1/2</strong>。名义上 2 个参数，统计行为像 1 个。λ 叫<strong>学习系数</strong>（RLCT）。</div></div>
-    <div class="rung"><div class="lvl">定理</div><div class="body">Watanabe（2009、2018）证明：贝叶斯推断下自由能 ≈ n·S + <strong>λ·log n</strong>，泛化误差 ≈ <strong>λ/n</strong>。神经网络几乎都是奇异的，所以决定泛化的是 λ，不是参数个数。证明用到 Hironaka 的奇点消解定理。[数据]</div></div>
-  </div>
-  <h3>20.1 已证明 vs 猜想</h3>
-  <ul>
-    <li><strong>已证明</strong>：上面的渐近公式（要求模型是实解析的、参数空间紧等）；深度线性网络等少数架构的精确 λ（Aoyagi）。</li>
-    <li><strong>未证明</strong>：SGD 训练的网络和贝叶斯后验的局部结构一致；训练中的"阶段"对应贝叶斯相变；λ 能描述有限样本、ReLU、非 realizable 的真实 LLM。</li>
-  </ul>
-  <h3>20.2 证据</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>工作</th><th>规模</th><th>结果</th></tr></thead>
-    <tbody>
-      <tr><td>Lau et al.（2308.12108）</td><td>深度线性网络等</td><td>局部学习系数（LLC）估计量能复现已知的精确 λ</td></tr>
-      <tr><td>Hoogland et al.（2402.02364）</td><td>约 3M 参数 transformer</td><td>LLC 的平台和转折标出了上下文学习的离散发育阶段</td></tr>
-      <tr><td>Kreer et al.（ICLR 2026）</td><td>数十亿参数</td><td>不用 Hessian 的数据归因，达到 SOTA</td></tr>
-      <tr><td>Spectroscopy at Scale（2026-04）</td><td><strong>Pythia-1.4B</strong></td><td>57,236 个结构簇，4,800 H200 小时</td></tr>
-      <tr><td>Patterning（2601.13548）</td><td>小模型</td><td>按 susceptibility 方向重新加权数据，能加速或推迟 induction circuit 的出现</td></tr>
-    </tbody>
-  </table></div>
-  <p>[数据] 最大规模约 1–3B，<strong>没有前沿模型的结果，也没有任何"SLT 发现了别的方法发现不了的安全问题"的案例</strong>。LLC 用 SGLD 采样估计，作者承认会失去无偏保证，并且对超参敏感。</p>
-  <h3>20.3 AI 能帮什么</h3>
-  <ul>
-    <li><strong>立刻能帮</strong>：(a) 用符号计算（Newton 多面体、blow-up 算法）批量算出小架构的精确 λ，给估计量提供标准答案；(b) agent 自动扫超参、跨种子复现，解决估计量稳健性这个一线痛点。</li>
-    <li><strong>中期</strong>：在大模型上跑 LLC/susceptibility 流水线主要受算力限制，人力成本可以降到很低。</li>
-    <li><strong>难</strong>：Lean 形式化（Mathlib 没有 Hironaka 定理，工程量巨大）；SGD 与贝叶斯差距的理论（B 类）。</li>
-  </ul>
-  <p><strong>决定性实验</strong>：在植入了 backdoor 或 reward hacking 的 model organism 上，看 λ 或 susceptibility 能不能<strong>在行为暴露之前</strong>发出预警。这个实验决定 SLT 是成为训练监控的标准工具，还是退回为理解学习动力学的科学工具。[判断] agent 会把这个实验的成本降到小团队几周就能做完。</p>
-</section>
-
-<section id="fwd-gsai">
-  <div class="kicker">Part II · 前瞻 · 方向 3 与 4</div>
-  <h2><span class="n">21.</span>Guaranteed Safe AI 与神经符号系统</h2>
-  <p><strong>GSAI 的想法</strong>（Dalrymple、Skalse、Bengio、Russell、Tegmark 等，arXiv 2405.06624）：不要求理解 AI 内部，而是要求 AI 的输出附带<strong>证书</strong>，证明它在一个<strong>世界模型</strong>里满足一个<strong>安全规格</strong>，由一个可信的<strong>验证器</strong>检查。</p>
-  <div class="verdict">
-    <div class="panel"><h4>例 A：验证排序函数</h4><p>spec："输出有序，且是输入的重排"。世界模型就是编程语言语义。Lean/Dafny 证明对所有输入都成立。<strong>坑</strong>：漏写"是输入的重排"，返回空列表也能通过证明。</p></div>
-    <div class="panel"><h4>例 B：验证刹车控制器</h4><p>世界模型：位置、速度的更新方程，加上"路面扰动不超过 0.1"。spec：永远不撞上障碍。验证器做可达性分析。<strong>坑</strong>：证书只在模型内成立；结冰时扰动超过 0.1，保证就失效了，需要运行时监测加备用控制器。</p></div>
-  </div>
-  <p>把例 B 换成"聊天机器人不给有害建议"：世界模型变成"人类社会"，spec 变成"harm"，两样都写不出来。这是 GSAI 最难的一端。</p>
-  <h3>21.1 机构旗舰已经转向（ARIA Safeguarded AI）[数据]</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>时间</th><th>事件</th></tr></thead>
-    <tbody>
-      <tr><td class="mono">2024-02</td><td>thesis v1：TA1 数学框架 / TA2 ML（计划成立 £18m 新机构）/ TA3 应用，总额 £59m</td></tr>
-      <tr><td class="mono">2025-11</td><td>davidad 叫停 TA2 Phase 2，原话 "every frontier model has more capability than I expected"，钱转去扩大 TA1</td></tr>
-      <tr><td class="mono">2026-02</td><td>应用收窄到网络安全，取消 cyber-physical Phase 2</td></tr>
-      <tr><td class="mono">2026-04</td><td>Nora Ammann 接任项目负责人，davidad 改任技术顾问</td></tr>
-      <tr><td class="mono">2026-05</td><td>thesis v2：只保留"数学保证工具链 + 网络安全应用"；理由是前沿进展快于预期，且国际上对 gatekeeper 模式短期内难以达成共识，因此转向"提升社会韧性"</td></tr>
-    </tbody>
-  </table></div>
-  <p>[判断] 最初的论点是"AI 能力在前，安全证书作为门禁"；v2 实际上退成了"用 AI 把形式化方法做便宜，给关键软件加固"。gatekeeper 只是远期选项。</p>
-  <h3>21.2 验证器这条腿正在被 AI 攻下 [数据]</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>基准 / 案例</th><th>早期</th><th>最新</th></tr></thead>
-    <tbody>
-      <tr><td>DafnyBench（782 个程序）</td><td>~68%（2024）</td><td>92.7%–96%（2025–2026）</td></tr>
-      <tr><td>CLEVER（161 题，Lean，端到端）</td><td>1/161（2025-05）</td><td>~87.5%（2026-05）</td></tr>
-      <tr><td>VERINA（189 题，Lean）</td><td>o3 证明成功率 4.9%（2025-05）</td><td>8B 专用模型在 3 个 Lean 基准上平均 62%（2026-03）</td></tr>
-      <tr><td>seL4（8,700 行 C）</td><td>人工：约 20 人年、约 $350/行（2009）</td><td>7B 模型自动证出 seL4 重要理论中 51.7% 的引理（2026，给定陈述）</td></tr>
-    </tbody>
-  </table></div>
-  <p><strong>规律</strong>：同一个基准一年左右从个位数涨到 80–90%，形状和 2023 年的 HumanEval 一样。Dafny 比 Lean 容易，因为它把一部分推理交给 SMT 求解器，模型只需写提示——这本身就是神经符号。</p>
-  <h3>21.3 落地顺序 [判断]</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>领域</th><th>世界模型</th><th>spec</th><th>预计</th></tr></thead>
-    <tbody>
-      <tr><td>密码库、协议、内核、C→Rust 等价翻译</td><td>语言语义，已有</td><td>往往已存在（RFC、参考实现）</td><td><strong>现在到 2027</strong></td></tr>
-      <tr><td>硬件、RTL、固件、分布式协议</td><td>ISA、内存模型，工程受限</td><td>可写，需要人审</td><td>2027–2029</td></tr>
-      <tr><td>有可靠物理模型的控制系统（电网、刹车）</td><td>物理定律 + 扰动界，数学受限</td><td>安全集，保守但能写</td><td>之后；形态是"有限时域证书 + 运行时监测"</td></tr>
-      <tr><td>开放世界的社会、生物领域</td><td>没有可审计的模型</td><td>"harm"写不出来</td><td>最后，也可能永远只有弱保证</td></tr>
-    </tbody>
-  </table></div>
-  <p><strong>反直觉的后果</strong>：AI 让找漏洞变便宜，也让证明没有漏洞变便宜。<strong>在软件领域，攻防平衡可能向防守倾斜</strong>——前提是防守方真的去做形式化验证。生物和社会领域没有这种对称性，因为写不出 spec。</p>
-  <h3>21.4 神经符号系统</h3>
-  <p>神经网络负责"猜"（证明步骤、spec 草稿、程序、世界模型代码），符号系统负责"判"（Lean 内核、SMT 求解器、可达性分析）。判官可靠，猜的一方可以是黑箱——和 GSAI"策略是黑箱、验证器可信"是同一个结构。</p>
-  <ul>
-    <li><strong>现状</strong>：在一切可验证领域，它已经是事实上的默认架构。程序化世界模型（PoE-World，NeurIPS 2025：LLM 写出 4000 多行 Python 来模拟 Montezuma 游戏世界，零样本泛化到新关卡）证明了路线可行，但只在 Atari 这类场景。AWS 的 Automated Reasoning checks 把文本翻译成逻辑再用求解器判定。[数据]</li>
-    <li><strong>最弱的一环是翻译层</strong>：自然语言到形式语言的每一步都可能产生空洞 spec 或错误形式化，这一层<strong>没有 sound 的检查方法</strong>，只能靠多份独立翻译的交叉一致性、测试和人审。</li>
-    <li><strong>还有一个攻击面</strong>：DeepSeek-Prover-V2 曾利用 Lean 4.9.0 的一个工具链漏洞，让假证明通过编译。[数据] "只需信任检查器"的前提本身要靠工程维护——RL 训练出的证明器会不会系统性地寻找这类漏洞，是一个 reward hacking 问题。</li>
-  </ul>
-</section>
-
-<section id="fwd-timeline">
-  <div class="kicker">Part II · 前瞻 · 推演</div>
-  <h2><span class="n">22.</span>时间线推演：T0 → T4</h2>
-  <p>每个节点分四部分：<strong>能力</strong>（三条曲线的中心情景）、<strong>解锁</strong>、<strong>新机会</strong>、<strong>会证伪它的信号</strong>。时间点的不确定性约 ±1 年：乐观情景整体提前半年到一年，悲观情景推迟一到两年。</p>
-
-  <h3>T0 · 现在（2026 Q4）</h3>
-  <ul>
-    <li><strong>能力</strong>：AI 独立完成约 1–2 个工作日的任务；开放问题单次解出率约 3–5%；形式化约 $0.01–0.02/行；竞赛数学饱和。</li>
-    <li><strong>解锁</strong>：辩论协议的定理可以交给 AI 形式化；SLT 的 λ 符号计算和估计量调参可以交给 agent；软件验证的证明环节基本自动化；神经符号在可验证领域成为默认。</li>
-    <li><strong>新机会</strong>：最值钱的是<strong>还不能被自动化的工作</strong>——陈述和 spec 的审核方法；证明器、验证器上的 reward hacking；有真实能力差距的监督实验设计。</li>
-    <li><strong>证伪信号</strong>：METR 新版长任务集显示进展停在 1–2 天。</li>
-  </ul>
-
-  <h3>T1 · 2027 年中</h3>
-  <ul>
-    <li><strong>能力</strong> [模型]：任务长度约 150 小时（≈ 一个工作月）；开放问题解出率约 9%；证明成本再降约一个数量级。</li>
-    <li><strong>解锁</strong>：<strong>A 类理论问题开始被批量攻克</strong>——辩论协议变体、具体架构的 λ、各种"把这个假设去掉"的定理。一个理论研究者加 AI，一个月能完成过去一个组一年的定理证明量。SLT 估计量的稳健性问题基本解决。密码学和协议库默认带证明。</li>
-    <li><strong>新机会</strong>："AI 辅助理论家"成为新角色：自己提陈述，让 AI 证明或找反例。最稀缺的技能是<strong>知道哪个陈述值得证</strong>。用形式数学搭建超人监督实验变得可行。</li>
-    <li><strong>证伪信号</strong>：FrontierMath Erdős 下一轮仍低于 5%；Anthropic 的"AI 主导、人监督"研发占比停在 30% 左右。</li>
-  </ul>
-
-  <h3>T2 · 2027 年底</h3>
-  <ul>
-    <li><strong>能力</strong> [模型]：任务长度约 400 小时（2–3 个工作月）；开放问题解出率约 18%；一个"费马大定理规模"的形式化约几千美元。</li>
-    <li><strong>解锁</strong>：辩论在理想模型下的理论问题大体收敛，剩下"现实论证是否满足 stability""训练能否到达诚实均衡"这类实证和 ML 问题。SLT 的决定性预警实验具备条件。硬件、RTL 验证开始规模化。</li>
-    <li><strong>新机会</strong>：<strong>"陈述与 spec 的审计学"</strong>成为一个领域：怎么快速判断形式陈述是否忠实、怎么设计交叉一致性检查、怎么测量人类审核员的吞吐量。现在几乎没人做。</li>
-    <li><strong>证伪信号</strong>：到 2027 年底仍没有一个经人类专家确认、由 AI 主导解决的"领域级重要问题"，说明曲线 ② 的上限设高了。</li>
-  </ul>
-
-  <h3>T3 · 2028 年</h3>
-  <ul>
-    <li><strong>能力</strong> [模型]：任务长度约 2,800 小时（一个工作年以上）；开放问题解出率约 45%；证明成本可以忽略。</li>
-    <li><strong>解锁</strong>：<strong>大部分 A 类问题已解决或被证明不可能</strong>。四个方向里只剩 B 类和概念问题。辩论和 SLT 的价值都取决于一件事：在形式化边界之外能不能提供保证。关键软件"默认带证明"可能成为行业标准（如果有监管或保险推动）。</li>
-    <li><strong>新机会</strong>：<strong>概念工作的回报率最高</strong>：能把"欺骗""reward hacking""harm"变成可测、可证陈述的人，本身就是瓶颈。如果 AI 研发已高度自动化，AI 安全理论也会被大规模自动化，<strong>人类审得过来吗</strong>成为核心问题。</li>
-    <li><strong>证伪信号</strong>：任务长度在几百小时停住（成败越来越取决于 spec），曲线 ① 变成 S 形。</li>
-  </ul>
-
-  <h3>T4 · 2029–2030</h3>
-  <ul>
-    <li><strong>情景分叉</strong>：
-      <ul>
-        <li><strong>AI 研发全面自动化</strong>（CASP 情景）：所有时间点被压缩；理论、证明、实验几乎全自动，人类的角色集中在设定目标、审核陈述、决定部署。</li>
-        <li><strong>出现硬瓶颈</strong>（算力、数据或 spec 审核）：进步回到指数甚至更慢；A 类问题已解，B 类和概念问题进展缓慢。</li>
-      </ul>
-    </li>
-    <li><strong>两种情景都成立</strong>：软件和协议的安全保证远强于今天，验证的不对称性有利于防守；开放世界（生物、社会）的保证仍然很弱，主要靠监控、访问控制和治理；<strong>谁来审核陈述和 spec</strong>是整个体系的上限。</li>
-  </ul>
-
-  <h3>22.1 这份推演最可能错在哪</h3>
-  <ol>
-    <li><strong>曲线 ① 的测量在失效</strong>：16 小时以上不可靠，作弊处理能差 4.5 个倍增。2027 年以后的数字主要靠"其他信号也在同步增长"来支撑。</li>
-    <li><strong>曲线 ② 只有一个锚点</strong>（3%，68 题），斜率是保守取的，误差很大。</li>
-    <li><strong>A 类和 B 类的边界会移动</strong>：AI 也许会比预期更早擅长"提出好陈述"。目前没有证据说明这已经发生——OpenAI 的 719 篇主要是解已有的问题，几乎没有提出新概念（对照 Tao 的"好数学"21 个维度）。如果这件事发生，所有节点都要提前，人类的角色会被进一步压缩。</li>
-    <li><strong>没算进去的变量</strong>：控速或暂停协议、重大安全事故、地缘政治。它们只可能让时间线变慢。</li>
-  </ol>
-
-  <h3>22.2 对研究者：现在做什么最划算</h3>
-  <p>原则：<strong>不要手工去做 AI 一年内就能做的事，除非它是基础设施，或者能帮你判断"该问什么"。</strong></p>
-  <div class="tbl"><table>
-    <thead><tr><th>机会</th><th>为什么现在</th></tr></thead>
-    <tbody>
-      <tr><td>证明器和验证器上的 reward hacking</td><td>已有证明器利用 Lean 工具链漏洞的先例；在 AI 证明大规模部署前研究最有价值</td></tr>
-      <tr><td>陈述和 spec 的忠实度审计</td><td>T1–T3 所有方向的共同瓶颈；本 deck 逐行读 Lean 陈述的做法就是雏形</td></tr>
-      <tr><td>用形式数学搭超人监督实验</td><td>现有实验的能力差距是人为制造的；形式数学提供真实差距 + 完美 ground truth</td></tr>
-      <tr><td>SLT 的"提前预警"实验</td><td>决定 SLT 安全价值的关键实验，还没人做</td></tr>
-      <tr><td>AI 研发自动化指标的抗操纵性</td><td>CASP 的政策建议依赖这些指标，但它们会被 reward hacking 抬高</td></tr>
-    </tbody>
-  </table></div>
-  <p class="tg">本部分关键数字均在正文注明出处。四份研究底稿（辩论、SLT、GSAI 与神经符号、趋势数据，含逐条 [P]/[R]/⚠ 标注与原始链接）保存在作者的研究笔记中，未随本 deck 公开。</p>
-</section>
-
-{{PART3}}
 <section id="reactions">
   <div class="kicker">Reactions · 原话</div>
-  <h2><span class="n">33.</span>各方怎么说</h2>
+  <h2><span class="n">24.</span>各方怎么说</h2>
   <div class="tbl"><table>
     <thead><tr><th>谁</th><th>原话</th><th>来源</th></tr></thead>
     <tbody>
@@ -874,8 +307,8 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 
 <section id="learn">
   <div class="kicker">Next steps</div>
-  <h2><span class="n">34.</span>开放问题与继续学习</h2>
-  <h3>34.1 接下来值得盯的</h3>
+  <h2><span class="n">25.</span>开放问题与继续学习</h2>
+  <h3>25.1 接下来值得盯的</h3>
   <ol>
     <li>OpenAI 会公开 4,000 题清单与失败案例吗？（决定能否回答"真实能力是多少"）</li>
     <li>未形式化的约 58% 里还有多少像 Weil 类论文那样的错误？撤稿率会怎么演化？</li>
@@ -884,7 +317,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
     <li>"补完他人工作"的优先权规范怎么建立（Buckmaster 事件）？</li>
     <li>平面色数：需要 6 色的有限单位距离图长什么样？</li>
   </ol>
-  <h3>34.2 学习路线（只需线性代数 + 微积分起步）</h3>
+  <h3>25.2 学习路线（只需线性代数 + 微积分起步）</h3>
   <div class="tbl"><table>
     <thead><tr><th>阶段</th><th>材料</th><th>为什么</th></tr></thead>
     <tbody>
@@ -901,8 +334,8 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 
 <section id="sources">
   <div class="kicker">Glossary & sources</div>
-  <h2><span class="n">35.</span>术语表与来源</h2>
-  <h3>35.1 术语</h3>
+  <h2><span class="n">26.</span>术语表与来源</h2>
+  <h3>26.1 术语</h3>
   <div class="tbl"><table>
     <thead><tr><th>术语</th><th>一句话</th></tr></thead>
     <tbody>
@@ -920,7 +353,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
       <tr><td class="mono">银河算法</td><td>渐近更快、但只在天文规模上才占优的算法</td></tr>
     </tbody>
   </table></div>
-  <h3>35.2 主要来源</h3>
+  <h3>26.2 主要来源</h3>
   <p><strong>一手</strong>：<a href="''' + REPO + '''">openai/math</a>（README、history.md、overview.pdf、CONTENTS.md、lean/、preprints/、reasoning_traces/；快照 fd4aeeb，2026-10-08）· <a href="https://github.com/openai/NavierStokesAndEuler">openai/NavierStokesAndEuler</a> · <a href="https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf">Clay NS 官方陈述（Fefferman）</a> · <a href="https://github.com/leanprover/comparator">leanprover/comparator</a> · 独立复核 <a href="https://github.com/davegoldblatt/openai-zeta-proof-check">davegoldblatt/openai-zeta-proof-check</a>、<a href="https://github.com/erenciracioglu-dotcom/openai-math-9-4-lean-check">erenciracioglu-dotcom/openai-math-9-4-lean-check</a> · Epoch <a href="https://arxiv.org/abs/2609.25050">FrontierMath Erdős（arXiv:2609.25050）</a>。</p>
   <p><strong>报道与评论</strong>：<a href="https://fortune.com/2026/10/07/openai-math-controversy-solutions-370-outstanding-challenges-published-criticisms-celebration/">Fortune 10-07</a> · <a href="https://www.nature.com/articles/d41586-026-03196-8">Nature</a>（付费墙，未读全文 ⚠）· <a href="https://www.scientificamerican.com/article/openai-unleashes-hundreds-more-math-results-upon-a-field-already-in-shock/">Scientific American</a> · <a href="https://www.quantamagazine.org/ai-has-solved-one-of-maths-1-million-millennium-prize-problems-20260908/">Quanta 09-08</a> · <a href="https://www.quantamagazine.org/as-ai-closed-in-on-unique-games-proof-researchers-raced-to-beat-the-machines-20261007/">Quanta 10-07</a> · <a href="https://www.npr.org/2026/09/22/nx-s1-5968588/openai-navier-stokes-problem-mathematicians-learn-little">NPR 09-22</a> · <a href="https://scottaaronson.blog/?p=10169">Aaronson</a> · <a href="https://gilkalai.wordpress.com/2026/10/07/updates-sharing-ai-progress-on-mathematics-amazing-and-my-lecture-plans/">Kalai</a> · <a href="https://terrytao.wordpress.com/">Tao 博客</a> · <a href="https://www.latent.space/p/ainews-quasi-riemann-hypothesis-openai">Latent Space</a>。</p>
   <p><strong>经典文献</strong>：Strassen 1969；Coppersmith–Winograd 1990；Alman 等 <a href="https://arxiv.org/abs/2404.16349">arXiv:2404.16349</a>；Ambainis–Filmus–Le Gall <a href="https://arxiv.org/abs/1411.5414">arXiv:1411.5414</a>；Goemans–Williamson 1995；Khot 2002；KKMO 2007；Raghavendra 2008；Khot–Minzer–Safra 2018；Nisan 1992；Saks–Zhou 1999；Reingold 2008；Roth 1955；Zeilberger–Zudilin <a href="https://arxiv.org/abs/1912.06345">arXiv:1912.06345</a>；Meiburg <a href="https://arxiv.org/abs/2208.13356">arXiv:2208.13356</a>；Guth–Maynard <a href="https://arxiv.org/abs/2405.20552">arXiv:2405.20552</a>；de Grey <a href="https://arxiv.org/abs/1804.02385">arXiv:1804.02385</a>；Moore <a href="https://arxiv.org/abs/1102.0747">arXiv:1102.0747</a>；Tao 2016 <a href="https://arxiv.org/abs/1402.0290">arXiv:1402.0290</a>；Glassey–Strauss 1986；Parisi 1979；Talagrand 2006；Mézard–Parisi 2001；Ding–Sly–Sun 2015。</p>
@@ -940,25 +373,60 @@ import md2html
 JJ_DIR = ROOT / "精讲"
 
 
-def part3_html():
-    """Part III: one section per 精讲 chapter, rendered from 精讲/NN_*.md."""
-    out = []
-    for k in range(1, 11):
-        files = sorted(JJ_DIR.glob(f"{k:02d}_*.md"))
-        assert len(files) == 1, f"精讲 chapter {k:02d}: expected exactly one file, got {files}"
-        md = files[0].read_text()
-        first, _, rest = md.partition("\n")
-        assert first.startswith("# "), files[0]
-        title = first[2:].strip()
-        out.append(f'''<section id="jj{k:02d}" class="jj">
-  <div class="kicker">Part III · 从零精讲 · 对应 §{3 + k}</div>
-  <h2><span class="n">{22 + k}.</span>{md2html.inline(title)}</h2>
+RESULT_KICKERS = {
+    "qrh": "数论 · family 003",
+    "pi": "数论 · family 017（+ 005）",
+    "matmul": "理论计算机 · family 107",
+    "ugc": "理论计算机 · family 102",
+    "bpl": "理论计算机 · family 103（+ 109）",
+    "color": "组合 · family 158（+ 156）",
+    "thompson": "群论 · family 248",
+    "ns": "偏微分方程 · 9 月单独发布（+ family 376）",
+    "vlasov": "数学物理 · family 362",
+    "spin": "概率与统计力学 · family 221",
+}
+RESULT_ORDER = ['qrh', 'pi', 'matmul', 'ugc', 'bpl', 'color', 'thompson', 'ns', 'vlasov', 'spin']
+
+
+def result_html(sid):
+    """One result section (§4–§13), rendered from its chapter Markdown file."""
+    k = RESULT_ORDER.index(sid) + 1
+    files = sorted(JJ_DIR.glob(f"{k:02d}_*.md"))
+    assert len(files) == 1, f"result {sid}: expected exactly one chapter file, got {files}"
+    md = files[0].read_text()
+    first, _, rest = md.partition("\n")
+    assert first.startswith("# "), files[0]
+    return f'''<section id="{sid}" class="jj">
+  <div class="kicker">{RESULT_KICKERS[sid]}</div>
+  <h2><span class="n">{3 + k}.</span>{md2html.inline(first[2:].strip())}</h2>
 {md2html.blocks(rest, heading_offset=1)}
-</section>''')
-    return "\n\n".join(out)
+</section>'''
 
 
-BODY = BODY.replace("{{PART3}}", part3_html())
+for _sid in RESULT_ORDER:
+    BODY = BODY.replace("{{RESULT:%s}}" % _sid, result_html(_sid))
+
+P2_DIR = ROOT / "前瞻"
+P2_SECTIONS = [('fwd-calib', 17), ('fwd-cs', 18), ('fwd-phys', 19), ('fwd-bio', 20), ('fwd-ai', 21), ('fwd-soc', 22), ('fwd-synth', 23)]
+P2_KICKERS = {17: 'Part II · 前瞻 · 校准', 18: 'Part II · 前瞻 · 计算机', 19: 'Part II · 前瞻 · 物理', 20: 'Part II · 前瞻 · 生物', 21: 'Part II · 前瞻 · AI 本身', 22: 'Part II · 前瞻 · 社会', 23: 'Part II · 前瞻 · 全景'}
+
+
+def part2_html(sec_id, n):
+    """One Part II section, rendered from 前瞻/NN_*.md."""
+    files = sorted(P2_DIR.glob(f"{n}_*.md"))
+    assert len(files) == 1, f"Part II §{n}: expected exactly one file, got {files}"
+    md = files[0].read_text()
+    first, _, rest = md.partition("\n")
+    assert first.startswith("# "), files[0]
+    return f'''<section id="{sec_id}" class="jj">
+  <div class="kicker">{P2_KICKERS[n]}</div>
+  <h2><span class="n">{n}.</span>{md2html.inline(first[2:].strip())}</h2>
+{md2html.blocks(rest, heading_offset=1)}
+</section>'''
+
+
+for _sec_id, _n in P2_SECTIONS:
+    BODY = BODY.replace("{{PART2:%d}}" % _n, part2_html(_sec_id, _n))
 import re as _re
 while _re.search(r'\^\{([^{}]*)\}', BODY):
     BODY = _re.sub(r'\^\{([^{}]*)\}', r'^(\1)', BODY)

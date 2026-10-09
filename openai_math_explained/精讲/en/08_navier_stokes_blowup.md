@@ -1,12 +1,12 @@
-# Explainer 08: Finite-time blowup for the Navier–Stokes equations (with external force)
+# Navier–Stokes: can a fluid "blow up" in finite time? (Finite-time blowup with external force)
 
-> This is the "explained from zero" version of §11 of the `notes/openai_math_explained/` deck. All you need: how to take derivatives, what a partial derivative ∂/∂x means, and vectors and dot products. You don't need to have studied partial differential equations (PDEs); PDEs are explained from the start.
+> PDE · a result OpenAI released separately on 2026-09-08 (not one of the 372 families in the October openai/math release), plus the related family 376 from the October release (universal computation in forced NS, §11.7.5). All you need: how to take derivatives, what a partial derivative ∂/∂x means, and vectors and dot products. You don't need to have studied partial differential equations (PDEs); PDEs are explained from the start.
 > Every number here is either computed by script or sourced. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter. Tags: **[P]** = primary material I read myself (paper PDF, Lean file, official Clay text); **[R]** = secondhand reporting; **⚠** = unverified or disputed. As of 2026-10-08.
-> Estimated reading time: 60–90 minutes. You can split it into three sittings: Sections 1–3 (PDEs, the fluid equations, what blowup means), Sections 4–6 (why it's hard, history, the Clay problem statement), Sections 7–9 (OpenAI's result, its verification, what it means).
+> Estimated reading time: 60–90 minutes. You can split it into three sittings: §11.1–11.3 (PDEs, the fluid equations, what blowup means), §11.4–11.6 (why it's hard, history, the Clay problem statement), §11.7–11.9 (OpenAI's result and the related family 376, its verification, what it means).
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 11.0 The bottom line: the one thing this chapter explains
 
 The Navier–Stokes (NS) equations describe how water and air flow, and engineers use them every day. But the most basic question about them has no answer: **starting from a smooth, gentle initial state, can the flow velocity become infinite in finite time?**
 
@@ -26,9 +26,9 @@ After this chapter, you should be able to explain in your own words:
 
 ---
 
-## 1. What is a PDE: starting with the heat equation
+## 11.1 What is a PDE: starting with the heat equation
 
-### 1.1 ODEs and PDEs
+### 11.1.1 ODEs and PDEs
 
 The differential equations you know, like y'(t) = −y(t), have as their unknown **a single** number y(t) that changes over time. These are called ordinary differential equations (ODEs).
 
@@ -36,7 +36,7 @@ In a partial differential equation (PDE), the unknown is **a whole field**: a va
 
 Cut space into small cells, one unknown per cell, with neighboring cells influencing each other: a PDE is "**infinitely many coupled ODEs**", like a distributed system in which each node only talks to its neighbors.
 
-### 1.2 The simplest PDE: the heat equation
+### 11.1.2 The simplest PDE: the heat equation
 
 Take a thin iron rod, and let u(x, t) be the temperature at position x at time t. The heat equation is:
 
@@ -61,7 +61,7 @@ The hot spot has spread out, but the total heat is unchanged.
 
 **[Check 1]** Take one more step (r = 0.25) from `[0, 0, 0.25, 0.5, 0.25, 0, 0]`. What is the result? What is the sum?
 
-### 1.3 Numerical simulation: the heat equation smooths everything out
+### 11.1.3 Numerical simulation: the heat equation smooths everything out
 
 Computed by script: k = 1, initial temperature 1 where |x| < 0.5 and 0 elsewhere (a "box" whose edges are infinitely steep steps), advanced with the scheme above on 1001 grid points.
 
@@ -78,15 +78,15 @@ Remember: **the heat equation only makes things smoother.** An infinitely steep 
 
 ---
 
-## 2. Fluids: the velocity field, and the NS equations term by term
+## 11.2 Fluids: the velocity field, and the NS equations term by term
 
-### 2.1 The velocity field
+### 11.2.1 The velocity field
 
 The unknowns for a fluid are the **velocity field** u(x, t) (a 3D vector at every point and every moment) and the **pressure** p(x, t) (a number).
 
 A 2D example: u(x, y) = (−y, x). At the point (1, 0) the velocity is (0, 1), pointing up; at (0, 1) it is (−1, 0), pointing left. Drawn out, it is a rigid rotation **counterclockwise around the origin**, faster the farther from the center (speed = radius r).
 
-### 2.2 Incompressibility: zero divergence
+### 11.2.2 Incompressibility: zero divergence
 
 Water is nearly incompressible. Mathematically this is written as **zero divergence**:
 
@@ -98,7 +98,7 @@ Divergence measures "how much flows out of a small region, net". Zero divergence
 
 **[Check 2]** Compute the divergence of u = (−y, x) and of w = (x, y). Which one is incompressible? What does w look like when drawn?
 
-### 2.3 The NS equations: Newton's second law, written for a small parcel of fluid
+### 11.2.3 The NS equations: Newton's second law, written for a small parcel of fluid
 
 The official Clay problem statement (written by Fefferman) says: "Equation (1) is just Newton's law f = ma for a fluid element" [P]. The equations are:
 
@@ -121,11 +121,11 @@ Term by term:
 
 **Second term on the right: pressure −∇p.** It pushes from high pressure toward low pressure. In incompressible flow, pressure is "the force that adjusts itself automatically so that ∇·u = 0 holds at every moment", i.e. the Lagrange multiplier for the incompressibility constraint.
 
-**Third term on the right: external force f.** For example gravity, a stirrer, or an electromagnetic force. **This term is the key to understanding OpenAI's result**; Section 6 is devoted to it.
+**Third term on the right: external force f.** For example gravity, a stirrer, or an electromagnetic force. **This term is the key to understanding OpenAI's result**; §11.6 is devoted to it.
 
 **[Check 3]** For the rotating flow u = (−y, x), take ν > 0 and f = 0. (a) Compute Δu. (b) This flow is steady (∂u/∂t = 0), so the equation requires (u·∇)u = −∇p. Find the pressure p. Is the pressure higher at the center or at the edge?
 
-### 2.4 Reynolds number: nonlinearity versus viscosity
+### 11.2.4 Reynolds number: nonlinearity versus viscosity
 
 Consider a flow with length scale L and speed U:
 - the time for the nonlinear term to carry velocity across one length scale is about L/U;
@@ -135,13 +135,13 @@ Their ratio is the **Reynolds number** Re = UL/ν. Large Re: nonlinearity domina
 
 Computed by script (water ν ≈ 1.0×10⁻⁶ m²/s, air ≈ 1.5×10⁻⁵ m²/s): water flowing at 1 m/s through a 0.1 m pipe has Re = 10⁵; air flowing at 30 m/s past a 4 m car has Re = 8×10⁶.
 
-Keep this quantity in mind; Section 4 uses it: **the blowup question is whether, at smaller and smaller scales, the Reynolds number can go up instead of down.**
+Keep this quantity in mind; §11.4 uses it: **the blowup question is whether, at smaller and smaller scales, the Reynolds number can go up instead of down.**
 
 ---
 
-## 3. "Smooth solutions exist forever" versus "finite-time blowup"
+## 11.3 "Smooth solutions exist forever" versus "finite-time blowup"
 
-### 3.1 First, an ODE toy: the equation is perfect, but the solution breaks
+### 11.3.1 First, an ODE toy: the equation is perfect, but the solution breaks
 
 Compare two equations that look very similar, both with initial value y(0) = 1:
 
@@ -155,7 +155,7 @@ Compare two equations that look very similar, both with initial value y(0) = 1:
 
 eᵗ is finite at every finite time; 1/(1−t) **becomes infinite at t = 1**. This is called **finite-time blowup**. The right-hand side y² could not be smoother; what breaks is the solution: "the bigger it is, the faster it grows", so the growth rate itself is growing.
 
-### 3.2 Adding damping: who wins depends on the initial value
+### 11.3.2 Adding damping: who wins depends on the initial value
 
 Now add a "viscosity-like" damping term: y' = y² − y. The substitution z = 1/y solves it exactly: z(t) = 1 + (z₀ − 1)eᵗ, and y blows up if and only if z hits 0.
 
@@ -166,29 +166,33 @@ Now add a "viscosity-like" damping term: y' = y² − y. The substitution z = 1/
 | 1.1 | Blows up, t* = ln 11 ≈ 2.398 |
 | 2.0 | Blows up, t* = ln 2 ≈ 0.693 |
 
-**For small initial values damping wins; for large ones nonlinearity wins.** The known theory of 3D NS has exactly this shape: Fefferman's statement says that in 3D "(A) and (B) hold provided the initial velocity u° satisfies a smallness condition", and that for large initial data, smooth solutions exist at least for a short time [0, T) [P]. Whether large initial data stays smooth forever is the Millennium Problem.
+**For small initial values damping wins; for large ones nonlinearity wins.** Compare with the NS equations of §11.2.3: y² plays the role of the nonlinear "self-transport" term (u·∇)u, −y plays the viscosity term νΔu, and the force f is set to 0 for now. The known theory of 3D NS has exactly this shape: Fefferman's statement says that in 3D "(A) and (B) hold provided the initial velocity u° satisfies a smallness condition", and that for large initial data, smooth solutions exist at least for a short time [0, T) [P]. Whether large initial data stays smooth forever is the Millennium Problem.
 
-### 3.3 A PDE toy: the Burgers equation
+The left half of the figure below puts the curves of §11.3.1–11.3.2 together (the figure calls the unknown x, and ẋ means dx/dt): eᵗ grows but never blows up; 1/(1−t) blows up at t = 1; y' = y² − y blows up at t = ln 2 ≈ 0.693 from initial value 2, and decays to 0 from initial value ½. The right half shows Clay's four branches, covered in detail in §11.6: OpenAI claims the forced (C)/(D); the unforced (A)/(B) remain open.
+
+{{FIG_BLOWUP}}
+
+### 11.3.3 A PDE toy: the Burgers equation
 
 Cut NS down to 1 dimension and drop the pressure: u_t + u·u_x = ν·u_xx. Initial value u = −sin x. **Without viscosity**, the slope at x = 0 satisfies (u_x)' = −(u_x)², which has the same form as y' = y², giving u_x(0, t) = −1/(1−t): at t = 1 the slope is infinite (a shock). **With viscosity**, the script simulates it with a spectral method, and the steepest slope is capped at about 1/(2ν): 3.7 for ν = 0.1 (1/(2ν) = 5), 48.4 for ν = 0.01 (50), 164.9 for ν = 0.003 (166.7). The smaller ν, the higher the cap, but it is always finite (1D viscous Burgers can be turned into the heat equation by the Cole–Hopf transformation, and it is rigorously proven not to blow up).
 
 **The question for 3D NS is: can viscosity still cap things like this?** 3D has one extra mechanism: **vortex stretching**. A vortex tube that gets stretched longer and thinner spins faster, like a figure skater pulling in their arms (angular momentum r·u_θ is conserved: shrink the radius 10×, and the spin speed goes up 10×). This positive feedback does not exist in 1D or 2D.
 
-### 3.4 Saying "blowup" precisely
+### 11.3.4 Saying "blowup" precisely
 
 "Smooth" means derivatives of all orders exist and are continuous (C^∞). **Global smooth solution**: smooth for all t ≥ 0 with bounded energy. **Finite-time blowup**: the solution is smooth on [0, T), but as t → T, the velocity or one of its derivatives → ∞ somewhere. Fefferman's statement records that for NS (ν > 0), at blowup **the velocity itself** must be unbounded [P], which is why OpenAI's theorem is stated as "lim sup ‖u(t)‖_∞ = ∞". Real water never has infinite velocity; the continuum model breaks down at molecular scales first. Blowup is a statement **about this mathematical model**.
 
 ---
 
-## 4. Why 3D is so hard: energy and supercritical scaling
+## 11.4 Why 3D is so hard: energy and supercritical scaling
 
-### 4.1 Energy: the only global ledger
+### 11.4.1 Energy: the only global ledger
 
 With no external force, NS has a beautiful identity: the total kinetic energy E(t) = ½∫|u|² dx **can only decrease, never increase** (viscosity turns kinetic energy into heat). The nonlinear term (u·∇)u contributes exactly 0 to the total energy; it only **moves** energy between scales and never creates it.
 
 So we have an upper bound valid for all time: E(t) ≤ E(0). The question is: **is this upper bound enough to prevent blowup?**
 
-### 4.2 Scaling symmetry
+### 11.4.2 Scaling symmetry
 
 NS has a symmetry: if u(x, t) is a solution, then for any λ > 0,
 
@@ -211,7 +215,7 @@ Where the energy column comes from: take ∫|λu(λx)|² dx and set y = λx; in 
 
 **The 3D column is the key**: shrink a "blowup structure" 1000×, speed its flow up 1000×, and the energy it needs is only one thousandth of the original. The energy bound places almost no constraint on small scales. This is called **supercritical**. In 2D the energy does not change under scaling, which is called **critical**; that is why 2D NS was proven long ago to be globally smooth (Ladyzhenskaya; see Fefferman's statement [P]).
 
-### 4.3 Saying it again with the Reynolds number
+### 11.4.3 Saying it again with the Reynolds number
 
 Fix the total energy E = 1 and the viscosity ν = 1. For a blob of flow of size L, how large can its speed be?
 
@@ -229,34 +233,34 @@ Fix the total energy E = 1 and the viscosity ν = 1. For a blob of flow of size 
 
 2D: energy holds the Reynolds number at every scale below 1, so viscosity always has what it takes to win. 3D: the smaller the scale, the larger the Reynolds number the energy allows, so **viscosity might lose at small scales**. Energy neither rules out blowup nor proves it; it is simply "not enough". This is the core of the 3D NS problem.
 
-### 4.4 Tao's "supercriticality barrier" (2016)
+### 11.4.4 Tao's "supercriticality barrier" (2016)
 
-Tao (JAMS 29, 2016; arXiv:1402.0290) constructed an "averaged NS": it keeps the energy identity and the scaling, replaces only the nonlinear term with an averaged version, and he proved that it **does** blow up. Consequence: an argument that uses only "energy + generic harmonic-analysis estimates" cannot prove (A)/(B); it must use the fine structure of the real nonlinear term. He also proposed a **program**: build "logic gates" out of a real fluid, so that the fluid, like a self-replicating machine, passes its energy again and again to smaller, faster copies of itself, producing blowup in **unforced** NS. This program has not been carried out to this day.
+Tao (JAMS 29, 2016; arXiv:1402.0290) constructed an "averaged NS": it keeps the energy identity and the scaling, replaces only the nonlinear term with an averaged version, and he proved that it **does** blow up. Consequence: an argument that uses only "energy + generic harmonic-analysis estimates" cannot prove (A)/(B); it must use the fine structure of the real nonlinear term. He also proposed a **program**: build "logic gates" out of a real fluid, so that the fluid, like a self-replicating machine, passes its energy again and again to smaller, faster copies of itself, producing blowup in **unforced** NS. This program has not been carried out to this day. (Family 376 in §11.7.5 is reminiscent of this program, but it is not the same thing.)
 
 ---
 
-## 5. 90 years of partial results
+## 11.5 90 years of partial results
 
 | Year | Result | Significance |
 |---|---|---|
 | 1934 | **Leray** (Acta Math. 63): every finite-energy initial value has a global **weak solution** | Weak solutions satisfy the equation only "in an integral-average sense" and allow singularities; smoothness and uniqueness are unknown |
 | 1982 | **Caffarelli–Kohn–Nirenberg** (CPAM 35): the singular set has parabolic 1-dimensional Hausdorff measure 0 | Singularities "cannot form a curve in space-time" (Fefferman's wording [P]), but isolated points are not ruled out |
 | 2003 | **Escauriaza–Seregin–Šverák**: if the L³ norm stays bounded, there is no blowup | Blowup must make the L³ norm diverge |
-| 2016 | **Tao**: averaged NS blows up | See Section 4.4 |
+| 2016 | **Tao**: averaged NS blows up | See §11.4.4 |
 | 2019 | **Buckmaster–Vicol** (Annals 189): a class of weak solutions is non-unique | Weak solutions are too "soft" |
 | 2014 / 2022 | **Luo–Hou** numerics (PNAS); **Chen–Hou** computer-assisted proof (arXiv:2210.07191): 3D axisymmetric Euler **with a boundary** blows up from smooth initial data | Needs a solid wall; not in all of space ℝ³ |
 | 2021 | **Elgindi** (Annals 194): Euler on ℝ³ blows up for C^{1,α} initial data | The initial data is not C^∞ |
 | 2023 on | **Córdoba–Martínez-Zoroa** (arXiv:2309.08495 and others): forced 3D Euler blows up, with a force of limited smoothness | Pioneers of the "forcing route": finer and finer vortex layers amplified stage by stage |
 | 2025 | **DeepMind et al.** (arXiv:2509.14185): neural networks find **unstable** self-similar singularities for the Boussinesq, IPM and other equations, with accuracy close to machine precision | Paves the way for computer-assisted proofs in the boundaryless case |
-| 2026-08 | **Buckmaster–Alpöge**: IPM, Boussinesq and 3D Euler blow up under **smooth forcing**, verified in Lean; made public September 7 | Pushes the route in the previous row to smooth forcing [P, Buckmaster statement] |
+| 2026-08 | **Buckmaster–Alpöge**: IPM, Boussinesq and 3D Euler blow up under **smooth forcing**, verified in Lean; made public September 7 (US Eastern time) | Pushes the Córdoba–Martínez-Zoroa route to smooth forcing [P, Buckmaster statement] |
 
 The pattern that keeps appearing in this table: **Euler (no viscosity) blows up more easily than NS; having a boundary, lower smoothness, or forcing is each easier than "all of space, C^∞, no forcing".** Every time one condition is relaxed, someone manages to produce blowup. Millennium Problem (A)/(B) is the version with no condition relaxed.
 
 ---
 
-## 6. The Clay problem statement: four branches, and the role of the force f
+## 11.6 The Clay problem statement: four branches, and the role of the force f
 
-### 6.1 The official text [P]
+### 11.6.1 The official text [P]
 
 Fefferman's statement (https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf) first sets out "physically reasonable" conditions: all derivatives of the initial data and the external force decay rapidly (conditions 4, 5), the solution is C^∞ on ℝ³ × [0, ∞) (6), and the energy is uniformly bounded (7); the periodic case uses conditions 8–11. Then:
 
@@ -271,9 +275,9 @@ Fefferman's statement (https://www.claymath.org/wp-content/uploads/2022/06/navie
 
 Two points. (A)/(B) say "good for all initial values", while (C)/(D) say "there is one bad example": **opposite directions**. (A)/(B) require f ≡ 0, while (C)/(D) let you **choose the force yourself**, as long as it is smooth and decaying. Fefferman also writes that the corresponding problem for the Euler equations (ν = 0) is "also open and very important", but it is not on the prize list [P].
 
-### 6.2 Why "you can choose the force" changes the shape of the problem
+### 11.6.2 Why "you can choose the force" changes the shape of the problem
 
-Section 2 of the OpenAI paper says this itself [P]:
+§11.2 of the OpenAI paper says this itself [P]:
 
 > "For any incompressible flow u and pressure p, we can always define the external force f to be the residual in (1.1). The Navier–Stokes equations then hold by construction. The challenge is to choose a flow that blows up while this residual remains smooth."
 
@@ -288,19 +292,19 @@ So blowup must rely on the nonlinear term to cancel the singular part **by itsel
 
 **[Check 5]** For y' = −y + g(t), if g is smooth and bounded on [0, 2] (say |g| ≤ 1) and y(0) = 0, can y(t) blow up at t = 1? Hint: compare with y' ≤ −y + 1.
 
-### 6.3 So is (C) easier than (A)?
+### 11.6.3 So is (C) easier than (A)?
 
 In 2000 Clay put (C) side by side with (A), considering all four branches to be "retaining the heart of the problem". But the "forcing route" opened by Córdoba–Martínez-Zoroa from 2023 on showed that **the force can do a great deal of "engineering" work**: inject energy where and when it is needed, and "plant" perturbations. In his statement Buckmaster says this route "is the route Luis and Diego opened", and calls the next goal "a path to unforced Euler" [P]. Even the people pushing this route see "unforced" as the deeper problem.
 
-A secondhand summary: the forcing route is "a route the written problem permits but that most working mathematicians exclude from the question they care about" [R, Implicator]. ⚠ This is a journalist's summary, not a systematic survey of analysts.
+In other words, (C)/(D) turn the problem into "can you build a flow that blows up while the residual force stays smooth?" That is much weaker than whether the fluid blows up **on its own** (the unforced (A)/(B)), and most analysts regard (A)/(B) as the real question [R]. A secondhand summary: the forcing route is "a route the written problem permits but that most working mathematicians exclude from the question they care about" [R, Implicator]. ⚠ This is a journalist's summary, not a systematic survey of analysts.
 
 ---
 
-## 7. What OpenAI claims
+## 11.7 What OpenAI claims
 
-### 7.1 The main theorem [P]
+### 11.7.1 The main theorem [P]
 
-The paper is *Finite time blowup for Navier–Stokes*, authored by "OpenAI", 166 pages, PDF generated 2026-09-08 12:06 PDT (https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf). Abstract:
+The paper is *Finite time blowup for Navier–Stokes*, authored by "OpenAI", 166 pages, PDF generated 2026-09-08 12:06 PDT (https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf). It was **released separately**: it is not one of the 372 families in the October 6 openai/math release; the paper is on OpenAI's CDN, and the roughly 640,000-line Lean proof is in a separate repository, [openai/NavierStokesAndEuler](https://github.com/openai/NavierStokesAndEuler) (§11.8.2). Abstract:
 
 > "For every positive viscosity, we construct a solution of the three-dimensional incompressible Navier–Stokes equations that starts from rest and develops unbounded velocity in finite time while maintaining uniformly bounded kinetic energy."
 
@@ -315,7 +319,7 @@ The paper's own words: "This establishes alternative (C) in the Millennium probl
 
 **[Check 6]** Verify: substituting u_ν = √ν · u(x/√ν, t), each of the three terms ∂u_ν/∂t, (u_ν·∇)u_ν and νΔu_ν equals √ν times the corresponding original term.
 
-### 7.2 Intuition for the mechanism (from reading Section 2 of the paper; a simplified version)
+### 11.7.2 Intuition for the mechanism (from reading Section 2 of the paper; a simplified version)
 
 1. **A vortex column that gets thinner and faster.** In the vortex core near the origin, fluid spirals inward and flows out up and down along the axis. Conservation of angular momentum makes the inflowing fluid spin faster; incompressibility makes the incoming fluid leave along the axis, so the inward flow can keep going.
 2. **Self-similar contraction.** Write τ = 1 − t. The core radius ℓ_r ~ τ^(1/2), the height ℓ_z ~ τ^(1/2−h), where h is a fixed small number, 0 < h < 1/100. The vortex column gets thinner and relatively longer.
@@ -323,9 +327,9 @@ The paper's own words: "This establishes alternative (C) in the Millennium probl
 4. **The fix: add oscillating pulses in the annulus.** The pulses have zero average velocity, but their **quadratic products** (momentum flux) do not average to zero. Two families of pulses are carefully arranged so that the nonlinear flux **exactly cancels** the divergent part of the residual. Each pulse is "planted" by an exponentially small force, and then grows by feeding on the background shear.
 5. **Outside**: a purely rotating flow that satisfies the heat equation and needs no force; then smoothly cut off to a bounded region.
 
-This is exactly Section 6.2's "the nonlinear term cancels the singular part by itself", except that it must be done in 3D for derivatives of every order.
+This is exactly §11.6.2's "the nonlinear term cancels the singular part by itself", except that it must be done in 3D for derivatives of every order.
 
-### 7.3 A feel for the numbers: how the vortex core shrinks
+### 11.7.3 A feel for the numbers: how the vortex core shrinks
 
 Take h = 0.005 (the paper only requires 0 < h < 1/100; I chose this value for illustration), and compute with the scaling laws the paper gives (computed by script, ν = 1, constant factors set to 1):
 
@@ -336,25 +340,37 @@ Take h = 0.005 (the paper only requires 0 < h < 1/100; I chose this value for il
 | 10⁻⁸ | 10⁻⁴ | 1.10×10⁻⁴ | 1.10×10⁴ | 1.3×10⁻⁴ | 1.096 |
 | 10⁻¹² | 10⁻⁶ | 1.15×10⁻⁶ | 1.15×10⁶ | 1.5×10⁻⁶ | 1.148 |
 
-- **Speed → ∞, core energy → 0**: this is exactly the supercriticality from Section 4, reaching ever larger speeds at small scales with ever less energy.
+- **Speed → ∞, core energy → 0**: this is exactly the supercriticality from §11.4, reaching ever larger speeds at small scales with ever less energy.
 - The speed carries an extra factor τ^(−h) beyond pure scaling τ^(−1/2); this is the **swirl Reynolds number**. It goes to infinity, but extremely slowly: as τ goes from 10⁻² to 10⁻¹², it only rises from 1.02 to 1.15. The blowup is achieved right at the edge, "just barely beyond critical".
 - Consistent with known theorems: the singularity is **a single point** (the origin, t = 1), which does not violate CKN; the cube of the L³ norm ~ τ^(−4h), about 1.74 at τ = 10⁻¹², and it is diverging, which fits the necessary condition from ESS (⚠ ESS is about the unforced case; here it serves only as an intuition check).
 
-### 7.4 The Euler result released at the same time
+### 11.7.4 The Euler result released at the same time
 
 The same Lean repository also formalizes a second paper, *Finite time blowup for the Euler equation* (57 pages, https://cdn.openai.com/pdf/315b36cd-ec98-4023-8342-93345194ece1/euler.pdf) [P]:
 
 > "We exhibit finite-time blowup for the three-dimensional incompressible, unforced Euler equations from smooth, compactly supported, divergence-free initial data."
 
-Compare with Section 5: Chen–Hou need a boundary, Elgindi's initial data is only C^{1,α}, and Córdoba–Martínez-Zoroa and Buckmaster–Alpöge need a force. This result removes all of those relaxations; the only remaining difference from the Millennium Problem is "no viscosity". Fefferman says the corresponding problem for Euler is "also open and very important" [P]. My judgment (speculation): in terms of how close it is to the question people actually care about, it may carry more weight than the forced NS result. ⚠ I found no named expert's technical assessment of this paper.
+Compare with §11.5: Chen–Hou need a boundary, Elgindi's initial data is only C^{1,α}, and Córdoba–Martínez-Zoroa and Buckmaster–Alpöge need a force. This result removes all of those relaxations; the only remaining difference from the Millennium Problem is "no viscosity". Fefferman says the corresponding problem for Euler is "also open and very important" [P]. My judgment (speculation): in terms of how close it is to the question people actually care about, it may carry more weight than the forced NS result. ⚠ I found no named expert's technical assessment of this paper.
 
 **Scale** [R]: about 10,000 concurrent agents, 88 hours; Wikipedia cites 2.7 million messages and 130 billion output tokens, while other reports say "nearly 5 million" ⚠. `formalization.yaml` records the model as "GPT-6 Astra" and the framework as Codex [P].
 
+### 11.7.5 Related: universal computation in forced NS (family 376)
+
+The October openai/math release contains a result family that bears directly on "the force": family 376, *Universal computation in forced Navier–Stokes flows*. It consists of a group of preprints; the representative one is *A Fixed Particle Test for Computation in a Forced Viscous Flow* (2026-09-27) [P].
+
+**Claim** [P]: fix a flat 3D torus, a positive computable viscosity, a fluid starting at rest, one designated fluid particle, and a fixed open region (the "detector"). For any given Turing machine and input, one can write a finite "program" for a smooth force such that the particle enters the detector **if and only if** that Turing machine halts. The halting problem is undecidable, so the reachability question "will this particle ever get there?" is **undecidable** too.
+
+**The paper is candid about it** [P]: "There is an elementary way to force a chosen smooth incompressible velocity: subtract its viscous term from its material acceleration. The mathematical work lies in choosing that velocity from the finite instruction table." This is the "residual force" trick of §11.6.2: pick the flow you want and let the force make up the difference. The real work is designing that flow: it has to execute the instructions one by one, keep the information needed for invertibility, and never touch the detector during a run that does not halt. The paper also states that it is "not a regularity theorem for general Navier–Stokes data".
+
+**Relation to Tao's program (§11.4.4)** (our judgment): it recalls Tao's 2016 program, which is to get the fluid **itself** to build a computer that hands its energy to ever-smaller copies of itself, causing blowup. But 376 puts the "programming" into the force, which does all of the programming work, so it **does not advance** that unforced-blowup program; it is closer to a controllability / undecidability result for forced fluids. As of 2026-10-09, none of the 9 preprints the repository lists in this family cites Tao 2016 [P]. The precursors it does cite are Cristopher Moore's generalized shifts (1990–91), Bennett's reversible computation (1973), and the Turing-complete stationary Euler flows that Cardona–Miranda–Peralta-Salas–Presas built on a 3-sphere with an adapted metric (PNAS 2021) [P].
+
+**Lean** [P]: `lean/docs/376.md` lists 6 Comparator statements covering selected results from 4 of the preprints, including a version on ℝ³: a smooth, compactly supported flow starting from rest in which the particle at (4,0,0) enters the fixed open box (−1,2)³ exactly when the machine halts. Coverage differs from paper to paper; for example, the fixed-particle halting detector of *Geometric Programs for Solenoidal Forcing* is explicitly outside the formalized scope. ⚠ We did not read the 6 statement files one by one, and did not compile them.
+
 ---
 
-## 8. How far it has been verified
+## 11.8 How far it has been verified
 
-### 8.1 The Lean statement: OpenAI did not write it
+### 11.8.1 The Lean statement: OpenAI did not write it
 
 The statement file `ComparatorChallenges/NavierStokes.lean` says at the top that it is copied from **Google DeepMind's Formal Conjectures project** (commit `8bf45ed`), with only the imports, namespace and notation changed [P]. If the solver writes the statement itself, it can quietly loosen conditions; here it comes from a third party. ⚠ I did not diff it line by line against upstream.
 
@@ -376,26 +392,27 @@ Word-by-word translation:
 
 I checked it item by item against the Clay text: (4)–(7) are all there; the periodic version (D) includes (8)–(11), and, as Clay's erratum requires, the pressure is also periodic [P]. **The structure of the statement matches Clay's (C)/(D).** Note that (C) asks that "**no** global smooth solution exists at all", not just "the solution I built blows up"; this requires uniqueness of smooth solutions (the "Consequently…" sentence in Theorem 1.1), and that is proven in Lean too.
 
-### 8.2 The proof itself
+### 11.8.2 The proof itself
 
 - Repository `openai/NavierStokesAndEuler` (snapshot `f9e8bc5`, 2026-09-10): **2,659 `.lean` files** (NS 816, Euler 1,839) [P], about 640,000 lines (a count from the author's research notes).
 - `formalization.yaml`: sorry count 0; uses only the three standard axioms `propext`, `Classical.choice`, `Quot.sound`; Comparator has `enable_nanoda` turned on, i.e. a second, independently implemented kernel also checks it [P]. The review status reads **"self-assessed"**.
-- ⚠ I did not run `lake build` or Comparator, and found no public report of a third party running the NS Comparator successfully (the quasi-Riemann hypothesis had Goldblatt's independent recheck).
+- ⚠ I did not run `lake build` or Comparator, and found no public report of a third party running the NS Comparator successfully (the quasi-Riemann hypothesis in §4 had Goldblatt's independent recheck).
 
-### 8.3 Human experts and institutions
+### 11.8.3 Human experts and institutions
 
-- **Clay** (09-11) [R]: reportedly said "the Navier–Stokes problem has apparently been settled", and also "The process is deliberately unhurried, but we will provide updates". The problem page on Clay's website is still marked "Active" as of today (I checked on 10-08).
+- **Clay** (09-11, president Martin Bridson) [R]: reportedly said "the Navier–Stokes problem has apparently been settled", and also that evaluation will be "deliberately unhurried" (full sentence: "The process is deliberately unhurried, but we will provide updates"). Clay still lists NS as unsolved: the problem page on Clay's website is still marked "Active" as of today (I checked on 10-08). Clay's rules require publication in a qualifying outlet plus a two-year acceptance period (§11.9.1).
 - **Gómez-Serrano** (NPR, 09-22) [R]: "The paper is not written for humans … as of today, the paper doesn't teach us much."
 - **Fefferman** [R]: "The heroes of the story … are Córdoba and Martínez-Zoroa." ⚠ Original source not found.
 - ⚠ **As of 2026-10-08, no human expert has publicly said they have read and verified the 166-page paper**, and there are no reports of journal submission.
 
-### 8.4 The priority dispute (in brief)
+### 11.8.4 The priority dispute (in brief)
 
-- **Buckmaster's statement** (https://cims.nyu.edu/~tristanb/statement.pdf) [P]: he and Alpöge obtained Boussinesq and 3D Euler blowup under smooth forcing on August 15, verified it in Lean on August 22, and made it public on September 7 (dates per Wikipedia [R]). They also used LLMs heavily (Claude, Codex). He credits the route to Córdoba and Martínez-Zoroa. About OpenAI, he recounts that in a call on September 6, "Eventually it was agreed that [the first prompt] had been sent in the past few days, after information about our work had reached OpenAI", and also writes "I am not accusing anyone of anything."
+- **Buckmaster's statement** (https://cims.nyu.edu/~tristanb/statement.pdf) [P]: Buckmaster (NYU) and Alpöge obtained Boussinesq and 3D Euler blowup under smooth forcing on August 15, verified it in Lean on August 22, and made it public, together with the IPM result, on September 7 (US Eastern time). The statement itself only says "Today"; September 7 is per Wikipedia [R], and the statement PDF's metadata says 2026-09-08 02:38 UTC, i.e. the evening of September 7 in US Eastern time [P], which is September 8 in UTC. They also used LLMs heavily (Claude, Codex). He credits the route to Córdoba and Martínez-Zoroa. About OpenAI, he recounts that in a call on September 6, "Eventually it was agreed that [the first prompt] had been sent in the past few days, after information about our work had reached OpenAI", and also writes "I am not accusing anyone of anything."
 - **OpenAI's response** [R]: "it is impossible for Dr. Buckmaster's Codex prompts over the last two months to have influenced the system in any way".
+- **The accounts differ** ⚠: Buckmaster's account is that OpenAI sent its first prompt only after information about their progress had reached OpenAI; what OpenAI denies is that his Codex prompts influenced its system. The two claims address different questions (one about timing, one about whether their user data was used), and neither has been verified by a third party.
 - **Citations** [P]: the PDF I read (generated 09-08 12:06 PDT) **already cites** three works by Córdoba–Martínez-Zoroa [6–8]; it **does not cite** Buckmaster–Alpöge.
 
-### 8.5 Remaining risks
+### 11.8.5 Remaining risks
 
 1. **Mathlib definitions**: the Laplacian, gradient, etc. come from Mathlib, and "junk value conventions" could make the statement drift from its intended meaning; but the statement requires C^∞ everywhere, so the effect is small.
 2. **Toolchain**: Lean 4.34.0-rc2 is a pre-release version [P]; the nanoda dual-kernel check lowers the risk.
@@ -403,9 +420,9 @@ I checked it item by item against the Clay text: (4)–(7) are all there; the pe
 
 ---
 
-## 9. What it means if true (and what it doesn't)
+## 11.9 What it means if true (and what it doesn't)
 
-### 9.1 By Clay's text, does this count as "solving the Millennium Problem"?
+### 11.9.1 By Clay's text, does this count as "solving the Millennium Problem"?
 
 The answer has three layers.
 
@@ -419,27 +436,28 @@ The answer has three layers.
 
 After that, CMI must also form a committee of at least 3 people to review it (Rule 7). Rule 8(b): CMI will "pay special attention to the question of whether a Prize solution depends crucially on insights published prior to the solution", and may add earlier contributors to the list of prizewinners; this is directly relevant to Córdoba–Martínez-Zoroa and Buckmaster–Alpöge. Rule 8(c): if no conclusion can be reached on correctness or **attribution**, the prize may not be awarded. Separately, OpenAI has reportedly said it will not claim the prize [R]. Speculation: even if it is published next year, with "2 years after publication", a conclusion would come around 2029 at the earliest.
 
-**Layer three: the question mathematicians care about. Most would say no.** "Does a fluid blow up on its own?" is still completely open. OpenAI's result does not answer the unforced case, and does not carry out Tao's program.
+**Layer three: the question mathematicians care about. Most would say no.** "Does a fluid blow up on its own?" is still completely open. OpenAI's result does not answer the unforced case, and does not carry out Tao's program (§11.4.4; nor does family 376 in §11.7.5).
 
-**Be careful with the "specification gaming" framing.** §11.1 of the deck compares this to specification gaming in AI. But Fefferman included (C) **on purpose** in 2000, considering that it retains the heart of the problem. A more accurate way to put it: **the problem setters thought at the time that (C) was as hard as (A); progress since 2023 shows that the forcing route is easier than expected.** The gap between the text and the intent became visible in hindsight; it is not a case of the solver exploiting a loophole the setters never thought of.
+**Be careful with the "specification gaming" framing.** It is tempting to compare this to specification gaming in AI: the literal text of the problem is satisfied, but the question the askers care about is not answered. But this is not cheating: Fefferman included (C) **on purpose** in 2000, as "retaining the heart of the problem" (§11.6.1). A more accurate way to put it: **the problem setters thought at the time that (C) was as hard as (A); progress since 2023 shows that the forcing route is easier than expected.** The gap between the text and the intent became visible in hindsight; it is not a case of the solver exploiting a loophole the setters never thought of.
 
-### 9.2 For mathematics, physics and AI
+### 11.9.2 For mathematics, physics and AI
 
-1. **Mathematics**: if it holds, this is the first NS blowup in the setting of smooth forcing, all of space, and C^∞: viscosity is not all-powerful. The unforced Euler blowup released at the same time (Section 7.4), if it holds, may be the bigger news. Methodologically, "synthesizing" the needed stress from the quadratic flux of oscillating pulses is related to convex integration for Euler (Daneri–Székelyhidi), as the paper itself says [P].
-2. **Physics and engineering**: almost no direct impact. NS solvers never rely on global regularity theorems; in real fluids, molecular scales make the continuum model fail before a singularity is reached. The conclusion is "**the model itself** breaks under an artificially designed force", not "real water can reach infinite velocity".
+1. **Mathematics**: if it holds, this is the first NS blowup in the setting of smooth forcing, all of space, and C^∞: viscosity is not all-powerful. The unforced Euler blowup released at the same time (§11.7.4), if it holds, may be the bigger news. Methodologically, "synthesizing" the needed stress from the quadratic flux of oscillating pulses is related to convex integration for Euler (Daneri–Székelyhidi), as the paper itself says [P].
+2. **Physics and engineering**: almost no direct impact on weather forecasting, turbulence modeling or engineering. NS solvers never rely on global regularity theorems; in real fluids, molecular scales make the continuum model fail before a singularity is reached. The conclusion is "**the model itself** breaks under an artificially designed force", not "real water can reach infinite velocity".
 3. **AI**: three independent gates: passing formalization ≠ a faithful statement ≠ acceptance by mathematicians. Here the second gate is fairly reliable because a third-party statement was used; the third gate is far from passed. Buckmaster says LLMs mean one mathematician plus a model "can now do all this work in a month", and calls it "a Deep Blue-Kasparov moment" [P]. When an AI lab can quickly pour large amounts of compute into a direction after hearing it is making progress, how norms of priority and attribution should adapt is a real question.
 
 ---
 
-## 10. Self-test
+## 11.10 Self-test
 
-1. In one sentence: why does y' = y² blow up in finite time while y' = y does not? (Section 3.1)
-2. Which term in the NS equations is nonlinear? What is its physical meaning? (Section 2.3)
-3. Why is energy for 3D NS called "supercritical"? Explain using the numbers for scaling λ = 1000. (Sections 4.2–4.3)
-4. How do Clay's (A) and (C) differ in "external force" and in "quantifier (for all / there exists)"? (Section 6.1)
-5. Why does "you can choose the force yourself" not make the problem trivial? What is the key difficulty? (Section 6.2)
-6. Who wrote OpenAI's Lean problem statement? Why does that matter? (Section 8.1)
-7. Under Clay's rules, what steps at minimum remain between now and a possible award? (Section 9.1)
+1. In one sentence: why does y' = y² blow up in finite time while y' = y does not? (§11.3.1)
+2. Which term in the NS equations is nonlinear? What is its physical meaning? (§11.2.3)
+3. Why is energy for 3D NS called "supercritical"? Explain using the numbers for scaling λ = 1000. (§11.4.2–11.4.3)
+4. How do Clay's (A) and (C) differ in "external force" and in "quantifier (for all / there exists)"? (§11.6.1)
+5. Why does "you can choose the force yourself" not make the problem trivial? What is the key difficulty? (§11.6.2)
+6. Who wrote OpenAI's Lean problem statement? Why does that matter? (§11.8.1)
+7. Under Clay's rules, what steps at minimum remain between now and a possible award? (§11.9.1)
+8. Why does the fluid "computer" of family 376 not advance Tao's unforced-blowup program? (§11.7.5)
 
 ---
 
@@ -447,7 +465,7 @@ After that, CMI must also form a committee of at least 3 people to review it (Ru
 
 - **Check 1**: `[0, 0.0625, 0.25, 0.375, 0.25, 0.0625, 0]`, sum 1 (checked by script). For example, the middle: 0.5 + 0.25·(0.25 − 1 + 0.25) = 0.375.
 - **Check 2**: ∇·(−y, x) = ∂(−y)/∂x + ∂x/∂y = 0 + 0 = 0, incompressible. ∇·(x, y) = 1 + 1 = 2 ≠ 0: w is a flow "spraying" outward from the origin; every small region has net outflow, and volume is expanding.
-- **Check 3**: (a) Each component of u = (−y, x) is a linear function, so all second derivatives are 0 and Δu = 0: rigid rotation has no shear, so viscosity does nothing. (b) From Section 2.3, (u·∇)u = (−x, −y), so ∇p = (x, y) and p = (x² + y²)/2 + constant. **Higher at the edge, lower at the center**: the pressure difference pushes inward from outside, supplying the centripetal force. When the OpenAI paper describes the vortex core as "Pressure decreases toward the axis, supplying the leading centripetal force", this is what it means.
+- **Check 3**: (a) Each component of u = (−y, x) is a linear function, so all second derivatives are 0 and Δu = 0: rigid rotation has no shear, so viscosity does nothing. (b) From §11.2.3, (u·∇)u = (−x, −y), so ∇p = (x, y) and p = (x² + y²)/2 + constant. **Higher at the edge, lower at the center**: the pressure difference pushes inward from outside, supplying the centripetal force. When the OpenAI paper describes the vortex core as "Pressure decreases toward the axis, supplying the leading centripetal force", this is what it means.
 - **Check 4**: In 2D, dx = dy/λ², so the energy factor is λ²/λ² = 1.
 - **Check 5**: No. From y' ≤ −y + 1 and y(0) = 0 you can derive y ≤ 1 − e^(−t) < 1; likewise y ≥ −1. A linear equation with a bounded force has a solution that stays bounded.
 - **Check 6**: ∂u_ν/∂t = √ν·∂u/∂t. (u_ν·∇)u_ν: the velocity factors give √ν × √ν, and the derivative ∇ acting on x/√ν brings 1/√ν, for √ν in total. νΔu_ν: ν × √ν × (1/√ν)² = √ν. All three terms agree.
@@ -468,6 +486,7 @@ After that, CMI must also form a committee of at least 3 people to review it (Ru
 | Vortex stretching | A vortex tube stretched longer and thinner spins faster; only in 3D |
 | Euler equations | NS with ν = 0, an inviscid fluid |
 | Clay (A)–(D) | The four alternative statements of the Millennium Problem; proving any one is enough |
+| Undecidable | No algorithm gives the correct yes/no answer for every input; the halting problem for Turing machines is the classic example |
 
 ## Appendix: Further reading
 
@@ -477,6 +496,7 @@ After that, CMI must also form a committee of at least 3 people to review it (Ru
 - **OpenAI Euler paper**: https://cdn.openai.com/pdf/315b36cd-ec98-4023-8342-93345194ece1/euler.pdf
 - **Lean repository**: https://github.com/openai/NavierStokesAndEuler ; upstream problem statement: https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/Millenium/NavierStokes.lean
 - **Buckmaster's statement**: https://cims.nyu.edu/~tristanb/statement.pdf
+- **Family 376** (universal computation in forced NS), representative paper: https://github.com/openai/math/blob/main/preprints/A-Fixed-Particle-Test-for-Computation-in-a-Forced-Viscous-Flow-September-27-2026/manuscript.pdf ; Lean scope notes: https://github.com/openai/math/blob/main/lean/docs/376.md
 - **Terence Tao**, arXiv:1402.0290 (JAMS 2016): the introduction lays out the "supercriticality barrier" clearly; more accessible is his blog post *Why global regularity for Navier-Stokes is hard* (2007).
 - **DeepMind et al.**, *Discovery of Unstable Singularities*, arXiv:2509.14185
 - **Chen & Hou**, *Stable nearly self-similar blowup of the 2D Boussinesq and 3D Euler equations with smooth data I: Analysis*, arXiv:2210.07191

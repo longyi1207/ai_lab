@@ -2,6 +2,7 @@
 
 Supports exactly what the chapters use: ATX headings, paragraphs, block quotes,
 nested bullet / numbered lists, pipe tables, fenced code, horizontal rules,
+`{{FIG_…}}` figure placeholder lines (passed through for the build to fill),
 and inline **bold**, *italic*, `code`, [text](url) and bare URLs.
 """
 import html
@@ -12,6 +13,7 @@ _LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 _BARE_URL = re.compile(r"(?<![\"'>=])(https?://[^\s<>()（）,，。;；]+[^\s<>()（）,，。;；.])")
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
 _ITAL = re.compile(r"(?<![*\w])\*(?!\s)(.+?)(?<!\s)\*(?![*\w])")
+_ESCAPED = re.compile(r"\\([\\`*_\[\]()#+\-.!|{}])")
 
 
 def inline(text):
@@ -23,12 +25,16 @@ def inline(text):
         return f"\x00{len(stash) - 1}\x00"
 
     text = _INLINE_CODE.sub(lambda m: keep(f"<code>{html.escape(m.group(1), quote=False)}</code>"), text)
-    text = _LINK.sub(lambda m: keep(f'<a href="{html.escape(m.group(2))}">{html.escape(m.group(1), quote=False)}</a>'), text)
+    text = _ESCAPED.sub(lambda m: keep(html.escape(m.group(1), quote=False)), text)  # \* \_ etc. → literal
+    text = _LINK.sub(lambda m: keep(f'<a href="{html.escape(m.group(2))}">{_emphasis(html.escape(m.group(1), quote=False))}</a>'), text)
     text = _BARE_URL.sub(lambda m: keep(f'<a href="{html.escape(m.group(1))}">{html.escape(m.group(1), quote=False)}</a>'), text)
-    text = html.escape(text, quote=False)
-    text = _BOLD.sub(r"<strong>\1</strong>", text)
-    text = _ITAL.sub(r"<em>\1</em>", text)
+    text = _emphasis(html.escape(text, quote=False))
     return re.sub(r"\x00(\d+)\x00", lambda m: stash[int(m.group(1))], text)
+
+
+def _emphasis(text):
+    """**bold** and *italic* on already-escaped text."""
+    return _ITAL.sub(r"<em>\1</em>", _BOLD.sub(r"<strong>\1</strong>", text))
 
 
 _LIST_ITEM = re.compile(r"^(\s*)([-*+]|\d+[.)])\s+(.*)$")
@@ -91,6 +97,9 @@ def blocks(md, heading_offset=1):
             i += 1
         elif re.fullmatch(r"-{3,}|\*{3,}", s):
             i += 1  # section breaks are carried by headings in the deck
+        elif re.fullmatch(r"\{\{FIG_[A-Z0-9_]+\}\}", s):
+            out.append(s)  # figure placeholder: the build script substitutes the SVG
+            i += 1
         elif s.startswith(">"):
             j = i
             inner = []

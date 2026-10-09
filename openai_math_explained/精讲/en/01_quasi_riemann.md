@@ -1,12 +1,12 @@
-# Explainer 01: The quasi-Riemann hypothesis
+# The quasi-Riemann hypothesis: a ceiling on the noise in the primes
 
-> This is the "explained from zero" version of §4 of the `notes/openai_math_explained/` deck. All you need going in: you can work with powers and logarithms, you know the summation sign Σ, and you know what a function is. Every new concept is explained before it is used.
-> Every number in this chapter was either computed by script or has a source. The **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
-> Estimated reading time: 60–90 minutes. You can read it in three sittings: Sections 1–3 (primes and the error), Sections 4–6 (the ζ function and its zeros), Sections 7–10 (OpenAI's result and what it means).
+> Number theory · OpenAI family 003. All you need going in: you can work with powers and logarithms, you know the summation sign Σ, and you know what a function is. Every new concept is explained before it is used.
+> Every number in this chapter was either computed by script or has a source. Tags: [P] = a primary source we read directly (paper, repo file, Lean source), [R] = secondary reporting, ⚠ = unverified or doubtful. The **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
+> Estimated reading time: 60–90 minutes. You can read it in three sittings: §4.1–4.3 (primes and the error), §4.4–4.6 (the ζ function and its zeros), §4.7–4.10 (OpenAI's result and what it means).
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 4.0 The bottom line: the one thing this chapter explains
 
 Prime numbers (2, 3, 5, 7, 11, …) look randomly scattered, but taken as a whole they are very regular. Mathematicians can write down a formula that predicts, accurately, "roughly how many primes there are up to x." The truly hard question is: **how wrong can that prediction be, at most?**
 
@@ -25,9 +25,9 @@ After reading this chapter, you should be able to explain in your own words:
 
 ---
 
-## 1. Primes: count them, look for a pattern
+## 4.1 Primes: count them, look for a pattern
 
-### 1.1 What primes are and why they matter
+### 4.1.1 What primes are and why they matter
 
 A prime is an integer greater than 1 that is divisible only by 1 and itself: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, …
 
@@ -37,7 +37,7 @@ They matter because **every integer can be split into a product of primes in exa
 
 So primes are the "atoms" of the integers. The HTTPS encryption (RSA) you use every day rests on one fact: multiplying two large primes is easy, but splitting the product back apart is extremely hard.
 
-### 1.2 Counting
+### 4.1.2 Counting
 
 Write **π(x)** for "the number of primes that are at most x." This π is just a name. It has nothing to do with the circle constant; it is a historical notation.
 
@@ -51,7 +51,7 @@ Write **π(x)** for "the number of primes that are at most x." This π is just a
 
 Primes get sparser as you go further out. Below 100, one number in four is prime. Near 1 million, only about 72 in every 1000 numbers are prime (that is the estimate from the 1/ln x rule in the next section; counted by script, the 1000 numbers from 999,001 to 1,000,000 actually contain 65 primes).
 
-### 1.3 The first pattern: the density is about 1/ln x
+### 4.1.3 The first pattern: the density is about 1/ln x
 
 As a teenager, Gauss stared at prime tables and noticed: **near x, about one number in every ln x is prime.**
 
@@ -59,7 +59,7 @@ Here ln is the natural logarithm, with base e ≈ 2.718. ln(1,000,000) ≈ 13.8,
 
 **[Check 1]** ln(1000) ≈ 6.9. By this rule, about how many primes are there per 1000 numbers near 1000?
 
-### 1.4 The prime number theorem
+### 4.1.4 The prime number theorem
 
 Integrate the "density 1/ln t" from 2 to x and you get a prediction for the number of primes up to x:
 
@@ -81,9 +81,9 @@ The **prime number theorem** (proved independently by Hadamard and de la Vallée
 
 ---
 
-## 2. The real question: how big is the error?
+## 4.2 The real question: how big is the error?
 
-### 2.1 Two ways of saying "the error is getting smaller," with very different strength
+### 4.2.1 Two ways of saying "the error is getting smaller," with very different strength
 
 The prime number theorem only says "error / x → 0," that is, the relative error goes to 0. It does not say **how fast** it goes to 0.
 
@@ -93,7 +93,7 @@ An intuitive way to measure this: roughly what power of x is the error?
 
 Note: the **actual error** and the **error bound you can prove** are two different things. Numerically, the actual error is very small (roughly on the order of √x). But mathematicians need a **proof**: "for all x, the error is definitely no more than such-and-such." Everything in this chapter is about the **bound you can prove**.
 
-### 2.2 "Power saving": why x^(7/8) is a qualitative change
+### 4.2.2 "Power saving": why x^(7/8) is a qualitative change
 
 Since 1958, the best provable bound has roughly had the form:
 
@@ -117,11 +117,11 @@ The old bound also shrinks, but **more slowly than any "negative power of x."** 
 
 ---
 
-## 3. The key turn: the error is made of "waves"
+## 4.3 The key turn: the error is made of "waves"
 
 This was Riemann's stroke of genius in 1859, and it is the single most important step in the chapter.
 
-### 3.1 First, an analogy with sound
+### 4.3.1 First, an analogy with sound
 
 A sound (say, a chord) can be broken down into a sum of pure tones (sine waves). Each pure tone has two properties:
 - **frequency**: how fast it vibrates
@@ -129,7 +129,7 @@ A sound (say, a chord) can be broken down into a sum of pure tones (sine waves).
 
 This is called **Fourier decomposition**. The EEG spectra you saw in neuroscience (alpha waves at 8–12 Hz, beta waves, …) are the same idea: break a complicated signal into waves of different frequencies.
 
-### 3.2 Riemann's discovery
+### 4.3.2 Riemann's discovery
 
 Riemann discovered that the error in counting primes can be broken down the same way:
 
@@ -140,7 +140,7 @@ Riemann discovered that the error in counting primes can be broken down the same
 (To keep the formula clean, mathematicians usually use a weighted version of the prime count, ψ(x), in which each prime p gets weight ln p. It is essentially the same thing as π(x).)
 
 The main term is smooth, roughly just x. All of the error comes from those "waves," and:
-- **Each wave corresponds to one zero of the ζ function** (Section 5 explains what a zero is).
+- **Each wave corresponds to one zero of the ζ function** (§4.5 explains what a zero is).
 - A zero is written in the form ρ = β + iγ, with two coordinates β and γ.
 - **γ determines the wave's frequency** (how fast it oscillates).
 - **β determines how fast the wave's amplitude grows with x**: the size of this wave is about x^β.
@@ -152,15 +152,15 @@ So:
 
 **In one sentence: the β coordinate of the zeros (how far "to the right" they sit) directly determines how big the error in counting primes is.** That is why number theorists care so much about "where the zeros are."
 
-### 3.3 Why complex numbers show up
+### 4.3.3 Why complex numbers show up
 
 To describe these "waves" we need complex numbers. The next section explains them first.
 
 ---
 
-## 4. Complex numbers: the 5-minute version
+## 4.4 Complex numbers: the 5-minute version
 
-### 4.1 A complex number is a point in the plane
+### 4.4.1 A complex number is a point in the plane
 
 Real numbers sit on a line. **Complex numbers are points in a plane**: the horizontal coordinate is called the real part, the vertical coordinate the imaginary part.
 
@@ -170,11 +170,11 @@ s = σ + i·t      σ is the horizontal coordinate (real part, written Re s), t 
 
 i is a symbol satisfying i² = −1. Don't worry about whether it "exists"; treat it as a marker for "one step in the vertical direction" and that is enough.
 
-### 4.2 Multiplying by a complex number = scaling + rotation
+### 4.4.2 Multiplying by a complex number = scaling + rotation
 
 The most useful property of complex numbers: **multiplying by a complex number rotates a point around the origin and scales it.** For example, multiplying by i rotates 90 degrees counterclockwise: 1 → i → −1 → −i → 1, one full turn.
 
-### 4.3 x to a complex power = "size part" × "rotation part"
+### 4.4.3 x to a complex power = "size part" × "rotation part"
 
 For a positive real number x and a complex number β + iγ:
 
@@ -185,13 +185,13 @@ x^(β+iγ) = x^β × (cos(γ·ln x) + i·sin(γ·ln x))
 - **x^β** is the size part: it grows with x, and how fast is set by β.
 - **cos(γ·ln x) + i·sin(γ·ln x)** is the rotation part: its length is always 1; it just goes around the unit circle. How fast it turns is set by γ.
 
-These are the "waves" from Section 3: **β controls the amplitude (x^β), γ controls the frequency (oscillation on the scale of ln x).**
+These are the "waves" from §4.3: **β controls the amplitude (x^β), γ controls the frequency (oscillation on the scale of ln x).**
 
 ---
 
-## 5. The ζ function and its zeros
+## 4.5 The ζ function and its zeros
 
-### 5.1 Definition of the ζ function
+### 4.5.1 Definition of the ζ function
 
 ```
 ζ(s) = 1/1^s + 1/2^s + 1/3^s + 1/4^s + ...
@@ -201,7 +201,7 @@ These are the "waves" from Section 3: **β controls the amplitude (x^β), γ con
 
 **At s = 1**: ζ(1) = 1 + 1/2 + 1/3 + 1/4 + …, the "harmonic series," which **diverges to infinity**. Computed by script: the sum of the first 1000 terms ≈ 7.49, the first 1 million terms ≈ 14.39. It grows very slowly but never stops.
 
-### 5.2 The Euler product: how ζ "knows" about primes
+### 4.5.2 The Euler product: how ζ "knows" about primes
 
 Euler discovered:
 
@@ -220,7 +220,7 @@ So **the ζ function ties "all integers" to "all primes"**, and this is the brid
 
 **A beautiful consequence** (Euler's proof that "there are infinitely many primes"): at s = 1 the left side is the harmonic series, which diverges to infinity. If there were only finitely many primes, the right side would be a product of finitely many finite numbers and could not be infinite. So there must be infinitely many primes.
 
-### 5.3 "Analytic continuation": extending the definition to the whole plane
+### 4.5.3 "Analytic continuation": extending the definition to the whole plane
 
 The sum above only converges (adds up to a finite number) when the real part of s is > 1. But Riemann needed to talk about ζ(s) on the whole complex plane.
 
@@ -234,7 +234,7 @@ The left side converges only when |x| < 1 (for example, at x = 2 the left side i
 
 One can prove mathematically that such a continuation, if it exists, is unique. Riemann used a similar but more elaborate technique to continue ζ(s) to the whole complex plane (except the single point s = 1).
 
-### 5.4 Zeros
+### 4.5.4 Zeros
 
 A **zero** is a complex number s that makes ζ(s) = 0.
 - **Trivial zeros**: s = −2, −4, −6, …, which come from a simple factor in the continuation formula. Nothing mysterious.
@@ -248,21 +248,21 @@ The first three non-trivial zeros (in the upper half-plane) are approximately:
 
 Their real parts are all exactly 1/2.
 
-### 5.5 The Riemann hypothesis
+### 4.5.5 The Riemann hypothesis
 
 > **Riemann hypothesis (1859)**: every non-trivial zero has real part equal to 1/2.
 
 Numerical checks have examined **more than ten trillion zeros**, all on the line Re s = 1/2 (Gourdon in 2004 verified the first 10¹³ zeros ⚠ defer to the original paper for the exact figure). But no amount of checking is a proof. It is one of the seven Clay Millennium Prize Problems, with a $1 million prize.
 
-Connecting Section 3 to here: **Riemann hypothesis ⇔ every wave has amplitude √x ⇔ the error in counting primes is about √x.**
+Connecting §4.3 to here: **Riemann hypothesis ⇔ every wave has amplitude √x ⇔ the error in counting primes is about √x.**
 
 ---
 
-## 6. Zero-free regions: what can be proved when the Riemann hypothesis can't
+## 4.6 Zero-free regions: what can be proved when the Riemann hypothesis can't
 
 Since nobody can prove "all zeros are on the line 1/2," mathematicians take a step back and ask: **can we at least prove where the zeros are not?** A region proved to contain no zeros is called a **zero-free region**.
 
-### 6.1 Step one: no zeros on the line Re s = 1 (1896)
+### 4.6.1 Step one: no zeros on the line Re s = 1 (1896)
 
 The proof of the prime number theorem essentially amounts to proving that **there are no zeros on the vertical line Re s = 1**.
 
@@ -276,7 +276,7 @@ The key trick is a trigonometric identity:
 
 Combining this identity with the Euler product, one can show that if 1 + iγ were a zero, it would lead to a contradiction.
 
-### 6.2 Step two: a strip to the left of Re s = 1 that "keeps getting narrower" (1899, 1958)
+### 4.6.2 Step two: a strip to the left of Re s = 1 that "keeps getting narrower" (1899, 1958)
 
 de la Vallée Poussin (1899) pushed the result a little further: not only are there no zeros on Re s = 1, there are none in **a narrow strip to its left** either:
 
@@ -291,11 +291,11 @@ Note the ln t in the denominator: **the bigger the height t, the narrower this s
 
 Vinogradov–Korobov (1958) widened the strip a bit (the denominator changes from ln t to (ln t)^(2/3) times an even smaller factor), but **it still shrinks toward 0 with height**. This was the best result for the following 60-plus years.
 
-### 6.3 Why "keeps getting narrower" and "fixed width" are qualitatively different
+### 4.6.3 Why "keeps getting narrower" and "fixed width" are qualitatively different
 
-Back to Section 3: the error is the sum of the waves from all zeros, and **the rightmost zero** sets the size of the error.
-- If the zero-free region keeps getting narrower: in principle, higher and higher up there could be zeros whose β gets closer and closer to 1. You cannot rule them out, so the error bound can only be "a little" smaller than x. That is the exp(−c(ln x)^0.6) from Section 2.
-- If there is a zero-free region of **fixed width**, say no zeros at all in Re s > 7/8: then every zero has β ≤ 7/8, every wave is ≤ x^(7/8), and the error bound becomes of order x^(7/8). That is the **power saving** from Section 2.
+Back to §4.3: the error is the sum of the waves from all zeros, and **the rightmost zero** sets the size of the error.
+- If the zero-free region keeps getting narrower: in principle, higher and higher up there could be zeros whose β gets closer and closer to 1. You cannot rule them out, so the error bound can only be "a little" smaller than x. That is the exp(−c(ln x)^0.6) from §4.2.
+- If there is a zero-free region of **fixed width**, say no zeros at all in Re s > 7/8: then every zero has β ≤ 7/8, every wave is ≤ x^(7/8), and the error bound becomes of order x^(7/8). That is the **power saving** from §4.2.
 
 The **quasi-Riemann hypothesis** is exactly such a statement:
 
@@ -303,19 +303,23 @@ The **quasi-Riemann hypothesis** is exactly such a statement:
 
 It is much weaker than the Riemann hypothesis (θ = 1/2), but before 2026 **nobody could prove it for any θ < 1**.
 
-### 6.4 Why the classical methods can't do it
+The figure below puts §4.5 and this section on one picture of the complex plane: the known zeros, the classical zero-free region that narrows as you go up, and the fixed-width zero-free region OpenAI claims.
 
-The "3 + 4cos θ + cos 2θ ≥ 0"-type argument from Section 6.1 starts from properties of the Euler product in Re s > 1 and "seeps" a little way to the left. But this seeping power decays with the height t, so all you can get is a strip that keeps getting narrower. To get a fixed width, you need **a fundamentally different mechanism**.
+{{FIG_ZETA}}
 
-Another line of attack is called "zero-density estimates" (for example, the important breakthrough of Guth–Maynard 2024). These can prove that "there are **few** zeros with Re s > σ," but not that "there are **none at all**." And for the error bound, even a single zero with β close to 1 is enough to make the error large.
+### 4.6.4 Why the classical methods can't do it
+
+The "3 + 4cos θ + cos 2θ ≥ 0"-type argument from §4.6.1 starts from properties of the Euler product in Re s > 1 and "seeps" a little way to the left. But this seeping power decays with the height t, so all you can get is a strip that keeps getting narrower. To get a fixed width, you need **a fundamentally different mechanism**.
+
+Another line of attack is called "zero-density estimates" (for example, the important breakthrough of Guth–Maynard 2024, [arXiv:2405.20552](https://arxiv.org/abs/2405.20552)). These can prove that "there are **few** zeros with Re s > σ," but not that "there are **none at all**." The introduction of OpenAI's paper makes the same distinction explicitly [P]. And for the error bound, even a single zero with β close to 1 is enough to make the error large.
 
 ---
 
-## 7. Dirichlet L-functions and Siegel zeros
+## 4.7 Dirichlet L-functions and Siegel zeros
 
 OpenAI's result is not only about ζ; it also covers all **Dirichlet L-functions**.
 
-### 7.1 Primes in arithmetic progressions
+### 4.7.1 Primes in arithmetic progressions
 
 Apart from 2, all primes are odd, so each has the form 4k+1 (5, 13, 17, …) or 4k+3 (3, 7, 11, 19, …).
 
@@ -325,7 +329,7 @@ Computed by script:
 
 The two types are roughly half and half (type 4k+3 is usually slightly ahead, but not always: at x = 26,861 type 4k+1 takes the lead for the first time; this phenomenon is called Chebyshev's bias). In 1837 Dirichlet proved that for any modulus q and any a coprime to q, there are infinitely many primes of the form qk + a, and that in the long run the classes split evenly.
 
-### 7.2 Dirichlet L-functions
+### 4.7.2 Dirichlet L-functions
 
 To study each class separately, Dirichlet built variants of ζ:
 
@@ -337,7 +341,7 @@ L(s, χ) = χ(1)/1^s + χ(2)/2^s + χ(3)/3^s + ...
 
 **Just like ζ, the zeros of L-functions control the error in the distribution of primes across the classes mod q.**
 
-### 7.3 Siegel zeros: a ghost that has haunted the field for 90 years
+### 4.7.3 Siegel zeros: a ghost that has haunted the field for 90 years
 
 For certain special L-functions, classical methods cannot rule out one possibility: **that it has a real zero very, very close to 1**. Such a hypothetical zero is called a **Siegel zero** (or Landau–Siegel zero).
 
@@ -349,11 +353,11 @@ Worse, Siegel's related theorem from 1935 is "ineffective": it proves that a cer
 
 ---
 
-## 8. What OpenAI claims
+## 4.8 What OpenAI claims
 
-### 8.1 The main result
+### 4.8.1 The main result
 
-Abstract of the paper *The Quasi-Riemann Hypothesis: A Zero-Free Half-Plane ℜs > 7/8* (2026-09-30, 199 pages):
+Abstract of the paper [*The Quasi-Riemann Hypothesis: A Zero-Free Half-Plane ℜs > 7/8*](https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026/paper.pdf) (2026-09-30, 199 pages) [P]:
 
 > "We prove that all finite-order Hecke L-functions over Q(√−3) and all Dirichlet L-functions are zero-free in the half-plane ℜs > 7/8 … In particular, the Riemann zeta function is zero-free in this half-plane, proving the quasi-Riemann hypothesis."
 
@@ -361,12 +365,12 @@ In plain terms: **ζ and all Dirichlet L-functions have no zeros anywhere in the
 
 The paper itself makes a point of stressing: "The Riemann hypothesis remains open." The Riemann hypothesis says the zeros are all at 1/2; this only proves they are all ≤ 7/8. Between 7/8 and 1/2 there is still a large unknown territory.
 
-There are two more papers in the same family: one proves an 11/12 version by a different method (49 pages; the README says its writing was edited by humans), and a 9-page paper separately proves that Siegel zeros are uniformly ruled out.
+There are two more papers in the same family (family 003): one proves an 11/12 version by a different method (49 pages; the README says its writing was edited by humans), and a 9-page paper separately proves that Siegel zeros are uniformly ruled out.
 
-### 8.2 Intuition for the method (we only read the introduction; this is a simplified version)
+### 4.8.2 Intuition for the method (we only read the introduction; this is a simplified version)
 
 1. **Switch number systems.** Instead of working in the ordinary integers, work in the "Eisenstein integers" ℤ[ω], where ω is a cube root of unity: ω³ = 1, ω ≠ 1. You can picture them as a triangular lattice of points in the plane (the ordinary integers are points on a line, the Gaussian integers a square lattice, the Eisenstein integers a triangular lattice). The field corresponding to this number system is written ℚ(√−3).
-2. **Build one quantity and compute it two ways.** The authors construct a sum made from the coefficients of a "cubic theta series," which can be computed along two independent routes: one uses a "reflection formula," the other uses "Poisson summation." The result of the second route contains terms like 1/L(s, η), i.e. the reciprocal of an L-function.
+2. **Build one quantity and compute it two ways.** The authors build a sum from the Fourier coefficients of a "cubic theta series" (the paper calls it a "completed sum"), which can be computed along two independent routes: one uses a "reflection formula," the other uses "Poisson summation." The result of the second route contains terms like 1/L(s, η), i.e. the reciprocal of an L-function.
 3. **Contradiction.** If some L-function had a zero in Re s > 7/8, 1/L would blow up there, and the two computations could not agree. Think of it as weighing the same object on two independent scales: if an assumption would make the two scales read differently, the assumption is wrong.
 4. **Transfer to ordinary Dirichlet L-functions.** Using a factorization formula L_F(s, χ∘N) = L(s, χ) · L(s, χχ₋₃), the conclusion over ℚ(√−3) can be "split" back into L-functions over the ordinary integers, including ζ.
 
@@ -374,9 +378,11 @@ Technically there are two stages: first a simpler version gives 11/12, then extr
 
 ---
 
-## 9. How far it has been verified
+## 4.9 How far it has been verified
 
-### 9.1 The Lean statement: one line, and you can read it yourself
+### 4.9.1 The Lean statement: one line, and you can read it yourself
+
+The "challenge statement" file in the repo, `lean/ComparatorChallenges/QuasiRiemannHypothesis.lean` (it imports only Mathlib) [P]:
 
 ```lean
 theorem riemannZeta_ne_zero_of_seven_eighths_lt_re {s : ℂ} (hs : (7/8 : ℝ) < s.re) :
@@ -393,35 +399,37 @@ So this one line says: **for any complex number s, if its real part is greater t
 
 The `riemannZeta` here is the **standard definition** that has long been maintained in Mathlib (Lean's community mathematics library), not something OpenAI wrote itself. This matters: if the definition were home-made, it could quietly "change the subject."
 
-### 9.2 The proof itself
+### 4.9.2 The proof itself
 
-- The proof is about 2,926 Lean files and 487,000 lines.
-- We grepped it: no `sorry` ("leave this step blank for now"), no added axioms, no `native_decide` (a backdoor that trusts the compiler).
-- Independent re-check: Dave Goldblatt used the Lean FRO's Comparator tool, plus an independently implemented checking kernel (nanoda), and got the proof to go through, in about 63 minutes.
-- **Remaining risk**: a patch to one dependency library is about 40,000 lines, and in it two upstream `sorry`s were removed and replaced with proofs. In other words, part of the so-called "dependency library" is OpenAI's own code. The Lean kernel checks these proofs, but if definitions were changed, that could affect what the statement means. Nobody has reviewed this line by line yet.
+- The proof is about 2,926 Lean files and 487,000 lines [P].
+- We grepped it: no `sorry` ("leave this step blank for now"), no added axioms, no `native_decide` (a backdoor that trusts the compiler) [P].
+- Independent re-check: Dave Goldblatt used the Lean FRO's Comparator tool, plus an independently implemented checking kernel (nanoda), and got the proof to go through, in about 63 minutes; `#print axioms` lists only the three standard axioms (`propext`, `Quot.sound`, `Classical.choice`) [P]. Re-check repo: [davegoldblatt/openai-zeta-proof-check](https://github.com/davegoldblatt/openai-zeta-proof-check).
+- ⚠ **Remaining risk**: the dependency patch `lean/patches/PrimeNumberTheoremAnd-lean4341.patch` is about 40,000 lines, and in it two upstream `sorry`s were removed and replaced with proofs. In other words, part of the so-called "dependency library" is OpenAI's own code. (PrimeNumberTheoremAnd is the prime-number-theorem formalization project that Kontorovich, quoted below, started.) The Lean kernel checks these proofs, but if definitions were changed, that could affect what the statement means. Nobody has reviewed this line by line yet.
+- **The formalization covers only the zero-free regions themselves.** Comparator checks four statements: the 7/8 zero-free region for ζ, for Dirichlet L-functions and for Hecke L-functions over ℚ(√−3), plus a uniform gap for Siegel zeros. The scope note `lean/docs/003.md` says, verbatim, "The paper's later applications are not included" [P]. So the least-quadratic-non-residue bound and the square-root algorithm in §4.10.2 have only the paper's human-readable proof, not a Lean proof.
 
-### 9.3 Human experts
+### 4.9.3 Human experts
 
-- Alex Kontorovich (Rutgers; he himself started the Lean formalization project for the prime number theorem): "Quasi-RH?!?!???! Are you kidding me? If a human did this, it would be an instant Fields Medal…"
-- **As of 2026-10-08, no human expert has publicly said they have read and verified the 199-page paper.**
+- Alex Kontorovich (Rutgers; he himself started PrimeNumberTheoremAnd, the Lean formalization project for the prime number theorem): "Quasi-RH?!?!???! Are you kidding me? If a human did this, it would be an instant Fields Medal…" [R] ([X post](https://x.com/AlexKontorovich/status/2107609087902941646); we quote it via officechai, as the original post could not be fetched)
+- Levent Alpöge (Anthropic): "Big, big, big, big props for quasiriemann and no Siegel zeroes." [R] ([X post](https://x.com/__alpoge__/status/2107616859595981117), quoted via Latent Space)
+- ⚠ **As of 2026-10-08, no human expert has publicly said they have read and verified the 199-page paper.** Both comments above are reactions, not referee reports.
 
-### 9.4 How to think about "proved by machine, but not understood by people"
+### 4.9.4 How to think about "proved by machine, but not understood by people"
 
-If you believe two things, (1) Mathlib's definition of ζ is correct and (2) the Lean kernel has no bugs, then this theorem has been proved in the machine sense, and it is far more trustworthy than a paper nobody has refereed.
+If you believe two things, (1) Mathlib's definition of ζ is correct and (2) the Lean kernel has no bugs, then this theorem has been proved in the machine sense, and it is an order of magnitude more trustworthy than a paper nobody has refereed. The remaining risk sits in the build chain: the patches and dependency libraries all come from OpenAI (see 9.2).
 
 But the mathematical community usually also asks for **understanding**: why is it true? Does the method generalize? This is what Tao means by "the end of Math 1.0": a conclusion can be confirmed by machine first, and understanding may only catch up much later.
 
 ---
 
-## 10. If true, what it means (and what it does not mean)
+## 4.10 If true, what it means (and what it does not mean)
 
-### 10.1 For mathematics
+### 4.10.1 For mathematics
 
 1. **For the first time, the prime number theorem has an error bound with a power saving**: π(x) − Li(x) = O(x^(7/8) · (ln x)²). This is one of the biggest single steps forward in the theory of the distribution of primes in 125 years.
-2. **Siegel zeros are ruled out**: a large batch of constants that "exist but can't be computed" become computable.
+2. **Siegel zeros are ruled out**: an obstacle that since 1935 has blocked a set of "can this constant be computed?" problems disappears, and a large batch of constants that "exist but can't be computed" become computable, e.g. effective lower bounds for class numbers of imaginary quadratic fields (§4.7.3).
 3. **Pushing from 1 to 7/8 is a qualitative change, but it is still far from 1/2.** The Riemann hypothesis remains open.
 
-### 10.2 For computer science: square roots mod p
+### 4.10.2 For computer science: square roots mod p
 
 One of the paper's corollaries is an upper bound on the "least quadratic non-residue." First, what that means.
 
@@ -434,29 +442,33 @@ One of the paper's corollaries is an upper bound on the "least quadratic non-res
 
 **Why it matters**: to take a square root mod p (given a, find x with x² ≡ a), there is a classical algorithm (Tonelli–Shanks) that first needs to find **any one** quadratic non-residue. Pick a number at random and there is a one-in-two chance it is a non-residue, so the randomized algorithm is fast. But a **deterministic** algorithm (no dice) has to guarantee that "if you try numbers upward from 2, you will hit a non-residue quickly," and for that you need to know how small the least non-residue is.
 
-The paper derives: least quadratic non-residue ≤ C · (ln p)^32. That is, trying upward from 2, you are guaranteed to find one within on the order of (ln p)^32 tries, so taking square roots gets an **unconditional** deterministic polynomial-time algorithm. Previously this conclusion required assuming the "generalized Riemann hypothesis."
+The paper's Corollary 1.2 derives: least quadratic non-residue ≤ C · (ln p)^32 (C is an absolute constant; the paper says 32 is just one workable value and was not optimized) [P]. That is, trying upward from 2, you are guaranteed to find one within on the order of (ln p)^32 tries, so taking square roots gets an **unconditional** deterministic polynomial-time algorithm. Previously this conclusion required assuming the "generalized Riemann hypothesis."
+
+The same fixed-width zero-free region also makes the **Miller primality test** (Miller 1976, which likewise relied on the generalized Riemann hypothesis) an unconditional deterministic polynomial-time algorithm. This one is stated in the introduction of the companion 11/12 paper in the same family [P]; Corollary 1.2 of the 7/8 paper itself only states the non-residue bound and square roots. Since 7/8 is stronger than 11/12, the conclusion carries over.
+
+A reminder (see 9.2): none of these corollaries is inside the Lean formalization.
 
 **No impact on practical cryptography**:
 - In practice people have always used the randomized algorithm, which is already fast.
 - A deterministic polynomial-time algorithm for primality testing has existed since 2002 (AKS).
 - The security of RSA and elliptic-curve cryptography rests on "factoring large numbers is hard" and "discrete logarithms are hard," which have nothing to do with this result.
 
-### 10.3 For AI
+### 4.10.3 For AI
 
 This is one of the strongest cases of "AI gets a result on an open problem that humans agree is hard-core, and the result is machine-verified." It also creates a new situation: **a 199-page paper + 480,000 lines of Lean**, where trust rests mainly on "are the kernel and the definitions correct," not on "has anyone understood it." Human reviewing bandwidth has become the new bottleneck.
 
 ---
 
-## 11. Self-test
+## 4.11 Self-test
 
 Try to answer these after reading. If you can't, go back and reread the corresponding section.
 
-1. In one sentence: why does the "real part" of the zeros affect the error in counting primes? (Section 3)
-2. What is the fundamental difference in shape between de la Vallée Poussin's zero-free region and the quasi-Riemann hypothesis's zero-free region? Why does that difference matter? (Sections 6.2–6.3)
-3. Why can't zero-density estimates, however good, replace a zero-free region? (Section 6.4)
-4. What is a Siegel zero? Why does the quasi-Riemann hypothesis rule it out? (Section 7.3)
-5. In the Lean statement, what does the hypothesis `hs` in front of `riemannZeta s ≠ 0` say? (Section 9.1)
-6. Why does this result not affect the security of RSA? (Section 10.2)
+1. In one sentence: why does the "real part" of the zeros affect the error in counting primes? (§4.3)
+2. What is the fundamental difference in shape between de la Vallée Poussin's zero-free region and the quasi-Riemann hypothesis's zero-free region? Why does that difference matter? (§4.6.2–4.6.3)
+3. Why can't zero-density estimates, however good, replace a zero-free region? (§4.6.4)
+4. What is a Siegel zero? Why does the quasi-Riemann hypothesis rule it out? (§4.7.3)
+5. In the Lean statement, what does the hypothesis `hs` in front of `riemannZeta s ≠ 0` say? (§4.9.1)
+6. Why does this result not affect the security of RSA? (§4.10.2)
 
 ---
 
@@ -486,7 +498,10 @@ Try to answer these after reading. If you can't, go back and reread the correspo
 
 ## Appendix: Further reading
 
-- **3Blue1Brown**, *Visualizing the Riemann zeta function and analytic continuation* (YouTube): an animated version of Section 5.3, "analytic continuation." Highly recommended.
-- **3Blue1Brown**, *But what is the Fourier Transform?*: the intuition behind Section 3, "breaking a signal into waves."
+- **3Blue1Brown**, *Visualizing the Riemann zeta function and analytic continuation* (YouTube): an animated version of §4.5.3, "analytic continuation." Highly recommended.
+- **3Blue1Brown**, *But what is the Fourier Transform?*: the intuition behind §4.3, "breaking a signal into waves."
 - **Barry Mazur & William Stein**, *Prime Numbers and the Riemann Hypothesis* (Cambridge University Press, 2016): a book written specifically for readers who are not math specialists; the first half needs only high-school math.
 - Original paper: https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-September-30-2026/paper.pdf
+- Companion papers: the 11/12 version https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026/paper2.pdf ; Siegel zeros https://github.com/openai/math/blob/main/preprints/Uniform-exclusion-of-Landau-Siegel-zeros-October-1-2026/paper.pdf
+- Lean scope note: https://github.com/openai/math/blob/main/lean/docs/003.md ; challenge statement: https://github.com/openai/math/blob/main/lean/ComparatorChallenges/QuasiRiemannHypothesis.lean
+- Dave Goldblatt's independent re-check: https://github.com/davegoldblatt/openai-zeta-proof-check

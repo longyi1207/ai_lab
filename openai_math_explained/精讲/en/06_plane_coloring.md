@@ -1,12 +1,12 @@
-# Explainer 06: The chromatic number of the plane χ ≥ 6 (the Hadwiger–Nelson problem)
+# The chromatic number of the plane χ ≥ 6 (the Hadwiger–Nelson problem)
 
-> This is the "explained from zero" version of §9 of the deck in `notes/openai_math_explained/` (`<section id="color">`). The only prerequisites: you know what a graph is (vertices + edges), you can use the Pythagorean theorem to compute the distance between two points, and you know cos/sin. Words like measure and ergodic theory are explained the first time they appear.
-> Every number in the text is either computed by script (script: `精讲/scripts/06_coloring.py`, with results copied into the text) or has a source. The **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
-> Estimated reading time: 50–80 minutes. You can read it in three sittings: Sections 1–4 (graph coloring, lower bound 4, upper bound 7), Sections 5–7 (the 2018 breakthrough, "weird sets" and the axiom of choice, why 6 is hard), Sections 8–10 (OpenAI's result, verification, what it means).
+> The only prerequisites: you know what a graph is (vertices + edges), you can use the Pythagorean theorem to compute the distance between two points, and you know cos/sin. Words like measure and ergodic theory are explained the first time they appear.
+> Every number in the text is either computed by script (script: `精讲/scripts/06_coloring.py`, with results copied into the text) or has a source. The **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter. Tags: **[P]** = primary material read (paper, openai/math repository file or Lean source); **[R]** = secondary reporting (blogs, news); **⚠** = something I could not verify, or where sources conflict; "speculation" = my own judgment.
+> Estimated reading time: 50–80 minutes. You can read it in three sittings: §9.1–9.4 (graph coloring, lower bound 4, upper bound 7), §9.5–9.7 (the 2018 breakthrough, "weird sets" and the axiom of choice, why 6 is hard), §9.8–9.10 (OpenAI's result, verification, what it means, ending with the Borsuk counterexample from the same batch).
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 9.0 The bottom line: the one thing this chapter explains
 
 The problem itself is something a grade-schooler can understand: **give every point in the plane a color, so that any two points at distance exactly 1 have different colors. What is the minimum number of colors?** This minimum is called the "chromatic number of the plane", written χ(ℝ²).
 
@@ -23,9 +23,9 @@ After reading this chapter, you should be able to explain in your own words:
 
 ---
 
-## 1. Graph coloring: an old friend from CS
+## 9.1 Graph coloring: an old friend from CS
 
-### 1.1 Definitions
+### 9.1.1 Definitions
 
 A **graph** is a set of vertices plus a set of edges. A **proper coloring**: give each vertex a color so that any two vertices joined by an edge have different colors. The minimum number of colors a graph needs is its **chromatic number** χ(G).
 
@@ -35,7 +35,7 @@ You've seen this in CS:
 
 Deciding whether a general graph can be 3-colored is NP-complete. This will matter later: with brute-force computer search, once the graph gets big, the search becomes infeasible.
 
-### 1.2 A few toys to work by hand
+### 9.1.2 A few toys to work by hand
 
 - One edge: needs 2 colors.
 - **Triangle** (3 points, all pairwise connected): 2 colors aren't enough. The script enumerated all 2³ = 8 colorings and found **0** proper ones. So a triangle needs 3 colors.
@@ -45,9 +45,9 @@ Deciding whether a general graph can be 3-colored is NP-complete. This will matt
 
 ---
 
-## 2. Turning the whole plane into a graph
+## 9.2 Turning the whole plane into a graph
 
-### 2.1 The unit-distance graph
+### 9.2.1 The unit-distance graph
 
 Now treat **every point of the plane** as a vertex (there are uncountably infinitely many), and join two points by an edge if and only if their distance is **exactly 1**. This enormous graph is called the **unit-distance graph** of the plane, and its chromatic number is χ(ℝ²).
 
@@ -55,20 +55,20 @@ An equivalent way to say it: split the plane into k pieces (one color per piece)
 
 Two things to note:
 - The distance is "exactly 1", not "less than 1". Two points at distance 0.999 or 1.001 may have the same color.
-- **There is no requirement at all on the shape of the color pieces.** They can be nice hexagons, or weird sets built with the axiom of choice that can't be drawn at all. This is the core difficulty of the whole problem; Section 6 is devoted to it.
+- **There is no requirement at all on the shape of the color pieces.** They can be nice hexagons, or weird sets built with the axiom of choice that can't be drawn at all. This is the core difficulty of the whole problem; §9.6 is devoted to it.
 
-### 2.2 The first few steps
+### 9.2.2 The first few steps
 
 - **χ ≥ 2**: any two points at distance 1 already need 2 colors.
-- **χ ≥ 3**: draw an equilateral triangle with side 1. Its three points are pairwise at distance 1; it's the triangle from Section 1.2, and 2 colors aren't enough.
+- **χ ≥ 3**: draw an equilateral triangle with side 1. Its three points are pairwise at distance 1; it's the triangle from §9.1.2, and 2 colors aren't enough.
 
 The recipe for lower bounds is set right here: **find a finite set of points in the plane whose unit-distance edges form a graph, prove that this finite graph can't be colored with k colors, and then the plane can't be colored with k colors either** (because any proper coloring of the plane, restricted to these few points, is a proper coloring of this small graph).
 
 ---
 
-## 3. Lower bound 4: the Moser spindle (1961)
+## 9.3 Lower bound 4: the Moser spindle (1961)
 
-### 3.1 Step one: a rhombus forces its two tips to share a color
+### 9.3.1 Step one: a rhombus forces its two tips to share a color
 
 Put two equilateral triangles of side 1 together to form a rhombus: O=(0,0), B=(1/2, √3/2), C=(1,0), T=(3/2, √3/2). O–B–C is one triangle, B–C–T is the other, and they share the edge BC.
 
@@ -76,7 +76,7 @@ With only 3 colors: O, B and C are pairwise adjacent, so each takes one of the t
 
 The distance between O and T is √3 ≈ 1.732 (computed by script), not 1, so their sharing a color does not by itself break any rule.
 
-### 3.2 Step two: add a second rhombus and rotate it
+### 9.3.2 Step two: add a second rhombus and rotate it
 
 Rotate the whole rhombus about O by an angle θ to get a second rhombus O, B₂, C₂, T₂. By the same argument, T₂ must also have the same color as O. Now choose θ so that the distance between T and T₂ is exactly 1.
 
@@ -90,7 +90,11 @@ Setting it equal to 1 gives **cos θ = 5/6**, θ ≈ 33.56° (computed by script
 
 Now T and T₂ must both have the same color as O, but they are at distance 1 from each other, so they must have different colors. **Contradiction. So 3 colors aren't enough, and χ ≥ 4.**
 
-### 3.3 Script check
+The figure below puts the two rhombi, the 11 unit-length edges and this argument together (the two tips are labeled T₁ and T₂ in the figure). The lower right shows how the known range for the chromatic number of the plane has changed; the next few sections cover each step.
+
+{{FIG_MOSER}}
+
+### 9.3.3 Script check
 
 The script builds 7 points from the coordinates above:
 
@@ -118,24 +122,24 @@ So this 7-point, 11-edge graph has chromatic number exactly 4. It is called the 
 
 ---
 
-## 4. Upper bound 7: a hexagonal tiling
+## 9.4 Upper bound 7: a hexagonal tiling
 
 Lower bounds come from "finding a small graph that can't be colored". An upper bound requires **giving a coloring that is proper for the entire plane**.
 
-### 4.1 The construction
+### 9.4.1 The construction
 
 1. Tile the plane with regular hexagons (a honeycomb). The paper takes the hexagons' circumradius to be r = 2/5.
 2. Any two points in the same hexagon are at distance at most its diameter, 2r = 0.8 < 1. **So a whole hexagon can be given one color**, and no pair of points inside it is at distance 1.
 3. Color the hexagons periodically with 7 colors, so that two different hexagons of the same color are far enough apart. In the paper, the centers of same-colored hexagons are at least √21·r ≈ 1.833 apart, so points in the two pieces are at least (√21 − 2)·r ≈ **1.033 > 1** apart (computed by script).
 4. Points on the boundaries can be assigned to any one of the adjacent pieces (this is how the paper handles them, and the Lean version also covers the boundaries).
 
-### 4.2 Where "7 colors" comes from
+### 9.4.2 Where "7 colors" comes from
 
-The centers of the hexagons form a triangular lattice. The paper writes it with complex numbers: lattice points have the form a·(m + n·ω), where ω = e^(2πi/3) is a cube root of unity (the Eisenstein integers from Explainer 01 §8.2 show up again).
+The centers of the hexagons form a triangular lattice. The paper writes it with complex numbers: lattice points have the form a·(m + n·ω), where ω = e^(2πi/3) is a cube root of unity (the Eisenstein integers from §4, §9.8.2, show up again).
 
 Multiplying by (2 − ω) gives a sublattice that is "scaled up and rotated a bit". It makes up 1/7 of the original lattice, because |2 − ω|² = 7 (computed by script: 7.000000000000001, where the last digit is floating-point error). The original lattice splits into 7 classes according to "which translated copy of the sublattice a point belongs to", and each class gets one color. In the script this corresponds to a very simple rule: the center a·(m + nω) gets color (m + 2n) mod 7.
 
-### 4.3 Script check
+### 9.4.3 Script check
 
 The script randomly scattered **200,000** pairs of points at distance exactly 1 (for each pair, pick a random point, then walk distance 1 in a random direction), colored them with the rule above, and found **0 pairs with the same color**.
 
@@ -145,13 +149,13 @@ So **4 ≤ χ(ℝ²) ≤ 7**. This interval held from 1950 (Nelson got 4 and Isb
 
 ---
 
-## 5. 2018: de Grey pushes the lower bound to 5
+## 9.5 2018: de Grey pushes the lower bound to 5
 
-### 5.1 A breakthrough by an amateur mathematician
+### 9.5.1 A breakthrough by an amateur mathematician
 
-In April 2018, Aubrey de Grey (known for his research on the biology of aging; mathematics is a hobby for him) posted *The chromatic number of the plane is at least 5* on arXiv (arXiv:1804.02385). The method was still the recipe from Section 2.2: assemble a huge finite unit-distance graph out of many parts like the Moser spindle, and prove that it **can't be 4-colored**. The corrected graph has **1581 vertices**, and the "can't be 4-colored" step was verified by computer.
+In April 2018, Aubrey de Grey (known for his research on the biology of aging; mathematics is a hobby for him) posted *The chromatic number of the plane is at least 5* on arXiv (arXiv:1804.02385). The method was still the recipe from §9.2.2: assemble a huge finite unit-distance graph out of many parts like the Moser spindle, and prove that it **can't be 4-colored**. The corrected graph has **1581 vertices**, and the "can't be 4-colored" step was verified by computer.
 
-### 5.2 Follow-ups: making the evidence smaller and readable
+### 9.5.2 Follow-ups: making the evidence smaller and readable
 
 | Year | Who | What they did | Source |
 |---|---|---|---|
@@ -164,7 +168,7 @@ This phase also included the crowdsourced project Polymath16 (organized by Dusti
 
 **Where the 509 points come from**: according to the introduction of the OpenAI paper, SAT plus unsatisfiable cores gave Heule's **553** points; the **509** points came from Parts's graph minimization. Both are connected to Polymath16.
 
-### 5.3 Why this road keeps getting harder
+### 9.5.3 Why this road keeps getting harder
 
 A graph with n vertices and k colors has kⁿ possible colorings (orders of magnitude computed by script):
 
@@ -177,7 +181,7 @@ A graph with n vertices and k colors has kⁿ possible colorings (orders of magn
 
 A SAT solver of course doesn't enumerate these one by one; it relies on pruning. But to prove "there are none at all", the solver has to rule out the whole space, and the graph for 5 colors is expected to be much larger still. Going from 4 to 5 already needed a graph with over a thousand points; going from 5 to 6, nobody knows how big the graph has to be, and nobody found one during Polymath16.
 
-### 5.4 A safety-net theorem: de Bruijn–Erdős compactness
+### 9.5.4 A safety-net theorem: de Bruijn–Erdős compactness
 
 If the finite graph we're looking for might be absurdly large, **does it necessarily exist**? Yes. This is the **de Bruijn–Erdős theorem (1951)**:
 
@@ -189,9 +193,9 @@ Here is an analogy that comes naturally to CS people: it's like "if every finite
 
 ---
 
-## 6. The real difficulty: weird sets, measurability and the axiom of choice
+## 9.6 The real difficulty: weird sets, measurability and the axiom of choice
 
-### 6.1 What "measurable" means
+### 9.6.1 What "measurable" means
 
 Roughly speaking, a set in the plane is **measurable** if it has a sensible "area". Every shape you can draw (polygons, disks, countable unions of them, plus some more complicated but "well-behaved" sets) is measurable.
 
@@ -199,7 +203,7 @@ But in the usual set theory (ZFC, the axiom system that includes the **axiom of 
 
 **The axiom of choice** says: given infinitely many nonempty boxes, you can always pick one element from each box, even if you can't write down a rule for picking. The vast majority of mathematicians accept it by default.
 
-### 6.2 The measurable chromatic number: a different problem
+### 9.6.2 The measurable chromatic number: a different problem
 
 If you require each color class to be measurable, the minimum number of colors is called the **measurable chromatic number** χ_m(ℝ²). Clearly χ_m ≥ χ (an extra restriction can only make coloring harder).
 
@@ -207,7 +211,7 @@ If you require each color class to be measurable, the minimum number of colors i
 
 In other words, **under the "measurable" restriction, 5 was proved back in 1981**, 37 years before de Grey. The hard part is removing the "measurable" condition.
 
-### 6.3 A cautionary example
+### 9.6.3 A cautionary example
 
 The introduction of the OpenAI paper cites an example by Payne (2009) that illustrates the issue well: consider a subgraph of the plane in which two points are joined only when their difference is exactly "a unit vector with rational coordinates" (for example, (3/5, 4/5)).
 - If any coloring is allowed, **2 colors** are enough for this graph;
@@ -215,7 +219,7 @@ The introduction of the OpenAI paper cites an example by Payne (2009) that illus
 
 So "measurable colorings" and "arbitrary colorings" can't be assumed to be the same, even when their distance constraints look identical. (⚠ I didn't read Payne's original; this restates what §1 of the OpenAI paper says.)
 
-### 6.4 Shelah–Soifer: the answer might depend on the axioms
+### 9.6.4 Shelah–Soifer: the answer might depend on the axioms
 
 In *Axiom of choice and chromatic number of the plane* (J. Combin. Theory Ser. A 103 (2003) 387–391), Shelah and Soifer constructed some "distance graphs" whose chromatic number **depends on which axioms you use**: it is 2 in ZFC, but uncountable in the axiom system that "drops the axiom of choice and replaces it with 'every set of reals is measurable'" (ZF + DC + LM; Solovay proved in 1970 that this system is consistent, provided you assume an "inaccessible cardinal" exists).
 
@@ -223,7 +227,7 @@ They also proposed a conditional theorem, roughly: if all finite unit-distance g
 
 The premise of this conditional theorem has been refuted by de Grey, but the possibility it reveals is still there: **"how many colors the plane really needs" might not have an answer independent of the axioms.** That is also why the OpenAI paper states at the very start that it is "working throughout in ZFC".
 
-### 6.5 "Nice" colorings: the answer is already known to be 7
+### 9.6.5 "Nice" colorings: the answer is already known to be 7
 
 If you require the color pieces to be "map-like" (with regular curves as boundaries), the situation is different again:
 - Townsend (announced 1981, details published 2005): map-like colorings need at least **6** colors.
@@ -233,7 +237,7 @@ In other words, **for colorings "you can draw", the answer is 7**. The remaining
 
 ---
 
-## 7. Why ≥ 6 is hard: both roads are blocked
+## 9.7 Why ≥ 6 is hard: both roads are blocked
 
 Before 2026, the situation looked like this:
 
@@ -251,11 +255,11 @@ OpenAI's paper corresponds exactly to these two steps.
 
 ---
 
-## 8. What OpenAI claims
+## 9.8 What OpenAI claims
 
-### 8.1 The main result
+### 9.8.1 The main result
 
-The abstract of the paper *The Euclidean plane is not five-colorable* (OpenAI, 2026-09-23, 62 pages, Family 158):
+The abstract of the paper *The Euclidean plane is not five-colorable* (OpenAI, 2026-09-23, 62 pages, Family 158) [P]:
 
 > "We prove that every coloring of the Euclidean plane with five colors has a monochromatic unit-distance pair, with no regularity assumption on the color classes. Consequently, the chromatic number of the plane is either six or seven."
 
@@ -263,9 +267,9 @@ In plain words: **every 5-coloring of the plane contains two points at distance 
 
 The paper's Theorem 1.1 writes this as 6 ≤ χ(ℝ²) ≤ 7, and immediately adds: "The remaining alternatives six and seven are unresolved."
 
-**A common misreading**: it is easy to assume this result is "find a bigger finite graph and verify it with SAT". **It isn't.** The paper never gives a single finite graph that can't be 5-colored.
+**A common misreading**: it is easy to assume this result is "find a bigger finite graph and verify it with SAT". **It isn't.** The standard recipe for lower bounds had always been "find a finite graph and prove it can't be k-colored" (the recipe from §9.2.2, and de Grey's route), but this paper never gives a single finite graph that can't be 5-colored. It uses ergodic theory and measure theory instead, which is what makes it surprising.
 
-### 8.2 The two halves of the proof
+### 9.8.2 The two halves of the proof
 
 The paper splits the proof into two theorems:
 
@@ -276,30 +280,30 @@ Together: if there were a proper 5-coloring, then by 1.3 there would be a weakly
 
 **What a "weakly measurable k-coloring" is** (a plain-language version of Definition 1.2): every color piece is measurable, and the "same-colored unit-distance pairs" are null in the sense of measure. That is, exceptional same-colored pairs are allowed, but there are so few of them that they have zero area and can be ignored. This is weaker than a "proper coloring" (it allows measure-zero violations), and more regular than an "arbitrary coloring" (it must be measurable).
 
-### 8.3 Intuition for the first half: "averaging" a weird coloring into a statistical regularity
+### 9.8.3 Intuition for the first half: "averaging" a weird coloring into a statistical regularity
 
 What follows is my simplified paraphrase of §1.1 of the paper; the technical details go far beyond this.
 
 1. **First shrink to a countable point set.** Take all points whose coordinates are **algebraic numbers** (roots of polynomial equations, like √2 or (1+√5)/2), and call this set E. It has only countably many points, but it is dense in the plane, and it is closed under "multiplying by an algebraic complex number of absolute value 1" (that is, rotation by an algebraic angle).
-2. **Average over translations and rotations.** Restrict the weird coloring to E, then "take the average" over all translations and rotations to get a **random coloring** whose statistics are invariant under any translation or rotation. Averaging like this relies on these groups being **amenable** (roughly, "you can take a fair average over them"; the chapter on Thompson's group, family 248, covers this in detail).
+2. **Average over translations and rotations.** Restrict the weird coloring to E, then "take the average" over all translations and rotations to get a **random coloring** whose statistics are invariant under any translation or rotation. Averaging like this relies on these groups being **amenable** (roughly, "you can take a fair average over them"). This connects directly to §10: §10 explains amenability in detail, and what it proves about Thompson's group F (family 248) is exactly that it is **not** amenable.
 
    An analogy with something familiar: this is like turning a very irregular signal into a **stationary random process**. A single sample may be weird, but its statistics (for example, its autocorrelation function) are regular.
 3. **Use the spectral theorem for a "Fourier decomposition".** A stationary process can be decomposed by frequency (compare the power spectrum of an EEG). Here the "frequencies" come in two kinds: ordinary continuous frequencies (corresponding to ordinary waves exp(iξ·z) on the plane), and a kind of "wild" frequency that only makes sense on the countable point set E.
 4. **Rigidity theorem (Theorem 2.3)**: any distribution that is invariant under rotations and does not sit on the ordinary frequencies **must be completely uniform noise** (Haar measure). Uniform noise has zero correlation under any nonzero translation, so throwing it away doesn't break the correlation condition "unit-distance pairs have different colors". The proof of this step uses the **Furstenberg–Zimmer structure of compact extensions**, a tool from ergodic theory developed for proving Szemerédi's theorem.
 5. **The remaining ordinary-frequency part can be extended to the whole plane**, giving a genuine measurable function. Then taking the most likely color at each point gives a weakly measurable coloring.
 
-The reverse direction (weakly measurable ⇒ proper) uses a Falconer-style density-point argument plus the de Bruijn–Erdős compactness from Section 5.4.
+The reverse direction (weakly measurable ⇒ proper) uses a Falconer-style density-point argument plus the de Bruijn–Erdős compactness from §9.5.4.
 
-### 8.4 Intuition for the second half: ruling out 5 colors with geometry
+### 9.8.4 Intuition for the second half: ruling out 5 colors with geometry
 
 Again a simplified paraphrase:
 
-1. **"Palette"**: around each point x, look at the unit circle and record which colors appear in which directions on the circle. The paper proves that almost every such palette has **at most 2 colors** (§5).
-2. **A "boundary graph" between colors**: treat the 5 colors as vertices and record which pairs of colors have a lot of transitions between them. The paper proves this graph contains a **cycle** (§6–7, using mollification, thresholding and a topological argument about coverings of the plane).
-3. **A cycle on 5 colors can only have length 3, 4 or 5**, and §8 rules them out one by one:
+1. **"Palette"**: around each point x, look at the unit circle and record which colors appear in which directions on the circle. The paper proves that almost every such palette has **at most 2 colors** (paper §5).
+2. **A "boundary graph" between colors**: treat the 5 colors as vertices and record which pairs of colors have a lot of transitions between them. The paper proves this graph contains a **cycle** (paper §6–7, using mollification, thresholding and a topological argument about coverings of the plane).
+3. **A cycle on 5 colors can only have length 3, 4 or 5**, and the paper's §8 rules them out one by one:
    - 5-cycle: a combinatorial contradiction about a "6-letter angle word";
    - 4-cycle: a parity contradiction;
-   - 3-cycle: it leaves an open region that uses only 3 colors, and then a "placement certificate" with rational coordinates puts **the 7 points of the Moser spindle** into this region. Section 3 already proved that 3 colors aren't enough for those 7 points: contradiction.
+   - 3-cycle: it leaves an open region that uses only 3 colors, and then a "placement certificate" with rational coordinates puts **the 7 points of the Moser spindle** into this region. §9.3 already proved that 3 colors aren't enough for those 7 points: contradiction.
 
 You can see the definition of this "three-color region" directly in the Lean code (`OAI/Geometry/PlaneColoring/Moser.lean`):
 
@@ -311,18 +315,18 @@ def ThreeLabelRegion (x y : ℝ) : Prop :=
 
 It's a region of the plane described by polynomial inequalities, and each point of the spindle has to be verified to lie inside it. **The whole 62-page argument starts from the 7-point toy of 1961 and comes back to it in the end.**
 
-### 8.5 Two side results
+### 9.8.5 Two side results
 
 - **Corollary 1.5 (the "bad fraction" has a positive lower bound)**: there is a constant δ > 0 such that in any 5-coloring, the fraction of "randomly placed needles of length 1 whose two ends have the same color" is at least δ. But the paper itself says: "The graph and the positive constant here are existential." That is, δ is **only known to exist; nobody knows how big it is**, because it comes from that finite graph needing 6 colors whose shape nobody knows.
-- **Footnote 1 (Reed's manuscript, 2026-05)**: Reed claims χ = 7 and attaches a "formalized theorem". The OpenAI paper points out that this theorem put a **false** density upper bound in as a **hypothesis** (counterexample: the half-open arc {e^(it) : 0 ≤ t < π/3}), so the formalization itself is not wrong; what's wrong is the proposition being proved. ⚠ I didn't read Reed's original manuscript; I only saw OpenAI's account of it. This example will be used in Section 9.
+- **Footnote 1 (Reed's manuscript, 2026-05)**: Reed claims χ = 7 and attaches a "formalized theorem". The OpenAI paper points out that this theorem put a **false** density upper bound in as a **hypothesis** (counterexample: the half-open arc {e^(it) : 0 ≤ t < π/3}), so the formalization itself is not wrong; what's wrong is the proposition being proved. ⚠ I didn't read Reed's original manuscript; I only saw OpenAI's account of it. This example will be used in §9.9.
 
 ---
 
-## 9. How far it has been verified
+## 9.9 How far it has been verified
 
-### 9.1 The Lean statement: two lines, you can read it yourself
+### 9.9.1 The Lean statement: two lines, you can read it yourself
 
-File `lean/ComparatorChallenges/EuclideanFiveColor.lean` (snapshot fd4aeeb):
+File `lean/ComparatorChallenges/EuclideanFiveColor.lean` (snapshot fd4aeeb) [P]:
 
 ```lean
 def ProperColoring (colorCount : ℕ) (coloring : ℂ → Fin colorCount) : Prop :=
@@ -338,11 +342,11 @@ Word-by-word translation:
 - `coloring point ≠ coloring otherPoint`: then their colors differ. This is exactly "proper coloring".
 - `¬ ∃ coloring : ℂ → Fin 5, ProperColoring 5 coloring`: there **does not exist** any proper 5-coloring.
 
-This is exactly the original statement of "5 colors aren't enough" for the Hadwiger–Nelson problem, with no sneaked-in measurability and no extra premises. Compared with the quasi-Riemann hypothesis in Explainer 01, it doesn't even depend on whether Mathlib's definition of some complicated function (like ζ) is correct; it only uses complex numbers, the modulus and finite sets. **This is one of the easiest statements for a human to audit in the entire OpenAI repository.**
+This is exactly the original statement of "5 colors aren't enough" for the Hadwiger–Nelson problem, with no sneaked-in measurability and no extra premises, so **the statement is faithful to the original problem**. The repository's scope note `lean/docs/158.md` also says explicitly that the lower bound "applies to arbitrary colorings, with no measurability or continuity assumption" [P]. Compared with the quasi-Riemann hypothesis in §4, it doesn't even depend on whether Mathlib's definition of some complicated function (like ζ) is correct; it only uses complex numbers, the modulus and finite sets. **This is one of the easiest statements for a human to audit in the entire OpenAI repository.**
 
 The upper bound is formalized too: `properColoring_seven` in `ComparatorChallenges/PlaneColoring.lean`, where the plane is `EuclideanSpace ℝ (Fin 2)` and the condition is `dist x y = 1 → c x ≠ c y`. The proof file `Seven.lean` is only 68 lines.
 
-### 9.2 The proof itself (statistics we ran ourselves)
+### 9.9.2 The proof itself (statistics we ran ourselves, [P])
 
 - The proof entry point is `OAI/Geometry/PlaneColoring/Five.lean`. A script followed its `import`s to collect all of its transitive dependencies inside the OAI directory: **70 files, 30,406 lines**.
 - grep over these 70 files: **no** `sorry`, `admit`, custom `axiom` or `native_decide`.
@@ -356,17 +360,17 @@ The upper bound is formalized too: `properColoring_seven` in `ComparatorChalleng
   ```
 
 - The Comparator configuration (`EuclideanFiveColor.json`) allows only the three standard axioms: `propext`, `Quot.sound` and `Classical.choice`. Note:
-  - `Classical.choice` is the **axiom of choice** in Lean. So what this formalization proves is "in mathematics with the axiom of choice, the plane can't be 5-colored", which agrees with the paper's "in ZFC". The point in Section 6.4 that "with a different set of axioms the answer may differ" is not touched by this proof.
-  - `"enable_nanoda": false`: an independent second checking kernel is **not** enabled. Someone independently re-checked the quasi-Riemann hypothesis of Explainer 01 with nanoda; for this one, as of 2026-10-08 we found no public record of an independent re-check ⚠.
+  - `Classical.choice` is the **axiom of choice** in Lean. So what this formalization proves is "in mathematics with the axiom of choice, the plane can't be 5-colored", which agrees with the paper's "in ZFC". The point in §9.6.4 that "with a different set of axioms the answer may differ" is not touched by this proof.
+  - `"enable_nanoda": false`: an independent second checking kernel is **not** enabled. Someone independently re-checked the quasi-Riemann hypothesis of §4 with nanoda; for this one, as of 2026-10-08 we found no public record of an independent re-check ⚠.
 - We did **not compile** this proof ourselves; the above comes from reading the source.
 
-### 9.3 Human experts
+### 9.9.3 Human experts
 
-- **Gil Kalai** (blog post, 2026-10-07): "The new manuscript raises the lower bound to six, leaving six and seven as the two possible answers." The disclaimer section of the same post says "even Lean verification may have issues".
+- **Gil Kalai** (blog post, 2026-10-07): "The new manuscript raises the lower bound to six, leaving six and seven as the two possible answers." The disclaimer section of the same post says "even Lean verification may have issues". [R]
 - **As of 2026-10-08, we found no public statement from de Grey, Polymath16 members or other combinatorial geometry experts saying they had read and verified the 62 pages.**
 - The 2026-10-07 history of the OpenAI repository lists 3 retractions and 14 revisions; **this paper is not among them**. Family 158 is also **not** among the 10 families whose reasoning summaries are published in the README.
 
-### 9.4 How to think about the remaining risk
+### 9.9.4 How to think about the remaining risk
 
 - **Statement risk: very low.** Two lines that anyone can check against the original problem; see 9.1.
 - **Proof risk: depends on the Lean kernel and Mathlib.** The measure theory, spectral theorem and so on used in the proof come from Mathlib or from these 70 files; the kernel checks every step. As long as the kernel has no bug and the statement is right, the conclusion holds.
@@ -375,40 +379,62 @@ The upper bound is formalized too: `properColoring_seven` in `ComparatorChalleng
 
 ---
 
-## 10. What it would mean if true (and what it would not)
+## 9.10 What it would mean if true (and what it would not)
 
-### 10.1 For mathematics
+### 9.10.1 For mathematics
 
 1. **χ(ℝ²) ∈ {6, 7}.** This is the first progress since 2018, and the first time the lower bound has been pushed without a finite graph.
 2. **The transfer theorem itself may matter more than the "6"**: it holds for all k, which amounts to saying that "arbitrary colorings" and "weakly measurable colorings" are the same thing for this problem. Future work on the problem can go straight to the measurable world and use analytic tools, without worrying about weird sets. (This is my judgment; it counts as speculation.)
-3. **A new open problem**: by de Bruijn–Erdős, there must be a finite unit-distance graph that can't be 5-colored, but nobody knows what it looks like or how big it is. Finding it (for example, with a SAT solver) would give a completely independent proof that can be verified finitely. This is a natural follow-up target for "AI + SAT" (speculation).
+3. **A new open problem**: by de Bruijn–Erdős, there must be a finite unit-distance graph that can't be 5-colored (that is, one needing at least 6 colors), but nobody knows what it looks like or how big it is. Finding it (for example, with a SAT solver) would give a completely independent proof that can be verified finitely. This is a natural follow-up target for "AI + SAT" (speculation).
 
-### 10.2 What it does not mean
+### 9.10.2 What it does not mean
 
 - **It doesn't decide between 6 and 7.** The paper says explicitly that both possibilities remain unresolved.
-- Section 6.5 says "nice colorings need 7 colors", so if the answer is 6, the coloring must use weird sets or extremely irregular measurable sets. Some people will guess from this that the answer is 7, but that's only intuition, not evidence (speculation).
-- **It says nothing about worlds without the axiom of choice.** The proof is carried out in ZFC (`Classical.choice` in Lean). The question from Section 6.4 of what happens in a world where "all sets are measurable" is still open. Intuitively, in that world every coloring is measurable, so the geometric part, Theorem 1.4, would seem to be enough; but I haven't checked whether its proof uses more choice than DC ⚠ (speculation).
+- §9.6.5 says "nice colorings need 7 colors", so if the answer is 6, the coloring must use weird sets or extremely irregular measurable sets. Some people will guess from this that the answer is 7, but that's only intuition, not evidence (speculation).
+- **It says nothing about worlds without the axiom of choice.** The proof is carried out in ZFC (`Classical.choice` in Lean). The question from §9.6.4 of what happens in a world where "all sets are measurable" is still open. Intuitively, in that world every coloring is measurable, so the geometric part, Theorem 1.4, would seem to be enough; but I haven't checked whether its proof uses more choice than DC ⚠ (speculation).
 - **It gives no numerical value for δ**, and no concrete finite graph needing 6 colors.
 
-### 10.3 For AI and AI safety
+### 9.10.3 For AI and AI safety
 
-- This is verifiability in its ideal form: **a two-line statement, a 30,000-line proof**, and humans only need to audit the two lines. Compared with the quasi-Riemann hypothesis, it doesn't even need the layer of trust "is Mathlib's definition of ζ correct?".
+- This is the ideal form of "humans audit the statement, machines audit the proof": **a two-line statement, a 30,000-line proof**, and humans only need to audit the two lines. Compared with the quasi-Riemann hypothesis (§4), it doesn't even need the layer of trust "is Mathlib's definition of ζ correct?".
 - Reed's counterexample shows the other side: **Lean only guarantees that "the given statement has been proved"**; the statement and its hypotheses still need human checking. This is the same kind of problem as specification gaming in reward models: the optimizer satisfies the spec you wrote down, not necessarily what you wanted.
 - The "surprising" method (ergodic theory + geometric topology, rather than a bigger finite graph) deserves attention: if it holds up, it's an example of "the model found a route nobody in the field had taken", rather than "computing faster along a known route". Whether nobody had really taken it needs a domain expert's judgment ⚠.
 
+### 9.10.4 Side note: the Borsuk counterexample from the same batch (family 156)
+
+On the same day (2026-09-23) there was also a discrete geometry paper whose problem is a close relative of coloring the plane.
+
+**Toy**: can a disk be cut into 2 pieces so that each piece has strictly smaller diameter (the distance between the two farthest points in the piece)? No: however you cut it, one piece contains a pair of antipodal points (the two ends of some diameter), and that piece's diameter has not shrunk. With 3 pieces (three 120° sectors) it works.
+
+**Borsuk's 1933 question**: can every bounded set in ℝᵈ be cut into d+1 pieces of smaller diameter? For d = 2 and 3 the answer is yes (d = 2 was proved by Borsuk himself, d = 3 by Perkal in 1947 and Eggleston in 1955) [R]. **Kahn–Kalai 1993** gave a counterexample in dimension 1325, disproving the conjecture. After that the dimension of counterexamples kept falling; the last few steps were 65 (Bondarenko) → 64 (Jenrich–Brouwer 2014) → 63 (Grinsztajn's author manuscript, May 2026) [P, from the literature review and references of the OpenAI paper]. The 63-dimensional step reportedly used GPT-5.5 Pro [R, ⚠ I could not find a primary source to verify this]. Separately, arXiv:2608.12561 (Yibo Ji, 2026-08) gives another 63-dimensional counterexample; its abstract says the example and proof were "generated entirely by ChatGPT using GPT 5.6 Sol", and that the author personally verified the result [P].
+
+**How it relates to coloring the plane**: for a finite point set, "cut into k pieces, each of smaller diameter" is equivalent to "join the pairs of points at distance **exactly equal to the diameter**, and this graph can be k-colored": a piece having smaller diameter just means no two of its points are a full diameter apart. Coloring the plane forbids "distance exactly 1"; Borsuk's problem forbids "distance exactly equal to the diameter". Both are about coloring a "distance graph". The Kahn–Kalai counterexample is exactly such a finite point set, whose chromatic number is proved to be large.
+
+**What OpenAI claims** [P]: the paper *A nine-dimensional counterexample to Borsuk's covering assertion* (2026-09-23, 18 pages).
+- Take all unit vectors u in ℝ⁴ and form the projection matrices uuᵀ (the 4×4 matrix that projects a vector onto the line through u), with the Frobenius distance (treat a matrix as a vector of 16 numbers and take the Euclidean distance).
+- These matrices are all symmetric with trace 1. A symmetric 4×4 matrix has 10 free parameters, and trace = 1 removes one more, so they lie in a **9-dimensional** space.
+- The set has diameter √2 (attained when the two lines are perpendicular), and **cannot be covered by 10 sets of smaller diameter**. So Borsuk's conjecture already fails in dimension 9: from 63 straight down to 9. The paper's Corollary 7.1 extends the construction to every d ≥ 9.
+- The paper says explicitly that it does not determine the smallest dimension of a counterexample. Since the conjecture holds for d ≤ 3, **dimensions 4–8 remain open**.
+- The paper itself points out that the "projection matrix" embedding is classical: Kalai's account of the Kahn–Kalai construction uses x ↦ x ⊗ x (that is, xxᵀ). What is new is proving the covering obstruction for this **continuous** set, using mod-two degree and simplicial complexes, and ending with a finite combinatorial argument.
+
+**Verification** [P]: it has a Lean formalization (`lean/ComparatorChallenges/BorsukNine.lean`). The statement is also short enough for a person to read: it defines `projectorSet` in the space of 4×4 matrices and asserts that it is compact, is contained in `traceOneSymmetric` (the symmetric matrices with trace 1), has diameter `Real.sqrt 2`, and `¬ HasTenSmallCover`, meaning there is no cover by 10 sets each of diameter less than √2.
+
+**How to think about it** (speculation): it uses the same idea as this section's plane-coloring result. Instead of looking for a bigger finite point set, it switches to a nice continuous object (here the space of all lines in ℝ⁴, the real projective space ℝP³) and rules it out with topology or analysis.
+
 ---
 
-## 11. Self-test
+## 9.11 Self-test
 
 Try answering these after reading. If you can't, go back and reread the corresponding section.
 
-1. Why does finding a finite point set in the plane that can't be k-colored imply χ(ℝ²) > k? (Section 2.2)
-2. In three sentences, restate why the Moser spindle proves that 3 colors aren't enough. (Section 3)
-3. In the hexagonal 7-coloring, which two inequalities does r = 2/5 satisfy? What does each one guarantee? (Section 4)
-4. What does the de Bruijn–Erdős theorem say? Why does it guarantee that a finite graph needing 6 colors exists, but not help you find it? (Section 5.4)
-5. Falconer proved "5" back in 1981, so why was de Grey's "5" in 2018 still a breakthrough? (Section 6.2)
-6. What are the two halves of OpenAI's proof? Which half holds for every number of colors k? (Section 8.2)
-7. What is the fundamental difference in trustworthiness between Reed's "formalized theorem" and OpenAI's `no_proper_five_coloring`? (Sections 8.5, 9.4)
+1. Why does finding a finite point set in the plane that can't be k-colored imply χ(ℝ²) > k? (§9.2.2)
+2. In three sentences, restate why the Moser spindle proves that 3 colors aren't enough. (§9.3)
+3. In the hexagonal 7-coloring, which two inequalities does r = 2/5 satisfy? What does each one guarantee? (§9.4)
+4. What does the de Bruijn–Erdős theorem say? Why does it guarantee that a finite graph needing 6 colors exists, but not help you find it? (§9.5.4)
+5. Falconer proved "5" back in 1981, so why was de Grey's "5" in 2018 still a breakthrough? (§9.6.2)
+6. What are the two halves of OpenAI's proof? Which half holds for every number of colors k? (§9.8.2)
+7. What is the fundamental difference in trustworthiness between Reed's "formalized theorem" and OpenAI's `no_proper_five_coloring`? (§9.8.5, 9.4)
+8. Why is Borsuk's problem a "close relative" of coloring the plane? What set is OpenAI's 9-dimensional counterexample, and why does it lie in a 9-dimensional space? (§9.10.4)
 
 ---
 
@@ -451,3 +477,5 @@ Try answering these after reading. If you can't, go back and reread the correspo
 - **Payne**, *Unit distance graphs with ambiguous chromatic number*: https://arxiv.org/abs/0707.1177
 - **Sokolov & Voronov**, map-like colorings need at least 7 colors: https://arxiv.org/abs/2502.01958
 - **Terence Tao**, *254A Lecture 9: Ergodicity* (the ergodic theory introduction cited by the paper): https://terrytao.wordpress.com/2008/02/04/254a-lecture-9-ergodicity/
+- **The Borsuk 9-dimensional counterexample (family 156)**: paper https://github.com/openai/math/blob/main/preprints/A-nine-dimensional-counterexample-to-Borsuks-covering-assertion-September-23-2026/paper.pdf ; Lean statement https://github.com/openai/math/blob/main/lean/ComparatorChallenges/BorsukNine.lean ; scope note `lean/docs/156.md`
+- **Jenrich & Brouwer**, the 64-dimensional counterexample: https://arxiv.org/abs/1308.0206 ; **Grinsztajn**, *A 63-dimensional counterexample to Borsuk's conjecture* (author manuscript, 2026-05, reference [7] of the OpenAI paper; ⚠ I found no public link); **Yibo Ji**, another 63-dimensional counterexample: https://arxiv.org/abs/2608.12561 ; **Kalai**, *Some old and new problems in combinatorial geometry I: Around Borsuk's problem* (Surveys in Combinatorics 2015); overview: https://en.wikipedia.org/wiki/Borsuk%27s_conjecture

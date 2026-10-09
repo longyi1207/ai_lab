@@ -1,13 +1,13 @@
-# Explainer 03: The matrix multiplication exponent ω ≤ 9/4
+# How fast can matrices be multiplied? ω ≤ 9/4
 
-> This is the "explained from zero" version of §6 of the `notes/openai_math_explained/` deck. You only need to know matrix multiplication, how to take a logarithm (things like log₂ 8 = 3), and what "complexity O(n³)" means. New ideas such as tensors, rank and "tensor characters" are all explained before they are used.
+> You only need to know matrix multiplication, how to take a logarithm (things like log₂ 8 = 3), and what "complexity O(n³)" means. New ideas such as tensors, rank and "tensor characters" are all explained before they are used.
 > Every number here is either computed by script (script: `精讲/scripts/03_matmul.py`, with symbolic checks in sympy) or has a source. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter. ⚠ = I could not fully verify this.
-> Estimated reading time: 60–90 minutes. You can split it into three sittings: §1–3 (Strassen and ω), §4–7 (tensors, approximation, the asymptotic spectrum), §8–10 (OpenAI's result and what it means).
-> One difference from Explainer 01: this paper is **only 13 pages, and I read all of it** (not just the introduction). So §8 can lay out the full skeleton of the proof.
+> Estimated reading time: 60–90 minutes. You can split it into three sittings: §6.1–6.3 (Strassen and ω), §6.4–6.7 (tensors, approximation, the asymptotic spectrum), §6.8–6.10 (OpenAI's result and what it means).
+> One difference from the quasi-Riemann hypothesis (§4): this paper is **only 13 pages, and I read all of it** (not just the introduction). So §6.8 can lay out the full skeleton of the proof.
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 6.0 The bottom line: the one thing this chapter explains
 
 Multiplying two n×n matrices the textbook way takes n³ multiplications. In 1969 Strassen found that you can do it with fewer. Ever since, theoretical computer science has been asking: **what is the smallest power of n you need?** That power is called **ω** (the matrix multiplication exponent).
 
@@ -25,9 +25,9 @@ After this chapter you should be able to explain in your own words:
 
 ---
 
-## 1. Matrix multiplication: counting the multiplications
+## 6.1 Matrix multiplication: counting the multiplications
 
-### 1.1 The textbook algorithm
+### 6.1.1 The textbook algorithm
 
 C = A·B. Each entry of C is a row times a column:
 
@@ -37,19 +37,19 @@ c_ij = a_i1·b_1j + a_i2·b_2j + … + a_in·b_nj
 
 C has n² entries, and each takes n multiplications and n−1 additions. In total: **n³ multiplications + (n³ − n²) additions**. For 2×2: 8 multiplications, 4 additions.
 
-### 1.2 Why theorists only count "multiplications"
+### 6.1.2 Why theorists only count "multiplications"
 
-You may find this odd: additions also take time, so why count only multiplications? The reason is recursion (you'll see it in §2 shortly). When a and b are themselves matrix blocks, "adding blocks" takes only (n/2)² operations, while "multiplying blocks" has to recurse, which costs far more. **In a recursion, the number of multiplications sets the exponent; additions only affect the constant.**
+You may find this odd: additions also take time, so why count only multiplications? The reason is recursion (you'll see it in §6.2 shortly). When a and b are themselves matrix blocks, "adding blocks" takes only (n/2)² operations, while "multiplying blocks" has to recurse, which costs far more. **In a recursion, the number of multiplications sets the exponent; additions only affect the constant.**
 
-### 1.3 How this connects to your daily work
+### 6.1.3 How this connects to your daily work
 
-Most of the FLOPs in LLM training are GEMMs (general matrix multiplies). The GEMMs in cuBLAS and CUTLASS use the n³ algorithm, just cut into small tiles that fit Tensor Cores and shared memory (tiling). That will still be true at the end of this chapter; §10.2 explains why.
+Most of the FLOPs in LLM training are GEMMs (general matrix multiplies). The GEMMs in cuBLAS and CUTLASS use the n³ algorithm, just cut into small tiles that fit Tensor Cores and shared memory (tiling). That will still be true at the end of this chapter; §6.10.2 explains why.
 
 ---
 
-## 2. Strassen 1969: 7 is enough
+## 6.2 Strassen 1969: 7 is enough
 
-### 2.1 Seven products
+### 6.2.1 Seven products
 
 Let A = [[a,b],[c,d]] and B = [[e,f],[g,h]]. Use only 7 multiplications:
 
@@ -67,7 +67,7 @@ Check C12: M3 + M5 = af − ah + ah + bh = af + bh ✓. (The script expanded all
 
 The cost: multiplications go down from 8 to 7, but additions/subtractions go up from 4 to 18. Doesn't look like a good deal, does it?
 
-### 2.2 The key: the formulas never use ab = ba
+### 6.2.2 The key: the formulas never use ab = ba
 
 Notice that in these 7 products, every multiplication has "only entries of A on the left, only entries of B on the right", and the order of multiplication is never swapped. So a…h can **themselves be matrix blocks** (matrix multiplication is not commutative, but we never need it to be). So:
 
@@ -93,23 +93,23 @@ log₂ 7 = 2.807354… (computed by script)
 
 (Computed by script.) Two things are worth noticing:
 1. Counting only multiplications, Strassen wins right away. Counting additions too, **it only starts winning at n = 1024** (if you recurse all the way to 1×1). Real implementations switch to the naive algorithm once blocks get small enough (say 64), which moves the crossover earlier. But the pattern "asymptotically faster ≠ faster at small sizes" will come up again and again in this chapter.
-2. This is only the operation count. Real hardware also has memory traffic and numerical stability; more on that in §10.2.
+2. This is only the operation count. Real hardware also has memory traffic and numerical stability; more on that in §6.10.2.
 
 ---
 
-## 3. ω: the matrix multiplication exponent
+## 6.3 ω: the matrix multiplication exponent
 
-### 3.1 Definition
+### 6.3.1 Definition
 
 **ω** = the infimum of all τ such that, for every ε > 0, n×n matrix multiplication can be done with O(n^(τ+ε)) arithmetic operations (+, −, ×).
 
 Unpacking this:
 - "Infimum": ω itself might not be achievable, but you can get arbitrarily close to it.
 - "+ε": allows a tiny bit of slack. That way something like n²·log n still counts as exponent 2.
-- The constant inside O(…) **can grow arbitrarily large as ε shrinks**. This is the root of the "galactic algorithms" in §10.
+- The constant inside O(…) **can grow arbitrarily large as ε shrinks**. This is the root of the "galactic algorithms" in §6.10.
 - The computation is exact, over the complex numbers (or any fixed field). Floating-point error and the bit length of numbers are ignored.
 
-### 3.2 Why 2 ≤ ω ≤ 3
+### 6.3.2 Why 2 ≤ ω ≤ 3
 
 - **ω ≤ 3**: the textbook algorithm.
 - **ω ≥ 2**: the output has n² numbers, and each has to be computed at least once. (Reading in the 2n² inputs also takes that many steps.)
@@ -117,21 +117,21 @@ Unpacking this:
 
 **The mainstream conjecture: ω = 2.** That is, matrix multiplication can be almost as fast as "reading the data once". Nobody can prove it, and nobody can prove ω > 2 either.
 
-### 3.3 Why it matters
+### 6.3.3 Why it matters
 
-For many basic problems, the best known algorithm's complexity can be written directly as n^ω: solving linear systems, matrix inversion, determinants, LU decomposition, transitive closure of a graph, maximum matching in bipartite graphs, and more [P] (standard results; see the Bürgisser–Clausen–Shokrollahi textbook in "Further reading"). When ω goes down, their theoretical complexity goes down with it.
+For many basic problems, the best known algorithm's complexity can be written directly as n^ω: solving linear systems, matrix inversion, determinants, LU decomposition, transitive closure of a graph, maximum matching in bipartite graphs, and more [P] (standard results; see the Bürgisser–Clausen–Shokrollahi textbook in "Further reading"). Linear-programming solvers are on the list too: the interior-point method of Cohen–Lee–Song (*Solving Linear Programs in the Current Matrix Multiplication Time*, STOC 2019, arXiv:1810.07896) solves a linear program with n variables in about n^ω time at the current ω (ignoring log factors) [P]. When ω goes down, their theoretical complexity goes down with it.
 
 ---
 
-## 4. Tensors: turning "an algorithm" into "a number"
+## 6.4 Tensors: turning "an algorithm" into "a number"
 
 This section is the foundation of the whole chapter. It replaces the task of "designing an algorithm" with the task of "finding the rank of a three-dimensional array".
 
-### 4.1 Starting from the rank of a matrix
+### 6.4.1 Starting from the rank of a matrix
 
 The rank of a matrix = the smallest number of "outer products" (column vector × row vector) it can be written as a sum of. For example, [[1,2],[2,4]] = [1,2]ᵀ·[1,2], which has rank 1.
 
-### 4.2 The matrix multiplication tensor
+### 6.4.2 The matrix multiplication tensor
 
 Write matrix multiplication as a big "polynomial" in three groups of variables (a trilinear form):
 
@@ -143,7 +143,7 @@ x stands for the entries of A, y for the entries of B, and z is a placeholder fo
 
 For 2×2, T₂ has 2³ = 8 terms, matching the 8 multiplications of the textbook algorithm.
 
-### 4.3 Tensor rank = the minimum number of multiplications
+### 6.4.3 Tensor rank = the minimum number of multiplications
 
 The **rank of a tensor R(T)** = the smallest number of "rank-1 terms" it can be written as a sum of, where each rank-1 term looks like:
 
@@ -155,9 +155,9 @@ Compare with Strassen's M1 = (a+d)(e+h): the first two brackets are exactly "a l
 
 > Strassen 1969 ⇔ R(T₂) ≤ 7. (Winograd 1971 proved that 7 is optimal: R(T₂) = 7 [P].)
 
-### 4.4 Tensor product = recursion
+### 6.4.4 Tensor product = recursion
 
-"Multiply" T_n and T_m (the tensor product, which pairs up the indices on each leg) and you get exactly T_{nm}. This is the algebraic version of the "blocks inside blocks" recursion from §2.2. So R(T_{nm}) ≤ R(T_n)·R(T_m), and:
+"Multiply" T_n and T_m (the tensor product, which pairs up the indices on each leg) and you get exactly T_{nm}. This is the algebraic version of the "blocks inside blocks" recursion from §6.2.2. So R(T_{nm}) ≤ R(T_n)·R(T_m), and:
 
 > As soon as you find a k×k decomposition using r multiplications, you get ω ≤ log_k r.
 
@@ -170,11 +170,11 @@ Compare with Strassen's M1 = (a+d)(e+h): the first two brackets are exactly "a l
 | 4 | 48 | AlphaEvolve 2025 (over the complex numbers) | 2.7925 |
 | 4 | 47 | AlphaTensor 2022 (GF(2) only, i.e. arithmetic mod 2) | 2.7773 |
 
-Note: **by "finding one good decomposition of a fixed small size", the best anyone has reached is about 2.77.** Every upper bound on ω below that number comes from the "asymptotic" methods of §5–7.
+Note: **by "finding one good decomposition of a fixed small size", the best anyone has reached is about 2.77.** Every upper bound on ω below that number comes from the "asymptotic" methods of §6.5–6.7.
 
 **[Check 2]** If someone found a 4×4 decomposition with 46 multiplications, what bound on ω would follow?
 
-### 4.5 Another tensor: polynomial multiplication (the star of OpenAI's proof)
+### 6.4.5 Another tensor: polynomial multiplication (the star of OpenAI's proof)
 
 Multiply two polynomials: (x₀ + x₁t)·(y₀ + y₁t) = x₀y₀ + (x₀y₁ + x₁y₀)t + x₁y₁t². Written as a tensor:
 
@@ -195,9 +195,9 @@ The case a = b = 2 is the **Karatsuba trick**: 3 multiplications P0 = x₀y₀, 
 
 ---
 
-## 5. Approximations count too: border rank and "degeneration"
+## 6.5 Approximations count too: border rank and "degeneration"
 
-### 5.1 A strange example
+### 6.5.1 A strange example
 
 Look at this small tensor (it has nothing to do with matrix multiplication; it's just a demonstration):
 
@@ -214,11 +214,11 @@ One can prove its rank is 3. But look at this expression (ε is a small paramete
 
 (Expanded and checked by script with sympy.) The left side has only **2** rank-1 terms, and as ε → 0 it tends to W. So W can be approximated arbitrarily well by "something of rank 2". We say W has **border rank** 2.
 
-### 5.2 Bini's interpolation: approximate algorithms can become exact ones
+### 6.5.2 Bini's interpolation: approximate algorithms can become exact ones
 
 Bini et al. found in 1979 that a variant of 2×2 matrix multiplication shows this kind of "approximately save a multiplication" behavior, and Bini 1980 proved a key fact [P]: **asymptotically, approximate algorithms are as good as exact ones.** The method: treat the expression containing ε as a polynomial in ε, compute it at several different values of ε, then interpolate out the ε⁰ term. The cost is only a factor independent of n, which disappears in the exponent.
 
-### 5.3 "Degeneration": giving variables weights
+### 6.5.3 "Degeneration": giving variables weights
 
 The ε trick above has a more systematic version, which OpenAI's proof uses over and over:
 
@@ -230,15 +230,17 @@ Getting B from A this way is written A ⇝ B. Bini's interpolation guarantees th
 
 ---
 
-## 6. Fifty years of history: a war over the third decimal place
+## 6.6 Fifty years of history: a war over the third decimal place
 
-### 6.1 The asymptotic sum inequality and the laser method
+### 6.6.1 The asymptotic sum inequality and the laser method
 
 - **Schönhage 1981**: if you can compute several **mutually independent** matrix multiplications **at the same time** more cheaply than computing them separately, you also get an upper bound on ω (the "asymptotic sum inequality"). Note that "independent" means no variables are shared on any of the three legs. This is called a **full direct sum**.
 - **Strassen 1986–87: the laser method.** Find a tensor that is not itself matrix multiplication but has very low rank, take a very high power of it (tensor it with itself many times), and then "cut" a large number of mutually independent matrix multiplications out of it. Like a laser, it filters the in-phase part out of messy light.
 - **Coppersmith–Winograd 1990**: found a particularly good starting tensor (the CW tensor) and, combined with the combinatorics of "sets with no three-term arithmetic progression" for the cutting, got 2.3755.
 
-### 6.2 Timeline
+From 1986 to August 2026, nearly 40 years, almost all progress on the upper bound for ω came from refining the laser method (every row after 1986 in the table below).
+
+### 6.6.2 Timeline
 
 | Year | Authors | Upper bound on ω | Drop from the previous row (computed by script) |
 |---|---|---|---|
@@ -254,35 +256,39 @@ Getting B from A this way is written A ⇝ B. Bini's interpolation guarantees th
 | 2024 | Vassilevska Williams–Xu–Xu–Zhou | 2.371552 | 0.00031 |
 | 2024 | Alman–Duan–Vassilevska Williams–Xu–Xu–Zhou | 2.371339 | 0.00021 |
 | 2026-08 | Dupont et al. (incl. AlphaEvolve) | **2.371177** | 0.00016 |
-| 2026-09-24 | OpenAI (any field, still within the laser-method framework) [R] | 2.371054886 | 0.00012 |
-| 2026-09-24 | OpenAI (complex numbers) [R] | 2.258 | 0.113 |
-| 2026-10-02 | OpenAI (complex numbers, the subject of this chapter) [R] | **2.25 = 9/4** | 0.008 |
+| 2026-09-24 | OpenAI claim (any field, still within the laser-method framework) [P] | 2.371054886 | 0.00012 |
+| 2026-09-24 | OpenAI claim (complex numbers) [P] | 2.258 | 0.113 |
+| 2026-10-02 | OpenAI claim (complex numbers, the subject of this chapter) [P] | **2.25 = 9/4** | 0.008 |
 
-(Values before 2026-08 are all peer-reviewed results [P]; Dupont et al.'s 2.371177 is the arXiv preprint 2608.16884, and OpenAI's 9/4 paper itself cites it as the previous record.)
+(Values before 2026-08 are all peer-reviewed results [P]; Dupont et al.'s 2.371177 is the arXiv preprint 2608.16884, and OpenAI's 9/4 paper itself cites it as the previous record. The three OpenAI rows are taken from the papers in the openai/math repo and have not been peer-reviewed.)
 
 A few comparisons computed by script:
 - The 34 years from 1990 → 2024: a total drop of 0.0041.
 - The 12 years from 2014 → 2026-08: a total drop of 0.0017.
 - 2026-08 → 9/4: a single drop of **0.121**.
 
-### 6.3 The wall the laser method hit
+### 6.6.3 The wall the laser method hit
 
 Ambainis–Filmus–Le Gall (STOC 2015) [P] proved that this kind of laser-method analysis, applied to powers of the CW tensor, **cannot go below about 2.3078**. Later, Alman–Vassilevska Williams and others gave more general barriers [P] ⚠ (I did not check the specific values one by one). So 2.25 cannot be "the laser method optimized a bit more"; it has to come from a different road. This is exactly what Aaronson means by "via a completely different approach".
 
+The figure below puts the timeline from §6.6.2 and this barrier together: OpenAI's 2.25 sits below the dashed line (about 2.3078).
+
+{{FIG_OMEGA}}
+
 ---
 
-## 7. Strassen's asymptotic spectrum: "measuring" instead of "constructing"
+## 6.7 Strassen's asymptotic spectrum: "measuring" instead of "constructing"
 
 This section is the key to understanding OpenAI's proof, and also the most abstract part of the chapter. I'll use engineering analogies as much as I can, and flag where an analogy breaks down.
 
-### 7.1 "Which tensor is stronger"
+### 6.7.1 "Which tensor is stronger"
 
 **A ≥ B** (B is a "restriction" of A) means: you can get B by applying a linear substitution to each of A's three legs. Intuitively, **if you can compute A, you can compute B**. For example:
 
 - R(T) ≤ r is equivalent to "r independent scalar multiplications ≥ T" (where r denotes "a sum of r mutually unrelated xyz terms").
 - Drop all terms of T_n with i ≠ j, and what's left is n independent scalar multiplications, so T_n ≥ n.
 
-### 7.2 Tensor characters: a "consistent measuring device"
+### 6.7.2 Tensor characters: a "consistent measuring device"
 
 A **tensor character** (also called a "point" of the asymptotic spectrum) is a function λ that maps tensors to non-negative real numbers and satisfies four properties:
 
@@ -297,7 +303,7 @@ These four immediately imply: **for any nonzero tensor, 1 ≤ λ(A) ≤ R(A)**. 
 
 **Example: flattening rank.** Stand one leg of the three-dimensional array up vertically and lay the other two legs out together as a row. You get an ordinary matrix; take its matrix rank. This satisfies all four properties, and these are the three simplest characters. For T_n, the flattening rank is n².
 
-### 7.3 Every character's value on matrix multiplication is n^(3t)
+### 6.7.3 Every character's value on matrix multiplication is n^(3t)
 
 §2.1 of the paper uses a small trick to prove that for any character λ there is a number t > 0 such that
 
@@ -309,7 +315,7 @@ These four immediately imply: **for any nonzero tensor, 1 ≤ λ(A) ≤ R(A)**. 
 
 For example, flattening rank: λ(T_n) = n² ⇒ 3t = 2, t = 2/3.
 
-### 7.4 Strassen's duality theorem: measurements decide everything
+### 6.7.4 Strassen's duality theorem: measurements decide everything
 
 Strassen 1986–88 [P] proved a deep theorem (Appendix A of the OpenAI paper re-proves the special case it needs):
 
@@ -327,13 +333,13 @@ If the ω = 2 conjecture is true, then every character has t = 2/3 on matrix mul
 
 ---
 
-## 8. What OpenAI claims
+## 6.8 What OpenAI claims
 
-### 8.1 The main result
+### 6.8.1 The main result
 
 The abstract of the paper *An Upper Bound of 9/4 for the Matrix Multiplication Exponent* (2026-10-02, 13 pages) is a single sentence:
 
-> "We prove that the exponent of matrix multiplication over the complex numbers is at most 9/4."
+> "We prove that the exponent of matrix multiplication over the complex numbers is at most 9/4." [P]
 
 Theorem 1.1: "For every ε > 0, two n × n complex matrices can be multiplied using O_ε(n^{9/4+ε}) arithmetic operations. In particular, ω ≤ 9/4."
 
@@ -343,15 +349,15 @@ The same family (number 107) has two more manuscripts:
 - *Complex Matrix Multiplication Below 2.258 and Rectangular Bounds* (2026-09-24, 83 pages): over fields of characteristic 0, ω < 2.258, the "dual exponent" α > 0.465, and ω(1, 0.709, 1) < 2.092. Once 9/4 came out, the 2.258 was superseded by it.
 - *Staggered extraction for exact matrix multiplication over every field* (2026-09-24, 35 pages): over **every field** (including finite fields and positive characteristic), ω < 2.371054886006746. Still within the laser-method framework; about 1.2×10⁻⁴ better than Dupont et al.
 
-### 8.2 The skeleton of the proof (I read the whole paper; this is a faithful simplification)
+### 6.8.2 The skeleton of the proof (I read the whole paper; this is a faithful simplification)
 
-The whole proof uses only the tools from §4–7. It has five steps.
+The whole proof uses only the tools from §6.4–6.7. It has five steps.
 
-**Step 1: separate blocks that "share a leg" (§3, the separation lemma).**
+**Step 1: separate blocks that "share a leg" (paper §3, the separation lemma).**
 
 An old problem for the laser method is that the small blocks you cut out often share variables, so they are not fully independent. OpenAI's core construction handles this case: M blocks that are independent of each other on the y and z legs but **share** the x leg. The method:
 - make 5M copies, and give each one a phase from a different power of an L = 5M-th root of unity ζ (this is a finite Fourier transform), tagging each x variable with a "tentative label" g;
-- then use the "weighting" from §5.3: x gets weight g², y gets weight hu − h², z gets weight −hv. On the terms that survive the Fourier transform, the total weight is exactly **(g − h)²**;
+- then use the "weighting" from §6.5.3: x gets weight g², y gets weight hu − h², z gets weight −hv. On the terms that survive the Fourier transform, the total weight is exactly **(g − h)²**;
 - keep only the terms with weight 0, i.e. g = h: each block gets its own private copy of x, and the blocks become fully independent. As a side effect, each block also gains a "dot product" of length M.
 
 The intuition for this step: **use the square (g−h)² ≥ 0 as a "penalty", so that every term whose labels don't match vanishes as ε → 0.** Combined with the standard "count by frequency" technique, this gives an entropy inequality (Corollary 3.2).
@@ -359,11 +365,11 @@ The intuition for this step: **use the square (g−h)² ≥ 0 as a "penalty", so
 **Step 2: look only at polynomial multiplication.** For any character λ, define the "symmetrized value" P(a, b) of the polynomial multiplication tensor C(a, b) (evaluate all 6 permutations of the three legs, multiply the 6 values together, then take the 1/(6t)-th power; see the paper's eq. 4.4). It satisfies three simple properties (Eq. 4.5):
 - P(a, b) = P(b, a);
 - P(1, b) = b (C(1, b) is just a dot product);
-- **P(a, b) ≤ (a + b − 1)^(1/t)**: because the rank of polynomial multiplication is a + b − 1 (§4.5), and a character is ≤ rank.
+- **P(a, b) ≤ (a + b − 1)^(1/t)**: because the rank of polynomial multiplication is a + b − 1 (§6.4.5), and a character is ≤ rank.
 
-Here t is exactly the "exponent of λ on matrix multiplication" from §7.3.
+Here t is exactly the "exponent of λ on matrix multiplication" from §6.7.3.
 
-**Step 3: two new inequalities (§4).**
+**Step 3: two new inequalities (paper §4).**
 - **Discrete concavity**: 2P(a, b) ≥ P(a, b+1) + P(a, b−1). (A "determinantal filtration" degenerates C(a, b) ⊗ dot product into two blocks, C(a, b+1) and C(a, b−1); then apply Step 1.)
 - **Shifted tripling**: P(a, 3h + a − 1) ≥ 3·P(a, h). (Cut the y and z indices of C(a, 3h+a−1) into left, middle and right segments; after weighting, exactly three copies of C(a, h) remain.)
 
@@ -380,7 +386,7 @@ You can work out the smallest case of shifted tripling by hand: a = 2, h = 1, i.
 
 **[Check 4]** Without looking at the table, work out why the term (0,1,1) has weight +1.
 
-**Step 4: a pure sequence argument (§5, Lemma 5.1).** Using only "symmetry + P(1,b) = b + concavity + shifted tripling", you can derive growth along the diagonal:
+**Step 4: a pure sequence argument (paper §5, Lemma 5.1).** Using only "symmetry + P(1,b) = b + concavity + shifted tripling", you can derive growth along the diagonal:
 
 ```
 P(a, a) ≥ a^(4/3)
@@ -396,15 +402,15 @@ a^(4/3) ≤ P(a, a) ≤ (2a − 1)^(1/t)
 
 As a → ∞, the left side behaves like a^1.333 and the right side like a^(1/t). For this to hold for all a, we need 1/t ≥ 4/3, i.e. **t ≤ 3/4**. Computed by script: if some character had t = 0.8, this inequality would already be violated at a = 32,761; with t = 0.76 it would take until a ≈ 3.8×10²².
 
-So **every** character has λ(T_d) = d^(3t) ≤ d^(9/4). Then by the duality theorem of §7.4, the rank exponent is ≤ 9/4, so **ω ≤ 9/4**.
+So **every** character has λ(T_d) = d^(3t) ≤ d^(9/4). Then by the duality theorem of §6.7.4, the rank exponent is ≤ 9/4, so **ω ≤ 9/4**.
 
-### 8.3 Why the final answer is a rational number
+### 6.8.3 Why the final answer is a rational number
 
 Laser-method bounds come from the optimal value of a numerical optimization problem, so they are "computed" irrational-looking numbers like 2.3728639. Here 9/4 = 3 × 3/4; the 3/4 comes from "growth like the 4/3 power", and the 4/3 in turn comes from the 3 in the "tripling" construction. Hence Aaronson's line: "a *rational* exponent for once (!)" [R].
 
-### 8.4 What "does not specify a size" actually means
+### 6.8.4 What "does not specify a size" actually means
 
-The last paragraph of the paper turns "ω ≤ 9/4" into an algorithm: by the definition of the rank exponent, there **exists** some fixed u and a decomposition of T_u with r < u^(9/4+δ) multiplications; then you recurse as Strassen did. But the proof **doesn't tell you what u is, and doesn't give the decomposition**, because the duality theorem of §7.4 uses compactness and a fixed-point theorem (Schauder–Tychonoff). It is essentially an existence proof.
+The last paragraph of the paper turns "ω ≤ 9/4" into an algorithm: by the definition of the rank exponent, there **exists** some fixed u and a decomposition of T_u with r < u^(9/4+δ) multiplications; then you recurse as Strassen did. But the proof **doesn't tell you what u is, and doesn't give the decomposition**, because the duality theorem of §6.7.4 uses compactness and a fixed-point theorem (Schauder–Tychonoff). It is essentially an existence proof.
 
 What this means for engineering can be estimated with known lower bounds (computed by script):
 - u = 2: R(T₂) = 7 > 2^2.25 ≈ 4.76. Impossible.
@@ -417,14 +423,14 @@ A comment on Aaronson's blog (Bram Cohen, #42) says the result "isn't constructi
 
 ---
 
-## 9. How far it has been verified
+## 6.9 How far it has been verified
 
-### 9.1 The Lean statement: read the model first, then the theorem
+### 6.9.1 The Lean statement: read the model first, then the theorem
 
-Unlike Explainer 01, ω here is not a ready-made Mathlib definition; it is written by the challenge file `lean/ComparatorChallenges/MatrixMultiplication.lean` itself. So **reviewing the definitions** matters more than reviewing the theorem. Translating block by block:
+Unlike the quasi-Riemann hypothesis (§4), ω here is not a ready-made Mathlib definition; it is written by the challenge file `lean/ComparatorChallenges/MatrixMultiplication.lean` itself. So **reviewing the definitions** matters more than reviewing the theorem. Here is my block-by-block translation from reading the Lean source [P]:
 
 - `Gate`: there are only five kinds of "gate": `constant` (a constant), `input` (read one input), `add`, `sub`, `mul` (operate on two existing registers).
-- `Gate.cost`: constants and inputs cost 0; **add, subtract and multiply each cost 1**. So this is the standard "number of arithmetic operations" model. (Multiplying by a constant also uses a `mul` gate, so it also costs 1.)
+- `Gate.cost`: constants and inputs cost 0; **add, subtract and multiply each cost 1** (the source reads `.constant _ => 0`, `.input _ => 0`, and `=> 1` for each of `.add`, `.sub`, `.mul`). So this is the standard "number of arithmetic operations" model. (Multiplying by a constant also uses a `mul` gate, so it also costs 1.)
 - `Program`: a sequence of gates, where each gate can only refer to earlier registers. This is a "straight-line program": no loops, no branches, no division.
 - `MatrixAlgorithm F a b c`: a program, plus "which register each position of the output matrix takes".
 - `Correct`: for **all** input matrices A, B, the output equals `A * B` (Mathlib's standard matrix multiplication).
@@ -438,13 +444,13 @@ theorem complex_omega_le_nine_quarters :
     Arithmetic.omega ℂ ≤ (9 : ℝ) / 4
 ```
 
-Translation: **over the complex numbers, the matrix multiplication exponent, defined by the model above, is ≤ 9/4.** This matches the definition in §3.1. Note that it is "non-uniform" (each n may have a different program; there is no requirement for one uniform algorithm that generates them), which is also the standard definition of ω in the literature.
+Its full name is `OAI.MatrixMultiplication.complex_omega_le_nine_quarters`. Translation: **over the complex numbers, the matrix multiplication exponent, defined by the model above, is ≤ 9/4.** This matches the definition in §6.3.1. Note that it is "non-uniform" (each n may have a different program; there is no requirement for one uniform algorithm that generates them), which is also the standard definition of ω in the literature (non-uniform algebraic complexity). My judgment: the model is consistent with the literature, with no hidden assumptions.
 
 **A specification trap worth noting** (especially interesting for AI safety people): in Lean/Mathlib, **the sInf of the empty set is defined to be 0**, and the sInf of a set with no lower bound is also defined to be 0. So if some definition were written wrong so that "no program is ever judged correct", then omega = 0 and "omega ≤ 9/4" would hold **trivially**. I checked this: the solution proves `omega_le_three` (the naive algorithm works, so the set is non-empty) and `admissibleExponent_two_le` (every admissible exponent is ≥ 2, so the set is bounded below), and the 9/4 derivation goes through `csInf_le`, which requires actually exhibiting an admissible exponent. So this trap is ruled out.
 
 The same challenge file has two more theorems: α > 93/200 and ω(ℂ; 1, 0.709, 1) < 523/250.
 
-### 9.2 The proof itself
+### 6.9.2 The proof itself
 
 - The Lean proof of the 9/4 theorem is in `OAI/LinearAlgebra/MatrixMultiplication/AuxiliarySeparation/` (73 files, 10,895 lines). Computing the import closure from its `Main.lean`, the project-internal total is **129 files, about 20,700 lines** (computed by script, including shared directories such as Arithmetic, Tensor and Polynomial). The whole matrix multiplication directory (including 2.258 and the rectangular bounds) is 509 files, about 83,000 lines.
 - I grepped: no `sorry`, no custom `axiom`, no `native_decide` (the three hits for `admit` are all the English word "admits" in comments).
@@ -452,65 +458,65 @@ The same challenge file has two more theorems: α > 93/200 and ω(ℂ; 1, 0.709,
 - **External dependency**: the fixed-point theorem in Appendix A uses the third-party library `fixed-point-theorems-lean4` (harfe, the Brouwer fixed-point theorem). OpenAI applied a porting patch to it (about 77 lines added, 63 deleted). I looked at it: it mainly adapts imports and syntax to Lean 4.34, and I saw no `sorry` or new axioms.
 - A small documentation oddity: the scope note `lean/docs/107.md` lists only the 2.258 and staggered papers, not the 9/4 paper; but the 9/4 theorem is indeed proved in `AuxiliarySeparation/Main.lean` (the file comment says "Theorem 1.1").
 
-### 9.3 Independent re-checks
+### 6.9.3 Independent re-checks
 
 - **erenciracioglu-dotcom/openai-math-9-4-lean-check** [R]: compiled these three theorems with Lean v4.34.1 on Windows 11, used `pp.all` to compare the challenge statement and the solution statement and found them identical, and reports dependence on only the three standard axioms. But it says itself: "It does **not** replace Comparator: there was no sandbox and no second, independent kernel replay." Also, it used openai/math commit `adc7f12`, not the `fd4aeeb` used in these notes ⚠ (I did not compare whether this part changed between the two commits).
 - I **did not compile** it myself.
 
-### 9.4 Human experts
+### 6.9.4 Human experts
 
-- Scott Aaronson ("The Mathocalypse", 2026-10-07): "Matrix multiplication in O(n^{9/4}) time—a rational exponent for once (!), and via a completely different approach than was used for O(n^{2.373}) and so forth" [R]. This is a comment, not a verification.
+- Scott Aaronson ("The Mathocalypse", 2026-10-07): "Matrix multiplication in n^{9/4+o(1)} time—a rational exponent for once (!), and via a completely different approach than was used for O(n^{2.373}) and so forth" [R]. This is a comment, not a verification.
 - **As of 2026-10-08, I found no laser-method / tensor expert (Vassilevska Williams, Alman, Le Gall, Zuiddam, Christandl, etc.) publicly saying they have read and verified this paper** ⚠. The vibemathed.com entry also says "No independent mathematician has checked this yet" [R].
 - One favorable factor (my judgment): the paper is only 13 pages, uses only standard tools, and Appendix A fully re-proves the special case of the duality theorem it needs. It is **one of the headline results of the whole openai/math release most likely to be fully understood by human experts within a few weeks**.
 
-### 9.5 Remaining risks
+### 6.9.5 Remaining risks
 
-1. The custom computational model: I read it and think it is faithful (§9.1). But that is the level of "one person read it once".
+1. The custom computational model: I read it and think it is faithful (§6.9.1). But that is the level of "one person read it once".
 2. No second-kernel re-check.
 3. Correctness of the third-party fixed-point library: the Lean kernel checks its proofs, so the risk is mainly at the level of definitions, and it is low.
 4. Risks beyond correctness: the conclusion is right, but humans don't yet understand "why nobody made this road work before".
 
 ---
 
-## 10. What it means if true (and what it doesn't)
+## 6.10 What it means if true (and what it doesn't)
 
-### 10.1 For mathematics and theoretical computer science
+### 6.10.1 For mathematics and theoretical computer science
 
 1. **The biggest single step in 35 years**: from 2.3712 to 2.25, a drop about 70 times the total of the previous 12 years (computed by script: 0.121 vs 0.0017).
-2. **It gets around the laser-method barrier** (§6.3), showing that Strassen's asymptotic-spectrum route is workable, and can be used in a quite "elementary" way.
-3. The theoretical upper bounds of all algorithms whose complexity is written as n^ω (§3.3) go down together.
+2. **It gets around the laser-method barrier** (§6.6.3), showing that Strassen's asymptotic-spectrum route is workable, and can be used in a quite "elementary" way.
+3. The theoretical upper bounds of all algorithms whose complexity is written as n^ω (§6.3.3) go down together.
 4. **Is ω = 2 now closer?** This is speculation. Where this method's bottleneck lies (whether the 4/3 growth rate is a limit of the method itself), and whether it can be pushed to 2, the paper doesn't discuss ⚠.
 5. **Only for the complex numbers** (and, via the algebraic-coefficient argument in the paper's Remark 5.2). Over fields of positive characteristic, OpenAI only claims 2.371054886.
 
-### 10.2 For GPUs and LLM training: no direct impact
+### 6.10.2 For GPUs and LLM training: no direct impact
 
 This is where engineers most easily get it wrong, so let me be concrete:
 
-1. **We barely use even Strassen.** The table in §2.2 shows that, counting additions, plain Strassen only wins on operation count at n ≈ 1024. On real hardware there is also: (a) the extra block additions need extra memory reads and writes, and GEMM is often bandwidth-bound; (b) Tensor Cores only accelerate "multiply-add", so block additions don't get accelerated; (c) numerical stability is worse than the naive algorithm (Higham's textbook analyzes this specifically). Some work has achieved practical Strassen speedups on CPUs (Huang et al., "Strassen's Algorithm Reloaded", SC16), but mainstream deep learning libraries don't use it.
-2. **The 9/4 algorithm is a "galactic algorithm"**: asymptotically faster, but only wins on absurdly large inputs. The paper gives no constant, so what follows is a **hypothetical** calculation (computed by script): if the 9/4 algorithm's constant is C and the naive algorithm's is 2n³, the crossover is around n ≈ (C/2)^(4/3). With C = 10⁶, n ≈ 4×10⁷, and a single such fp16 matrix takes about 3×10¹⁵ bytes (3 PB). And nobody knows the real constant; as §8.4 said, even the size u of the base decomposition is at least 34, and the actual decomposition is unknown.
+1. **We barely use even Strassen.** The table in §6.2.2 shows that, counting additions, plain Strassen only wins on operation count at n ≈ 1024. On real hardware there is also: (a) the extra block additions need extra memory reads and writes with an irregular access pattern, and GEMM is often bound by memory bandwidth and Tensor Core throughput; (b) Tensor Cores only accelerate "multiply-add", so block additions don't get accelerated; (c) numerical stability is worse than the naive algorithm (Higham's textbook analyzes this specifically). Some work has achieved practical Strassen speedups on CPUs (Huang et al., "Strassen's Algorithm Reloaded", SC16), but mainstream deep learning libraries don't use it.
+2. **The 9/4 algorithm is a "galactic algorithm"**: asymptotically faster, but only wins on absurdly large inputs. The paper gives no constant, so what follows is a **hypothetical** calculation (computed by script): if the 9/4 algorithm's constant is C and the naive algorithm's is 2n³, the crossover is around n ≈ (C/2)^(4/3). With C = 10⁶, n ≈ 4×10⁷, and a single such fp16 matrix takes about 3×10¹⁵ bytes (3 PB). And nobody knows the real constant; as §6.8.4 said, even the size u of the base decomposition is at least 34, and the actual decomposition is unknown.
 3. **The 2.37 laser-method algorithms are galactic algorithms too.** So this is not a problem specific to 9/4: **none of the results with ω below about 2.77 has ever been usable in practice.**
-4. **Compare AlphaTensor / AlphaEvolve**: AlphaTensor (Fawzi et al., *Nature* 610, 2022) [P] and AlphaEvolve (2025, 48 multiplications for 4×4 complex matrices) [R] look for low-rank decompositions of a **fixed small size**. That kind of thing can be written directly into a kernel and gives constant-factor speedups (the AlphaTensor paper even optimized decompositions for specific GPUs). ω is about the exponent as n → ∞. The two are almost different problems. Dupont et al. (2026-08) used AlphaEvolve to optimize parameters inside the laser method; that is AI progress on ω itself, but the size of the improvement is 1.6×10⁻⁴.
+4. **Compare AlphaTensor / AlphaEvolve**: AlphaTensor (Fawzi et al., *Nature* 610, 2022) [P] and AlphaEvolve (2025, 48 multiplications for 4×4 complex matrices) [R] look for low-rank decompositions of a **fixed small size**. That kind of thing can be written directly into a kernel and gives constant-factor speedups (the AlphaTensor paper even optimized decompositions for specific GPUs). ω is about the exponent as n → ∞. The two are almost different problems. Dupont et al. (2026-08) used AlphaEvolve to optimize parameters inside the laser method; that was the first time AI helped set a new record bound on ω, but the improvement was only 1.6×10⁻⁴.
 
-### 10.3 For AI
+### 6.10.3 For AI
 
 - **This is a "new idea", not a "bigger optimization".** Compared with Dupont et al. "using AI to tune parameters and squeeze out 1.6×10⁻⁴", the 9/4 proof switched to a different route, and the final argument is short enough to write out by hand. If it holds up, it is one of the clearest examples of "AI producing a mathematical idea that humans didn't find in 35 years".
-- **13 pages + about 20,000 lines of Lean make a good touchstone for human verification.** Unlike Explainer 01's 199 pages + 480,000 lines of Lean, here human experts can read the whole thing independently. How experts assess it over the next few weeks is a good signal for judging "the credibility of the whole openai/math release".
-- **Spec review matters more than proof review** (§9.1): a Lean proof is only trustworthy if "the computational model is written correctly". This is the math version of the "spec gaming" problem in AI safety, and here the review only requires reading 100 lines of definitions.
+- **13 pages + about 20,000 lines of Lean make a good touchstone for human verification.** Unlike the 199 pages + 480,000 lines of Lean for the quasi-Riemann hypothesis (§4), here human experts can read the whole thing independently. How experts assess it over the next few weeks is a good signal for judging "the credibility of the whole openai/math release".
+- **Spec review matters more than proof review** (§6.9.1): a Lean proof is only trustworthy if "the computational model is written correctly". This is the math version of the "spec gaming" problem in AI safety, and here the review only requires reading 100 lines of definitions.
 
 ---
 
-## 11. Self-test
+## 6.11 Self-test
 
 Try answering these after reading. If you can't, go back and reread the relevant section.
 
-1. Why can Strassen's 7-multiplication formula be used recursively? Which property does it crucially not use? (§2.2)
-2. What is the relationship between "a rank-r tensor decomposition" and "an algorithm using r multiplications"? (§4.3)
-3. Why is the rank of the polynomial multiplication tensor C(a, b) equal to a + b − 1? How does this relate to Karatsuba? (§4.5)
-4. What four properties must a tensor character satisfy? Why is every character ≤ rank? (§7.2)
-5. Between the laser method and the asymptotic-spectrum route, which is "constructing" and which is "measuring"? Why can the latter get around the known barriers? (§6.3, §7.4)
-6. In the last step of OpenAI's proof, which two inequalities squeeze out t ≤ 3/4? (§8.2, step 5)
-7. In Lean, why does "sInf of the empty set = 0" create a specification risk? How is it ruled out here? (§9.1)
-8. Why won't ω ≤ 9/4 make your GPU training faster? Give at least three reasons. (§10.2)
+1. Why can Strassen's 7-multiplication formula be used recursively? Which property does it crucially not use? (§6.2.2)
+2. What is the relationship between "a rank-r tensor decomposition" and "an algorithm using r multiplications"? (§6.4.3)
+3. Why is the rank of the polynomial multiplication tensor C(a, b) equal to a + b − 1? How does this relate to Karatsuba? (§6.4.5)
+4. What four properties must a tensor character satisfy? Why is every character ≤ rank? (§6.7.2)
+5. Between the laser method and the asymptotic-spectrum route, which is "constructing" and which is "measuring"? Why can the latter get around the known barriers? (§6.6.3, §6.7.4)
+6. In the last step of OpenAI's proof, which two inequalities squeeze out t ≤ 3/4? (§6.8.2, step 5)
+7. In Lean, why does "sInf of the empty set = 0" create a specification risk? How is it ruled out here? (§6.9.1)
+8. Why won't ω ≤ 9/4 make your GPU training faster? Give at least three reasons. (§6.10.2)
 
 ---
 
@@ -549,7 +555,7 @@ Try answering these after reading. If you can't, go back and reread the relevant
 - **Markus Bläser**, *Fast Matrix Multiplication* (Theory of Computing Graduate Surveys 5, 2013): the best introductory survey, free. https://theoryofcomputing.org/articles/gs005/
 - **J. M. Landsberg**, *The complexity of matrix multiplication: developments since 2014* (arXiv 1811.11667): a survey from a more geometric point of view.
 - **Bürgisser, Clausen, Shokrollahi**, *Algebraic Complexity Theory* (Springer 1997): Chapters 14–15 cover tensor rank, the laser method and the asymptotic spectrum; the standard textbook.
-- **Christandl, Vrana, Zuiddam**, *Universal points in the asymptotic spectrum of tensors* (JAMS 36, 2023; arXiv 1709.07851): "what the known characters look like" from §7.
+- **Christandl, Vrana, Zuiddam**, *Universal points in the asymptotic spectrum of tensors* (JAMS 36, 2023; arXiv 1709.07851): "what the known characters look like" from §6.7.
 - **Ambainis, Filmus, Le Gall**, the laser-method barrier (STOC 2015): https://arxiv.org/abs/1411.5414
 - **Alman et al.**, *More Asymmetry Yields Faster Matrix Multiplication* (SODA 2025): https://arxiv.org/abs/2404.16349
 - **Dupont et al.**, *Improving the matrix multiplication exponent with modern optimization and AlphaEvolve* (2026-08): https://arxiv.org/abs/2608.16884

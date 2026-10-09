@@ -251,7 +251,7 @@ def svg_moser():
                               'but |T₁T₂| = 1 → contradiction ⇒ χ ≥ 4']):
         out.append(f'<text x="{tx}" y="{82+i*18}" class="z">{line}</text>')
     out.append(f'<text x="{tx}" y="182" class="t">Known bounds on χ of the plane</text>')
-    for i, (yr, txt, cls) in enumerate([('1950s', '4 ≤ χ ≤ 7 (spindle, hexagons)', 's'),
+    for i, (yr, txt, cls) in enumerate([('1950–61', '4 ≤ χ ≤ 7 (spindle, hexagons)', 's'),
                                         ('2018', '5 ≤ χ ≤ 7 (de Grey graph)', 's'),
                                         ('2026-09', '6 ≤ χ ≤ 7 (OpenAI, Lean)', 'r')]):
         out.append(f'<text x="{tx}" y="{204+i*18}" class="{cls}">{yr}  {txt}</text>')

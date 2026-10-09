@@ -1,12 +1,12 @@
-# Explainer 04: The Unique Games Conjecture
+# The Unique Games Conjecture: where is the ceiling for approximation algorithms?
 
-> This is the "explained from zero" version of §7 of the `notes/openai_math_explained/` deck. You only need to know what a graph is (vertices and edges), how to do modular arithmetic (7 mod 3 = 1), that "polynomial time" roughly means "grows mildly with input size", and to have a vague sense of P vs NP. Every new idea is explained before it is used.
-> Every number here is either computed by script or has a source. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
-> Estimated reading time: 60–90 minutes. You can split it into three sittings: §1–4 (NP-hardness, approximation, 0.878, PCP), §5–7 (what a unique game is, why it matters, the 24-year tug-of-war), §8–10 (OpenAI's result, verification, what it means).
+> You only need to know what a graph is (vertices and edges), how to do modular arithmetic (7 mod 3 = 1), that "polynomial time" roughly means "grows mildly with input size", and to have a vague sense of P vs NP. Every new idea is explained before it is used.
+> Every number here is either computed by script (script: `精讲/scripts/04_ugc.py`) or has a source. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter. ⚠ = I could not fully verify this.
+> Estimated reading time: 60–90 minutes. You can split it into three sittings: §7.1–7.4 (NP-hardness, approximation, 0.878, PCP), §7.5–7.7 (what a unique game is, why it matters, the 24-year tug-of-war), §7.8–7.10 (OpenAI's result, verification, what it means).
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 7.0 The bottom line: the one thing this chapter explains
 
 Many important optimization problems (cutting a network into two halves, placing the fewest guards to watch every road…) are believed to have **no fast exact algorithm**. As a fallback, we ask: **what percentage of the optimum can a fast algorithm guarantee at best?**
 
@@ -25,9 +25,9 @@ After this chapter you should be able to explain in your own words:
 
 ---
 
-## 1. P vs NP and NP-hardness: the 5-minute version
+## 7.1 P vs NP and NP-hardness: the 5-minute version
 
-### 1.1 "Easy to check" is not "easy to find"
+### 7.1.1 "Easy to check" is not "easy to find"
 
 Sudoku: given a filled-in grid, checking whether it's right takes seconds; filling it in from an empty grid can take a long time of trial and error.
 
@@ -36,7 +36,7 @@ Sudoku: given a filled-in grid, checking whether it's right takes seconds; filli
 
 **P vs NP** asks: is everything that is easy to check also easy to find? Almost everyone believes **P ≠ NP**, but nobody has proved it (it is one of the Clay Millennium Problems).
 
-### 1.2 Reductions and NP-hardness
+### 7.1.2 Reductions and NP-hardness
 
 **Reduction**: quickly translate any instance of problem A into an instance of problem B, so that B's answer is A's answer. If you can do this, then "B has a fast algorithm" implies "A has a fast algorithm", so B is at least as hard as A.
 
@@ -48,9 +48,9 @@ Sudoku: given a filled-in grid, checking whether it's right takes seconds; filli
 
 ---
 
-## 2. The fallback: approximation algorithms
+## 7.2 The fallback: approximation algorithms
 
-### 2.1 Max-Cut
+### 7.2.1 Max-Cut
 
 Given a graph, split the vertices into two groups (say, color them black and white). An edge is "cut" if its two ends have different colors. **Max-Cut** asks: what is the largest number of edges you can cut? Deciding "can you cut ≥ k edges" is one of Karp's 21 NP-complete problems from 1972.
 
@@ -64,7 +64,7 @@ Computed by script (brute-force enumeration of all colorings):
 
 Why a triangle can cut at most 2: three vertices and only two colors means two vertices must share a color, and the edge between them can't be cut.
 
-### 2.2 Approximation ratio, and "1/2 for free"
+### 7.2.2 Approximation ratio, and "1/2 for free"
 
 An **α-approximation algorithm**: runs in polynomial time and always returns a solution worth at least "α × the optimum".
 
@@ -74,7 +74,7 @@ From 1976 (Sahni–Gonzalez) until 1995, 1/2 was the best guarantee known.
 
 **[Check 1]** What is the max cut of a 4-cycle (a square, 4 edges)? How many edges does a random coloring cut in expectation?
 
-### 2.3 Another lead character: Vertex Cover
+### 7.2.3 Another lead character: Vertex Cover
 
 Pick the fewest vertices in a graph so that every edge has at least one endpoint picked (imagine posting guards at intersections to watch every road).
 
@@ -84,9 +84,9 @@ For 50 years, nobody has managed "1.99 times".
 
 ---
 
-## 3. Goemans–Williamson: turning vertices into vectors
+## 7.3 Goemans–Williamson: turning vertices into vectors
 
-### 3.1 Relaxation: first solve a looser problem
+### 7.3.1 Relaxation: first solve a looser problem
 
 Max-Cut is hard because each vertex can take only two values (black = +1, white = −1). An edge (i, j) is cut exactly when xᵢ·xⱼ = −1, so the number of cut edges = Σ (1 − xᵢxⱼ)/2.
 
@@ -98,7 +98,7 @@ maximize  Σ_edges (1 − vᵢ·vⱼ)/2      subject to: each vᵢ is a vector o
 
 This is called a **semidefinite program (SDP)**, and it can be solved (approximately) in polynomial time. Since ±1 are "one-dimensional unit vectors", every solution of the original problem is also a solution of this one, so **the SDP optimum ≥ the true max cut**. Intuitively: the more "opposite" the two ends of an edge are pushed (the closer their angle is to 180°), the better.
 
-### 3.2 Random hyperplane: turning vectors back into black and white
+### 7.3.2 Random hyperplane: turning vectors back into black and white
 
 Once you have the vectors, pick a random plane through the origin, splitting space in two: color the points on one side black and the other side white.
 
@@ -112,7 +112,7 @@ Verified by script with 1,000,000 random planes:
 | 120° | 0.6667 | 0.6659 |
 | 150° | 0.8333 | 0.8337 |
 
-### 3.3 Where 0.878 comes from
+### 7.3.3 Where 0.878 comes from
 
 For each edge, compare two quantities:
 - the "score" the SDP gives it: (1 − cos θ)/2;
@@ -137,7 +137,7 @@ Computed by script (numerical minimization):
 
 **α_GW = 0.878567…**, attained at θ ≈ 133.56° (inner product ρ ≈ −0.689). This matches the 0.878567… given in Eq. (1.1) of OpenAI's Max-Cut paper.
 
-### 3.4 An example: the pentagon
+### 7.3.4 An example: the pentagon
 
 The optimal SDP solution for the 5-cycle places the 5 vectors in a plane, one every 144° (= 4π/5). Computed by script:
 - SDP value = 5 × (1 − cos 144°)/2 = **4.5225**;
@@ -148,15 +148,15 @@ So on the pentagon the SDP value is noticeably higher than the true optimum (4/4
 
 ---
 
-## 4. Approximation can be hard too: the PCP theorem
+## 7.4 Approximation can be hard too: the PCP theorem
 
-### 4.1 The intuition behind the PCP theorem
+### 7.4.1 The intuition behind the PCP theorem
 
 The **PCP theorem** (Arora–Safra; Arora–Lund–Motwani–Sudan–Szegedy, 1992 conference, 1998 journal; Dinur 2007 gave a combinatorial proof) says something that sounds like magic:
 
 > Any mathematical proof can be rewritten in a special format such that a referee who **randomly reads only a constant number of bits** of it can tell, with high confidence, whether the proof is right: a correct proof always passes; a wrong proof, no matter how it is written, gets caught with probability at least one half.
 
-### 4.2 Why it has to do with "approximation"
+### 7.4.2 Why it has to do with "approximation"
 
 Restate PCP: there is a reduction starting from 3SAT that produces a constraint system such that
 - formula satisfiable ⇒ the constraint system can be **fully** satisfied;
@@ -166,7 +166,7 @@ This is called a **gap**. Now suppose some algorithm guarantees an approximation
 
 The game for the following decades was to make this gap "sharper and sharper", until it sits exactly at the position of a known algorithm.
 
-### 4.3 The gap for Max-Cut
+### 7.4.3 The gap for Max-Cut
 
 Håstad (2001, *JACM*), together with the "gadgets" of Trevisan–Sorkin–Sudan–Williamson, proved: **approximating Max-Cut above 16/17 ≈ 0.941 is NP-hard.**
 
@@ -177,15 +177,19 @@ So:
      random        GW algo  ?unknown?   NP-hard
 ```
 
-**Who owns the region between 0.878 and 0.941?** A better algorithm, or a stronger hardness proof? This is what UGC is meant to answer. (FIG_MAXCUT in the deck draws exactly this number line.)
+**Who owns the region between 0.878 and 0.941?** A better algorithm, or a stronger hardness proof? This is what UGC is meant to answer.
 
-Vertex cover has a similar gap: the algorithm achieves 2, and the NP-hardness lower bound was Dinur–Safra's **1.3606** (2005, *Annals*), raised in 2018 to **√2 ≈ 1.414** (Khot–Minzer–Safra, see §7.2).
+The top half of the figure below is the same number line; the bottom half is the "completeness ladder" for unique games that §7.5–7.7 explain (proved up to about 1/2 in 2018; UGC needs 1 − ε). Skim it now and come back after §7.7.
+
+{{FIG_MAXCUT}}
+
+Vertex cover has a similar gap: the algorithm achieves 2, and the NP-hardness lower bound was Dinur–Safra's **1.3606** (2005, *Annals*), raised in 2018 to **√2 ≈ 1.414** (Khot–Minzer–Safra, see §7.7.2).
 
 ---
 
-## 5. What Unique Games are
+## 7.5 What Unique Games are
 
-### 5.1 Labeling games
+### 7.5.1 Labeling games
 
 A **label constraint system** has:
 - a graph;
@@ -196,7 +200,7 @@ The goal: pick labels so that the fraction of satisfied constraints (called the 
 
 "Label Cover", the standard output of the PCP theorem, has exactly this form, except that its constraints are "many-to-one": once one end is fixed, the other end has several choices.
 
-### 5.2 "Unique": fix one end and the other is determined
+### 7.5.2 "Unique": fix one end and the other is determined
 
 **Unique Game**: every edge constraint is a **permutation** (a one-to-one correspondence). Once one end picks a label, there is **exactly one** label at the other end that satisfies the edge.
 
@@ -208,7 +212,7 @@ x_i − x_j ≡ c   (mod k)
 
 Given x_j, x_i is uniquely determined as x_j + c. (OpenAI's paper uses "translation constraints" a(v) = a(u) + c, which just replace numbers mod k with bitwise XOR on 0/1 vectors; it's essentially the same.)
 
-### 5.3 By hand: a triangle, mod 3
+### 7.5.3 By hand: a triangle, mod 3
 
 Three variables a, b, c, labels {0, 1, 2}:
 
@@ -222,7 +226,7 @@ The general rule: **on a cycle, add up the constraint constants around the loop;
 
 **[Check 2]** Four variables x₀…x₃, mod 5, constraints: x₁−x₀≡2, x₂−x₁≡3, x₃−x₂≡1, x₀−x₃≡4, x₂−x₀≡0. Can they all be satisfied? What if the last one is changed to x₂−x₀≡1?
 
-### 5.4 Why "fully satisfiable" is easy
+### 7.5.4 Why "fully satisfiable" is easy
 
 If a unique game can be **fully** satisfied, there is a simple polynomial-time algorithm:
 
@@ -234,7 +238,7 @@ Each attempt is one pass over the graph, k attempts in total. Compare brute-forc
 
 This is completely different from 3SAT: even when a 3SAT formula is "fully satisfiable", finding a solution is hard. **So UGC can't be about "satisfiable vs unsatisfiable"; it has to be about "nearly satisfiable vs far from satisfiable".** That is where the 1 − ε in UGC comes from.
 
-### 5.5 Why "nearly satisfiable" might be hard
+### 7.5.5 Why "nearly satisfiable" might be hard
 
 Once a few constraints are "wrong", propagation carries the error a long way. The script ran an experiment: a random graph with 2000 vertices and on average 6 edges per vertex, mod 7; first plant a reference answer, then randomly tamper with a fraction of the constraints; then assign labels by propagation (breadth-first) from random starting points, trying 20 starting points:
 
@@ -251,7 +255,7 @@ The reason: a vertex's label is "passed along" a path from the starting point, a
 
 **To be honest**: this experiment only shows that "propagation" fails, not that the problem itself is hard. On **random** noisy instances like these, smarter algorithms (such as SDP) actually do very well. What UGC says is: there **exist** carefully constructed instances where no polynomial-time algorithm can tell "it is 99% satisfiable" from "it is only 1% satisfiable".
 
-### 5.6 The precise statement of UGC
+### 7.5.6 The precise statement of UGC
 
 > **Unique Games Conjecture (Khot 2002)**: for every ε > 0 and δ > 0, there is an alphabet size k such that, for unique games with alphabet k, it is NP-hard to tell apart the following two cases:
 > - YES: value ≥ 1 − ε (nearly all satisfiable);
@@ -261,7 +265,7 @@ Note the **order of quantifiers**: first ε and δ are given, **then** the alpha
 
 ---
 
-## 6. Why UGC matters: one conjecture governs a whole territory
+## 7.6 Why UGC matters: one conjecture governs a whole territory
 
 The appeal of UGC: assuming it holds, the **exact** approximation limits of many problems can be computed, and they often **exactly equal some known algorithm**.
 
@@ -281,9 +285,9 @@ This is why UGC is called "the map of the field of approximation algorithms". Kh
 
 ---
 
-## 7. A 24-year tug-of-war: support and doubt
+## 7.7 A 24-year tug-of-war: support and doubt
 
-### 7.1 Doubt: a subexponential-time algorithm (2010)
+### 7.7.1 Doubt: a subexponential-time algorithm (2010)
 
 Arora–Barak–Steurer (FOCS 2010, *JACM* 2015) gave an algorithm that, for a unique game with alphabet k, n variables and value ≥ 1 − ε^c (c a fixed constant), finds a labeling satisfying 1 − ε in **exp(k·n^ε)** time.
 
@@ -297,7 +301,7 @@ Why did this make people doubt UGC? Because 3SAT is generally believed to need c
 
 If UGC holds, the reduction from 3SAT to UG must **blow up** the instance to a very large polynomial size (otherwise 3SAT would also have a subexponential algorithm). That is not a contradiction, but it shows that even if UG is hard, it is "not thoroughly hard". Some researchers leaned toward believing UGC is false because of this.
 
-### 7.2 Support: the 2-to-2 theorem (2018)
+### 7.7.2 Support: the 2-to-2 theorem (2018)
 
 **2-to-2 constraints**: a bit looser than unique; once one end is fixed, the other end has 2 allowed labels. A series of works by Khot–Minzer–Safra and Dinur–Khot–Kindler–Minzer–Safra in 2017–2018 (the last piece being the KMS FOCS 2018 theorem on expansion in Grassmann graphs) proved: **nearly satisfiable 2-to-2 games are NP-hard.**
 
@@ -307,25 +311,25 @@ Corollaries:
 
 What remained hard: pushing completeness from 1/2 to 1 − ε. §1.3 of OpenAI's paper also says: "Obtaining Unique Games completeness arbitrarily close to one was a separate problem."
 
-### 7.3 September 2026: a race
+### 7.7.3 September 2026: a race
 
 According to Quanta (2026-10-07), MIT's Dor Minzer and his students Yumou Fei and Shuo Wang, after hearing rumors that OpenAI was about to release a proof of UGC, rushed out a proof of a 4-to-1 variant of Khot's 2-to-1 conjecture on 2026-09-14. O'Donnell's comment: "They solved the problem in the old-fashioned way, with their minds, and wrote it with their own fingers." [R]
 
 ---
 
-## 8. What OpenAI claims
+## 7.8 What OpenAI claims
 
-### 8.1 The main result
+### 7.8.1 The main result
 
 The abstract of the paper *The Unique Games Theorem* (2026-09-23, 58 pages, author listed as "OpenAI"):
 
-> "We prove the Unique Games Conjecture. For every fixed ε, δ ∈ (0, 1/2), we give a deterministic polynomial-time reduction from 3SAT to Unique Games over a fixed finite alphabet, with completeness at least 1 − ε and soundness at most δ."
+> "We prove the Unique Games Conjecture. For every fixed ε, δ ∈ (0, 1/2), we give a deterministic polynomial-time reduction from 3SAT to Unique Games over a fixed finite alphabet, with completeness at least 1 − ε and soundness at most δ." [P]
 
-In plain words: **for any fixed ε, δ, there is a deterministic polynomial-time reduction that translates 3SAT into unique games with a fixed alphabet: satisfiable formulas become instances with value ≥ 1 − ε, and unsatisfiable ones become instances with value ≤ δ.** This is exactly the statement of UGC from §5.6.
+In plain words: **for any fixed ε, δ, there is a deterministic polynomial-time reduction that translates 3SAT into unique games with a fixed alphabet: satisfiable formulas become instances with value ≥ 1 − ε, and unsatisfiable ones become instances with value ≤ δ.** This is exactly the statement of UGC from §7.5.6.
 
 Theorem 1.1 also states a stronger form: the alphabet is the 0/1 vector space F₂ˢ, every constraint is a translation, and the graph is simple, bipartite and unweighted. The paper says this is a known equivalent form of UGC (citing KKMO), so "stronger" is not "swapping in a different problem".
 
-### 8.2 Other papers in the same family (family 102)
+### 7.8.2 Other papers in the same family (family 102)
 
 | Paper | Pages | Conclusion |
 |---|---|---|
@@ -334,11 +338,11 @@ Theorem 1.1 also states a stronger form: the alphabet is the 0/1 vector space F�
 | Constant-factor hardness of Min-UnCut | — | Every constant factor is NP-hard |
 | Constant-factor hardness of directed feedback vertex set | — | Every constant factor is NP-hard |
 
-The repo's CONTENTS.md says these 4 papers are **independent direct reductions** that "use established PCP and Label Cover hardness results" and don't depend on the UGC paper. In other words, even if the UGC paper has an error, its two most famous consequences, Max-Cut 0.878 and vertex cover 2, have a separate independent path. This is what Aaronson's blog means when it says "UGC isn't actually necessary for its most famous consequences" [R].
+The repo's CONTENTS.md says these 4 papers are **independent direct reductions** that "use established PCP and Label Cover hardness results" and don't depend on the UGC paper. In other words, even if the UGC paper has an error, its two most famous consequences, Max-Cut 0.878 and vertex cover 2, have a separate independent path. The complexity theorist Dana Moshkovitz put it this way, in commentary that Aaronson posted as comment #2 on "The Mathocalypse" (it opens "Additional commentary from Dana on the UGC proof"): "The Unique Games Conjecture is true, though it wasn't really needed for the proof of its most famous corollaries", with optimal hardness of approximating Max-Cut and other constraint satisfaction problems as her examples in parentheses [R]. These 4 direct reductions are what she means.
 
 In addition, **family 105** (*Perfect completeness for 2-to-1 games*) claims a proof of Khot's 2-to-1 conjecture (the perfect-completeness version). Footnote 1 of the UGC paper says it is "not an input to this proof".
 
-### 8.3 Intuition for the method (I read only the introduction; this is a simplified version)
+### 7.8.3 Intuition for the method (I read only the introduction; this is a simplified version)
 
 1. **Starting point**: Håstad's hardness result for "nearly satisfiable systems of parity equations" (each equation x + y + z ≡ b mod 2).
 2. **Why the 2-to-2 road got stuck at 1/2**: in the "matrix short code" of Barak–Kothari–Steurer, the probability that an honest proof's answer stays unchanged under one random rank-one perturbation is (1 + 2^(−ℓ))/2, i.e. about 1/2. So completeness could only reach 1/2.
@@ -348,11 +352,11 @@ In addition, **family 105** (*Perfect completeness for 2-to-1 games*) claims a p
 
 ---
 
-## 9. How far it has been verified
+## 7.9 How far it has been verified
 
-### 9.1 The Lean statement: much longer than the quasi-Riemann hypothesis, but still readable
+### 7.9.1 The Lean statement: much longer than the quasi-Riemann hypothesis, but still readable
 
-The Lean statement of the quasi-Riemann hypothesis is a single line, because Mathlib already has the ζ function. UGC is different: Mathlib has **no** ready-made definitions of "unique game", "3SAT encoding" or "polynomial-time reduction to a graph", so the challenge file `ComparatorChallenges/UniqueGamesTheorem.lean` (239 lines) has to define all of these itself. The core theorem:
+The Lean statement of the quasi-Riemann hypothesis (§4) is a single line, because Mathlib already has the ζ function. UGC is different: Mathlib has **no** ready-made definitions of "unique game", "3SAT encoding" or "polynomial-time reduction to a graph", so the challenge file `ComparatorChallenges/UniqueGamesTheorem.lean` (239 lines) has to define all of these itself. The core theorem (full name `OAI.UniqueGamesTheorem.theorem11`; the translation below is from my reading of the Lean source [P]):
 
 ```lean
 theorem theorem11 (ε δ : ℝ)
@@ -384,70 +388,70 @@ A few details worth noting:
 - Repeated edges are counted by multiplicity; there are no hidden weights.
 - If the input string can't even be parsed as a formula, it counts as "unsatisfiable", and the reduction must still output an instance with value ≤ δ. This is a stricter requirement, not a loophole.
 - Restricting ε, δ < 1/2 doesn't affect the conclusion: UGC is precisely about small ε, δ.
-- Completeness is written as ≥ 1 − ε rather than = 1, which is correct: as §5.4 said, the fully satisfiable case is easy.
+- Completeness is written as ≥ 1 − ε rather than = 1, which is correct: as §7.5.4 said, the fully satisfiable case is easy.
 
 **My judgment: this is a faithful encoding of UGC, in a stronger form.** One outside fact the reader has to supply: the theorem says "reduces from 3SAT"; "therefore NP-hard" also needs the Cook–Levin theorem (3SAT is NP-complete). That step is not in this statement, but it is a textbook result and uncontroversial.
 
-### 9.2 The proof itself
+### 7.9.2 The proof itself
 
 - Solution directory `OAI/Computability/UniqueGames/`: **478 Lean files, 186,782 lines** (counted by script).
 - grep for `sorry`, `axiom`, `admit`, `native_decide`, `implemented_by`, `unsafe`: 0 hits. The Comparator config allows only three standard axioms (`propext`, `Quot.sound`, `Classical.choice`).
 - Apart from Mathlib, the proof imports nothing from other directories in the repo. Since Mathlib has no PCP theorem, **the PCP theorem, Håstad's result, KMS's Grassmann expansion theorem, parallel repetition, and the polynomial-time Turing machine implementation** should all have been formalized from scratch within these 478 files. The subdirectory names (`PCP/` with 104 files, `Inverse/` with 39 files including `KMS…`, `Repetition/`, `Machines/` with 144 files) are consistent with this. ⚠ This is inferred from the directory structure and import relations; I did not open each one to check.
-- The direct proofs for Max-Cut and vertex cover also have Lean: `MaxCut/` has 372 files, 186,763 lines; `VertexCover/` has 354 files, 66,335 lines. In the Max-Cut statement, α_GW is defined directly as the `sInf` of 2·arccos ρ / (π(1 − ρ)), which is exactly the formula from §3.3 (arccos ρ = θ).
-- **What wasn't done**: I did not compile it. The Comparator config for the UGC family has `enable_nanoda: false`, meaning no second, independent kernel re-check. Unlike the quasi-Riemann hypothesis, I found no third party who has publicly re-run this proof ⚠. The repo's `formalization.yaml` itself says `review: status: unchecked`.
+- The direct proofs for Max-Cut and vertex cover also have Lean: `MaxCut/` has 372 files, 186,763 lines; `VertexCover/` has 354 files, 66,335 lines. In the Max-Cut statement, α_GW is defined directly as the `sInf` of 2·arccos ρ / (π(1 − ρ)), which is exactly the formula from §7.3.3 (arccos ρ = θ).
+- **What wasn't done**: I did not compile it. The Comparator config for the UGC family has `enable_nanoda: false`, meaning no second, independent kernel re-check. Unlike the quasi-Riemann hypothesis (§4), I found no third party who has publicly re-run this proof ⚠. The repo's `formalization.yaml` itself says `review: status: unchecked`.
 
-### 9.3 Human experts
+### 7.9.3 Human experts
 
 - Lance Fortnow (blog post "Open No More", 2026-10-07): "if they hold up, we've seen more progress in TCS in the last 24 hours than in the previous three decades combined." [R]
 - Mark Braverman (Princeton, Quanta 2026-10-07): "Math by press release is not that healthy for math." [R]
 - Quanta's report says this proof "didn't undergo any human editing or review by independent experts". [R]
-- Dana Moshkovitz criticized the paper as extremely hard to read (as relayed by Aaronson's blog and Implicator) ⚠ secondhand quote; original wording not verified.
+- Dana Moshkovitz (a complexity theorist, and Aaronson's wife): her views come from private texts and comments that Aaronson posted on his blog, not from a formal review [R]. In the post body: "Basically the paper is so horribly written that it's impossible to read it without AI help"; in comment #2: "the writeup is poorly written". Her description of the method: "The UGC proof invents a completely new bizarre code with a noise test" (this is the new encoder and noise of step 3 in §7.8.3). Later, in comment #94, Aaronson wrote: "Dana tells me she now mostly understands the proof of the UGC". Secondhand retellings in outlets such as Implicator word this differently ⚠; go by the original on Aaronson's blog.
 - Khot himself: as of 2026-10-08 I found no public statement ⚠.
 - **As of 2026-10-08, no human expert has publicly said they have read through and verified these 58 pages.**
 
-### 9.4 Remaining risks
+### 7.9.4 Remaining risks
 
 1. **Statement level**: I read it line by line and found no problems, but I am not a complexity theory expert. The things most worth an expert's re-check are the use of `TM2ComputableInPolyTime` (whether the input and output encodings are reasonable, and whether the polynomial really is independent of the input), and whether the 3SAT encoding has a loophole that makes the problem easier.
 2. **Compilation level**: depends on third parties or re-running it yourself. No nanoda re-check.
-3. **Understanding level**: this is the same situation as the quasi-Riemann hypothesis chapter. It may already be proved in the machine sense, but nobody can explain "why that nonlinear noise works". The paper is very hard to read, which will slow down human understanding.
+3. **Understanding level**: this is the same situation as the quasi-Riemann hypothesis (§4). It may already be proved in the machine sense, but nobody can explain "why that nonlinear noise works". The paper is very hard to read, which will slow down human understanding.
 
 ---
 
-## 10. What it means if true (and what it doesn't)
+## 7.10 What it means if true (and what it doesn't)
 
-### 10.1 For theoretical computer science
+### 7.10.1 For theoretical computer science
 
-1. **A large batch of conditional results become theorems**: Max-Cut's 0.878, vertex cover's 2, Raghavendra's "SDP is optimal for every CSP", and so on. The premise is removed from the many papers of the past 20 years that say "assuming UGC, then…".
+1. **A large batch of conditional results become theorems**: Max-Cut's 0.878, vertex cover's 2, Raghavendra's "SDP is optimal for every CSP", and so on. The premise is removed from the hundreds of papers of the past 20 years that say "assuming UGC, then…".
 2. **The map of approximation algorithms is basically complete**: for many problems, the gap between "achievable" and "not achievable" is closed. The 1995 GW algorithm is proved optimal.
 3. **The subexponential algorithm is no longer a counterexample**: UGC being true and ABS's exp(n^ε) algorithm coexist. This means the reduction from 3SAT to UG must produce an extremely large polynomial (the paper says the degree and constants of the polynomial depend only on ε, δ, but gives no concrete numbers).
 
-### 10.2 What it does not mean
+### 7.10.2 What it does not mean
 
 - **It does not resolve P vs NP.** Every conclusion is "X is NP-hard", i.e. "unless P = NP, X cannot be done". If someone proved P = NP tomorrow, all these hardness results would become void. Fortnow says in the same blog post that these results don't bring us closer to resolving P vs NP [R].
 - **It does not affect practical engineering.** Industry uses heuristics for graph partitioning and clustering, and on real data they often do far better than the worst-case 0.878. UGC is about **guarantees** in the **worst case**.
 - **It does not overturn any known algorithm.** It only proves that "existing algorithms can't be improved further".
 
-### 10.3 For AI
+### 7.10.3 For AI
 
 - This is the result in OpenAI's batch **closest to AI researchers' daily work**: its core objects (SDP relaxations, randomized rounding, PCP-style verification) are basic tools of computer science.
 - An association (**my speculation, not an established result**): the complexity-theoretic foundation of debate-style scalable oversight (Irving–Christiano–Amodei 2018, arXiv:1805.00899) is interactive proofs and PCP: "can a weak verifier, looking at only a little information, judge a strong prover's argument?" UGC characterizes the boundary where "a little noise makes efficient distinction impossible". For designing "weak overseer + strong model" protocols, it suggests there may be an essential computational-hardness difference between **perfect agreement** and **near agreement**.
-- As with the quasi-Riemann hypothesis, we again have the combination "a hard-to-read 58-page paper + 187,000 lines of Lean". The bottleneck of trust moves from "is the proof right" to "**was the statement encoded correctly**", which is exactly the spec review that §9.1 does.
+- As with the quasi-Riemann hypothesis (§4), we again have the combination "a hard-to-read 58-page paper + 187,000 lines of Lean". The bottleneck of trust moves from "is the proof right" to "**was the statement encoded correctly**", which is exactly the spec review that §7.9.1 does.
 
 ---
 
-## 11. Self-test
+## 7.11 Self-test
 
 Try answering these after reading. If you can't, go back and reread the relevant section.
 
-1. What exactly does "X is NP-hard" mean? Does it prove P ≠ NP? (§1.2)
-2. Why is random coloring at least a 1/2-approximation? (§2.2)
-3. In the GW algorithm, 0.878 is the minimum of the ratio of which two quantities, and where is it attained? (§3.3)
-4. Why does the "gap" in the PCP theorem imply hardness of approximation? (§4.2)
-5. Why can a fully satisfiable unique game be solved in polynomial time, while 3SAT can't? (§5.4)
-6. Why does the order "first ε, δ, then the alphabet size" in UGC matter? (§5.6)
-7. What has the 2-to-2 theorem already proved, and what was still missing? (§7.2)
-8. What does the `soundness` field in the Lean statement say? What happens if the input string isn't a valid formula encoding at all? (§9.1)
-9. Why might the optimality of Max-Cut 0.878 still hold even if the UGC paper has an error? (§8.2)
+1. What exactly does "X is NP-hard" mean? Does it prove P ≠ NP? (§7.1.2)
+2. Why is random coloring at least a 1/2-approximation? (§7.2.2)
+3. In the GW algorithm, 0.878 is the minimum of the ratio of which two quantities, and where is it attained? (§7.3.3)
+4. Why does the "gap" in the PCP theorem imply hardness of approximation? (§7.4.2)
+5. Why can a fully satisfiable unique game be solved in polynomial time, while 3SAT can't? (§7.5.4)
+6. Why does the order "first ε, δ, then the alphabet size" in UGC matter? (§7.5.6)
+7. What has the 2-to-2 theorem already proved, and what was still missing? (§7.7.2)
+8. What does the `soundness` field in the Lean statement say? What happens if the input string isn't a valid formula encoding at all? (§7.9.1)
+9. Why might the optimality of Max-Cut 0.878 still hold even if the UGC paper has an error? (§7.8.2)
 
 ---
 

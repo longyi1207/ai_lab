@@ -1,12 +1,12 @@
-# Explainer 10: The Mézard–Parisi formula (diluted spin glasses)
+# The Mézard–Parisi formula (diluted spin glasses): from magnets to the energy landscapes of neural networks
 
-> This is the "explained from zero" version of §13 of the `notes/openai_math_explained/` deck. Prerequisites: you can work with exponentials and logarithms (e^x, ln x), you know what an "expectation" (average) is, and you know the summation sign Σ. The physics concepts (energy, temperature, free energy) are all explained from scratch. The Hopfield network you met in neuroscience comes back in Section 10.
-> Every number in the text was computed by script or has a source. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
-> Estimated reading time: 70–100 minutes. You can split it into three sittings: Sections 1–4 (spins, free energy, the replica method), Sections 5–7 (sparse graphs, the cavity method, the problem itself), Sections 8–10 (OpenAI's result, how well it is verified, and what it means).
+> Prerequisites: you can work with exponentials and logarithms (e^x, ln x), you know what an "expectation" (average) is, and you know the summation sign Σ. The physics concepts (energy, temperature, free energy) are all explained from scratch. The Hopfield network you met in neuroscience comes back in §13.10.
+> Every number in the text was computed by script or has a source; [P] marks primary material read (paper, repo, Lean source), and ⚠ marks something unverified or conflicting. **[Check]** items are small exercises you can work out yourself; answers are at the end of the chapter.
+> Estimated reading time: 70–100 minutes. You can split it into three sittings: §13.1–13.4 (spins, free energy, the replica method), §13.5–13.7 (sparse graphs, the cavity method, the problem itself), §13.8–13.10 (OpenAI's result, how well it is verified, and what it means).
 
 ---
 
-## 0. The bottom line: the one thing this chapter explains
+## 13.0 The bottom line: the one thing this chapter explains
 
 A magnet contains a huge number of tiny compass needles ("spins"), each of which can only point up or down. If the interactions between the needles are **random**, with some pairs wanting to align and others wanting to point opposite ways, you get a situation where "no arrangement can satisfy everyone." Such a system is called a **spin glass**. The central quantity physicists care about is the **free energy**: once you know it, you can derive almost every macroscopic property of the system at every temperature.
 
@@ -14,9 +14,9 @@ Between 1979 and 2001, physicists (mainly Parisi and Mézard) wrote down formula
 
 > Free energy = the minimum of a "hierarchical trial functional" ⟸ the upper bound was proved long ago (the interpolation method, 2003–04) ⟸ the lower bound (equality) requires controlling "the spin patterns seen by several replicas at once" ⟸ in the dense model (SK), pairwise overlaps are enough; in sparse models they are not, and this step was stuck for over twenty years.
 
-OpenAI claims to have filled in the lower bound for **one class of sparse models** (Poisson-diluted, even-arity interactions, satisfying the Panchenko–Talagrand condition), thereby proving that equality holds, and has given a Lean formalization.
+OpenAI claims (family 221, 2026-09-23, a 36-page paper + about 56,000 lines of Lean) [P] to have filled in the lower bound for **one class of sparse models** (Poisson-diluted, even-arity interactions, satisfying the Panchenko–Talagrand condition), thereby proving that equality holds, and has given a Lean formalization.
 
-Note: the name "Mézard–Parisi" refers to at least two different things in the literature. What OpenAI proved is the **hierarchical cavity formula for diluted spin glasses** (Mézard–Parisi 2001), **not** the famous **random assignment problem ζ(2) = π²/6** (Mézard–Parisi 1985–87, proved by Aldous in 2001). Section 6 covers the latter, because it is the best example for understanding "why physicists' non-rigorous methods are trustworthy."
+Note: the name "Mézard–Parisi" refers to at least two different things in the literature. What OpenAI proved is the **hierarchical cavity formula for diluted spin glasses** (Mézard–Parisi 2001), **not** the famous **random assignment problem ζ(2) = π²/6** (Mézard–Parisi 1985–87, proved by Aldous in 2001). §13.6 covers the latter, because it is the best example for understanding "why physicists' non-rigorous methods are trustworthy."
 
 After reading this chapter, you should be able to explain in your own words:
 - what free energy is, why "averaging log Z" is hard, and what trick the replica method uses to get around it;
@@ -26,15 +26,15 @@ After reading this chapter, you should be able to explain in your own words:
 
 ---
 
-## 1. Magnets and spins: the Ising model
+## 13.1 Magnets and spins: the Ising model
 
-### 1.1 Spins
+### 13.1.1 Spins
 
 Think of a magnet as a row of tiny compass needles, each with only two states: up is written σ = +1, down is written σ = −1. This variable that can only take ±1 is called a **spin**. One assignment of values to N spins (for example +1, −1, −1, +1) is called a **configuration**, and there are 2^N configurations in total.
 
 You have seen the same thing in neuroscience: the binary "firing / not firing" model of a neuron, which is exactly how a Hopfield network encodes it.
 
-### 1.2 Energy
+### 13.1.2 Energy
 
 Between two spins i, j there is a **coupling strength** Jᵢⱼ. The energy of the system (physicists call it the Hamiltonian) is:
 
@@ -48,7 +48,9 @@ Look at a single pair of spins:
 
 Physical systems tend toward low-energy states. The configuration with the lowest energy is called the **ground state**.
 
-### 1.3 The Boltzmann distribution: where temperature comes in
+This energy function connects directly to your neuroscience background: the energy of a Hopfield network (1982), E = −½ Σ Wᵢⱼσᵢσⱼ, has exactly this form, i.e. it is a spin-glass-style Hamiltonian. Stored memories are local minima of this energy; starting from a partial cue, the network updates so that the energy never goes up, and it settles into a nearby minimum (§13.10.3 comes back to this in detail).
+
+### 13.1.3 The Boltzmann distribution: where temperature comes in
 
 At temperature T > 0, the system doesn't stick to the ground state. Instead, it appears in every configuration with some probability, given by the **Boltzmann distribution**:
 
@@ -74,9 +76,9 @@ At high temperature all four configurations are equally likely (thermal motion s
 
 ---
 
-## 2. Frustration and spin glasses
+## 13.2 Frustration and spin glasses
 
-### 2.1 The frustrated triangle
+### 13.2.1 The frustrated triangle
 
 Put three spins on a triangle, with all three edges antiferromagnetic (J = −1): every pair wants to point opposite ways. The energy is H = σ₁σ₂ + σ₂σ₃ + σ₁σ₃.
 
@@ -93,13 +95,13 @@ The partition function of the antiferromagnetic triangle is Z(β) = 2e^(−3β) 
 
 **[Check 2]** List the 8 configurations of the antiferromagnetic triangle with their energies, and confirm that exactly 2 have energy +3 and 6 have energy −1.
 
-### 2.2 Spin glasses: random couplings
+### 13.2.2 Spin glasses: random couplings
 
 If each edge's Jᵢⱼ has a **random** sign (or is a random Gaussian number), frustration is everywhere: pick three random ±1 signs, and the probability that the triangle is frustrated (the product of the three signs is negative) is exactly 1/2 (the script enumerates the 8 sign combinations). Such a system is called a **spin glass**. The name comes from real materials (for example copper with a small amount of manganese mixed in): at low temperature their spins "freeze" in disordered directions, "orderly disordered" like glass.
 
 There is a key distinction here that also shows up in ML: the couplings J are "**frozen randomness**" (quenched disorder), drawn once and then fixed; the spins σ are the variables that undergo "thermal motion" under the Boltzmann distribution. Analogy: J is a training set, and σ are the parameters on that training set.
 
-### 2.3 A rugged energy landscape
+### 13.2.3 A rugged energy landscape
 
 "Frustration everywhere" produces a **rugged energy landscape**: many local minima, separated from each other by energy barriers. A script experiment: call a configuration where "flipping any single spin cannot lower the energy" a **single-flip stable configuration** (a local minimum), and count them:
 
@@ -113,9 +115,9 @@ The literature result is that the number of single-flip stable configurations in
 
 ---
 
-## 3. Free energy: why physicists want it
+## 13.3 Free energy: why physicists want it
 
-### 3.1 Definition
+### 13.3.1 Definition
 
 ```
 Free energy   F = −(1/β) · ln Z
@@ -124,13 +126,13 @@ Free energy   F = −(1/β) · ln Z
 
 Pressure = −βF/N: the two differ only by a factor of −β/N (−β from the sign and temperature, 1/N from "per spin"), so they are essentially the same thing.
 
-### 3.2 Why they want it
+### 13.3.2 Why they want it
 
 Because ln Z is a "generating function": differentiating it gives almost every macroscopic quantity. For example, the mean energy ⟨E⟩ = −∂(ln Z)/∂β, and the entropy S = β(⟨E⟩ − F). Computed by script on the frustrated triangle: at β = 5, the entropy of the antiferromagnetic triangle is S = 1.7918, almost exactly ln 6 = 1.7918 (6 equally likely ground states); the entropy of the ferromagnetic triangle is 0.6931 = ln 2.
 
 The ML counterpart: ln Z is just log-sum-exp; the ELBO is a lower bound on ln Z.
 
-### 3.3 The real difficulty: you have to average ln Z
+### 13.3.3 The real difficulty: you have to average ln Z
 
 For a spin glass, Z itself is random (it depends on which J you drew). What is physically meaningful is the free energy of a **typical** sample, that is, **E[ln Z]** (the "quenched average").
 
@@ -149,9 +151,9 @@ The gap is large. The reason is that E[Z] is dominated by a very few "unusually 
 
 ---
 
-## 4. The replica method and replica symmetry breaking: a tradition that is "not rigorous, but right"
+## 13.4 The replica method and replica symmetry breaking: a tradition that is "not rigorous, but right"
 
-### 4.1 The replica trick
+### 13.4.1 The replica trick
 
 Physicists use an identity:
 
@@ -169,7 +171,7 @@ The benefit: when n is a **positive integer**, Z^n = Z·Z·…·Z is the partiti
 
 Step 2 has no mathematical justification at all (the values at the integers do not uniquely determine a function on the reals), and step 3 also requires swapping the two limits n → 0 and N → ∞. This is why it is called "non-rigorous."
 
-### 4.2 Replica symmetry and its failure
+### 13.4.2 Replica symmetry and its failure
 
 When computing E[Z^n], an n × n matrix Q_ab appears, called the **overlap**:
 
@@ -179,7 +181,7 @@ Q_ab = (1/N) Σᵢ σᵢ^a · σᵢ^b    (how similar the configurations of repl
 
 The most natural guess is that all replicas are "equal," so all off-diagonal Q_ab are the same. This is called **replica symmetric** (RS). Sherrington and Kirkpatrick did exactly this for the SK model in 1975, and the result was clearly wrong at low temperature: the zero-temperature entropy came out as **−1/(2π) ≈ −0.159**, while the entropy of an Ising system cannot be negative (there is at least 1 configuration, and ln 1 = 0); the RS prediction for the ground-state energy, −√(2/π) ≈ −0.798, also disagrees with numerical simulations.
 
-### 4.3 Parisi's replica symmetry breaking
+### 13.4.3 Parisi's replica symmetry breaking
 
 In 1979 Parisi proposed that the replicas are not equal but form a **hierarchy**. Split the n replicas into large groups, split each large group into smaller groups, those into even smaller groups… Overlaps within the same small group are large; overlaps between different large groups are small. Splitting into r levels is called **r-step replica symmetry breaking** (r-RSB), and r → ∞ is called full RSB.
 
@@ -187,7 +189,11 @@ The physical interpretation (built up gradually starting with Mézard–Parisi�
 
 The parameters 0 < m₁ < m₂ < … < m_r < 1 that appear in the Parisi formula are the "branching strengths" at each level of the tree. The `Exponents m` in the OpenAI paper and Lean code later on refer to exactly these.
 
-### 4.4 The physics was right; the math took 27 years
+The figure below puts the two ideas side by side. On the left is the frustrated triangle from §13.2.1: all three bonds want opposite spins, none of the 8 configurations satisfies all three (the dashed bond always fails), and the ground state is 6-fold degenerate. On the right is Parisi's hierarchical tree: pure states first split into large groups, and the large groups split again; the deeper the common ancestor of two pure states (the "closer relatives" they are), the larger their overlap. The note at the bottom right, "diluted: need all multi-replica overlaps," is the difficulty that §13.7.3 explains.
+
+{{FIG_SPIN}}
+
+### 13.4.4 The physics was right; the math took 27 years
 
 | Year | Event | Nature |
 |---|---|---|
@@ -214,9 +220,9 @@ As N grows, the value moves toward −0.763, but slowly (finite-size corrections
 
 ---
 
-## 5. Sparse graphs and the cavity method
+## 13.5 Sparse graphs and the cavity method
 
-### 5.1 Dense vs. sparse
+### 13.5.1 Dense vs. sparse
 
 In the SK model, **every pair** of spins is coupled, each spin has N − 1 neighbors, and each coupling is very weak (of order 1/√N). This is called a **dense** (mean-field) model.
 
@@ -224,7 +230,7 @@ Real physics and many computational problems are **sparse**: each spin interacts
 - **Poisson dilution** (Viana–Bray 1985): scatter αN edges at random (in OpenAI's theorem the number of edges is itself drawn as Poisson(αN)); each spin's degree is approximately Poisson-distributed.
 - **Bethe lattice / random regular graph**: every spin has the same **fixed** degree. The original Mézard–Parisi 2001 paper uses this one.
 
-### 5.2 Sparse random graphs "look locally like trees"
+### 13.5.2 Sparse random graphs "look locally like trees"
 
 The key property: sparse random graphs have **very few short cycles**. Computed by script (Erdős–Rényi graphs with average degree 3):
 
@@ -237,7 +243,7 @@ The key property: sparse random graphs have **very few short cycles**. Computed 
 
 Theoretical values: the number of triangles tends to c³/6 = 4.5 (**it does not grow with N**), and the fraction of isolated vertices tends to e⁻³ ≈ 0.0498. In other words, the bigger the graph, the closer to zero the fraction of vertices with a short cycle nearby: looking a few steps out from any vertex, what you see is almost always a tree.
 
-### 5.3 The cavity method: exact on trees
+### 13.5.3 The cavity method: exact on trees
 
 The idea of the **cavity method**: remove one spin and see how the rest of the system "treats" the empty slot.
 
@@ -253,11 +259,11 @@ where h_j^cavity is "the total field felt by j after i is removed." This is **be
 
 The script also does a tree with 5 vertices and random couplings and external fields: comparing the 5 magnetizations computed by exact enumeration of the 32 configurations against the BP result, the largest difference is **4.9 × 10⁻¹⁶** (machine precision). Add two more edges to create cycles, and the largest difference becomes **0.16**. **Cavity / BP is exact on trees and inexact with short cycles.** Sparse random graphs "look locally like trees," so there is reason to expect the cavity method to become exact as N → ∞, but this needs proof.
 
-### 5.4 The complication: with many pure states, messages become "distributions of distributions"
+### 13.5.4 The complication: with many pure states, messages become "distributions of distributions"
 
 At high temperature, BP has a unique fixed point, with one message per edge; averaging over random graphs, the order parameter is "**a distribution of messages**" ζ ∈ P(ℝ). This is the RS level (r = 0).
 
-In the low-temperature spin glass phase there are many pure states (the tree from Section 4.3), and the message on an edge differs from one pure state to another. So you have to describe "how the message is distributed across pure states," then average over the randomness of the graph, and the order parameter becomes "**a distribution of distributions of messages**"; with r levels of RSB, there are r + 1 levels of nesting:
+In the low-temperature spin glass phase there are many pure states (the tree from §13.4.3), and the message on an edge differs from one pure state to another. So you have to describe "how the message is distributed across pure states," then average over the randomness of the graph, and the order parameter becomes "**a distribution of distributions of messages**"; with r levels of RSB, there are r + 1 levels of nesting:
 
 ```
 Level 0: ℝ (one message)
@@ -268,21 +274,21 @@ Level 2: P(P(ℝ)) (a distribution of distributions of messages)
 
 The `Hierarchy` in the Lean statement is exactly this definition: `H₀ = ℝ`, `H_{r+1} = P(H_r)`. This is what "hierarchical" means in "**hierarchical cavity formula**."
 
-Mézard–Parisi 2001 (*The Bethe lattice spin glass revisited*, EPJ B 20:217) wrote down this framework and an explicit 1RSB functional for the fixed-degree Bethe lattice; the general form for any finite number of levels r, and the proof that it is an upper bound on the free energy, come from Panchenko–Talagrand 2004 (see Section 7).
+Mézard–Parisi 2001 (*The Bethe lattice spin glass revisited*, EPJ B 20:217) wrote down this framework and an explicit 1RSB functional for the fixed-degree Bethe lattice; the general form for any finite number of levels r, and the proof that it is an upper bound on the free energy, come from Panchenko–Talagrand 2004 (see §13.7).
 
 ---
 
-## 6. The other "Mézard–Parisi": random assignment and ζ(2)
+## 13.6 The other "Mézard–Parisi": random assignment and ζ(2)
 
-This section is not OpenAI's result, but it is the most beautiful example of "physicists' non-rigorous method → mathematical theorem," and it is the same number as ζ(2) = π²/6 in Explainer 01.
+This section is not OpenAI's result, but it is the most beautiful example of "physicists' non-rigorous method → mathematical theorem," and it is the same number as ζ(2) = π²/6 in the quasi-Riemann hypothesis (§4).
 
-### 6.1 The problem
+### 13.6.1 The problem
 
 n workers, n jobs. The cost Cᵢⱼ for worker i to do job j is an independent random number, exponentially distributed with mean 1. Find a one-to-one assignment that minimizes the total cost. Question: what is the expected minimum total cost?
 
 Intuition might say it grows with n (after all, you are adding n numbers), but the optimal assignment picks very small numbers from each row, and as n grows, the "very small numbers" get smaller and smaller.
 
-### 6.2 Prediction and proof
+### 13.6.2 Prediction and proof
 
 - **Mézard–Parisi 1985/1987**: using the replica method, they predicted that as n → ∞ the expected minimum cost → **ζ(2) = π²/6 ≈ 1.6449**.
 - **Aldous 2001** (*The ζ(2) limit in the random assignment problem*, Random Structures & Algorithms 18): a rigorous proof, using "local weak convergence" (the same idea as the cavity method's "locally tree-like").
@@ -310,11 +316,11 @@ Every row agrees within one or two standard errors, and for large n both approac
 
 ---
 
-## 7. What exactly is the problem: the upper bound is known, equality is open
+## 13.7 What exactly is the problem: the upper bound is known, equality is open
 
-### 7.1 What needs to be proved
+### 13.7.1 What needs to be proved
 
-For the diluted model, define the per-spin pressure F_N = (1/N)·E[ln Z_N]. The hierarchical cavity functional B_r(ζ, m) gives a number for any "trial law" ζ (the nested distributions from Section 5.4) and any branching parameters 0 < m₁ < … < m_r < 1. The conjecture is:
+For the diluted model, define the per-spin pressure F_N = (1/N)·E[ln Z_N]. The hierarchical cavity functional B_r(ζ, m) gives a number for any "trial law" ζ (the nested distributions from §13.5.4) and any branching parameters 0 < m₁ < … < m_r < 1. The conjecture is:
 
 ```
 lim_{N→∞} F_N  =  inf_{r ≥ 0}  inf_{ζ, m}  B_r(ζ, m)
@@ -322,14 +328,14 @@ lim_{N→∞} F_N  =  inf_{r ≥ 0}  inf_{ζ, m}  B_r(ζ, m)
 
 The right-hand side takes the infimum over **all finite numbers of levels and all trial laws**.
 
-### 7.2 Half of it is already proved: the upper bound (2003–04)
+### 13.7.2 Half of it is already proved: the upper bound (2003–04)
 
 - **Franz–Leone 2003** (J. Stat. Phys. 111): carried Guerra's interpolation method over to diluted models and proved the RS and 1RSB upper bounds for even-arity models.
 - **Panchenko–Talagrand 2004** (PTRF 130): proved the upper bound for any finite number of levels r: for every r, ζ, m, lim sup F_N ≤ B_r(ζ, m). After Theorem 4 they **explicitly state equality as a conjecture**. The OpenAI paper says this is the conjecture it resolves (within the same model class).
 
 The intuition for the interpolation method: build a path that continuously deforms "the real model" into "a trial model made of independent messages," and prove that the derivative of the pressure along the path has a fixed sign. Determining the sign uses a positivity condition; this is where E[(−b)ⁿ] ≥ 0 in the Panchenko–Talagrand condition below comes from, and also why only **even-arity** interactions can be handled.
 
-### 7.3 Why the lower bound is hard
+### 13.7.3 Why the lower bound is hard
 
 In SK, when Talagrand proved the lower bound, he only needed to control the **pairwise overlaps** Q_ab. In a sparse model, a newly inserted spin connects simultaneously to p − 1 old spins, and you need to know what pattern several replicas see **at the same time** at those positions. This depends on all the **multioverlaps**:
 
@@ -347,17 +353,19 @@ Neighboring known results (background):
 
 ---
 
-## 8. What OpenAI claims
+## 13.8 What OpenAI claims
 
-### 8.1 The main result
+### 13.8.1 The main result
 
-Abstract of the paper *The Mézard–Parisi formula for diluted spin glasses* (OpenAI, 2026-09-23, 36 pages, family 221):
+Abstract of the paper *The Mézard–Parisi formula for diluted spin glasses* (OpenAI, 2026-09-23, 36 pages, family 221) [P]:
 
 > "We prove the Mézard–Parisi hierarchical cavity formula for diluted even-arity Ising models in the Panchenko–Talagrand class. This resolves the variational equality conjecture for that class: the limiting pressure equals the infimum of the trial functional over all finite hierarchy depths and trial laws. Only first moments of the interaction and external field are required."
 
 Main theorem (Theorem 2.1): under assumptions (2.1)–(2.4), the thermodynamic limit exists, and lim F_N = inf_r Φ_r.
 
-### 8.2 What the model is (plain-language version)
+The key trick in one sentence: shift every branching depth down one level, then average over depths, which gives control of all multi-replica overlaps (step 3 in §13.8.4).
+
+### 13.8.2 What the model is (plain-language version)
 
 - Fix an **even** p ≥ 2 (how many spins each interaction involves) and a density α > 0.
 - Scatter M_N ~ Poisson(αN) interactions; each picks p spins at random (**with replacement**, so repeats are allowed) and applies a random function θ. Each spin also gets a random external field h.
@@ -377,17 +385,18 @@ The coverage listed in Section 10 of the paper (OpenAI's claim):
 - **soft random even K-SAT**, at every positive temperature ("soft": a violated clause is only penalized by energy βW, not strictly forbidden).
 - Corollary 10.3: lowering the temperature to zero gives the limit of "maximum energy / minimum number of violated clauses," with error ≤ ln 2 / β.
 
-### 8.3 What it does not cover (important)
+### 13.8.3 What it does not cover (important)
 
 - **Odd arity**: random **3-SAT** is not included. The paper's Remark 10.4 says so itself, and points to another OpenAI paper from the same batch, *Computing the Random 3-SAT Threshold* (2026-09-27), which uses a different trial functional (OpenAI's claim; not read for this chapter).
-- **Fixed-degree Bethe lattice / random regular graphs**: the degrees in the theorem come from Poisson edge scattering. The setting of the original Mézard–Parisi 2001 paper is exactly the fixed-degree one, and that case is **not** covered by the theorem. In other words, the "Mézard–Parisi formula" in the title refers to its counterpart on Poisson-diluted models.
+- **Fixed-degree Bethe lattice / random regular graphs**: the degrees in the theorem come from Poisson edge scattering. The setting of the original Mézard–Parisi 2001 paper is exactly the fixed-degree one, and that case is **not** covered by the theorem. In other words, the "Mézard–Parisi formula" in the paper's title refers to its counterpart on Poisson-diluted models.
 - **Ferromagnetic models** (my inference; I haven't seen the paper say it explicitly ⚠): for fixed J > 0, the standard decomposition gives b = tanh(βJ) > 0, so E[(−b)ⁿ] alternates in sign and the positivity condition fails. But the ferromagnetic case was already handled by Dembo–Montanari 2010, so it is not a gap.
 - **The zero-temperature hard-constraint SAT threshold**: the theorem is a result at every positive temperature; the zero-temperature limit only gives the minimum number of violations, not the satisfiability threshold directly. So it does **not** re-prove or extend Ding–Sly–Sun.
+- **Hopfield networks**: fully connected (dense), with couplings determined by the stored patterns, so different edges are not independent; they are outside the theorem. The connections in §13.10.3 (Hopfield, perceptrons, loss landscapes) are about where the ideas came from, not consequences of this theorem.
 - It **does not claim** that the infimum is attained by some trial law, and it does not construct an infinite-level limiting Gibbs state (the remarks after Theorem 2.1 in the paper).
 
-### 8.4 Intuition for the method (I only read the introduction and Section 2.2; what follows is a simplified version)
+### 13.8.4 Intuition for the method (I only read the introduction and §13.2.2; what follows is a simplified version)
 
-The upper bound reuses the interpolation method (Section 4). The lower bound has four steps:
+The upper bound reuses the interpolation method (§13.4). The lower bound has four steps:
 
 1. **Choose a "cavity reservoir"**: compare the system with N spins and with N + 1 spins, adding a sublinear number of small perturbations. These don't change the pressure, but they make the system satisfy certain "identities" (the perturbed statistics concentrate).
 2. **Prescribe branching patterns**: develop a "calculus" on finite probability trees that expands the effect of inserting a new spin into a signed sum over replica paths, using independent labels to pick out any specified replica branching pattern.
@@ -404,15 +413,15 @@ The reasoning summary (`reasoning_traces/mezard-parisi-formula.pdf`, 5 pages) re
 
 The summary also candidly records failed attempts: the pinning method (fixing some spins) could not reconcile the observed distributions; a claim of "exact purity" "proves too strong"; and before "shifting the branching depths," various expansions all had errors that were too large after dividing by small exponent gaps.
 
-### 8.5 Neighboring results in the same batch (OpenAI's claims; not verified for this chapter)
+### 13.8.5 Neighboring results in the same batch (OpenAI's claims; not verified for this chapter)
 
-The same release also contains a whole group of spin glass results: family 222 (perceptron free energy, jamming exponents), 281 (full support of the zero-temperature SK Parisi measure; QAOA reaching the SK ground-state energy), 235 (computability and variance of the random k-SAT threshold; priority for the existence of the 3-SAT threshold goes to Gaia Carenini's ECCC TR26-229), 217 and others (SK fluctuations and dynamics). Section 10.3 uses 222 and 281.
+The same release also contains a whole group of spin glass results: family 222 (perceptron free energy, jamming exponents), 281 (full support of the zero-temperature SK Parisi measure; QAOA reaching the SK ground-state energy), 235 (computability and variance of the random k-SAT threshold; priority for the existence of the 3-SAT threshold goes to Gaia Carenini's ECCC TR26-229), 217 and others (SK fluctuations and dynamics). §13.10.3 uses 222 and 281.
 
 ---
 
-## 9. How well has it been verified
+## 13.9 How well has it been verified
 
-### 9.1 The Lean statement
+### 13.9.1 The Lean statement
 
 The main theorem of the challenge file `lean/ComparatorChallenges/DilutedSpin.lean` (154 lines):
 
@@ -429,80 +438,80 @@ Word-by-word translation:
 - `variationalValue M`: `⨅ r, phi M r`, i.e. the infimum over all numbers of levels r; `phi M r` is the infimum of `functional` over all ζ ∈ `Hierarchy (r+1)` and all m satisfying `Exponents` (0 < m₁ < … < m_r < 1), and `functional` corresponds term by term to the paper's (2.11) B_r = ln 2 + E ln T₀V_s − α(p−1)·E ln T₀V_e.
 - `Tendsto … atTop (𝓝 …)`: as N → ∞, F_N converges to this value. This also includes "the limit exists."
 
-The difference from Explainer 01: the quasi-Riemann statement used only Mathlib's standard definition `riemannZeta`; **here almost all the definitions (`pressure`, `Hierarchy`, `functional`, …) are written by the challenge file itself**, so "is the statement faithful" depends on a human reading these 154 lines. I read them item by item against Section 2 of the paper and found no inconsistencies, but I am not an expert in this field ⚠.
+The difference from the quasi-Riemann hypothesis (§4): that statement used only Mathlib's standard definition `riemannZeta`; **here almost all the definitions (`pressure`, `Hierarchy`, `functional`, …) are written by the challenge file itself**, so "is the statement faithful" depends on a human reading these 154 lines. I read them item by item against Section 2 of the paper [P] and found no inconsistencies, but I am not an expert in this field ⚠.
 
-### 9.2 The proof itself
+### 13.9.2 The proof itself
 
-- Solution module `OAI/Probability/DilutedSpin/`: **405 .lean files, 56,285 lines** (counted by script). grep for `sorry` / `admit` / `native_decide` / `axiom` declarations: **0**.
+- Solution module `OAI/Probability/DilutedSpin/`: **405 .lean files, 56,285 lines** (counted by script) [P]. grep for `sorry` / `admit` / `native_decide` / `axiom` declarations: **0**.
 - The definitions in the solution module's `Model.lean` are **word-for-word identical** to those in the challenge file (I diffed the section from `Spin` to `variationalValue`).
 - Comparator config `DilutedSpin.json`: only Lean's three standard axioms are allowed (`propext`, `Quot.sound`, `Classical.choice`); **`enable_nanoda: false`**, meaning no second, independent kernel is configured for a re-check.
 - **We did not actually compile the proof or run Comparator** (the full library is very large). `formalization.yaml` is marked `review: status: unchecked` overall.
-- Unlike quasi-Riemann, **I found no report of any third party (someone like Goldblatt) independently running this proof successfully** ⚠.
+- Unlike the quasi-Riemann hypothesis (§4), **I found no report of any third party (someone like Goldblatt) independently running this proof successfully** ⚠.
 
-### 9.3 Human experts
+### 13.9.3 Human experts
 
 As of 2026-10-08, I found no named comment or verification report on this paper from any spin glass / probability expert ⚠ (searched; I only found aggregator blogs restating family 221). Panchenko, Talagrand, Coja-Oghlan, and others are the natural referees.
 
-### 9.4 Remaining risks
+### 13.9.4 Remaining risks
 
 1. **Faithfulness of the statement**: Lean proves the statement written in the challenge file. A few places deserve a close look from an expert: each level of `Hierarchy` uses the Borel σ-algebra of the weak topology (the file's comments say this follows the paper); the indexing convention for m in `logMean` (`m 0` corresponds to the paper's m₁); and `pressure` uses "average over all indices" in place of "random sampling." I believe these are all equivalent, but I haven't checked formally ⚠.
-2. **Title vs. scope**: readers can easily take "the Mézard–Parisi formula" to mean the Bethe lattice (fixed-degree) case of Mézard–Parisi 2001, or to include 3-SAT. Neither is included (Section 8.3). This is the "spec vs. intent" gap that keeps recurring in this series.
+2. **Paper title vs. scope**: readers can easily take "the Mézard–Parisi formula" to mean the Bethe lattice (fixed-degree) case of Mézard–Parisi 2001, or to include 3-SAT. Neither is included (§13.8.3). This is the "spec vs. intent" gap that keeps recurring in this series.
 3. **Readability of the proof**: a 36-page paper against 56,000 lines of Lean; the paper is written in summary style. It may take humans quite some time to understand why the "shifting the branching depths" trick works.
 
 ---
 
-## 10. What it would mean if true (and what it would not mean)
+## 13.10 What it would mean if true (and what it would not mean)
 
-### 10.1 For mathematics
+### 13.10.1 For mathematics
 
 1. **A roughly 20-year-old open conjecture (Panchenko–Talagrand 2004) is resolved in its original model class**, and it needs only first moments, a weaker assumption than the original problem set.
 2. **The new technique may matter more than the conclusion**: "shift the branching depths + average over depths" to control all multioverlaps. If it holds up, it may generalize to other sparse models (fixed degree, odd arity). The paper itself says the lower-bound part **holds for any bounded interaction that is invariant under permutations of its inputs**, without needing the decomposition or the positivity condition (end of §2.2 of the paper); what is stuck is the upper bound. In other words, if someone later extends the interpolation upper bound to odd arity, the lower-bound half is already done.
 3. **What it does not mean**: the formula for the random 3-SAT threshold, a complete solution of the Bethe lattice spin glass, and "ultrametricity" on sparse models are all still unsolved.
 
-### 10.2 For physics
+### 13.10.2 For physics
 
 Physicists already "knew" in 2001 that this formula was right, and used it to compute a large number of numerical predictions. The theorem doesn't change any physical prediction. Its role is to **upgrade the cavity method from "a trustworthy heuristic" to a theorem** for one class of sparse systems. This is the same kind of significance as Talagrand 2006 for SK, but with a narrower scope.
 
-### 10.3 For ML and neuroscience (the honest version)
+### 13.10.3 For ML and neuroscience (the honest version)
 
 **Connections that really exist**:
 
-- **A Hopfield network (1982) is an Ising system.** Energy E = −½ Σ Wᵢⱼσᵢσⱼ, and the Hebb rule Wᵢⱼ = (1/N) Σ_μ ξᵢ^μ ξⱼ^μ stores P patterns. When too many are stored, the "crosstalk" from the other patterns acts like random couplings and creates frustration, and the system falls into "spin glass states" that don't correspond to any memory. Amit–Gutfreund–Sompolinsky 1985 used the replica method to compute the capacity **α_c = P/N ≈ 0.138**. Script simulation (N = 1000, zero-temperature asynchronous updates, starting from a stored pattern, 30 runs per α):
+- **A Hopfield network (1982) is an Ising system.** Energy E = −½ Σ Wᵢⱼσᵢσⱼ, and the Hebb rule Wᵢⱼ = (1/N) Σ_μ ξᵢ^μ ξⱼ^μ stores P patterns; each memory is a minimum of the energy. When too many are stored, the "crosstalk" from the other patterns acts like random couplings and creates frustration, and the system falls into "spin glass states" that don't correspond to any memory. Amit–Gutfreund–Sompolinsky 1985 used the replica method to compute the capacity **α_c = P/N ≈ 0.138**. Script simulation (N = 1000, zero-temperature asynchronous updates, starting from a stored pattern, 30 runs per α):
 
   | α = P/N | 0.05 | 0.10 | 0.12 | 0.13 | 0.14 | 0.15 | 0.17 | 0.20 |
   |---|---|---|---|---|---|---|---|---|
   | Mean final overlap m | 1.000 | 0.998 | 0.992 | 0.974 | 0.941 | 0.917 | 0.583 | 0.363 |
 
   Retrieval quality clearly collapses between 0.13 and 0.17, consistent with the 0.138 prediction. At N = 1000 the transition is smeared out by finite-size effects, and past 0.138 the overlap doesn't drop to zero right away, so this table is only a qualitative check. Hopfield and Hinton won the 2024 Nobel Prize in Physics.
-- **Perceptron capacity**: Gardner 1988 used the replica method to compute the capacity of the spherical perceptron, α = 2; for the Ising perceptron (weights ±1), Krauth–Mézard 1989 predicted about 0.833, and rigorous proofs have only recently made partial progress (Ding–Sun 2019 proved the lower bound; Huang 2024 gave a matching upper bound under a numerical assumption ⚠ not rechecked). Family 222 in the same batch deals with the perceptron free energy at **positive temperature**, not the zero-temperature capacity itself.
+- **Perceptron capacity**: Gardner 1988 used the replica method to compute the capacity of the spherical perceptron, α = 2; for the Ising perceptron (weights ±1), Krauth–Mézard 1989 predicted about 0.833, and rigorous proofs have only recently made partial progress (Ding–Sun 2019 proved the lower bound; Huang 2024 gave a matching upper bound under a numerical assumption ⚠ not rechecked). Family 222 in the same batch gives the free energies of the Ising perceptron and the spherical perceptron at **positive temperature**, plus jamming exponents for the spherical perceptron with negative margin (−1) (OpenAI's claim, per the 222 entry in the repo's `CONTENTS.md`), not the zero-temperature capacity itself.
 - **Random optimization landscapes and algorithms**: Montanari 2019 (arXiv:1812.10897) gave a polynomial-time algorithm that approximately finds the SK ground state, **provided** the zero-temperature Parisi measure has "no overlap gap." Family 281 in the same batch claims to prove this full-support property (OpenAI's claim, not verified ⚠). If it holds, "the SK ground state can be approximated efficiently" becomes unconditional. This is the most direct answer spin glass theory gives to "can random landscapes be optimized efficiently," and it is closer to ML's concerns than 221 itself.
 - **Inference on sparse graphs**: LDPC decoding, community detection, and the information-theoretic thresholds of sparse constraint satisfaction problems all rely on cavity / BP-type variational formulas. 221 adds one more rigorous cornerstone to arguments of the form "physics prediction = true threshold" (speculative extrapolation).
 
 **Where to discount**:
 
 - **221 does not cover Hopfield.** Hopfield is fully connected (dense), and its couplings are determined by the patterns, so different edges are not independent; 221 requires sparse models with independent interactions. The "sparse Hopfield" models in neuroscience (for example the strongly diluted model of Derrida–Gardner–Zippelius 1987) also don't fit the Panchenko–Talagrand decomposition.
-- Analogies like **deep network loss landscape ≈ spherical spin glass** (Choromanska et al. 2015) rely on strong simplifying assumptions and are **heuristic**. This theorem won't tell you where SGD converges or how well a model generalizes.
-- The title of deck §13, "from magnets to the energy landscapes of neural networks," is about an **intellectual lineage** (energy functions, the replica method, rugged landscapes), not a claim that this theorem has direct consequences for neural networks.
+- The intuition of a "rugged landscape with hierarchically clustered minima" for loss landscapes comes from spin glasses; the best-known example is the analogy **deep network loss landscape ≈ spherical spin glass** (Choromanska et al. 2015). Such analogies rely on strong simplifying assumptions and are mostly **heuristic**. This theorem won't tell you what SGD will find, where it converges, or how well a model generalizes.
+- The second half of this chapter's title, "from magnets to the energy landscapes of neural networks," is about an **intellectual lineage** (energy functions, the replica method, rugged landscapes), not a claim that this theorem has direct consequences for neural networks.
 
-### 10.4 For AI
+### 13.10.4 For AI
 
-This is a textbook case of "AI fills in a missing step in a classic research program": the problem has a clear origin (the conjecture after Theorem 4 of PT 2004), a Lean statement, and a candid reasoning summary. It is also a teaching case for "spec vs. intent": the scope Lean covers (Poisson, even arity, positivity) is narrower than the title suggests, and judging that gap takes domain knowledge; Lean can't do it for you.
+This is a textbook case of "AI fills in a missing step in a classic research program": the problem has a clear origin (the conjecture after Theorem 4 of PT 2004), a Lean statement, and a candid reasoning summary. It is also a teaching case for "spec vs. intent": the scope Lean covers (Poisson, even arity, positivity) is narrower than the paper's title suggests, and judging that gap takes domain knowledge; Lean can't do it for you.
 
 ---
 
-## 11. Self-test
+## 13.11 Self-test
 
 Try to answer these after reading. If you can't, go back and reread the corresponding section.
 
-1. Why do physicists compute E[ln Z] rather than the easier ln E[Z]? When do the two differ? (Section 3.3)
-2. Which step of the replica trick has no mathematical justification? (Section 4.1)
-3. What is wrong with the replica-symmetric SK solution? Give a clearly unphysical number. (Section 4.2)
-4. Why is cavity / BP exact on trees but inexact on graphs with short cycles? Why is there still hope for sparse random graphs? (Sections 5.2–5.3)
-5. What does "hierarchical" refer to in the hierarchical cavity formula? How is `Hierarchy` defined in Lean? (Sections 5.4, 9.1)
-6. What is the relationship between the π²/6 of the random assignment problem and the formula OpenAI proved? (Sections 0, 6)
-7. In the Panchenko–Talagrand conjecture, which half was proved long ago? Why is the other half harder in sparse models than in SK? (Sections 7.2–7.3)
-8. List three classes of models that OpenAI's theorem does **not** cover. (Section 8.3)
-9. Why can't you say "this theorem proves such-and-such a property of Hopfield networks"? (Section 10.3)
+1. Why do physicists compute E[ln Z] rather than the easier ln E[Z]? When do the two differ? (§13.3.3)
+2. Which step of the replica trick has no mathematical justification? (§13.4.1)
+3. What is wrong with the replica-symmetric SK solution? Give a clearly unphysical number. (§13.4.2)
+4. Why is cavity / BP exact on trees but inexact on graphs with short cycles? Why is there still hope for sparse random graphs? (§13.5.2–13.5.3)
+5. What does "hierarchical" refer to in the hierarchical cavity formula? How is `Hierarchy` defined in Lean? (§13.5.4, 9.1)
+6. What is the relationship between the π²/6 of the random assignment problem and the formula OpenAI proved? (§13.0, 6)
+7. In the Panchenko–Talagrand conjecture, which half was proved long ago? Why is the other half harder in sparse models than in SK? (§13.7.2–13.7.3)
+8. List three classes of models that OpenAI's theorem does **not** cover. (§13.8.3)
+9. Why can't you say "this theorem proves such-and-such a property of Hopfield networks"? (§13.10.3)
 
 ---
 
@@ -510,7 +519,7 @@ Try to answer these after reading. If you can't, go back and reread the correspo
 
 - **Check 1**: e¹ ≈ 2.7183, e⁻¹ ≈ 0.3679, 2e + 2e⁻¹ ≈ 6.1724, so P(+,+) ≈ 2.7183 / 6.1724 ≈ 0.4404 (script: 0.44040).
 - **Check 2**: H = σ₁σ₂ + σ₂σ₃ + σ₁σ₃. For (+,+,+) and (−,−,−), all three terms are +1, so H = +3. The other 6 configurations all have "two of one sign, one of the other": the same-sign pair contributes +1, and the other two pairs contribute −1 each, so H = −1. So there are 2 with +3 and 6 with −1.
-- **Check 3** (the example from Section 5.3): only spin 1 has an external field. Z = Σ e^(σ₁σ₂ + 0.5σ₁). The total weight for σ₂ = +1 is e^(1.5) + e^(−1.5), and for σ₂ = −1 it is e^(−0.5) + e^(0.5). m₂ = [e^1.5 + e^−1.5 − e^0.5 − e^−0.5] / [e^1.5 + e^−1.5 + e^0.5 + e^−0.5] = (4.7048 − 2.2553)/(4.7048 + 2.2553) ≈ 0.3519 = tanh(1)·tanh(0.5).
+- **Check 3** (the example from §13.5.3): only spin 1 has an external field. Z = Σ e^(σ₁σ₂ + 0.5σ₁). The total weight for σ₂ = +1 is e^(1.5) + e^(−1.5), and for σ₂ = −1 it is e^(−0.5) + e^(0.5). m₂ = [e^1.5 + e^−1.5 − e^0.5 − e^−0.5] / [e^1.5 + e^−1.5 + e^0.5 + e^−0.5] = (4.7048 − 2.2553)/(4.7048 + 2.2553) ≈ 0.3519 = tanh(1)·tanh(0.5).
 - **Check 4**: a + d and b + c are two independent Gamma(2, 1) variables, with P(X > t) = (1+t)e^(−t). So P(min > t) = (1+t)²e^(−2t), and E[min] = ∫₀^∞ (1 + 2t + t²)e^(−2t) dt = 1/2 + 2·(1/4) + 2/8 = 5/4.
 - **Check 5**: when s₁s₂ = +1, the right-hand side = cosh(βJ) + sinh(βJ) = e^(βJ); when s₁s₂ = −1, the right-hand side = cosh(βJ) − sinh(βJ) = e^(−βJ). In both cases it equals the left-hand side.
 
@@ -541,7 +550,7 @@ Try to answer these after reading. If you can't, go back and reread the correspo
 
 ## Appendix: Further reading
 
-- **Mézard & Montanari**, *Information, Physics, and Computation* (Oxford University Press, 2009): covers spin glasses, the cavity method, BP, random k-SAT, and coding in one book, written for CS readers; Chapters 14–19 cover exactly Sections 5–7 of this chapter. Most recommended.
+- **Mézard & Montanari**, *Information, Physics, and Computation* (Oxford University Press, 2009): covers spin glasses, the cavity method, BP, random k-SAT, and coding in one book, written for CS readers; Chapters 14–19 cover exactly §13.5–13.7 of this chapter. Most recommended.
 - **Panchenko**, *Introduction to the SK model* (survey, arXiv:1412.0170): https://arxiv.org/abs/1412.0170 ; the full version is his book *The Sherrington–Kirkpatrick Model* (Springer, 2013).
 - **Nobel 2021 popular information** (the Parisi part): https://www.nobelprize.org/prizes/physics/2021/popular-information/
 - **Mézard & Parisi 2001**, *The Bethe lattice spin glass revisited*, EPJ B 20:217 (arXiv:cond-mat/0009418 ⚠ ID from memory, please verify).
