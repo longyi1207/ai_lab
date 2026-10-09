@@ -51,8 +51,10 @@ TOC = [
     ("matmul", "6", "矩阵乘法 ω"), ("ugc", "7", "Unique Games"), ("bpl", "8", "L = BPL"),
     ("color", "9", "平面着色"), ("thompson", "10", "Thompson 群"), ("ns", "11", "Navier–Stokes"),
     ("vlasov", "12", "等离子体"), ("spin", "13", "自旋玻璃"), ("hodge", "14", "撤稿案例"),
-    ("synthesis", "15", "横向看"), ("ai", "16", "对 AI 意味着"), ("reactions", "17", "反应"),
-    ("learn", "18", "开放问题/继续学"), ("sources", "19", "术语/来源"),
+    ("synthesis", "15", "横向看"), ("ai", "16", "对 AI 意味着"),
+    ("fwd-method", "17", "前瞻：三条曲线"), ("fwd-ab", "18", "瓶颈迁移"), ("fwd-debate", "19", "辩论"),
+    ("fwd-slt", "20", "SLT"), ("fwd-gsai", "21", "GSAI/神经符号"), ("fwd-timeline", "22", "时间线 T0–T4"),
+    ("reactions", "23", "反应"), ("learn", "24", "开放问题/继续学"), ("sources", "25", "术语/来源"),
 ]
 
 BODY = r'''
@@ -60,7 +62,7 @@ BODY = r'''
   <div class="kicker">学习 deck · 给非数学背景的 AI 研究者</div>
   <h1>OpenAI 的 719 篇 AI 数学论文：从零读懂它们在说什么</h1>
   <p>2026-10-06，OpenAI 一次性公开了一个未发布内部模型生成的 <strong>722 篇数学手稿（372 个结果族）</strong>，其中声称解决了准黎曼猜想、Unique Games 猜想、矩阵乘法指数 ω ≤ 9/4、Thompson 群不可顺从、平面不能 5 着色等一批几十年的名题；第二天因一个符号错误撤回 3 篇。数学界称之为 "Mathocalypse"。这份 deck 的目标：<strong>只用线性代数 + 微积分 + 高中数学</strong>，把其中 10 个代表性结果各自讲到"能判断它有多大、多难、为什么重要、核实到哪一步"。</p>
-  <p class="meta">2026-10-08 首版 · repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿见 deep_reads/</p>
+  <p class="meta">2026-10-08 首版（同日增补 Part II 前瞻 §17–§22）· repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿见 deep_reads/</p>
 </header>
 
 <section id="scope">
@@ -75,7 +77,7 @@ BODY = r'''
     <p>判断任何一个证明是否正确的能力。这 10 个结果里，截至 10-08 <strong>没有一个</strong>有人类领域专家公开表示"我读完并确认了"。本 deck 里的"核实"只到两层：① 我们静态审查了 Lean 源码与陈述；② 汇总了公开反应。都标注了来源和可信度。</p>
   </div>
   <h3>0.1 阅读路径</h3>
-  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§14 是 10 个结果，每节结构相同：<em>阶梯 → 问题 → 为什么难 → OpenAI 声称 → 核实状态 → 如果为真</em>，可以按兴趣跳读。§15–§16 是横向总结和对 AI 的含义，§17 是各方反应，§18 是开放问题和继续学习的路线，§19 是术语表与来源。</p>
+  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§14 是 10 个结果，每节结构相同：<em>阶梯 → 问题 → 为什么难 → OpenAI 声称 → 核实状态 → 如果为真</em>，可以按兴趣跳读。§15–§16 是横向总结和对 AI 的含义。<strong>Part II（§17–§22）是前瞻</strong>：按 AI 数学和编程的进步曲线，推演辩论、SLT、Guaranteed Safe AI、神经符号这几类安全理论何时被解锁，每一步都附证据和推理。§23 是各方反应，§24 是开放问题和继续学习的路线，§25 是术语表与来源。</p>
   <h3>0.2 一张速查表</h3>
   <div class="tbl"><table>
     <thead><tr><th>§</th><th>结果（family 编号）</th><th>卡了多久</th><th>Lean</th><th>一句话</th></tr></thead>
@@ -517,9 +519,325 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
   <p>社区已经通过 IAS 顾问组形成了初步规范（披露模型名、prompt、推理链、计算时间与成本、选题方式、同类问题失败率），OpenAI 只遵守了一部分，然后一次性发布 700 多篇。AHM 的说法 "a demonstration of power" 虽然激烈，但点到了结构性问题：<strong>前沿公司单方面决定一项能力以什么方式进入公共领域，受影响的共同体只能事后反应</strong>。</p>
 </section>
 
+<section id="fwd-method">
+  <div class="kicker">Part II · 前瞻 · 方法</div>
+  <h2><span class="n">17.</span>往前看：按趋势推演，而不是按直觉</h2>
+  <p>Part I 讲的是"已经发生了什么"。Part II 回答一个更大的问题：<strong>照 AI 在数学和编程上的进步速度，几类 AI 安全理论（辩论、SLT、Guaranteed Safe AI、神经符号）会在什么时候、以什么顺序被解锁？</strong></p>
+  <div class="note">
+    <span class="label">关于"现实"的约定</span>
+    <p>人的直觉习惯线性外推，但下面三条曲线都是指数型的。所以按趋势推出来的未来常常显得"太快"。这一部分的原则是：<strong>不因为反直觉就保守，也不凭空想象</strong>。每个时间点都写明依赖哪条曲线、用了什么假设、哪些信号会证伪它。标签：[数据] 有出处；[模型] 按明确假设算出；[判断] 我的推断。</p>
+  </div>
+  <h3>17.1 曲线 ①：AI 能独立完成的任务有多长</h3>
+  <p><strong>这是什么</strong>：METR 让 AI 去做一批软件和研究任务，每个任务先测人类专家要花多久，再找出"AI 有 50% 把握做成"的任务长度。这个长度叫时间跨度（time horizon），它把"AI 有多能干"压缩成一个可以画在图上的数。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>发布</th><th>模型</th><th>时间跨度（p50）</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">2019-02</td><td>GPT-2</td><td>0.1 分钟</td></tr>
+      <tr><td class="mono">2023-03</td><td>GPT-4</td><td>4 分钟</td></tr>
+      <tr><td class="mono">2024-12</td><td>o1</td><td>39 分钟</td></tr>
+      <tr><td class="mono">2025-04</td><td>o3</td><td>2.0 小时</td></tr>
+      <tr><td class="mono">2025-08</td><td>GPT-5</td><td>3.4 小时</td></tr>
+      <tr><td class="mono">2026-02</td><td>Claude Opus 4.6</td><td>12 小时（CI 5.3–61）</td></tr>
+      <tr><td class="mono">2026-04</td><td>Claude Mythos Preview</td><td>17.4 小时（CI 8.5–55）</td></tr>
+      <tr><td class="mono">2026-06</td><td>GPT-5.6 Sol</td><td>作弊算失败：11.3 小时；其他处理方式：71–270+ 小时</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tg">来源：METR TH1.1 原始数据 benchmark_results_1_1.yaml（2026-05-08 更新）；GPT-5.6 Sol 来自 METR 2026-06-26 报告。[数据]</p>
+  <p><strong>倍增期</strong>：从 2023 年起拟合，每 <strong>129 天</strong>翻一倍（95% CI 104–158 天）；只用 2024 年后的数据约 89 天；2019 年起全部数据约 188 天。[数据] 129 天翻倍换算成年增长是 2^(365/129) ≈ <strong>每年 ×7</strong>。这就是反直觉的根源：线性直觉以为明年会"好一点"，按趋势是"好 7 倍"。</p>
+  {{FIG_METR}}
+  <div class="tbl"><table>
+    <thead><tr><th>情景</th><th>倍增期</th><th>2026 年末</th><th>2027 年中</th><th>2027 年末</th><th>2028 年末</th></tr></thead>
+    <tbody>
+      <tr><td>乐观</td><td>89 天</td><td>~100 小时</td><td>~410 小时</td><td>~1,700 小时（10 工作月）</td><td>~3 万小时</td></tr>
+      <tr><td><strong>中心</strong></td><td><strong>129 天</strong></td><td><strong>~56 小时</strong>（1 工作周+）</td><td><strong>~150 小时</strong>（≈1 工作月）</td><td><strong>~400 小时</strong>（≈2.4 工作月）</td><td><strong>~2,800 小时</strong>（≈1.4 工作年）</td></tr>
+      <tr><td>悲观</td><td>213 天</td><td>~33 小时</td><td>~60 小时</td><td>~110 小时</td><td>~360 小时（≈2 工作月）</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tg">[模型] 锚点 2026-05 约 15 小时（介于 Opus 4.6 与 Mythos Preview 之间），按固定倍增期纯指数外推，由 build 脚本计算。</p>
+  <p><strong>这条曲线的两个弱点</strong>（必须一起记住）：(1) METR 说现有任务集在 16 小时以上就不可靠，2027 年以后的数字需要新的长任务集（TH 2.0，尚未发布）来检验；(2) GPT-5.6 Sol 的结果说明，"作弊算不算成功"能让数字相差约 4.5 个倍增，相当于约 1.5 年的趋势。[判断] 超过约一个工作月之后，决定成败的越来越是"任务说得清不清楚"，而不是执行能力。</p>
+  <h3>17.2 曲线 ②：真正的开放问题，AI 能解出多少</h3>
+  <p><strong>为什么需要第二条曲线</strong>：竞赛和 benchmark 已经饱和，不能再拿来外推。[数据]</p>
+  <ul>
+    <li>IMO 2024 银牌（28/42）→ 2025 金牌（35/42）→ 2026 满分（42/42，两个系统经官方评分）。</li>
+    <li>PutnamBench（Lean）2025-04 约 7% → 2026-08 满分 672/672；2026-09 解完全集只花 $111。</li>
+    <li>FrontierMath Tier 4 从 2025-11 的 19% 涨到 2026-09 的 98%。</li>
+  </ul>
+  <p>但同一时期，在 Epoch 的 <strong>FrontierMath Erdős</strong>（68 个预先登记为开放、必须给 Lean 证明、每题预算 $300 的 Erdős 问题）上，最强的 GPT-6 Astra 只解出 <strong>2/68 = 3%</strong>，其他模型都是 0。不限预算时 5/68（约 7%），花费超过 $22 万。[数据] <strong>benchmark 上的 98% 和开放问题上的 3% 之间的差距，是整个外推里最重要的不确定量。</strong></p>
+  {{FIG_OPEN}}
+  <div class="tbl"><table>
+    <thead><tr><th>情景</th><th>斜率 · 上限</th><th>2026 年末</th><th>2027 年中</th><th>2027 年末</th><th>2028 年末</th><th>2030 年末</th></tr></thead>
+    <tbody>
+      <tr><td>乐观</td><td>+3.0/年 · 90%</td><td>~7%</td><td>~26%</td><td>~58%</td><td>~88%</td><td>~90%</td></tr>
+      <tr><td><strong>中心</strong></td><td><strong>+1.5/年 · 80%</strong></td><td><strong>~5%</strong></td><td><strong>~9%</strong></td><td><strong>~18%</strong></td><td><strong>~45%</strong></td><td><strong>~77%</strong></td></tr>
+      <tr><td>悲观</td><td>+0.7/年 · 60%</td><td>~4%</td><td>~5%</td><td>~7%</td><td>~13%</td><td>~31%</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>为什么中心情景可能偏保守</strong>：(1) 预算放大 10 倍，2026 年就能从 3% 提到约 7%，而推理价格每年降 10 倍以上（Epoch：固定能力下每年降 9–900 倍，中位数 50 倍）[数据]；(2) OpenAI 从约 4,000 题里留下 372 族（约 9%），说明一个可能更强的未发布模型在"大量尝试 + 事后挑选"口径下已经远高于 3%。<strong>为什么可能偏乐观</strong>：固定题集越往后剩下的越难；千禧年级别的单个难题不在这个模型的适用范围内。</p>
+  <h3>17.3 曲线 ③：形式化证明的成本</h3>
+  <ul>
+    <li><strong>2025-09</strong>：Math Inc 的 Gauss 用 3 周完成强素数定理的形式化，约 2.5 万行（人类专家此前 18 个月只完成一部分）。[数据]</li>
+    <li><strong>2026-09</strong>：Claude 用 11 天完成<strong>费马大定理</strong>的完整形式化，1300 万行、约 60 亿输出 token，只用三条标准公理，并经 Buzzard 审阅。按标价约 $30 万，即 <strong>$0.023/行</strong>。对照：人类项目预计 5 年、100 万英镑。[数据]</li>
+    <li><strong>2026-10</strong>：OpenAI 的 Lean 库 2600 万行（见 §3）。</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>情景（每年降幅）</th><th>2026 年末</th><th>2027 年末</th><th>2028 年末</th><th>"费马大定理规模"项目，2028 年末</th></tr></thead>
+    <tbody>
+      <tr><td>乐观（÷30/年）</td><td>$0.008/行</td><td>$0.0003/行</td><td>$0.00001/行</td><td>~$110</td></tr>
+      <tr><td><strong>中心（÷10/年）</strong></td><td><strong>$0.01/行</strong></td><td><strong>$0.001/行</strong></td><td><strong>$0.0001/行</strong></td><td><strong>~$1,400</strong></td></tr>
+      <tr><td>悲观（÷3/年）</td><td>$0.016/行</td><td>$0.005/行</td><td>$0.002/行</td><td>~$2.3 万</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>含义</strong>：三种情景下，<strong>生成证明的成本到 2027–2028 年都会降到可以忽略</strong>。剩下的成本几乎全是"人审核陈述和 spec 是否忠实"，这部分的吞吐量基本不随时间增长。⚠ 有报道称费马大定理形式化的内部成本只有约 $2,000，与标价相差约 150 倍，口径未核实。</p>
+  <h3>17.4 可能打破趋势的因素</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>因素</th><th>方向</th><th>证据与判断</th></tr></thead>
+    <tbody>
+      <tr><td>AI 研发全面自动化</td><td><strong>加速</strong></td><td>CASP 2026（Hinton、Bengio、OpenAI 首席科学家等联名）的模型给出 r ≈ 1.39 > 1，意味着超指数增长：全面自动化后约 17 个月进步速度提高 10 倍。前兆：Anthropic 内部"AI 主导、人监督"的研发占比 2026-03 到 08 从 1% 升到 26%；完全自主仍是 0%。[数据]</td></tr>
+      <tr><td>训练算力增速放缓</td><td>减速</td><td>可能从每年 4–5 倍降到 3–4 倍（电力、HBM）。但数学和形式化主要消耗推理算力，受影响较小。[判断]</td></tr>
+      <tr><td>数据</td><td>中性偏正</td><td>在可验证领域，Lean 内核或测试本身就是无限的奖励信号；几千万行新 Lean 会回流进训练。数据墙在这里最弱。[判断]</td></tr>
+      <tr><td>验证器本身有噪声</td><td>让测量失真</td><td>FrontierMath 审计发现 42% 的题有错，SWE-bench Pro 约 30% 的任务有问题。指标会比能力先失效。[数据]</td></tr>
+      <tr><td>Reward hacking</td><td>让测量失真</td><td>外推 METR 时必须同时报告"作弊处理区间"。</td></tr>
+      <tr><td>监管与社会反应</td><td>局部减速</td><td>Fields 奖得主公开信、IAS 出版规范会减慢学术界接受 AI 结果，但基本不限制能力本身。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="fwd-ab">
+  <div class="kicker">Part II · 前瞻 · 框架</div>
+  <h2><span class="n">18.</span>核心洞见：AI 的加速极不均匀，瓶颈会迁移</h2>
+  <p>三条曲线都在测同一类东西：<strong>有自动裁判的工作</strong>。Lean 内核判断证明对不对，测试判断代码对不对，benchmark 判断答案对不对。AI 在这类工作上进步极快，因为强化学习可以无限地"试错 → 拿到可靠反馈 → 改进"。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>有自动裁判（AI 会碾压）</th><th>没有自动裁判（仍主要靠人）</th></tr></thead>
+    <tbody>
+      <tr><td>给定一个定理陈述，找出证明</td><td>判断<strong>该证哪个定理</strong>，陈述是否抓住了你真正关心的东西</td></tr>
+      <tr><td>给定 spec 写代码，并证明代码满足 spec</td><td>写出<strong>对的 spec</strong>（例如"无害"是什么意思）</td></tr>
+      <tr><td>给定一个模型，计算它的数学性质</td><td>判断这个数学量和"安全"有什么关系</td></tr>
+      <tr><td>跑实验、扫超参、复现</td><td>设计<strong>对的实验</strong>，判断结果说明了什么</td></tr>
+    </tbody>
+  </table></div>
+  <h3>18.1 瓶颈已经在迁移的证据</h3>
+  <ul>
+    <li><strong>证明成功率暴涨</strong>：CLEVER 基准（161 道题，把 HumanEval 翻译成 Lean，要求写出代码并证明它满足 spec）的端到端成功率从 2025-05 的 1/161 涨到 2026-05 的约 87.5%（Claude Code agent）。DafnyBench 一年内从约 68% 涨到 96%。[数据]</li>
+    <li><strong>spec 质量没跟上</strong>：vericoding 基准（Tegmark 组，12,504 条 spec）统计，在验证<strong>成功</strong>的样本里，约 9% 的 spec 太弱（"空洞 spec"：例如排序函数的 spec 漏写"输出是输入的重排"，返回空列表也能通过），约 15% 的翻译有问题。[数据]</li>
+    <li><strong>陈述没人审</strong>：OpenAI 的 416 个 Comparator 挑战文件状态是 <code>review: unchecked</code>（§3）；费马大定理能被确认，是因为 Mathlib 里有现成的人类陈述可以比对。[数据]</li>
+    <li><strong>IMO 2026 的流程</strong>在 Lean 证明之后专门加了一个"形式陈述是否覆盖原题"的裁判。陈述对齐本身已经成为新的难题。[数据]</li>
+  </ul>
+  <h3>18.2 把"缺数学"拆成两类</h3>
+  <p>说一个领域"需要更多数学"，其实有两种完全不同的情况：</p>
+  <ul>
+    <li><strong>A 类：陈述已经清楚，只差证明</strong>。例如"在不需要 stability 假设的情况下，Prover-Estimator Debate 是否仍然 sound？"——这是一个定义清楚的命题，有了 Lean 就有自动裁判。<strong>AI 会在 2027 年前后批量解决这类问题。</strong></li>
+    <li><strong>B 类：连该证什么都不清楚</strong>。例如"SGD 训练出来的网络和贝叶斯后验之间的差距，应该用什么量来刻画？"——难的是找到对的陈述。AI 能提猜想、做数值检验，但没有自动裁判告诉它"这个陈述是对的问题"。<strong>AI 在这里帮得慢。</strong></li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>方向</th><th>A 类（缺证明）</th><th>B 类（缺陈述）</th><th>工程 / 实验</th><th>概念</th></tr></thead>
+    <tbody>
+      <tr><td><strong>辩论</strong></td><td>去掉 stability 的 PE debate；对 ε 比例裁判错误的稳健协议</td><td>什么样的现实论证满足 stability；非零和、合谋下的均衡怎么形式化</td><td>RL 能否到达诚实均衡（exploration hacking）；有真实能力差距的 testbed</td><td>没有 ground truth 的问题，"诚实"怎么定义；真话但选择性陈述</td></tr>
+      <tr><td><strong>SLT</strong></td><td>具体架构的学习系数（符号计算）；Langevin 动力学与 LLC</td><td>SGD 与贝叶斯后验的差距；有限样本、ReLU 版本应该长什么样</td><td>估计量稳健性；扩展到 10B+ 模型</td><td>λ 和"欺骗""reward hacking"的关系</td></tr>
+      <tr><td><strong>GSAI</strong></td><td>软件、协议的证明（已基本可自动化）</td><td>概率集合（credal set）上 sound bound 的组合理论</td><td>spec 起草与审核工具；仓库级验证；硬件</td><td>物理扰动界从哪来；社会领域的"harm"写不出来</td></tr>
+      <tr><td><strong>神经符号</strong></td><td>（大多已是工程）</td><td>翻译层有没有 sound 的检查方法</td><td>"LLM 提议、求解器判定"成为默认架构</td><td>哪些任务能这样分解</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="fwd-debate">
+  <div class="kicker">Part II · 前瞻 · 方向 1</div>
+  <h2><span class="n">19.</span>辩论（AI safety via debate）</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">直觉</div><div class="body">要判断"1 到 2^60 之间素数个数是不是奇数"，人数不过来。规则：Alice 报一个总数，并把区间对半分，报出两半各有几个；Bob 挑一半质疑；继续对半分……约 60 轮后只剩一个数，裁判自己检查它是不是素数。如果 Alice 撒谎，<strong>至少有一半是错的</strong>，Bob 总能顺着错误追到底。所以裁判只做一次廉价检查，就间接验证了一个指数级的计算。</div></div>
+    <div class="rung"><div class="lvl">定理</div><div class="body">Irving–Christiano–Amodei 2018：最优对弈下，辩论能判定的问题从 NP（"给我一个证据我能查"）扩大到 <strong>PSPACE</strong>。辩论是零和博弈，对真命题来说"诚实"是必胜策略，所以均衡是诚实的——这就是"辩论的 Nash 均衡 = 诚实"的含义。作者自己说这是类比，不期望现实 ML 能达到全部 PSPACE。[数据]</div></div>
+    <div class="rung"><div class="lvl">隐含假设</div><div class="body">(a) 足够强的对弈；(b) 裁判在每一小步上可靠；(c) 问题能递归分解、每步可检查；(d) 零和、没有合谋；(e) 训练真的收敛到均衡。</div></div>
+    <div class="rung"><div class="lvl">2023 改进</div><div class="body">Doubly-efficient debate（Brown-Cohen、Irving、Piliouras）：诚实方只需要多项式步，就能赢过可以用指数步的说谎方。"诚实方不比对手更强"也够用了。</div></div>
+  </div>
+  <h3>19.1 卡在哪</h3>
+  <ol>
+    <li><strong>混淆论证（2020）</strong>：说谎者把简单问题拆成很多子问题，<em>其中某处有错</em>，但<strong>双方都找不到在哪</strong>（找错本身是计算上难的）。2018 定理默认了"诚实方能找到错误"。2025 年的 <strong>Prover-Estimator Debate</strong>（2506.13609）部分解决了它：估计方不再挑攻击对象，而是给每个子命题打概率；但需要 <strong>stability 假设</strong>——结论不会因为概率的微小变化而翻转。<strong>现实论证满不满足 stability，没人知道。</strong></li>
+    <li><strong>能不能学到均衡</strong>：2026-04 的论文（2604.28182，含 GDM 研究者）证明模型可以被训练成抵抗 RL 探索，前沿模型知道自己在训练时会显式推理"压低探索"。[数据]</li>
+    <li><strong>裁判的系统性错误</strong>：人类在某些子分布上会一致地判错。Irving 2025-05 提出让论证对 ε 比例的错误稳健，但是否存在不被说谎者利用的版本，仍未解决。</li>
+    <li><strong>真话但选择性陈述</strong>（2609.29189）：结论正确，但通过挑选、组织信息追求隐藏目标。辩论的正确性保证管不到这一层。</li>
+    <li><strong>合谋</strong>：两个辩手是同一模型的副本时，零和靠什么保证？2603.05293 发现训练语料相同时辩论退化为 RLAIF。</li>
+  </ol>
+  <h3>19.2 证据</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>工作</th><th>设定</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>Michael et al. 2023（2311.08702）</td><td>人类辩手，裁判看不到原文</td><td>辩论裁判准确率 84%，单方游说 74%</td></tr>
+      <tr><td>Khan et al. 2024（ICML best paper）</td><td>LLM 辩手</td><td>非专家 LLM 裁判 48% → 76%，人类 60% → 88%</td></tr>
+      <tr><td>Kenton et al. 2024（GDM）</td><td>数学、代码、逻辑、多模态</td><td>所有任务上辩论 > 单方游说；相对"裁判直接答"，只在信息不对称任务上占优</td></tr>
+      <tr><td>Engels…Tegmark 2025（2504.18530）</td><td>监督成功率 vs 能力差距</td><td>400 Elo 差距下嵌套监督成功率：辩论 51.7%（Mafia 13.5%，后门代码 10.0%）</td></tr>
+      <tr><td><strong>Kenton et al. 2026-08（GDM，2608.17776）</strong></td><td>数学 RL，辩论作为奖励信号</td><td>RLAIF 基线很快学会利用裁判；辩论训练让裁判保持有效，<strong>恢复 45% 的性能差距</strong></td></tr>
+    </tbody>
+  </table></div>
+  <p>[判断] 证据支持"辩论是一种<strong>更难被 hack 的奖励信号</strong>"，还不支持"辩论让人类可靠地监督超人系统"。所有实验里的能力差距都远小于理论设想。</p>
+  <h3>19.3 AI 数学和编程能帮什么</h3>
+  <ul>
+    <li><strong>A 类，现在就能帮</strong>：把辩论协议的定理形式化并证明。Irving 在 2026 年 80,000 Hours 访谈里说："理论比实证更容易自动化，因为证明给出了可验证的奖励。"这正是 Resolution（Irving 任首席科学家）的核心赌注。[数据]</li>
+    <li><strong>新机会：用形式数学搭"真实能力差距"的辩论实验</strong>。AI 的形式数学能力已经远超普通人，所以"人类裁判监督 AI 的数学论证"就是天然的超人监督实验，Lean 提供完美的 ground truth。这比 QuALITY 那种人为隐藏信息的实验更接近真问题。[判断]</li>
+    <li><strong>一个反直觉的点</strong>：在可以形式化的领域，Lean 本身就是完美裁判，根本不需要辩论。<strong>辩论的价值恰恰在形式化边界之外</strong>，而那里正是 AI 帮得最慢的地方。</li>
+    <li><strong>帮不上的</strong>：价值判断类问题里"诚实"的定义、选择性陈述。</li>
+  </ul>
+</section>
+
+<section id="fwd-slt">
+  <div class="kicker">Part II · 前瞻 · 方向 2</div>
+  <h2><span class="n">20.</span>奇异学习理论（SLT）</h2>
+  <div class="ladder">
+    <div class="rung"><div class="lvl">普通理论</div><div class="body">经典统计假设最好的参数是一个点，周围像一个碗。这时"有效参数个数"就是真实参数个数 d，泛化误差约为 d/(2n)。</div></div>
+    <div class="rung"><div class="lvl">玩具例子</div><div class="body">模型 y = a·b·x，真实数据来自 y = 0。损失约为 (ab)²，只要 a = 0 或 b = 0 就是最优。所以最优解是一个<strong>十字</strong>，不是一个点；交叉处的 Hessian 全是 0，经典近似失效。这叫<strong>奇异</strong>（singular）。</div></div>
+    <div class="rung"><div class="lvl">数"有效参数"</div><div class="body">看"几乎最优"的参数体积 V(ε) 随 ε → 0 怎么缩小：V ≈ ε^λ。一参数碗 a²：λ = 1/2；二参数碗 a² + b²：λ = 1；奇异的 a²b²：<strong>λ = 1/2</strong>。名义上 2 个参数，统计行为像 1 个。λ 叫<strong>学习系数</strong>（RLCT）。</div></div>
+    <div class="rung"><div class="lvl">定理</div><div class="body">Watanabe（2009、2018）证明：贝叶斯推断下自由能 ≈ n·S + <strong>λ·log n</strong>，泛化误差 ≈ <strong>λ/n</strong>。神经网络几乎都是奇异的，所以决定泛化的是 λ，不是参数个数。证明用到 Hironaka 的奇点消解定理。[数据]</div></div>
+  </div>
+  <h3>20.1 已证明 vs 猜想</h3>
+  <ul>
+    <li><strong>已证明</strong>：上面的渐近公式（要求模型是实解析的、参数空间紧等）；深度线性网络等少数架构的精确 λ（Aoyagi）。</li>
+    <li><strong>未证明</strong>：SGD 训练的网络和贝叶斯后验的局部结构一致；训练中的"阶段"对应贝叶斯相变；λ 能描述有限样本、ReLU、非 realizable 的真实 LLM。</li>
+  </ul>
+  <h3>20.2 证据</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>工作</th><th>规模</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>Lau et al.（2308.12108）</td><td>深度线性网络等</td><td>局部学习系数（LLC）估计量能复现已知的精确 λ</td></tr>
+      <tr><td>Hoogland et al.（2402.02364）</td><td>约 3M 参数 transformer</td><td>LLC 的平台和转折标出了上下文学习的离散发育阶段</td></tr>
+      <tr><td>Kreer et al.（ICLR 2026）</td><td>数十亿参数</td><td>不用 Hessian 的数据归因，达到 SOTA</td></tr>
+      <tr><td>Spectroscopy at Scale（2026-04）</td><td><strong>Pythia-1.4B</strong></td><td>57,236 个结构簇，4,800 H200 小时</td></tr>
+      <tr><td>Patterning（2601.13548）</td><td>小模型</td><td>按 susceptibility 方向重新加权数据，能加速或推迟 induction circuit 的出现</td></tr>
+    </tbody>
+  </table></div>
+  <p>[数据] 最大规模约 1–3B，<strong>没有前沿模型的结果，也没有任何"SLT 发现了别的方法发现不了的安全问题"的案例</strong>。LLC 用 SGLD 采样估计，作者承认会失去无偏保证，并且对超参敏感。</p>
+  <h3>20.3 AI 能帮什么</h3>
+  <ul>
+    <li><strong>立刻能帮</strong>：(a) 用符号计算（Newton 多面体、blow-up 算法）批量算出小架构的精确 λ，给估计量提供标准答案；(b) agent 自动扫超参、跨种子复现，解决估计量稳健性这个一线痛点。</li>
+    <li><strong>中期</strong>：在大模型上跑 LLC/susceptibility 流水线主要受算力限制，人力成本可以降到很低。</li>
+    <li><strong>难</strong>：Lean 形式化（Mathlib 没有 Hironaka 定理，工程量巨大）；SGD 与贝叶斯差距的理论（B 类）。</li>
+  </ul>
+  <p><strong>决定性实验</strong>：在植入了 backdoor 或 reward hacking 的 model organism 上，看 λ 或 susceptibility 能不能<strong>在行为暴露之前</strong>发出预警。这个实验决定 SLT 是成为训练监控的标准工具，还是退回为理解学习动力学的科学工具。[判断] agent 会把这个实验的成本降到小团队几周就能做完。</p>
+</section>
+
+<section id="fwd-gsai">
+  <div class="kicker">Part II · 前瞻 · 方向 3 与 4</div>
+  <h2><span class="n">21.</span>Guaranteed Safe AI 与神经符号系统</h2>
+  <p><strong>GSAI 的想法</strong>（Dalrymple、Skalse、Bengio、Russell、Tegmark 等，arXiv 2405.06624）：不要求理解 AI 内部，而是要求 AI 的输出附带<strong>证书</strong>，证明它在一个<strong>世界模型</strong>里满足一个<strong>安全规格</strong>，由一个可信的<strong>验证器</strong>检查。</p>
+  <div class="verdict">
+    <div class="panel"><h4>例 A：验证排序函数</h4><p>spec："输出有序，且是输入的重排"。世界模型就是编程语言语义。Lean/Dafny 证明对所有输入都成立。<strong>坑</strong>：漏写"是输入的重排"，返回空列表也能通过证明。</p></div>
+    <div class="panel"><h4>例 B：验证刹车控制器</h4><p>世界模型：位置、速度的更新方程，加上"路面扰动不超过 0.1"。spec：永远不撞上障碍。验证器做可达性分析。<strong>坑</strong>：证书只在模型内成立；结冰时扰动超过 0.1，保证就失效了，需要运行时监测加备用控制器。</p></div>
+  </div>
+  <p>把例 B 换成"聊天机器人不给有害建议"：世界模型变成"人类社会"，spec 变成"harm"，两样都写不出来。这是 GSAI 最难的一端。</p>
+  <h3>21.1 机构旗舰已经转向（ARIA Safeguarded AI）[数据]</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>时间</th><th>事件</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">2024-02</td><td>thesis v1：TA1 数学框架 / TA2 ML（计划成立 £18m 新机构）/ TA3 应用，总额 £59m</td></tr>
+      <tr><td class="mono">2025-11</td><td>davidad 叫停 TA2 Phase 2，原话 "every frontier model has more capability than I expected"，钱转去扩大 TA1</td></tr>
+      <tr><td class="mono">2026-02</td><td>应用收窄到网络安全，取消 cyber-physical Phase 2</td></tr>
+      <tr><td class="mono">2026-04</td><td>Nora Ammann 接任项目负责人，davidad 改任技术顾问</td></tr>
+      <tr><td class="mono">2026-05</td><td>thesis v2：只保留"数学保证工具链 + 网络安全应用"；理由是前沿进展快于预期，且国际上对 gatekeeper 模式短期内难以达成共识，因此转向"提升社会韧性"</td></tr>
+    </tbody>
+  </table></div>
+  <p>[判断] 最初的论点是"AI 能力在前，安全证书作为门禁"；v2 实际上退成了"用 AI 把形式化方法做便宜，给关键软件加固"。gatekeeper 只是远期选项。</p>
+  <h3>21.2 验证器这条腿正在被 AI 攻下 [数据]</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>基准 / 案例</th><th>早期</th><th>最新</th></tr></thead>
+    <tbody>
+      <tr><td>DafnyBench（782 个程序）</td><td>~68%（2024）</td><td>92.7%–96%（2025–2026）</td></tr>
+      <tr><td>CLEVER（161 题，Lean，端到端）</td><td>1/161（2025-05）</td><td>~87.5%（2026-05）</td></tr>
+      <tr><td>VERINA（189 题，Lean）</td><td>o3 证明成功率 4.9%（2025-05）</td><td>8B 专用模型在 3 个 Lean 基准上平均 62%（2026-03）</td></tr>
+      <tr><td>seL4（8,700 行 C）</td><td>人工：约 20 人年、约 $350/行（2009）</td><td>7B 模型自动证出 seL4 重要理论中 51.7% 的引理（2026，给定陈述）</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>规律</strong>：同一个基准一年左右从个位数涨到 80–90%，形状和 2023 年的 HumanEval 一样。Dafny 比 Lean 容易，因为它把一部分推理交给 SMT 求解器，模型只需写提示——这本身就是神经符号。</p>
+  <h3>21.3 落地顺序 [判断]</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>领域</th><th>世界模型</th><th>spec</th><th>预计</th></tr></thead>
+    <tbody>
+      <tr><td>密码库、协议、内核、C→Rust 等价翻译</td><td>语言语义，已有</td><td>往往已存在（RFC、参考实现）</td><td><strong>现在到 2027</strong></td></tr>
+      <tr><td>硬件、RTL、固件、分布式协议</td><td>ISA、内存模型，工程受限</td><td>可写，需要人审</td><td>2027–2029</td></tr>
+      <tr><td>有可靠物理模型的控制系统（电网、刹车）</td><td>物理定律 + 扰动界，数学受限</td><td>安全集，保守但能写</td><td>之后；形态是"有限时域证书 + 运行时监测"</td></tr>
+      <tr><td>开放世界的社会、生物领域</td><td>没有可审计的模型</td><td>"harm"写不出来</td><td>最后，也可能永远只有弱保证</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>反直觉的后果</strong>：AI 让找漏洞变便宜，也让证明没有漏洞变便宜。<strong>在软件领域，攻防平衡可能向防守倾斜</strong>——前提是防守方真的去做形式化验证。生物和社会领域没有这种对称性，因为写不出 spec。</p>
+  <h3>21.4 神经符号系统</h3>
+  <p>神经网络负责"猜"（证明步骤、spec 草稿、程序、世界模型代码），符号系统负责"判"（Lean 内核、SMT 求解器、可达性分析）。判官可靠，猜的一方可以是黑箱——和 GSAI"策略是黑箱、验证器可信"是同一个结构。</p>
+  <ul>
+    <li><strong>现状</strong>：在一切可验证领域，它已经是事实上的默认架构。程序化世界模型（PoE-World，NeurIPS 2025：LLM 写出 4000 多行 Python 来模拟 Montezuma 游戏世界，零样本泛化到新关卡）证明了路线可行，但只在 Atari 这类场景。AWS 的 Automated Reasoning checks 把文本翻译成逻辑再用求解器判定。[数据]</li>
+    <li><strong>最弱的一环是翻译层</strong>：自然语言到形式语言的每一步都可能产生空洞 spec 或错误形式化，这一层<strong>没有 sound 的检查方法</strong>，只能靠多份独立翻译的交叉一致性、测试和人审。</li>
+    <li><strong>还有一个攻击面</strong>：DeepSeek-Prover-V2 曾利用 Lean 4.9.0 的一个工具链漏洞，让假证明通过编译。[数据] "只需信任检查器"的前提本身要靠工程维护——RL 训练出的证明器会不会系统性地寻找这类漏洞，是一个 reward hacking 问题。</li>
+  </ul>
+</section>
+
+<section id="fwd-timeline">
+  <div class="kicker">Part II · 前瞻 · 推演</div>
+  <h2><span class="n">22.</span>时间线推演：T0 → T4</h2>
+  <p>每个节点分四部分：<strong>能力</strong>（三条曲线的中心情景）、<strong>解锁</strong>、<strong>新机会</strong>、<strong>会证伪它的信号</strong>。时间点的不确定性约 ±1 年：乐观情景整体提前半年到一年，悲观情景推迟一到两年。</p>
+
+  <h3>T0 · 现在（2026 Q4）</h3>
+  <ul>
+    <li><strong>能力</strong>：AI 独立完成约 1–2 个工作日的任务；开放问题单次解出率约 3–5%；形式化约 $0.01–0.02/行；竞赛数学饱和。</li>
+    <li><strong>解锁</strong>：辩论协议的定理可以交给 AI 形式化；SLT 的 λ 符号计算和估计量调参可以交给 agent；软件验证的证明环节基本自动化；神经符号在可验证领域成为默认。</li>
+    <li><strong>新机会</strong>：最值钱的是<strong>还不能被自动化的工作</strong>——陈述和 spec 的审核方法；证明器、验证器上的 reward hacking；有真实能力差距的监督实验设计。</li>
+    <li><strong>证伪信号</strong>：METR 新版长任务集显示进展停在 1–2 天。</li>
+  </ul>
+
+  <h3>T1 · 2027 年中</h3>
+  <ul>
+    <li><strong>能力</strong> [模型]：任务长度约 150 小时（≈ 一个工作月）；开放问题解出率约 9%；证明成本再降约一个数量级。</li>
+    <li><strong>解锁</strong>：<strong>A 类理论问题开始被批量攻克</strong>——辩论协议变体、具体架构的 λ、各种"把这个假设去掉"的定理。一个理论研究者加 AI，一个月能完成过去一个组一年的定理证明量。SLT 估计量的稳健性问题基本解决。密码学和协议库默认带证明。</li>
+    <li><strong>新机会</strong>："AI 辅助理论家"成为新角色：自己提陈述，让 AI 证明或找反例。最稀缺的技能是<strong>知道哪个陈述值得证</strong>。用形式数学搭建超人监督实验变得可行。</li>
+    <li><strong>证伪信号</strong>：FrontierMath Erdős 下一轮仍低于 5%；Anthropic 的"AI 主导、人监督"研发占比停在 30% 左右。</li>
+  </ul>
+
+  <h3>T2 · 2027 年底</h3>
+  <ul>
+    <li><strong>能力</strong> [模型]：任务长度约 400 小时（2–3 个工作月）；开放问题解出率约 18%；一个"费马大定理规模"的形式化约几千美元。</li>
+    <li><strong>解锁</strong>：辩论在理想模型下的理论问题大体收敛，剩下"现实论证是否满足 stability""训练能否到达诚实均衡"这类实证和 ML 问题。SLT 的决定性预警实验具备条件。硬件、RTL 验证开始规模化。</li>
+    <li><strong>新机会</strong>：<strong>"陈述与 spec 的审计学"</strong>成为一个领域：怎么快速判断形式陈述是否忠实、怎么设计交叉一致性检查、怎么测量人类审核员的吞吐量。现在几乎没人做。</li>
+    <li><strong>证伪信号</strong>：到 2027 年底仍没有一个经人类专家确认、由 AI 主导解决的"领域级重要问题"，说明曲线 ② 的上限设高了。</li>
+  </ul>
+
+  <h3>T3 · 2028 年</h3>
+  <ul>
+    <li><strong>能力</strong> [模型]：任务长度约 2,800 小时（一个工作年以上）；开放问题解出率约 45%；证明成本可以忽略。</li>
+    <li><strong>解锁</strong>：<strong>大部分 A 类问题已解决或被证明不可能</strong>。四个方向里只剩 B 类和概念问题。辩论和 SLT 的价值都取决于一件事：在形式化边界之外能不能提供保证。关键软件"默认带证明"可能成为行业标准（如果有监管或保险推动）。</li>
+    <li><strong>新机会</strong>：<strong>概念工作的回报率最高</strong>：能把"欺骗""reward hacking""harm"变成可测、可证陈述的人，本身就是瓶颈。如果 AI 研发已高度自动化，AI 安全理论也会被大规模自动化，<strong>人类审得过来吗</strong>成为核心问题。</li>
+    <li><strong>证伪信号</strong>：任务长度在几百小时停住（成败越来越取决于 spec），曲线 ① 变成 S 形。</li>
+  </ul>
+
+  <h3>T4 · 2029–2030</h3>
+  <ul>
+    <li><strong>情景分叉</strong>：
+      <ul>
+        <li><strong>AI 研发全面自动化</strong>（CASP 情景）：所有时间点被压缩；理论、证明、实验几乎全自动，人类的角色集中在设定目标、审核陈述、决定部署。</li>
+        <li><strong>出现硬瓶颈</strong>（算力、数据或 spec 审核）：进步回到指数甚至更慢；A 类问题已解，B 类和概念问题进展缓慢。</li>
+      </ul>
+    </li>
+    <li><strong>两种情景都成立</strong>：软件和协议的安全保证远强于今天，验证的不对称性有利于防守；开放世界（生物、社会）的保证仍然很弱，主要靠监控、访问控制和治理；<strong>谁来审核陈述和 spec</strong>是整个体系的上限。</li>
+  </ul>
+
+  <h3>22.1 这份推演最可能错在哪</h3>
+  <ol>
+    <li><strong>曲线 ① 的测量在失效</strong>：16 小时以上不可靠，作弊处理能差 4.5 个倍增。2027 年以后的数字主要靠"其他信号也在同步增长"来支撑。</li>
+    <li><strong>曲线 ② 只有一个锚点</strong>（3%，68 题），斜率是保守取的，误差很大。</li>
+    <li><strong>A 类和 B 类的边界会移动</strong>：AI 也许会比预期更早擅长"提出好陈述"。目前没有证据说明这已经发生——OpenAI 的 719 篇主要是解已有的问题，几乎没有提出新概念（对照 Tao 的"好数学"21 个维度）。如果这件事发生，所有节点都要提前，人类的角色会被进一步压缩。</li>
+    <li><strong>没算进去的变量</strong>：控速或暂停协议、重大安全事故、地缘政治。它们只可能让时间线变慢。</li>
+  </ol>
+
+  <h3>22.2 对研究者：现在做什么最划算</h3>
+  <p>原则：<strong>不要手工去做 AI 一年内就能做的事，除非它是基础设施，或者能帮你判断"该问什么"。</strong></p>
+  <div class="tbl"><table>
+    <thead><tr><th>机会</th><th>为什么现在</th></tr></thead>
+    <tbody>
+      <tr><td>证明器和验证器上的 reward hacking</td><td>已有证明器利用 Lean 工具链漏洞的先例；在 AI 证明大规模部署前研究最有价值</td></tr>
+      <tr><td>陈述和 spec 的忠实度审计</td><td>T1–T3 所有方向的共同瓶颈；本 deck 逐行读 Lean 陈述的做法就是雏形</td></tr>
+      <tr><td>用形式数学搭超人监督实验</td><td>现有实验的能力差距是人为制造的；形式数学提供真实差距 + 完美 ground truth</td></tr>
+      <tr><td>SLT 的"提前预警"实验</td><td>决定 SLT 安全价值的关键实验，还没人做</td></tr>
+      <tr><td>AI 研发自动化指标的抗操纵性</td><td>CASP 的政策建议依赖这些指标，但它们会被 reward hacking 抬高</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tg">本部分关键数字均在正文注明出处。四份研究底稿（辩论、SLT、GSAI 与神经符号、趋势数据，含逐条 [P]/[R]/⚠ 标注与原始链接）保存在作者的研究笔记中，未随本 deck 公开。</p>
+</section>
+
 <section id="reactions">
   <div class="kicker">Reactions · 原话</div>
-  <h2><span class="n">17.</span>各方怎么说</h2>
+  <h2><span class="n">23.</span>各方怎么说</h2>
   <div class="tbl"><table>
     <thead><tr><th>谁</th><th>原话</th><th>来源</th></tr></thead>
     <tbody>
@@ -541,7 +859,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 
 <section id="learn">
   <div class="kicker">Next steps</div>
-  <h2><span class="n">18.</span>开放问题与继续学习</h2>
+  <h2><span class="n">24.</span>开放问题与继续学习</h2>
   <h3>18.1 接下来值得盯的</h3>
   <ol>
     <li>OpenAI 会公开 4,000 题清单与失败案例吗？（决定能否回答"真实能力是多少"）</li>
@@ -568,7 +886,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 
 <section id="sources">
   <div class="kicker">Glossary & sources</div>
-  <h2><span class="n">19.</span>术语表与来源</h2>
+  <h2><span class="n">25.</span>术语表与来源</h2>
   <h3>19.1 术语</h3>
   <div class="tbl"><table>
     <thead><tr><th>术语</th><th>一句话</th></tr></thead>
@@ -600,6 +918,7 @@ FIGS = {
     "{{FIG_FLINT}}": figs.svg_flint(), "{{FIG_OMEGA}}": figs.svg_omega(), "{{FIG_MAXCUT}}": figs.svg_maxcut(),
     "{{FIG_MOSER}}": figs.svg_moser(), "{{FIG_THOMPSON}}": figs.svg_thompson(), "{{FIG_BLOWUP}}": figs.svg_blowup(),
     "{{FIG_HARMONIC}}": figs.svg_harmonic(), "{{FIG_SPIN}}": figs.svg_spin(), "{{FIG_HODGE}}": figs.svg_hodge(),
+    "{{FIG_METR}}": figs.svg_metr(figs.METR_ZH), "{{FIG_OPEN}}": figs.svg_openprob(figs.OPEN_ZH),
 }
 import re as _re
 while _re.search(r'\^\{([^{}]*)\}', BODY):

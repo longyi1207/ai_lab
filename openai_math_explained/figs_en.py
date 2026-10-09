@@ -422,3 +422,94 @@ def svg_hodge():
     out.append('<text x="420" y="226" class="r">722 → 719; 14 repaired, 13 re-cited</text>')
     return fig('\n'.join(out), '0 0 720 270',
                'Sources: <a href="https://github.com/openai/math/blob/main/history.md">openai/math history.md</a> (2026-10-07); the family title is compared against CONTENTS.md at the initial commit <code>adc7f12</code>. The withdrawal notice reads: "This withdrawal concerns the proof; it does not assert that the mathematical statement is false."')
+
+
+# ------------------------------------------------------------------ forward look: METR horizon + projections
+import datetime as _dt
+
+METR_PTS = [((2019, 2), 0.1 / 60, 'GPT-2'), ((2023, 3), 4 / 60, 'GPT-4'), ((2024, 6), 11 / 60, ''),
+            ((2024, 12), 39 / 60, 'o1'), ((2025, 2), 1.0, ''), ((2025, 4), 2.0, 'o3'), ((2025, 8), 3.4, ''),
+            ((2025, 11), 4.9, ''), ((2025, 12), 5.9, ''), ((2026, 2), 12.0, ''), ((2026, 4), 17.4, 'Mythos Preview')]
+
+
+def _yr(y, m, d=15):
+    return y + (_dt.date(y, m, d) - _dt.date(y, 1, 1)).days / 365.25
+
+
+def svg_metr(L):
+    X0, X1, A, B = 70, 640, 2023.0, 2029.2
+    Y0, Y1, LO, HI = 290, 40, -2, 4.5   # log10 hours
+    sx = lambda t: X0 + (t - A) / (B - A) * (X1 - X0)
+    sy = lambda h: Y0 - (math.log10(h) - LO) / (HI - LO) * (Y0 - Y1)
+    out = [f'<text x="{X0}" y="22" class="h">{L["title"]}</text>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X1}" y2="{Y0}" class="ax"/>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X0}" y2="{Y1}" class="ax"/>']
+    for h, lab in [(1 / 60, L['1min']), (1, L['1h']), (8, L['1d']), (160, L['1mo']), (2000, L['1y'])]:
+        out.append(f'<line x1="{X0}" y1="{sy(h):.1f}" x2="{X1}" y2="{sy(h):.1f}" class="grid"/>')
+        out.append(f'<text x="{X0-6}" y="{sy(h)+4:.1f}" class="s" text-anchor="end">{lab}</text>')
+    for y in range(2023, 2030):
+        out.append(f'<text x="{sx(y):.1f}" y="{Y0+16}" class="s" text-anchor="middle">{y}</text>')
+    a = _yr(2026, 5, 1)
+    for D, cls, lab in [(89, 'dash', L['opt']), (129, 'lnr', L['cen']), (213, 'dash', L['pes'])]:
+        seq = []
+        t = a
+        while t <= B:
+            h = 15 * 2 ** ((t - a) * 365.25 / D)
+            if h > 10 ** HI:
+                break
+            seq.append((sx(t), sy(h)))
+            t += 0.02
+        out.append(f'<polyline points="{pts(seq)}" class="{cls}"/>')
+        out.append(f'<text x="{seq[-1][0]+4:.1f}" y="{seq[-1][1]+4:.1f}" class="s">{lab}</text>')
+    for (y, m), h, lab in METR_PTS:
+        t = _yr(y, m)
+        if t < A:
+            continue
+        out.append(f'<circle cx="{sx(t):.1f}" cy="{sy(h):.1f}" r="3.5" fill="#1a1a18"/>')
+        if lab:
+            dy = 16 if lab == 'Opus 4.6' else -6
+            out.append(f'<text x="{sx(t)-6:.1f}" y="{sy(h)+dy:.1f}" class="s" text-anchor="end">{lab}</text>')
+    out.append(f'<line x1="{sx(2023.0):.1f}" y1="{sy(16):.1f}" x2="{X1}" y2="{sy(16):.1f}" class="dash"/>')
+    out.append(f'<text x="{sx(2023.1):.1f}" y="{sy(16)-4:.1f}" class="s">{L["unrel"]}</text>')
+    return fig('\n'.join(out), '0 0 720 320', L['cap'])
+
+
+def svg_openprob(L):
+    X0, X1, A, B = 70, 600, 2026.5, 2031.0
+    Y0, Y1 = 270, 40
+    sx = lambda t: X0 + (t - A) / (B - A) * (X1 - X0)
+    sy = lambda p: Y0 - p * (Y0 - Y1)
+    out = [f'<text x="{X0}" y="22" class="h">{L["title"]}</text>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X1}" y2="{Y0}" class="ax"/>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X0}" y2="{Y1}" class="ax"/>']
+    for p in (0, 0.25, 0.5, 0.75, 1.0):
+        out.append(f'<line x1="{X0}" y1="{sy(p):.1f}" x2="{X1}" y2="{sy(p):.1f}" class="grid"/>')
+        out.append(f'<text x="{X0-6}" y="{sy(p)+4:.1f}" class="s" text-anchor="end">{int(p*100)}%</text>')
+    for y in range(2027, 2032):
+        out.append(f'<text x="{sx(y):.1f}" y="{Y0+16}" class="s" text-anchor="middle">{y}</text>')
+    t0 = _yr(2026, 9, 6)
+    for s_, C, cls, lab in [(3.0, 0.9, 'dash', L['opt']), (1.5, 0.8, 'lnr', L['cen']), (0.7, 0.6, 'dash', L['pes'])]:
+        q0 = 0.03 / C
+        L0 = math.log(q0 / (1 - q0))
+        seq = []
+        t = t0
+        while t <= B:
+            p = C / (1 + math.exp(-(L0 + s_ * (t - t0))))
+            seq.append((sx(t), sy(p)))
+            t += 0.02
+        out.append(f'<polyline points="{pts(seq)}" class="{cls}"/>')
+        out.append(f'<text x="{seq[-1][0]+4:.1f}" y="{seq[-1][1]+4:.1f}" class="s">{lab}</text>')
+    out.append(f'<circle cx="{sx(t0):.1f}" cy="{sy(0.03):.1f}" r="4" fill="#1a1a18"/>')
+    out.append(f'<text x="{sx(t0)+8:.1f}" y="{sy(0.03)-8:.1f}" class="s">{L["anchor"]}</text>')
+    return fig('\n'.join(out), '0 0 720 300', L['cap'])
+
+
+
+METR_EN = dict(title='Curve ①: task length AI completes alone (METR p50, log scale)',
+               **{'1min': '1 min', '1h': '1 hour', '1d': '1 workday', '1mo': '1 work-month', '1y': '1 work-year'},
+               opt='optimistic', cen='central', pes='pessimistic', unrel='unreliable above 16 h',
+               cap='Black dots: state-of-the-art models in the raw METR TH1.1 data (from 2023; GPT-2 in 2019 at 0.1 minutes is off-chart). Red: central scenario, anchored at ~15 hours in 2026-05 and doubling every 129 days (METR fit from 2023, 95% CI 104–158 days), i.e. roughly ×7 per year. Dashed: optimistic (89 days, the post-2024 pace) and pessimistic (213 days, ~7 months). Each gridline step on the vertical axis is 10×. Curves computed by the build script.')
+OPEN_EN = dict(title='Curve ②: single-attempt solve rate on open problems (~$300 each)',
+               opt='optimistic', cen='central', pes='pessimistic',
+               anchor='anchor: FrontierMath Erdős, 2026-09: 3% (2/68)',
+               cap='Scenario parameters: optimistic +3.0 logit/yr, cap 90%; central +1.5, cap 80%; pessimistic +0.7, cap 60%. Model: solve rate = C × sigmoid(a + s·t), where C caps the fraction of problems that are extremely hard or have no short proof; anchored at the 3% that GPT-6 Astra scored on Epoch FrontierMath Erdős (68 pre-registered open problems, Lean proofs required). For comparison, FrontierMath Tier 4 rose about 5.3 logits in 10 months; all three scenarios are slower because open-problem difficulty is heavy-tailed. Curves computed by the build script.')

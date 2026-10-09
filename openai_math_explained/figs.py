@@ -422,3 +422,93 @@ def svg_hodge():
     out.append('<text x="420" y="226" class="r">722 篇 → 719 篇；另有 14 篇修补、13 篇更新引用</text>')
     return fig('\n'.join(out), '0 0 720 270',
                '来源：<a href="https://github.com/openai/math/blob/main/history.md">openai/math history.md</a>（2026-10-07）；家族标题对比初始 commit <code>adc7f12</code> 的 CONTENTS.md。撤稿说明原文："This withdrawal concerns the proof; it does not assert that the mathematical statement is false."')
+
+
+# ------------------------------------------------------------------ forward look: METR horizon + projections
+import datetime as _dt
+
+METR_PTS = [((2019, 2), 0.1 / 60, 'GPT-2'), ((2023, 3), 4 / 60, 'GPT-4'), ((2024, 6), 11 / 60, ''),
+            ((2024, 12), 39 / 60, 'o1'), ((2025, 2), 1.0, ''), ((2025, 4), 2.0, 'o3'), ((2025, 8), 3.4, ''),
+            ((2025, 11), 4.9, ''), ((2025, 12), 5.9, ''), ((2026, 2), 12.0, ''), ((2026, 4), 17.4, 'Mythos Preview')]
+
+
+def _yr(y, m, d=15):
+    return y + (_dt.date(y, m, d) - _dt.date(y, 1, 1)).days / 365.25
+
+
+def svg_metr(L):
+    X0, X1, A, B = 70, 640, 2023.0, 2029.2
+    Y0, Y1, LO, HI = 290, 40, -2, 4.5   # log10 hours
+    sx = lambda t: X0 + (t - A) / (B - A) * (X1 - X0)
+    sy = lambda h: Y0 - (math.log10(h) - LO) / (HI - LO) * (Y0 - Y1)
+    out = [f'<text x="{X0}" y="22" class="h">{L["title"]}</text>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X1}" y2="{Y0}" class="ax"/>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X0}" y2="{Y1}" class="ax"/>']
+    for h, lab in [(1 / 60, L['1min']), (1, L['1h']), (8, L['1d']), (160, L['1mo']), (2000, L['1y'])]:
+        out.append(f'<line x1="{X0}" y1="{sy(h):.1f}" x2="{X1}" y2="{sy(h):.1f}" class="grid"/>')
+        out.append(f'<text x="{X0-6}" y="{sy(h)+4:.1f}" class="s" text-anchor="end">{lab}</text>')
+    for y in range(2023, 2030):
+        out.append(f'<text x="{sx(y):.1f}" y="{Y0+16}" class="s" text-anchor="middle">{y}</text>')
+    a = _yr(2026, 5, 1)
+    for D, cls, lab in [(89, 'dash', L['opt']), (129, 'lnr', L['cen']), (213, 'dash', L['pes'])]:
+        seq = []
+        t = a
+        while t <= B:
+            h = 15 * 2 ** ((t - a) * 365.25 / D)
+            if h > 10 ** HI:
+                break
+            seq.append((sx(t), sy(h)))
+            t += 0.02
+        out.append(f'<polyline points="{pts(seq)}" class="{cls}"/>')
+        out.append(f'<text x="{seq[-1][0]+4:.1f}" y="{seq[-1][1]+4:.1f}" class="s">{lab}</text>')
+    for (y, m), h, lab in METR_PTS:
+        t = _yr(y, m)
+        if t < A:
+            continue
+        out.append(f'<circle cx="{sx(t):.1f}" cy="{sy(h):.1f}" r="3.5" fill="#1a1a18"/>')
+        if lab:
+            dy = 16 if lab == 'Opus 4.6' else -6
+            out.append(f'<text x="{sx(t)-6:.1f}" y="{sy(h)+dy:.1f}" class="s" text-anchor="end">{lab}</text>')
+    out.append(f'<line x1="{sx(2023.0):.1f}" y1="{sy(16):.1f}" x2="{X1}" y2="{sy(16):.1f}" class="dash"/>')
+    out.append(f'<text x="{sx(2023.1):.1f}" y="{sy(16)-4:.1f}" class="s">{L["unrel"]}</text>')
+    return fig('\n'.join(out), '0 0 720 320', L['cap'])
+
+
+def svg_openprob(L):
+    X0, X1, A, B = 70, 600, 2026.5, 2031.0
+    Y0, Y1 = 270, 40
+    sx = lambda t: X0 + (t - A) / (B - A) * (X1 - X0)
+    sy = lambda p: Y0 - p * (Y0 - Y1)
+    out = [f'<text x="{X0}" y="22" class="h">{L["title"]}</text>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X1}" y2="{Y0}" class="ax"/>',
+           f'<line x1="{X0}" y1="{Y0}" x2="{X0}" y2="{Y1}" class="ax"/>']
+    for p in (0, 0.25, 0.5, 0.75, 1.0):
+        out.append(f'<line x1="{X0}" y1="{sy(p):.1f}" x2="{X1}" y2="{sy(p):.1f}" class="grid"/>')
+        out.append(f'<text x="{X0-6}" y="{sy(p)+4:.1f}" class="s" text-anchor="end">{int(p*100)}%</text>')
+    for y in range(2027, 2032):
+        out.append(f'<text x="{sx(y):.1f}" y="{Y0+16}" class="s" text-anchor="middle">{y}</text>')
+    t0 = _yr(2026, 9, 6)
+    for s_, C, cls, lab in [(3.0, 0.9, 'dash', L['opt']), (1.5, 0.8, 'lnr', L['cen']), (0.7, 0.6, 'dash', L['pes'])]:
+        q0 = 0.03 / C
+        L0 = math.log(q0 / (1 - q0))
+        seq = []
+        t = t0
+        while t <= B:
+            p = C / (1 + math.exp(-(L0 + s_ * (t - t0))))
+            seq.append((sx(t), sy(p)))
+            t += 0.02
+        out.append(f'<polyline points="{pts(seq)}" class="{cls}"/>')
+        out.append(f'<text x="{seq[-1][0]+4:.1f}" y="{seq[-1][1]+4:.1f}" class="s">{lab}</text>')
+    out.append(f'<circle cx="{sx(t0):.1f}" cy="{sy(0.03):.1f}" r="4" fill="#1a1a18"/>')
+    out.append(f'<text x="{sx(t0)+8:.1f}" y="{sy(0.03)-8:.1f}" class="s">{L["anchor"]}</text>')
+    return fig('\n'.join(out), '0 0 720 300', L['cap'])
+
+
+METR_ZH = dict(title='曲线 ①：AI 能独立完成的任务长度（METR p50，对数坐标）与三情景外推',
+               **{'1min': '1 分钟', '1h': '1 小时', '1d': '1 工作日', '1mo': '1 工作月', '1y': '1 工作年'},
+               opt='乐观 89 天倍增', cen='中心 129 天', pes='悲观 213 天', unrel='16 小时以上，现有任务集不可靠',
+               cap='黑点是 METR TH1.1 原始数据里的 SOTA 模型（2023 起；GPT-2 2019 年为 0.1 分钟，在图外）。红线是中心情景：以 2026-05 约 15 小时为锚点，每 129 天翻倍（METR 2023 年起拟合，95% CI 104–158 天），相当于每年约 ×7。虚线是乐观（89 天，2024 年起的速度）和悲观（213 天，约 7 个月）。纵轴每一格是 10 倍。曲线由 build 脚本计算。')
+OPEN_ZH = dict(title='曲线 ②：可形式化开放问题的单次解出率（每题约 $300）三情景',
+               opt='乐观', cen='中心', pes='悲观',
+               anchor='锚点：2026-09 FrontierMath Erdős 3%（2/68）',
+               cap='三情景参数：乐观 +3.0 logit/年、上限 90%；中心 +1.5、上限 80%；悲观 +0.7、上限 60%。模型：解出率 = C × sigmoid(a + s·t)，C 是"有些题本身极难或无解"的上限，锚点是 Epoch FrontierMath Erdős（68 个预注册开放问题、必须给 Lean 证明）上 GPT-6 Astra 的 3%。斜率参照 FrontierMath Tier 4 在 10 个月内涨约 5.3 logit，三情景都取得更慢，因为开放问题的难度分布是重尾的。曲线由 build 脚本计算。')

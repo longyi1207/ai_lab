@@ -19,6 +19,14 @@ A sourced learning deck, in parallel Chinese and English editions, for readers w
 
 It also covers the withdrawn Hodge-related papers as a case study of what goes wrong without formal verification.
 
+**Part II (§17–§22): looking ahead.** Added 2026-10-08. It extrapolates three trend curves:
+
+- METR task-length horizon, doubling about every 129 days.
+- Single-attempt solve rate on open problems, anchored at 3% on FrontierMath Erdős.
+- Formal-proof cost, about $0.023/line for the Fermat formalization.
+
+Each curve has optimistic, central and pessimistic scenarios. Part II then argues that the bottleneck moves from proofs to statements and specs. It covers what this means for AI-safety debate, singular learning theory, Guaranteed Safe AI and neurosymbolic systems, and ends with a T0–T4 timeline (2026 Q4 → 2030). Every node lists signals that would falsify it. Claims are tagged [data] / [model] / [judgment].
+
 **How each result is presented:** every result gets the same "ladder":
 
 1. A toy example you can compute by hand

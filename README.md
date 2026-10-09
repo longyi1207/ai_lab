@@ -131,7 +131,10 @@ example to the real statement, then gives its history, OpenAI's exact claim, and
 status. Each Lean statement is read line by line for faithfulness. A static audit of the 26M-line
 Lean library is summarized, and a withdrawn-papers case study is included. It closes with what
 this means for AI and AI safety (specification review, verification without understanding,
-selection effects). Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
+selection effects). Part II (§17–§22) looks ahead: three trend curves (METR task
+length, open-problem solve rate, formal-proof cost) with scenarios, why the bottleneck moves from
+proofs to statements and specs, implications for debate, SLT, Guaranteed Safe AI and neurosymbolic
+systems, and a T0–T4 timeline to 2030 with falsifiers. Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
 
 ## License
 
