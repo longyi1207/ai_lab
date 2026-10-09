@@ -134,7 +134,8 @@ this means for AI and AI safety (specification review, verification without unde
 selection effects). Part II (§17–§22) looks ahead: three trend curves (METR task
 length, open-problem solve rate, formal-proof cost) with scenarios, why the bottleneck moves from
 proofs to statements and specs, implications for debate, SLT, Guaranteed Safe AI and neurosymbolic
-systems, and a T0–T4 timeline to 2030 with falsifiers. Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
+systems, and a T0–T4 timeline to 2030 with falsifiers. Part III (§23–§32, Chinese only) has one long
+from-zero chapter per result, with hand-checkable exercises and the scripts behind every computed number. Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
 
 ## License
 

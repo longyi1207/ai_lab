@@ -43,6 +43,8 @@ Each curve has optimistic, central and pessimistic scenarios. Part II then argue
 
 The two editions are maintained in parallel (not machine-translated), so content changes should be made in both build scripts.
 
+**Exception: Part III (§23–§32) is Chinese only for now.** It holds the 从零精讲 chapters: one long chapter per headline result. Each chapter builds the result up from basic concepts, with hand-checkable examples and 【检查】 exercises, and runs to about ten times the length of its Part I section. The Chinese PDF is therefore about 209 pages, and the English PDF is about 57. The chapters live in [`精讲/`](精讲/) as Markdown. `build_notes.py` renders them into the deck with `md2html.py`.
+
 ## What "verified" means here
 
 The deck separates three things:
@@ -64,7 +66,7 @@ Tags used throughout:
 ## Rebuild
 
 ```bash
-python3 build_notes.py        # → notes.html    (Chinese; chart data computed in figs.py, not hand-typed)
+python3 build_notes.py        # → notes.html    (Chinese; chart data computed in figs.py; Part III rendered from 精讲/*.md)
 python3 build_notes_en.py     # → notes_en.html (English; figures from figs_en.py)
 for f in notes notes_en; do
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer \
@@ -79,6 +81,9 @@ openai_math_explained/
 ├── build_notes.py     ← Chinese deck content (all text)
 ├── build_notes_en.py  ← English deck content (maintained in parallel)
 ├── figs.py / figs_en.py ← inline SVG figures (zh / en labels); plotted numbers computed here
+├── 精讲/NN_*.md      ← Part III 从零精讲 chapters (Chinese), one per result
+├── 精讲/scripts/      ← scripts behind every "脚本实算" number in the chapters (see its README)
+├── md2html.py         ← minimal dependency-free Markdown → HTML used for Part III
 ├── _notes_base.css    ← shared visual style (same as cyber_ai_fundamentals / compute_pause_verification)
 ├── notes.html / notes.pdf         ← Chinese edition
 ├── notes_en.html / notes_en.pdf   ← English edition
