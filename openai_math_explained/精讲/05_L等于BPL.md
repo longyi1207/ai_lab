@@ -330,7 +330,7 @@ Saks 和 Zhou 把 Nisan 的 log n 层切成 √log n 段，每段 √log n 层�
 | 2021 | Hoza（加权伪随机性） | log^1.5 n / √(log log n) |
 | 2026 | **OpenAI（声称）** | **log n** |
 
-（Hoza 的界据 OpenAI 论文 §1.1 引用的 [19, Theorem 1.6 and Corollary A.5] 和我的记忆；作者研究笔记里原先标了 ⚠，这次核对了论文的引用，两者一致。）
+（Hoza 的界据 OpenAI 论文 §1.1 引用的 [19, Theorem 1.6 and Corollary A.5] 和我的记忆；本 deck 作者的研究笔记里原先标了 ⚠，这次核对了论文的引用，两者一致。）
 
 Hoza 2021 只省下了 √(log log n)，对 n = 10⁹ 也就是省掉约 2.2 倍。一般 BPL 的指数在 3/2 附近卡了 27 年。
 

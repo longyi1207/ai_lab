@@ -1941,7 +1941,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <h4>1.2 数一数</h4>
 <p>记 <strong>π(x)</strong> = "不超过 x 的素数有多少个"。这里的 π 只是一个名字，和圆周率无关，是历史遗留的记号。</p>
 <div class="tbl"><table><thead><tr><th>x</th><th>π(x)（真实个数）</th></tr></thead><tbody><tr><td>10</td><td>4（2, 3, 5, 7）</td></tr><tr><td>100</td><td>25</td></tr><tr><td>1,000</td><td>168</td></tr><tr><td>1,000,000</td><td>78,498</td></tr><tr><td>1,000,000,000</td><td>50,847,534</td></tr></tbody></table></div>
-<p>素数越往后越稀疏：100 以内四个数里就有一个素数，100 万附近每 1000 个数里只有大约 72 个（脚本实算：999,001 到 1,000,000 这 1000 个数里有 65 个素数）。</p>
+<p>素数越往后越稀疏：100 以内四个数里就有一个素数，100 万附近每 1000 个数里只有大约 72 个（这是按下一节的 1/ln x 规律估算的；脚本实数：999,001 到 1,000,000 这 1000 个数里实际有 65 个素数）。</p>
 <h4>1.3 第一个规律：密度约等于 1/ln x</h4>
 <p>高斯（Gauss）在十几岁时盯着素数表发现：<strong>在 x 附近，大约每 ln x 个数里有一个素数。</strong></p>
 <p>这里 ln 是自然对数，以 e ≈ 2.718 为底。ln(1,000,000) ≈ 13.8，意思是 100 万附近大约每 14 个数里有一个素数。上面实算是每 1000 个数 65 个，约每 15 个一个，很接近。</p>
@@ -2054,7 +2054,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <p>除了 2，所有素数都是奇数，所以要么形如 4k+1（5, 13, 17, …），要么形如 4k+3（3, 7, 11, 19, …）。</p>
 <p>脚本实算：</p>
 <ul><li>100 以内：4k+1 型 11 个，4k+3 型 13 个</li><li>1000 以内：4k+1 型 80 个，4k+3 型 87 个</li></ul>
-<p>两类大约各占一半（4k+3 型总是略多一点，这个现象叫 Chebyshev 偏差）。Dirichlet 在 1837 年证明了：对任何模 q 和与 q 互素的 a，形如 qk + a 的素数都有无穷多个，而且长期看各类平分。</p>
+<p>两类大约各占一半（4k+3 型多数时候略多一点，但并非总是：x = 26,861 时 4k+1 型第一次反超。这个现象叫 Chebyshev 偏差）。Dirichlet 在 1837 年证明了：对任何模 q 和与 q 互素的 a，形如 qk + a 的素数都有无穷多个，而且长期看各类平分。</p>
 <h4>7.2 Dirichlet L 函数</h4>
 <p>为了分别研究每一类，Dirichlet 构造了 ζ 的变体：</p>
 <pre><code>L(s, χ) = χ(1)/1^s + χ(2)/2^s + χ(3)/3^s + ...</code></pre>
@@ -2136,7 +2136,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <p>误差变小本身不稀奇：分母允许到 10⁶，你随便取 3141593/1000000 也能把误差压到 10⁻⁷ 左右。所以只看误差是不公平的，要看<strong>相对于分母大小</strong>的误差。</p>
 <p>看 314/100 和 22/7：两者误差差不多（都约 10⁻³），但 22/7 只用了分母 7，而 314/100 用了分母 100。22/7 "性价比"高得多。</p>
 <p>一个自然的度量是：<strong>误差相当于分母的几次方的倒数？</strong> 如果 |π − p/q| ≈ q^(−ν)，我们就说这个逼近的"有效指数"是 ν。ν 越大，逼近越"超常"。</p>
-<ul><li>314/100：误差 ≈ 100^(−1.4)，ν ≈ 1.4。小数截断大约只有 ν ≈ 1 的水平（误差 ~ 1/q）。</li><li>22/7：ν ≈ 3.43（脚本实算）。</li><li>355/113：ν ≈ 3.20（脚本实算）。这就是"密率"神奇的地方：用三位数的分母，得到了七位小数的精度。</li></ul>
+<ul><li>314/100：误差 ≈ 100^(−1.4)，ν ≈ 1.4。小数截断大约只有 ν ≈ 1 的水平（误差 ~ 1/q）。</li><li>22/7：ν ≈ 3.43（脚本实算）。</li><li>355/113：ν ≈ 3.20（脚本实算）。这就是"密率"神奇的地方：用三位数的分母，得到了约 10⁻⁷ 的精度（小数点后 6 位全对）。</li></ul>
 <p>表的最后一列 q² × 误差 是另一个角度：如果它 &lt; 1，说明误差比 1/q² 还小。355/113 的这一列是 0.0034，也就是比 1/q² 好了约 <strong>290 倍</strong>。</p>
 <p>【检查 1】用计算器验证：355/113 = 3.14159292…，和 π 差多少？113² 是多少？误差乘以 113² 大约是多少？</p>
 <h3>2. 连分数：寻找"最佳逼近"的机器</h3>
@@ -2177,7 +2177,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <h4>3.3 能不能比 1/q² 更好？</h4>
 <p>脚本实算：在分母 2 ≤ q ≤ 100,000 的所有既约分数里，数一数满足 |π − p/q| &lt; q^(−ν) 的有几个：</p>
 <div class="tbl"><table><thead><tr><th>ν</th><th>满足的分数个数</th><th>它们的分母</th></tr></thead><tbody><tr><td>2</td><td>8</td><td>6, 7, 106, 113, 33102, 33215, 66317, 99532</td></tr><tr><td>2.2</td><td>2</td><td>7, 113</td></tr><tr><td>2.5</td><td>2</td><td>7, 113</td></tr><tr><td>3</td><td>2</td><td>7, 113</td></tr></tbody></table></div>
-<p>ν = 2 时个数一直在增加（Dirichlet 保证它无穷多）。ν &gt; 2 之后，在 10 万以内只剩 22/7 和 355/113 两个"早期奇迹"。</p>
+<p>ν = 2 时个数一直在增加（Dirichlet 保证它无穷多）。ν 只比 2 大一点时还剩几个（脚本实算：分母 6、106、33102、33215、66317、99532 的有效指数在 2.01–2.11 之间）；ν ≥ 2.2 时，10 万以内只剩 22/7 和 355/113 两个"早期奇迹"。</p>
 <p><strong>μ(π) = 2 说的就是</strong>：对任何 ν &gt; 2（哪怕 2.0001），这样的分数只有<strong>有限多个</strong>。早期可以有几个奇迹，但奇迹不能无穷无尽地出现。</p>
 <h3>4. 无理性指数 μ：定义和一个"动物园"</h3>
 <h4>4.1 定义</h4>
@@ -2211,7 +2211,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <h3>5. π 的上界史：70 年从 42 到 7.1</h3>
 <h4>5.1 时间线</h4>
 <div class="tbl"><table><thead><tr><th>年份</th><th>作者</th><th>证明的 μ(π) 上界</th><th>出处</th></tr></thead><tbody><tr><td>1953</td><td>Mahler</td><td>42（并称最终可做到 30）</td><td><em>On the approximation of π</em>, Indag. Math. 15</td></tr><tr><td>1974</td><td>Mignotte</td><td>21（所有分母）/ 20（最终）</td><td>Bull. SMF Mém. 37</td></tr><tr><td>1993</td><td>Hata</td><td>8.01604539…</td><td>Acta Arith. 63</td></tr><tr><td>2008</td><td>Salikhov</td><td>7.606308…</td><td>Russ. Math. Surveys 63(3)</td></tr><tr><td>2020</td><td>Zeilberger–Zudilin</td><td>7.103205334137…</td><td>Moscow J. Comb. Number Theory 9(4)；arXiv:1912.06345</td></tr><tr><td>2026-09</td><td>Bai（预印本）</td><td>7.101862832357</td><td>arXiv:2609.11276 ⚠ 未经同行评审</td></tr><tr><td>2026-09-24</td><td>OpenAI（声称）</td><td><strong>= 2</strong></td><td>本章第 7 节</td></tr></tbody></table></div>
-<p>（上表数值以 OpenAI 论文 §1.1 的综述为准，并与作者的研究笔记交叉核对。）</p>
+<p>（上表数值以 OpenAI 论文 §1.1 的综述为准，并与本 deck 作者的研究笔记交叉核对。）</p>
 <p>注意最后两步之间的跨度：前 70 年是 42 → 7.10，每一步都是大量精细工作；然后一步跳到 2，而且是<strong>精确值</strong>，不是又一个上界。</p>
 <h4>5.2 旧方法的天花板</h4>
 <p>此前所有上界都来自同一个框架（Zudilin 的综述 arXiv:math/0404523 讲得很清楚）：</p>
@@ -2286,7 +2286,7 @@ theorem no_proper_five_coloring : ¬ ∃ c : ℂ → Fin 5, ProperColoring 5 c</
 <p>几乎没有直接影响。</p>
 <ul><li>浮点数的三角函数要做"参数约减"（把大数 x 减到 [−π/4, π/4] 区间），最坏情况取决于某个浮点数离 π/2 的倍数有多近。但这是<strong>有限范围</strong>的问题（double 的范围是有限的），工程上早已用连分数把最坏情况直接算出来（见 J.-M. Muller, <em>Elementary Functions</em>, 参数约减一章 ⚠ 具体章节以原书为准）。一个"渐近的、不给门槛的"定理不会改变这些具体数字。</li><li>和密码学、复杂度理论没有关系。</li></ul>
 <h4>9.4 对 AI</h4>
-<ol><li>这是 "AI 解决一个被文献正式记录的经典猜想" 的一个相对<strong>容易检验</strong>的案例：陈述短、只用标准定义、Lean 证明不依赖补丁库。如果你想向别人说明"这批结果里哪些最可信"，它比准黎曼猜想更好举例。</li><li>推理摘要展示了一个值得研究的过程特征：保守目标（2.5）+ 长时间失败探索（40 多节）+ 大量自我审计，最后发现技术的真正上限。对研究 AI 的研究过程本身（以及 eval 设计）有参考价值。</li><li>生态层面：同月有 Bai 的 7.1018 预印本（作者研究笔记记录其作者致谢 OpenAI 模型协助 ⚠ 未复核原文）、被撤回的 Flint Hills 声明、formal-conjectures 上 AI 起草的 issue。"AI 协助的数学声明"数量在激增，人类专家的审读带宽仍是瓶颈，和第 1 章的结论一致。</li></ol>
+<ol><li>这是 "AI 解决一个被文献正式记录的经典猜想" 的一个相对<strong>容易检验</strong>的案例：陈述短、只用标准定义、Lean 证明不依赖补丁库。如果你想向别人说明"这批结果里哪些最可信"，它比准黎曼猜想更好举例。</li><li>推理摘要展示了一个值得研究的过程特征：保守目标（2.5）+ 长时间失败探索（40 多节）+ 大量自我审计，最后发现技术的真正上限。对研究 AI 的研究过程本身（以及 eval 设计）有参考价值。</li><li>生态层面：同月有 Bai 的 7.1018 预印本（本 deck 作者的研究笔记记录：Bai 在致谢中提到 OpenAI 模型协助 ⚠ 未复核原文）、被撤回的 Flint Hills 声明、formal-conjectures 上 AI 起草的 issue。"AI 协助的数学声明"数量在激增，人类专家的审读带宽仍是瓶颈，和第 1 章的结论一致。</li></ol>
 <h3>10. 自测题</h3>
 <p>读完后试着回答。如果答不上来，回到对应小节再读一遍。</p>
 <ol><li>为什么不能只看误差大小来评价一个分数逼近？"有效指数 ν"是怎么定义的？（第 1.2 节）</li><li>355/113 为什么特别准？用连分数的语言解释。（第 2.3 节）</li><li>用抽屉原理说明为什么每个无理数都有 μ ≥ 2。（第 3.2 节）</li><li>"非零整数 ≥ 1"这个套路，在 √2 的证明和 OpenAI 的证明里分别对应什么量？（第 4.3、7.2 节）</li><li>为什么"π 是超越数"不能帮助证明 μ(π) = 2？OpenAI 的证明用了 π 的什么结构？（第 4.4、7.2 节）</li><li>为什么 Flint Hills 级数的部分和是阶梯形？μ(π) &lt; 5/2 为什么足以让它收敛？（第 6 节）</li><li>Lean 陈述的第二部分 <code>sSup {…} = 2</code> 对应 μ 定义里的哪几个词？（第 8.1 节）</li><li>μ(π) = 2 能推出"π 的连分数部分商有界"吗？能推出"π 是正规数"吗？（第 9.2 节）</li></ol>
@@ -2437,7 +2437,7 @@ C21 = M2+M4          C22 = M1−M2+M3+M6</code></pre>
 <p>激光法的老难题是：切出来的小块常常共享变量，不是完全独立的。OpenAI 的核心构造处理这样一种情形：M 个块在 y、z 两条腿上各自独立，但<strong>共享</strong> x 腿。做法：</p>
 <ul><li>复制 5M 份，每份用一个 L = 5M 次单位根 ζ 的不同幂次做相位（这是一个有限傅里叶变换），给每个 x 变量打上一个"暂定标签" g；</li><li>再用第 5.3 节的"配权重"：x 的权重 g²，y 的权重 hu − h²，z 的权重 −hv。在傅里叶变换保留下来的项上，总权重恰好等于 <strong>(g − h)²</strong>；</li><li>只保留权重为 0 的项，也就是 g = h：每个块拿到了自己专属的 x 副本，块与块完全独立了。附带地，每块还多出一个长度 M 的"点积"。</li></ul>
 <p>这一步的直觉：<strong>用平方 (g−h)² ≥ 0 作为"惩罚"，让标签对不上的项在 ε → 0 时全部消失。</strong> 结合"按频率计数"的标准技巧，得到一个熵不等式（推论 3.2）。</p>
-<p><strong>第 2 步：只看多项式乘法。</strong> 对任意一个特征 λ，定义多项式乘法张量 C(a, b) 的"对称化取值" P(a, b)（把三条腿的 6 种排列都算一遍取几何平均，再开 1/(6t) 次方）。它满足三条简单性质（式 4.5）：</p>
+<p><strong>第 2 步：只看多项式乘法。</strong> 对任意一个特征 λ，定义多项式乘法张量 C(a, b) 的"对称化取值" P(a, b)（把三条腿的 6 种排列都算一遍、把 6 个取值相乘，再开 1/(6t) 次方；见论文式 4.4）。它满足三条简单性质（式 4.5）：</p>
 <ul><li>P(a, b) = P(b, a)；</li><li>P(1, b) = b（C(1, b) 就是一个点积）；</li><li><strong>P(a, b) ≤ (a + b − 1)^(1/t)</strong>：因为多项式乘法的秩是 a + b − 1（第 4.5 节），而特征 ≤ 秩。</li></ul>
 <p>这里 t 正是第 7.3 节里那个"λ 在矩阵乘法上的指数"。</p>
 <p><strong>第 3 步：两条新不等式（§4）。</strong></p>
@@ -2810,7 +2810,7 @@ RL ⊆ NL ⊆ L²（Savitch 1970）</code></pre>
 <p>空间：一组哈希函数 √log n × log n，加上递归 √log n 段 × 每段 log n，合计 <strong>O(log^1.5 n)</strong>。</p>
 <h4>6.4 之后的进展和停滞</h4>
 <div class="tbl"><table><thead><tr><th>年份</th><th>结果</th><th>确定性空间</th></tr></thead><tbody><tr><td>1983</td><td>Borodin–Cook–Pippenger</td><td>log² n</td></tr><tr><td>1992</td><td>Nisan PRG</td><td>log² n</td></tr><tr><td>1999</td><td>Saks–Zhou</td><td>log^1.5 n</td></tr><tr><td>2021</td><td>Hoza（加权伪随机性）</td><td>log^1.5 n / √(log log n)</td></tr><tr><td>2026</td><td><strong>OpenAI（声称）</strong></td><td><strong>log n</strong></td></tr></tbody></table></div>
-<p>（Hoza 的界据 OpenAI 论文 §1.1 引用的 [19, Theorem 1.6 and Corollary A.5] 和我的记忆；作者研究笔记里原先标了 ⚠，这次核对了论文的引用，两者一致。）</p>
+<p>（Hoza 的界据 OpenAI 论文 §1.1 引用的 [19, Theorem 1.6 and Corollary A.5] 和我的记忆；本 deck 作者的研究笔记里原先标了 ⚠，这次核对了论文的引用，两者一致。）</p>
 <p>Hoza 2021 只省下了 √(log log n)，对 n = 10⁹ 也就是省掉约 2.2 倍。一般 BPL 的指数在 3/2 附近卡了 27 年。</p>
 <p><strong>中间还发现了很多"特殊结构"上的胜利</strong>：Reingold（无向图）、Reingold–Trevisan–Vadhan（正则有向图）、Ahmadinejad 等（Eulerian 图上高精度地算随机游走概率）、Cohen–Doron–Sberlo–Ta-Shma（长随机矩阵乘积）。[已确立] 另外，Cheng–Hoza 2022 证明了：只要有一个对数空间可枚举的"命中集"（只保证找到一个接受的输入，比 PRG 弱），就能推出 L = BPL。[已确立] 这些都说明，问题的"形状"已经被摸得很清楚，就差最后一步。</p>
 <h3>7. OpenAI 声称了什么</h3>
@@ -2932,7 +2932,7 @@ RL ⊆ NL ⊆ L²（Savitch 1970）</code></pre>
 <h4>5.2 之后的跟进：把证据变小、变得可读</h4>
 <div class="tbl"><table><thead><tr><th>年份</th><th>谁</th><th>做了什么</th><th>来源</th></tr></thead><tbody><tr><td>2018</td><td>Heule</td><td>用 SAT 求解器加"不可满足核"提取，得到 553 个顶点的 5 色图</td><td>arXiv:1805.12181</td></tr><tr><td>2018/2020</td><td>Exoo, Ismailescu</td><td>独立给出 χ ≥ 5 的另一个证明</td><td>arXiv:1805.00157</td></tr><tr><td>2020</td><td>Parts</td><td>把图缩小到 509 个顶点（图最小化）</td><td>arXiv:2010.12665</td></tr><tr><td>2020</td><td>Parts</td><td>给出一个<strong>人可以手工核对</strong>的 χ ≥ 5 证明</td><td>arXiv:2010.12661</td></tr></tbody></table></div>
 <p>这一阶段还有众包项目 Polymath16（由 Dustin Mixon 在其博客上组织），上面这些工作和它交织在一起。</p>
-<p><strong>对 deck 的一处更正</strong>：deck 第 9 节写的是"后经 Polymath16 + SAT 求解器缩小到约 509 点"。按 OpenAI 论文引言的说法，SAT 加不可满足核得到的是 Heule 的 <strong>553</strong> 点；<strong>509</strong> 点是 Parts 用图最小化得到的。两者都和 Polymath16 有关，但"SAT → 509"的说法不准确。</p>
+<p><strong>509 点从哪来</strong>：按 OpenAI 论文引言的说法，SAT 加不可满足核得到的是 Heule 的 <strong>553</strong> 点；<strong>509</strong> 点是 Parts 用图最小化得到的。两者都和 Polymath16 有关。</p>
 <h4>5.3 为什么这条路越来越难</h4>
 <p>一个 n 个顶点的图用 k 色，可能的涂法有 kⁿ 种（脚本实算数量级）：</p>
 <div class="tbl"><table><thead><tr><th>图</th><th>顶点</th><th>颜色</th><th>kⁿ ≈</th></tr></thead><tbody><tr><td>Moser 菱形对</td><td>7</td><td>3</td><td>10^3.3</td></tr><tr><td>Parts</td><td>509</td><td>4</td><td>10^306</td></tr><tr><td>Heule</td><td>553</td><td>4</td><td>10^333</td></tr><tr><td>de Grey</td><td>1581</td><td>4</td><td>10^952</td></tr></tbody></table></div>
@@ -2975,7 +2975,7 @@ RL ⊆ NL ⊆ L²（Savitch 1970）</code></pre>
 <blockquote><p>"We prove that every coloring of the Euclidean plane with five colors has a monochromatic unit-distance pair, with no regularity assumption on the color classes. Consequently, the chromatic number of the plane is either six or seven."</p></blockquote>
 <p>翻译：<strong>平面的任何 5 色涂法里，一定有两个相距为 1 的同色点，而且对颜色块不作任何正则性要求。所以平面色数是 6 或 7。</strong></p>
 <p>论文 Theorem 1.1 写作 6 ≤ χ(ℝ²) ≤ 7，并紧接着说："The remaining alternatives six and seven are unresolved."</p>
-<p><strong>重要的更正（已在 deep read 里记录）</strong>：起初以为这个结果是"找一个更大的有限图再用 SAT 验证"。<strong>不是。</strong>全文没有给出任何一个不能 5 着色的有限图。</p>
+<p><strong>一个常见误解</strong>：容易以为这个结果是"找一个更大的有限图再用 SAT 验证"。<strong>不是。</strong>全文没有给出任何一个不能 5 着色的有限图。</p>
 <h4>8.2 证明的两半</h4>
 <p>论文把证明拆成两个定理：</p>
 <ul><li><strong>Theorem 1.3（转移定理）</strong>：对每个 k，"存在合法的 k 着色" ⇔ "存在<strong>弱可测</strong> k 着色"。对所有 k 都成立，不只是 5。</li><li><strong>Theorem 1.4</strong>：不存在弱可测 5 着色。</li></ul>
@@ -3092,7 +3092,7 @@ theorem no_proper_five_coloring : ¬ ∃ coloring : ℂ → Fin 5, ProperColorin
 <blockquote><p>群 G 可顺从 ⟺ 对任意有限个"挪动" h 和任意小的 ε &gt; 0，都能找到一个有限集合 A，使得 |hA △ A| / |A| &lt; ε。</p></blockquote>
 <p>这里 hA = {h·a : a ∈ A} 是 A 整体挪一下的结果，△ 是"对称差"（只在一边出现的元素）。|hA △ A|/|A| 衡量"挪一下之后，有多大比例的元素变了"。直觉是：如果 A 挪一下几乎不变，在 A 上取平均就近似于一个公平的平均；让 A 越来越大、越来越"不漏"，取极限就得到 M。</p>
 <p><strong>脚本实算</strong>：</p>
-<div class="tbl"><table><thead><tr><th>群</th><th>集合 A</th><th></th><th>A</th><th></th><th>挪动 h</th><th></th><th>hA △ A</th><th>/</th><th>A</th><th></th></tr></thead><tbody><tr><td>ℤ</td><td>{−n,…,n}，n=10</td><td>21</td><td>+1</td><td>0.0952</td></tr><tr><td>ℤ</td><td>n=1000</td><td>2,001</td><td>+1</td><td>0.0010</td></tr><tr><td>ℤ²</td><td>(2n+1)×(2n+1) 方块，n=10</td><td>441</td><td>(1,0)</td><td>0.0952</td></tr><tr><td>ℤ²</td><td>n=100</td><td>40,401</td><td>(1,0)</td><td>0.0100</td></tr><tr><td>F₂</td><td>长度 ≤ 4 的球</td><td>161</td><td>a</td><td>1.006</td></tr><tr><td>F₂</td><td>长度 ≤ 10 的球</td><td>118,097</td><td>a</td><td>1.000</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>群</th><th>集合 A</th><th>|A|</th><th>挪动 h</th><th>|hA △ A| / |A|</th></tr></thead><tbody><tr><td>ℤ</td><td>{−n,…,n}，n=10</td><td>21</td><td>+1</td><td>0.0952</td></tr><tr><td>ℤ</td><td>n=1000</td><td>2,001</td><td>+1</td><td>0.0010</td></tr><tr><td>ℤ²</td><td>(2n+1)×(2n+1) 方块，n=10</td><td>441</td><td>(1,0)</td><td>0.0952</td></tr><tr><td>ℤ²</td><td>n=100</td><td>40,401</td><td>(1,0)</td><td>0.0100</td></tr><tr><td>F₂</td><td>长度 ≤ 4 的球</td><td>161</td><td>a</td><td>1.006</td></tr><tr><td>F₂</td><td>长度 ≤ 10 的球</td><td>118,097</td><td>a</td><td>1.000</td></tr></tbody></table></div>
 <p>ℤ 和 ℤ² 的比例 → 0，所以可顺从。F₂ 的球挪一下，比例<strong>趋于 1</strong>：大约一半的元素跑出去了、同样多的新元素跑进来（|hA △ A| 把两边都算上）。原因就是第 2 节说的"大部分元素都在边缘"。</p>
 <p>【检查 2】ℤ 上 A = {−n,…,n}，h = +1。hA △ A 是哪两个元素？由此验证比例 = 2/(2n+1)。</p>
 <h4>3.3 但"球不行"不等于"所有集合都不行"</h4>
@@ -3375,7 +3375,7 @@ theorem thompson_F_nonamenable_composition :
 <p>取 h = 0.005（论文只要求 0 &lt; h &lt; 1/100，这个值是我为演示选的），按论文给出的标度律算（脚本实算，ν = 1，常数因子取 1）：</p>
 <div class="tbl"><table><thead><tr><th>τ = 1 − t</th><th>核半径 ℓ_r</th><th>核高度 ℓ_z</th><th>速度 ~ τ^(−1/2−h)</th><th>核的能量 ~ τ^(1/2−3h)</th><th>旋转雷诺数 τ^(−h)</th></tr></thead><tbody><tr><td>10⁻²</td><td>0.1</td><td>0.102</td><td>10.2</td><td>0.107</td><td>1.023</td></tr><tr><td>10⁻⁴</td><td>0.01</td><td>0.0105</td><td>104.7</td><td>0.0115</td><td>1.047</td></tr><tr><td>10⁻⁸</td><td>10⁻⁴</td><td>1.10×10⁻⁴</td><td>1.10×10⁴</td><td>1.3×10⁻⁴</td><td>1.096</td></tr><tr><td>10⁻¹²</td><td>10⁻⁶</td><td>1.15×10⁻⁶</td><td>1.15×10⁶</td><td>1.5×10⁻⁶</td><td>1.148</td></tr></tbody></table></div>
 <ul><li><strong>速度 → ∞，核的能量 → 0</strong>：正是第 4 节的超临界，小尺度上用越来越少的能量达到越来越大的速度。</li><li>速度比纯缩放 τ^(−1/2) 多出因子 τ^(−h)，即<strong>旋转雷诺数</strong>。它趋于无穷，但极慢：τ 从 10⁻² 到 10⁻¹²，只从 1.02 涨到 1.15。爆破是在"刚好比临界多一点点"的边缘上实现的。</li><li>和已知定理一致：奇点是<strong>一个点</strong>（原点，t = 1），不违反 CKN；L³ 范数的三次方 ~ τ^(−4h)，在 τ = 10⁻¹² 时约 1.74，在发散，符合 ESS 的必要条件（⚠ ESS 针对无外力情形，这里只作直觉检查）。</li></ul>
-<h4>7.4 同时发布的 Euler 结果（deck 中没有提到）</h4>
+<h4>7.4 同时发布的 Euler 结果</h4>
 <p>同一个 Lean 仓库还形式化了第二篇论文 <em>Finite time blowup for the Euler equation</em>（57 页，<a href="https://cdn.openai.com/pdf/315b36cd-ec98-4023-8342-93345194ece1/euler.pdf">https://cdn.openai.com/pdf/315b36cd-ec98-4023-8342-93345194ece1/euler.pdf</a>）[P]：</p>
 <blockquote><p>"We exhibit finite-time blowup for the three-dimensional incompressible, unforced Euler equations from smooth, compactly supported, divergence-free initial data."</p></blockquote>
 <p>对比第 5 节：Chen–Hou 需要边界，Elgindi 的初值只有 C^(1,α)，Córdoba–Martínez-Zoroa 和 Buckmaster–Alpöge 需要外力。这个结果把这些放宽全部去掉，只剩"没有粘性"与千禧年问题不同。Fefferman 说 Euler 的对应问题"also open and very important" [P]。我的判断（推测）：论离大家真正关心的问题有多近，它可能比带外力 NS 分量更重。⚠ 我没有找到任何专家对这篇论文的具名技术评价。</p>
@@ -3520,7 +3520,7 @@ j(t, x) = ∫ (粒子的速度) · f dv  （电流：粒子带着电荷跑）</c
 <h3>6. "解会不会坏掉"到底是什么意思</h3>
 <h4>6.1 一个 ODE 的玩具：有限时间爆破</h4>
 <p>看最简单的方程 dp/dt = p²，p(0) = 1。解是 p(t) = 1/(1 − t)：t = 0.5 时 2，t = 0.9 时 10，t = 0.99 时 100，<strong>t → 1 时趋于无穷</strong>。方程本身完全光滑，解却在 t = 1 坏掉了。这叫<strong>有限时间爆破</strong>（finite-time blowup）。</p>
-<p>换一个角度数：p 从 1 翻倍到 2、从 2 翻到 4、从 4 翻到 8……第 k 次翻倍（从 2ᵏ 到 2ᵏ⁺¹）要花的时间是 1/2ᵏ − 1/2ᵏ⁺¹ = 1/2ᵏ⁺¹。</p>
+<p>换一个角度数：p 从 1 翻倍到 2、从 2 翻到 4、从 4 翻到 8……从 2ᵏ 翻到 2ᵏ⁺¹（k = 0, 1, 2, …）要花的时间是 1/2ᵏ − 1/2ᵏ⁺¹ = 1/2ᵏ⁺¹。</p>
 <div class="tbl"><table><thead><tr><th>翻倍次数</th><th>每次花的时间</th><th>累计时间</th></tr></thead><tbody><tr><td>第 1 次</td><td>1/2</td><td>0.5</td></tr><tr><td>第 2 次</td><td>1/4</td><td>0.75</td></tr><tr><td>第 3 次</td><td>1/8</td><td>0.875</td></tr><tr><td>60 次</td><td>…</td><td>1 − 2⁻⁶⁰（脚本实算 ≈ 1.0）</td></tr></tbody></table></div>
 <p><strong>翻倍时间越来越短，加起来收敛</strong>（几何级数和 = 1），所以在有限时间内可以翻倍无穷多次。这就是爆破。</p>
 <h4>6.2 反过来：翻倍时间之和发散 ⇒ 不爆破</h4>
@@ -3604,7 +3604,7 @@ j(t, x) = ∫ (粒子的速度) · f dv  （电流：粒子带着电荷跑）</c
 <h4>10.2 对聚变和空间物理：几乎没有直接影响</h4>
 <p>这一点值得说清楚，因为媒体容易写成"AI 解决了聚变里的数学难题"。</p>
 <ul><li><strong>工程模拟不依赖这个定理</strong>。聚变界用的是粒子网格法（PIC）、回旋动理学（gyrokinetic）代码、流体/MHD 代码。它们在离散网格上算，有有限分辨率和有限时间步，从来不需要假设连续方程整体光滑。</li><li><strong>模型本身和真实装置差很远</strong>：真实托卡马克有至少两种粒子、有碰撞（长时间尺度上重要）、有金属壁和边界条件、有外加线圈的强磁场。这个定理是在<strong>整个无界三维空间、没有外场、只有一种粒子</strong>的条件下证的。</li><li><strong>逃逸电子不是数学爆破</strong>：工程上担心的逃逸电子能量很大但有限。定理说的是"在有限时间内不会冲到无穷"，它不能告诉你逃逸电子在真实装置里最多能到多少 MeV。</li></ul>
-<p>一个更准确的定位：它是一张<strong>模型健康证明</strong>。它告诉物理学家，这个方程组作为数学对象是自洽的：从合理的初值出发，在任何有限时间内都不会自己产生无穷大的动量。（小修正：deck 里说"不会自发产生无穷能量粒子"，更准确的说法是"不会有粒子的<strong>动量</strong>在有限时间内趋于无穷"，<strong>总能量</strong>本来就是守恒的。）这对理论家有价值（比如保证某些推导的前提成立），但不会改变任何人今天怎么设计聚变堆。</p>
+<p>一个更准确的定位：它是一张<strong>模型健康证明</strong>。它告诉物理学家，这个方程组作为数学对象是自洽的：从合理的初值出发，在任何有限时间内都不会自己产生无穷大的动量。（注意管住的是单个粒子的<strong>动量</strong>，不是总能量：<strong>总能量</strong>本来就是守恒的。）这对理论家有价值（比如保证某些推导的前提成立），但不会改变任何人今天怎么设计聚变堆。</p>
 <h4>10.3 对 AI</h4>
 <ul><li>这是本批结果里<strong>分量最重的数学物理结果之一</strong>：一个有名有姓、有完整文献链的开放问题，结论清晰，<strong>有 Lean 证明而且只依赖 Mathlib</strong>。</li><li>和第 01 章对比：ζ 那一章的陈述用的是社区定义（风险在依赖补丁），这里的风险在<strong>自定义的陈述</strong>。对机器证明的 PDE 结果，"陈述是否忠实"是新的人类瓶颈：读 140 行 Lean 定义，比读 49 页论文容易得多，但仍然需要懂行的人。</li><li>推理摘要显示了一个比较像人类研究者的过程：先试已知方法，碰壁，发现具体的指数矛盾，修正时间窗口，反复审计依赖顺序。但我们看到的是 OpenAI 编辑过的摘要，不是原始推理过程。</li></ul>
 <h3>11. 自测题</h3>
@@ -3667,7 +3667,7 @@ j(t, x) = ∫ (粒子的速度) · f dv  （电流：粒子带着电荷跑）</c
 <h4>3.1 定义</h4>
 <pre><code>自由能       F = −(1/β) · ln Z
 "压强"       每个自旋的 (1/N) · ln Z  （OpenAI 论文用的就是这个量，叫 pressure）</code></pre>
-<p>两者只差一个因子 −β，是同一个东西。</p>
+<p>压强 = −βF/N：两者只差一个因子 −β/N（−β 来自符号和温度，1/N 来自"每个自旋"），本质上是同一个东西。</p>
 <h4>3.2 为什么想要它</h4>
 <p>因为 ln Z 是一个"生成函数"：对它求导就能得到几乎所有宏观量。例如平均能量 ⟨E⟩ = −∂(ln Z)/∂β，熵 S = β(⟨E⟩ − F)。在挫折三角形上脚本实算：β = 5 时，反铁磁三角形的熵 S = 1.7918，几乎正好是 ln 6 = 1.7918（6 个基态等概率）；铁磁三角形的熵是 0.6931 = ln 2。</p>
 <p>ML 里的对应物：ln Z 就是 log-sum-exp；ELBO 是 ln Z 的下界。</p>
