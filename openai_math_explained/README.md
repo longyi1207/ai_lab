@@ -6,7 +6,7 @@ A sourced learning deck, in parallel Chinese and English editions, for readers w
 
 ## Structure
 
-**Part I (§0–§16): the release.** §1–§3 cover the basics, the event, and what a Lean proof does and does not guarantee. §4–§13 take 10 headline results, one section each:
+**Part I (§0–§17): the release.** §1–§3 cover the basics, the event, and what a Lean proof does and does not guarantee. §4–§14 take 11 headline results, one section each:
 
 | § | Result |
 |---|---|
@@ -20,16 +20,17 @@ A sourced learning deck, in parallel Chinese and English editions, for readers w
 | 11 | Navier–Stokes blowup with forcing |
 | 12 | relativistic Vlasov–Maxwell |
 | 13 | the Mézard–Parisi formula for diluted spin glasses |
+| 14 | the Kakeya problem (4D set conjecture, 3D maximal conjecture) and Fourier restriction |
 
-Each result section is built up from basic concepts, with hand-checkable examples and 【检查】/[Check] exercises. Each follows the same path: the bottom line → concepts from zero → what OpenAI claims (quoting the manuscript) → how far it is verified (the Lean statement read line by line, public expert reactions) → what it would and would not mean if true. §14 is the withdrawn Hodge papers as a case study; §15–§16 give cross-cutting patterns and what the release means for AI.
+Each result section is built up from basic concepts, with hand-checkable examples and 【检查】/[Check] exercises. Each follows the same path: the bottom line → concepts from zero → what OpenAI claims (quoting the manuscript) → how far it is verified (the Lean statement read line by line, public expert reactions) → what it would and would not mean if true. §15 is the withdrawn Hodge papers as a case study; §16–§17 give cross-cutting patterns and what the release means for AI. §0 states how the 11 results were chosen out of 372 families, and lists results of comparable standing that are not covered.
 
-**Part II (§17–§23): what happens if AI solves mathematics.** Rewritten 2026-10-09.
+**Part II (§18–§24): what happens if AI solves mathematics.** Rewritten 2026-10-09.
 
-- **§17, calibration.** How math breakthroughs historically became real-world impact (14 cases, with lag times). When math is and is not the bottleneck (Amdahl's law, Baumol). The real AI-for-science record to date. Three capability curves with scenarios: METR task length, open-problem solve rate, formal-proof cost. The type A / type B distinction.
-- **§18–§22, one field each.** §18 computing, cryptography and quantum; §19 physics, chemistry and materials; §20 biology, medicine and neuroscience; §21 AI theory, interpretability and alignment; §22 economics, society and governance. Each section picks the 5–8 problems that matter most and explains every one from zero. For each it asks: is math the bottleneck? What does AI math change, and what do AI's other abilities change? What are the first- and second-order impacts? What is the central timing, what are the counterarguments, and which signals to watch?
-- **§23, big picture.** The cross-field patterns, a top-10 table, a 2026 → 2030s timeline, the deeper second-order impacts, what this means for AI-safety research, and where the projection is most likely wrong.
+- **§18, calibration.** How math breakthroughs historically became real-world impact (14 cases, with lag times). When math is and is not the bottleneck (Amdahl's law, Baumol). The real AI-for-science record to date. Three capability curves with scenarios: METR task length, open-problem solve rate, formal-proof cost. The type A / type B distinction.
+- **§19–§23, one field each.** §19 computing, cryptography and quantum; §20 physics, chemistry and materials; §21 biology, medicine and neuroscience; §22 AI theory, interpretability and alignment; §23 economics, society and governance. Each section picks the 5–8 problems that matter most and explains every one from zero. For each it asks: is math the bottleneck? What does AI math change, and what do AI's other abilities change? What are the first- and second-order impacts? What is the central timing, what are the counterarguments, and which signals to watch?
+- **§24, big picture.** The cross-field patterns, a top-10 table, a 2026 → 2030s timeline, the deeper second-order impacts, what this means for AI-safety research, and where the projection is most likely wrong.
 
-§24 collects reactions, §25 lists open questions and a learning path, §26 is the glossary and sources.
+§25 collects reactions, §26 lists open questions and a learning path, §27 is the glossary and sources.
 
 ## Read
 
@@ -67,16 +68,16 @@ for f in notes notes_en; do
 done
 ```
 
-The build scripts hold §0–§3 and §14–§16 plus §24–§26 as HTML. They render §4–§13 from `精讲/` and §17–§23 from `前瞻/` (Markdown, via `md2html.py`), and fill in the figures from `figs.py` / `figs_en.py`. The build fails if a chapter file or a figure placeholder is missing.
+The build scripts hold §0–§3 and §15–§17 plus §25–§27 as HTML. They render §4–§14 from `精讲/` and §18–§24 from `前瞻/` (Markdown, via `md2html.py`), and fill in the figures from `figs.py` / `figs_en.py`. The build fails if a chapter file or a figure placeholder is missing.
 
 ## Files
 
 ```
 openai_math_explained/
-├── build_notes.py / build_notes_en.py ← build scripts (zh / en); hold §0–§3, §14–§16, §24–§26
-├── 精讲/NN_*.md, 精讲/en/NN_*.md      ← §4–§13, one result per file (NN = 01…10 → §4…§13)
+├── build_notes.py / build_notes_en.py ← build scripts (zh / en); hold §0–§3, §15–§17, §25–§27
+├── 精讲/NN_*.md, 精讲/en/NN_*.md      ← §4–§14, one result per file (NN = 01…11 → §4…§14)
 ├── 精讲/scripts/                      ← scripts behind every "脚本实算" / "computed by script" number (see its README)
-├── 前瞻/NN_*.md, 前瞻/en/NN_*.md      ← Part II, §17–§23 (NN = section number)
+├── 前瞻/NN_*.md, 前瞻/en/NN_*.md      ← Part II, §18–§24 (NN = section number)
 ├── figs.py / figs_en.py               ← inline SVG figures; plotted numbers computed here
 ├── md2html.py                         ← minimal dependency-free Markdown → HTML
 ├── _notes_base.css                    ← shared visual style

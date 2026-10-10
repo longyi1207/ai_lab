@@ -13,6 +13,7 @@ These scripts compute the numbers marked "脚本实算" in the 精讲 chapters. 
 | 08 Navier–Stokes | `08_navier_stokes.py` | numpy |
 | 09 Vlasov–Maxwell | `09_vlasov_maxwell.py` | numpy |
 | 10 Mézard–Parisi | `10_mezard_parisi.py` | numpy, scipy, networkx |
+| 11 挂谷与 Fourier 限制 (§14) | `11_kakeya.py` | — (pure Python) |
 
 Chapter 01 has no script here: its numbers were computed inline while drafting.
 

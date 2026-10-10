@@ -1,10 +1,10 @@
 # Computing, cryptography and quantum computing: rebuilding the trust stack once proofs are cheap
 
-> **Tags**: [established] textbook-level or replicated by several groups; [recent] new results from 2024–2026; [speculation] inference; ⚠ could not be verified, or only secondary sources. **Capability curves** (see §17): ① METR time horizon, about 150 hours by mid-2027 in the central scenario; ② single-attempt solve rate on formalizable open problems, about 18% by end-2027 and about 45% by end-2028; ③ formal proof cost about $0.023/line, falling to 1/10 each year. **Type A**: clearly stated, missing a proof; **type B**: it isn't even clear what to prove.
+> **Tags**: [established] textbook-level or replicated by several groups; [recent] new results from 2024–2026; [speculation] inference; ⚠ could not be verified, or only secondary sources. **Capability curves** (see §18): ① METR time horizon, about 150 hours by mid-2027 in the central scenario; ② single-attempt solve rate on formalizable open problems, about 18% by end-2027 and about 45% by end-2028; ③ formal proof cost about $0.023/line, falling to 1/10 each year. **Type A**: clearly stated, missing a proof; **type B**: it isn't even clear what to prove.
 >
 > In computer science, the proof itself is the product: correctness proofs for compilers, security arguments for encryption standards and resource estimates for quantum circuits directly decide whether real systems can be used. So the first-order effect of "AI solving math" is much larger here than in biology or materials. But most real incidents still come from implementations, specs and institutions.
 
-## 18.0 The bottom line
+## 19.0 The bottom line
 
 1. **The bottleneck in cybersecurity has shifted from "finding vulnerabilities" to "fixing them", and what drove the shift is AI's coding ability, not its math ability.** Anthropic's Glasswing program flagged 6,202 high-severity candidates; of the roughly 530 disclosed so far, only 75 have been patched (2026-05) [recent]. The only defense that can keep up is "proving that a class of vulnerabilities is absent"; proofs are getting cheaper, and the new bottlenecks are **whether the spec is right** and **whether the trusted computing base (TCB) has holes**.
 2. **Cryptography is built on unproven conjectures, and AI math will audit them at scale.** Plenty of standards candidates have been broken by pure math: SIKE (2022, about an hour on a single core), Rainbow (2022, a weekend on a laptop), and the "proximity gaps" conjecture, which a batch of zkVMs relied on for their parameters and which was refuted in 2025 [established/recent]. The probability that ML-KEM suffers a practical classical break before 2030 is estimated at ≤5% [speculation]; young post-quantum signatures and ZK parameter conjectures carry much higher risk.
@@ -14,7 +14,7 @@
 6. **Big problems like P vs NP are protected by "barrier theorems"; they are classic type B problems, and even a proof would barely change practice.** Only a few kinds of results would change the world: the unconditional existence of one-way functions, quantum algorithms for lattice problems, and impossibility theorems about "what can be audited efficiently" (for example, provably undetectable backdoors in models).
 7. **Three connections to AI safety**: (a) the "box" around an AI agent is itself software, and verifiable isolation is the physical foundation of AI control; (b) ZK and FHE can "verify without revealing" and could serve as infrastructure for AI governance, but they are in tension with misuse monitoring; (c) cryptanalytic capability should be included in dangerous-capability evaluations, while mainstream frameworks currently seem to focus mainly on cyberattack operations ([speculation], not systematically verified).
 
-## 18.1 Why these problems
+## 19.1 Why these problems
 
 Ranked by multiplying four criteria: **scale of impact**; **whether math is the bottleneck** (if not, say clearly what the real bottleneck is); **whether there is an automatic judge** (proof checkers, circuit simulators, benchmarks; type A problems with a judge move fast); **relevance to AI safety**.
 
@@ -28,9 +28,9 @@ Ranked by multiplying four criteria: **scale of impact**; **whether math is the 
 | 6 | Algorithm discovery | Medium in practice, low for records | Yes for records; no for practical speedups | Yes | A | AI optimizing its own training stack |
 | 7 | Complexity theory | Low directly, high as a foundation | Yes, but type B | Weak | Big problems B; gadgets A | Impossibility of auditing; debate |
 
-**Left out but worth mentioning**: hardware verification, compiler verification (CompCert) and distributed protocol verification (TLA+) are folded into problem 1; SAT/SMT/MIP solvers rely mainly on engineering and are folded into problem 6; symmetric cryptography (AES, SHA-3) has a large security margin; for quantum key distribution (QKD) the bottleneck is physics and deployment; indistinguishability obfuscation (iO) is extremely far from practical; AI text watermarking already has impossibility results and belongs to §21.
+**Left out but worth mentioning**: hardware verification, compiler verification (CompCert) and distributed protocol verification (TLA+) are folded into problem 1; SAT/SMT/MIP solvers rely mainly on engineering and are folded into problem 6; symmetric cryptography (AES, SHA-3) has a large security margin; for quantum key distribution (QKD) the bottleneck is physics and deployment; indistinguishability obfuscation (iO) is extremely far from practical; AI text watermarking already has impossibility results and belongs to §22.
 
-## 18.2 Problem 1: Formal verification of critical software × cyber offense and defense in the AI era
+## 19.2 Problem 1: Formal verification of critical software × cyber offense and defense in the AI era
 
 **In one sentence**: AI makes "finding vulnerabilities" almost free, and the only defense that can keep up is "proving there are no vulnerabilities of this kind". Proofs are getting cheaper too, and the new bottlenecks become "what exactly is being proved (the spec)" and "what are we trusting (the TCB)".
 
@@ -62,7 +62,7 @@ Formal verification has three ingredients: a spec, an implementation, and a proo
 
 **Sources**: seL4 statistics https://trustworthy.systems/projects/OLD/l4.verified/numbers ; DARPA AIxCC https://www.darpa.mil/news/2025/aixcc-results ; Glasswing https://www.anthropic.com/news/glasswing-initial-update ; arXiv:2608.13522 (Vero), 1801.01203 (Spectre); lean-zip https://kirancodes.me/posts/log-who-watches-the-watchers.html ; Rust in Android https://blog.google/security/rust-in-android-move-fast-fix-things/ ; secondary summary of Langley ⚠ https://www.remio.ai/post/adam-langley-says-lean-proof-automation-is-here-the-hard-part-just-moved .
 
-## 18.3 Problem 2: Post-quantum lattice cryptography (ML-KEM) — will AI find a break, or build confidence?
+## 19.3 Problem 2: Post-quantum lattice cryptography (ML-KEM) — will AI find a break, or build confidence?
 
 **In one sentence**: the internet is moving key exchange to ML-KEM, whose security rests on the **conjecture** that "the Learning With Errors problem (LWE) is hard". AI math will audit it at an unprecedented scale, and the outcome could be a break (catastrophic, but with hybrid schemes as a backstop), higher confidence, or a small reduction in security bits.
 
@@ -98,7 +98,7 @@ Without noise, Gaussian elimination solves for s immediately; with ±1 noise, ev
 
 **Sources**: ePrint 2022/975 (SIKE), 2022/214 (Rainbow), 2024/555 (Chen), 2024/1049 (KyberSlash), 2025/1002 (SALSA comparison), 2023/302 (Ducas–Pulles); Bernstein https://blog.cr.yp.to/20260630-risk.html ; Luo analysis ⚠ https://postquantum.com/security-pqc/luo-ml-kem-quantum-attack-analysis/ ; Cloudflare https://blog.cloudflare.com/pq-2025/ ; FIPS 203 https://csrc.nist.gov/pubs/fips/203/final .
 
-## 18.4 Problem 3: The Q-day countdown — how many qubits does it take to break RSA/ECC?
+## 19.4 Problem 3: The Q-day countdown — how many qubits does it take to break RSA/ECC?
 
 **In one sentence**: Q-day depends on two numbers: how fast hardware improves, and "how many qubits and how many gates a break takes". The second number is set entirely by math (algorithms, error-correcting codes, architecture), and it fell about 200-fold in 7 years.
 
@@ -122,7 +122,7 @@ The 2025 drop came **entirely** from algorithms and architecture (approximate re
 
 **What AI can do**: *AI math/proof*: resource estimation is classic type A, with a clear objective function (Toffoli count, logical qubit count) and an automatic judge (stabilizer simulators): searching for new, implementable qLDPC code families, optimizing modular arithmetic circuits, designing cheaper magic-state protocols. AlphaEvolve-style "search + evaluator" is a perfect fit. *AI's other capabilities*: neural-network decoders, automatic calibration and chip design, which directly ease the hardware bottleneck.
 
-**If solved: first-order impact**: Q-day estimates move earlier and their ranges narrow, giving policymakers harder numbers; fault-tolerant machines also become usable earlier for chemistry and materials simulation (§19).
+**If solved: first-order impact**: Q-day estimates move earlier and their ranges narrow, giving policymakers harder numbers; fault-tolerant machines also become usable earlier for chemistry and materials simulation (§20).
 
 **If solved: second-order impact**: *"Algorithmic Q-day"*: the date may be set by a paper rather than by a machine, so migration plans should be stress-tested against "resources falling another 10-fold before 2030" [speculation]. *Disclosure norms for dangerous math*: Google did not publish its ECC attack circuit; instead it attached a zero-knowledge proof generated with the SP1 zkVM + Groth16, letting third parties confirm that "such a circuit exists and the resource counts are correct"; ironically, the curve Groth16 uses is itself vulnerable to quantum attack [recent]. This template could carry over to other dangerous results that AI discovers, such as exploit chains and biological sequences. *Cryptocurrency governance*: whether "dormant coins" with exposed public keys should be frozen or left alone.
 
@@ -134,15 +134,15 @@ The 2025 drop came **entirely** from algorithms and architecture (approximate re
 
 **Sources**: arXiv:1905.09749, 2505.15917 (Gidney), 2602.11457 (Pinnacle), 2603.28846 (Google ECDLP), 2603.28627 (Cain et al.), 2408.13687 (Willow), 2308.07915 (gross code); Google disclosure blog https://research.google/blog/safeguarding-cryptocurrency-by-disclosing-quantum-vulnerabilities-responsibly/ ; AlphaQubit https://blog.google/technology/google-deepmind/alphaqubit-quantum-error-correction/ ; IBM Starling https://newsroom.ibm.com/2025-06-10-IBM-Sets-the-Course-to-Build-Worlds-First-Large-Scale,-Fault-Tolerant-Quantum-Computer-at-New-IBM-Quantum-Data-Center ; TQI overview (with details of the ZK disclosure) https://thequantuminsider.com/2026/03/31/q-day-just-got-closer-three-papers-in-three-months-are-rewriting-the-quantum-threat-timeline/ .
 
-## 18.5 Problem 4: New quantum algorithms and provable quantum advantage (short card)
+## 19.5 Problem 4: New quantum algorithms and provable quantum advantage (short card)
 
 Quantum speedups come from **interference** of amplitudes, like noise-canceling headphones: the waves of wrong answers cancel each other out. This requires the problem to have **structure** (such as the periodicity Shor exploits); unstructured search gets only Grover's quadratic speedup (10¹² steps become 10⁶), and every logical step carries error-correction overhead, so quadratic speedups will mostly be useless in the fault-tolerant era [established]. Math can also destroy speedups: in 2018, 18-year-old Ewin Tang used a classical algorithm to knock the exponential speedup of a quantum recommendation system back down ("dequantization") [established]; Lee et al. concluded that evidence for an exponential quantum advantage in ground-state energy calculation has yet to be found across chemical space (paraphrased) [established].
 
-**Math is the bottleneck, in its purest form in this field, and mostly type B**: it isn't even clear "which class of problems to look in", and classical baselines (tensor networks, neural-network quantum states) keep raising the bar. AI math is already involved: Aaronson and Witteveen (2025) proved limits on black-box amplification for QMA, and a key step was a function proposed by GPT-5 [recent]. The counterintuitive part comes from AI's other capabilities: AI-driven classical simulation is taking over quantum computing's chemistry and materials applications, so the stronger AI gets, the fewer "killer apps" quantum computing may have [speculation] (§19).
+**Math is the bottleneck, in its purest form in this field, and mostly type B**: it isn't even clear "which class of problems to look in", and classical baselines (tensor networks, neural-network quantum states) keep raising the bar. AI math is already involved: Aaronson and Witteveen (2025) proved limits on black-box amplification for QMA, and a key step was a function proposed by GPT-5 [recent]. The counterintuitive part comes from AI's other capabilities: AI-driven classical simulation is taking over quantum computing's chemistry and materials applications, so the stronger AI gets, the fewer "killer apps" quantum computing may have [speculation] (§20).
 
 Timing: concrete type A proofs are happening now; a whole new family of exponential speedups found mainly by AI: about 15–30% before 2030 [speculation], and curve ② does not apply. **An efficient quantum algorithm for lattice problems (LWE): <5% before 2030 [speculation], but with the highest impact weight**: if it happens, the entire post-quantum migration of problem 2 has to start over. **Sources**: Tang arXiv:1807.04271; quantum chemistry arXiv:2208.02199; Aaronson & Witteveen arXiv:2509.21131.
 
-## 18.6 Problem 5: FHE and zero-knowledge proofs — making "computing on ciphertext" and "verifiable computation" cheap
+## 19.6 Problem 5: FHE and zero-knowledge proofs — making "computing on ciphertext" and "verifiable computation" cheap
 
 **In one sentence**: fully homomorphic encryption (FHE) can compute on data without decrypting it, and zero-knowledge proofs (ZK) can prove "the computation was done correctly" without revealing the inputs. Both already exist mathematically, but their overhead is thousands to tens of millions of times that of plaintext computation (order-of-magnitude estimate ⚠), and efficiency depends half on math and half on engineering. They are the most promising tools for "verifiable AI governance".
 
@@ -168,15 +168,15 @@ Timing: concrete type A proofs are happening now; a whole new family of exponent
 
 **Sources**: ePrint 2025/2046, 2026/782 (proximity gap counterexamples); better.codes https://blog.ethereum.org/2026/08/20/better-codes-challenge ; SP1 Hypercube https://blog.succinct.xyz/sp1-hypercube/ ; Apple HE https://machinelearning.apple.com/research/homomorphic-encryption ; arXiv:2404.16109 (zkLLM), 2402.15293 (SoK on SNARK vulnerabilities).
 
-## 18.7 Problem 6: Algorithm discovery — asymptotic records vs real speedups on GPUs (short card)
+## 19.7 Problem 6: Algorithm discovery — asymptotic records vs real speedups on GPUs (short card)
 
 Big-O notation hides constants; an algorithm that is asymptotically faster but has constants of cosmic size is called a "galactic algorithm". The matrix multiplication exponent ω fell to **2.371177** in 2026-08 with AlphaEvolve's help [recent]. Working out by hand what that is worth: the exponent dropped by 0.000162, and at n = 10⁵, n^0.000162 ≈ 1.0019, a saving of only 0.19% of operations; and laser-method algorithms cannot be implemented in practice anyway. OpenAI's claimed ω ≤ 9/4 in §6 is a much bigger step, but it too is an existence proof and a galactic algorithm, and §6.10.2 already explained that it has no direct impact on GPUs or LLM training: what GPUs run on their tensor cores is still the n³ algorithm. What is close to practical are decompositions for **fixed small sizes** (AlphaEvolve's 48 multiplications for 4×4 complex matrices; a follow-up paper tries to "bring it into practice", but its abstract reports no measured speedup). Shortest paths broke the sorting barrier for the first time in 2025, but at n = 10⁹ the new algorithm is in theory only about 3 times faster than Dijkstra, a gain that constants and caches will likely eat up [recent].
 
 **For asymptotic records the bottleneck is math; for practical speedups it is not**: there the bottleneck is understanding the hardware (memory hierarchy, bandwidth), reliable benchmarking and correctness checking. Practical speedups come from AI's other capabilities, "write code + evolutionary search + benchmarks as the judge": one Borg scheduling rule from AlphaEvolve continuously recovers 0.7% of Google's worldwide compute, and one matrix multiplication kernel for Gemini got 23% faster, cutting training time by about 1% [established]. High-performance code written by AI risks gaming the evaluation (related incidents in 2025 ⚠ from memory), so the single most useful thing AI math can do here is **prove that an optimized kernel is equivalent to the reference implementation**.
 
-Second-order impact: making Gemini training 1% faster is **AI optimizing AI's own training stack**, the plainest form of recursive self-improvement, and one that has already happened; progress in algorithmic efficiency will weaken regulation that uses compute as its threshold [speculation] (§22). Timing: kernel-level optimization is already happening; tasks at the level of compilers or scheduling systems become feasible around 2027 in the central scenario (curve ①); asymptotic records will see many small AI-assisted improvements in 2026–2028 (curve ②). **Sources**: AlphaEvolve https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/ ; arXiv:2608.16884 (ω < 2.371177), 2506.13242 and 2609.12027 (4×4), 2504.17033 (shortest paths).
+Second-order impact: making Gemini training 1% faster is **AI optimizing AI's own training stack**, the plainest form of recursive self-improvement, and one that has already happened; progress in algorithmic efficiency will weaken regulation that uses compute as its threshold [speculation] (§23). Timing: kernel-level optimization is already happening; tasks at the level of compilers or scheduling systems become feasible around 2027 in the central scenario (curve ①); asymptotic records will see many small AI-assisted improvements in 2026–2028 (curve ②). **Sources**: AlphaEvolve https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/ ; arXiv:2608.16884 (ω < 2.371177), 2506.13242 and 2609.12027 (4×4), 2504.17033 (shortest paths).
 
-## 18.8 Problem 7: Complexity theory — which proofs would change the world, and which would not
+## 19.8 Problem 7: Complexity theory — which proofs would change the world, and which would not
 
 **In one sentence**: big problems like P vs NP are blocked by "barrier theorems" and are type B; AI can already produce type A results in complexity theory. A few target theorems would change the foundations of cryptography and AI safety; most would change no practice at all.
 
@@ -194,7 +194,7 @@ Second-order impact: making Gemini training 1% faster is **AI optimizing AI's ow
 | BPP = P; proving or refuting the UGC | Small: clarifies which approximation algorithms are optimal (UGC: see §7) |
 | Impossibility theorems about "what can be audited efficiently" | **Large impact on AI safety** |
 
-An example for the last row: Goldwasser et al. (2022) proved that backdoors can be planted in models that **no computationally bounded observer can detect**: a construction based on digital signatures is undetectable in the black-box setting, and for models such as random ReLU networks it is undetectable even in the white-box setting [established]. So **inspecting the weights alone cannot, in principle, rule out all backdoors**, and safety guarantees must rest partly on provenance proofs for the training process (linking back to problem 5). Another root: the theoretical motivation for debate (AI safety via debate) is exactly IP = PSPACE, i.e. a weak verifier can check a strong prover through interaction; characterizing "when computationally bounded human judges remain reliable" amounts to drawing the boundary of scalable oversight (§21).
+An example for the last row: Goldwasser et al. (2022) proved that backdoors can be planted in models that **no computationally bounded observer can detect**: a construction based on digital signatures is undetectable in the black-box setting, and for models such as random ReLU networks it is undetectable even in the white-box setting [established]. So **inspecting the weights alone cannot, in principle, rule out all backdoors**, and safety guarantees must rest partly on provenance proofs for the training process (linking back to problem 5). Another root: the theoretical motivation for debate (AI safety via debate) is exactly IP = PSPACE, i.e. a weak verifier can check a strong prover through interaction; characterizing "when computationally bounded human judges remain reliable" amounts to drawing the boundary of scalable oversight (§22).
 
 **What's blocking it: is math the bottleneck?** It is pure math, and the big problems are type B: known techniques have been proven insufficient, and entirely new ideas are needed. Compute helps only when searching over finite structures (gadgets, small circuits).
 
@@ -212,7 +212,7 @@ An example for the last row: Goldwasser et al. (2022) proved that backdoors can 
 
 **Sources**: arXiv:2509.18057 (Nagda et al.), 2009.11514 (Liu–Pass), 2204.06974 (undetectable backdoors), 1805.00899 (debate); Razborov & Rudich, JCSS 1997.
 
-## 18.9 Second-order effects in this field
+## 19.9 Second-order effects in this field
 
 **1. "Proofs are cheap, statements are expensive" recurs across all seven problems, just under a different name each time.**
 
@@ -234,9 +234,9 @@ An example for the last row: Goldwasser et al. (2022) proved that backdoors can 
 
 **5. Summary of the connections to AI safety.** Verifiable sandboxes (problem 1); cryptanalysis and vulnerability discovery included in dangerous-capability evaluations (problems 1, 2); governance tools that "verify without disclosing", and their tension with misuse monitoring (problem 5); undetectable backdoors putting a ceiling on model auditing (problem 7); algorithmic efficiency weakening regulation that uses compute as its threshold (problem 6); proof checkers as reward signals that are hard to hack, speeding up AI coding ability (problem 1).
 
-**6. Connections to other fields.** Quantum computing and AI-driven classical simulation compete for the same applications (§19); the security of cryptocurrencies depends on coding-theory conjectures and on how long ECC lasts; software liability is moving into law (§22); private cryptanalytic and quantum capabilities are asymmetric weapons in geopolitics. An analogy from neuroscience [speculation, not a strict correspondence]: the brain uses slower prefrontal control to constrain fast association; computer security in the AI era is also moving toward "a powerful but untrusted generator + a small, trusted checker".
+**6. Connections to other fields.** Quantum computing and AI-driven classical simulation compete for the same applications (§20); the security of cryptocurrencies depends on coding-theory conjectures and on how long ECC lasts; software liability is moving into law (§23); private cryptanalytic and quantum capabilities are asymmetric weapons in geopolitics. An analogy from neuroscience [speculation, not a strict correspondence]: the brain uses slower prefrontal control to constrain fast association; computer security in the AI era is also moving toward "a powerful but untrusted generator + a small, trusted checker".
 
-## 18.10 Sources for this section
+## 19.10 Sources for this section
 
 Full citations are in the **Sources** line at the end of each problem. arXiv IDs → `https://arxiv.org/abs/<ID>`, ePrint IDs → `https://eprint.iacr.org/<ID>`.
 

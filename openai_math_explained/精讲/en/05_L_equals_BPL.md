@@ -454,7 +454,7 @@ Almost no direct impact on real systems: the randomized algorithms used in pract
 
 - Like the other headline results, this is a case of "AI produces a proof of a recognized hard open problem, with a machine check attached".
 - What sets it apart is that **everyone believes the conclusion; the hard part is the proof**. Problems of this kind may suit AI especially well: the direction is clear, there's no need to "guess the right conclusion", and what's needed is to get every step of a 108-page complex construction right, which Lean can check step by step. [Speculation]
-- The lesson for AI safety research is the same as in §16 of this deck: once you have Lean, the bottleneck of trust moves from "is the proof right?" to "**were the statement and definitions written correctly?**" This family's definitions are self-written, so the table in §8.8.1 is a spec review. It is the same kind of work as auditing the behavioral spec of an AI agent.
+- The lesson for AI safety research is the same as in §17 of this deck: once you have Lean, the bottleneck of trust moves from "is the proof right?" to "**were the statement and definitions written correctly?**" This family's definitions are self-written, so the table in §8.8.1 is a spec review. It is the same kind of work as auditing the behavioral spec of an AI agent.
 
 ### 8.9.4 Side note: integer multiplication below n log n, from the same batch (family 109)
 

@@ -1,8 +1,8 @@
 # Physics, chemistry and materials: the equations are known; the hard part is computing, measuring and building
 
-> Tags: [established] accepted results; [recent] new results from 2024–2026; [speculation] inference; ⚠ unverified or disputed. Timing calls tie into the three curves of §17: **curve ①** METR task length (central: about 150 h by mid-2027, about 400 h by end of 2027); **curve ②** single-attempt solve rate on formalizable open problems (central: about 18% by end of 2027, about 45% by end of 2028, about 77% by end of 2030); **curve ③** cost of formal proof (falling about 10× per year). **Type A** = statement clear, proof missing; **type B** = not even clear what to prove. Problems 4, 6 and 8 are short cards.
+> Tags: [established] accepted results; [recent] new results from 2024–2026; [speculation] inference; ⚠ unverified or disputed. Timing calls tie into the three curves of §18: **curve ①** METR task length (central: about 150 h by mid-2027, about 400 h by end of 2027); **curve ②** single-attempt solve rate on formalizable open problems (central: about 18% by end of 2027, about 45% by end of 2028, about 77% by end of 2030); **curve ③** cost of formal proof (falling about 10× per year). **Type A** = statement clear, proof missing; **type B** = not even clear what to prove. Problems 4, 6 and 8 are short cards.
 
-## 19.0 The bottom line
+## 20.0 The bottom line
 
 - **Most of the equations have long been known.** In 1929 Dirac said that the physical laws needed for chemistry are "completely known", and the only trouble is that the equations can't be solved [established]. The hard parts are: **can't compute** (the cost of the many-electron equation grows exponentially), **can't measure precisely** (synthesis and characterization are ambiguous), and **can't build** (getting from the lab to engineering). So AI math acts here mainly through **algorithms**, not through **theorems**.
 - **Only three kinds of math can change the direction of physics**: impossibility theorems (e.g. Schuch–Verstraete for DFT), existence results and counterexamples (e.g. the 2026-09 counterexample to Grad's conjecture), and computer-assisted proofs (e.g. Euler blowup). Most of the rest are **model-health proofs**, which confirm what physicists already believed.
@@ -12,7 +12,7 @@
 - **Energy impact arrives slowly.** Going from lab to grid usually takes 10–20 years. Before 2030 the only things likely to land are: weather forecasting (already happened), incremental improvement of batteries and catalysts, and faster control and design of fusion devices.
 - **For AI safety**: physics and chemistry have automatic referees, so they will be where autonomous AI research gets going first and where AI first gets to act in the physical world. They also form a feedback loop, "AI → energy, chips, materials → more compute". Chemistry's dual-use risk is the most direct. There are ready-made examples of specification gaming (forced NS; DFT functionals whose energies fit better and better while their densities drift further and further off).
 
-## 19.1 Why these problems
+## 20.1 Why these problems
 
 The criterion is a product of three factors: **impact** × **is math the bottleneck** (type A, type B, or not math at all) × **AI tractability** (is there an automatic referee). The 8 problems deliberately cover the whole spectrum, from almost all math (Yang–Mills) to almost no math (materials synthesis, weather).
 
@@ -27,9 +27,9 @@ The criterion is a product of three factors: **impact** × **is math the bottlen
 | 7 | Yang–Mills and making mathematical physics rigorous | Conceptually very high, practically about 0 | Yes: type A statement, type B core | Yes (Lean) |
 | 8 | Quantum gravity and string theory | Conceptually very high, practically about 0 | Subproblems type A; as a whole type B plus missing experiments | Only for subproblems |
 
-**Not selected but worth mentioning**: topological phases (the mathematical classification was finished long ago; it is stuck on materials, as in the dispute over the evidence for Majorana 1 ⚠); quantum computing hardware (goes to §18); proteins and drugs (go to §20); the glass transition (type B); dark matter and cosmology (the bottleneck is observation); making statistical mechanics rigorous, such as Ising and percolation (merged into Problem 7).
+**Not selected but worth mentioning**: topological phases (the mathematical classification was finished long ago; it is stuck on materials, as in the dispute over the evidence for Majorana 1 ⚠); quantum computing hardware (goes to §19); proteins and drugs (go to §21); the glass transition (type B); dark matter and cosmology (the bottleneck is observation); making statistical mechanics rigorous, such as Ising and percolation (merged into Problem 7).
 
-## 19.2 Problem 1: Electronic structure (the many-electron Schrödinger equation and DFT)
+## 20.2 Problem 1: Electronic structure (the many-electron Schrödinger equation and DFT)
 
 **In one sentence** All the "rules" of chemistry and materials are written in one equation, but the cost of solving it exactly grows exponentially with the number of electrons. The whole industry runs on an approximation (density functional theory, DFT), and nobody knows the exact form of its central term.
 
@@ -61,7 +61,7 @@ The criterion is a product of three factors: **impact** × **is math the bottlen
 
 **Sources**: Dirac 1929, doi:10.1098/rspa.1929.0094; Schuch & Verstraete arXiv:0712.0483; Skala arXiv:2506.14665; FermiNet arXiv:1909.02487; OMol25 arXiv:2505.08762; Reiher et al. arXiv:1605.03590; Lee et al. arXiv:2208.02199; FeMoco resource estimate (secondhand) https://postquantum.com/quantum-utility-map/quantum-chemistry-drug-discovery-catalysis/ ⚠; IEA https://www.iea.org/reports/ammonia-technology-roadmap; Erisman et al. 2008, Nat. Geosci. 1:636; Medvedev et al. 2017, Science 355:49; Urbina et al. 2022, Nat. Mach. Intell. 4:189
 
-## 19.3 Problem 2: Inverse design and autonomous labs (batteries, catalysts, carbon capture)
+## 20.3 Problem 2: Inverse design and autonomous labs (batteries, catalysts, carbon capture)
 
 **In one sentence** Turn "given a material, compute its properties" around into "given the properties you want, find the material and make it". AI can already generate millions of candidates cheaply, so the bottleneck has moved to synthesis, characterization, testing and scale-up, none of which are math problems.
 
@@ -91,7 +91,7 @@ The criterion is a product of three factors: **impact** × **is math the bottlen
 
 **Sources**: GNoME, Nature 624:80; A-Lab, Nature 624:86; A-Lab critique https://www.theregister.com/2024/01/31/ai_chemistry_research_disputed/; MatterGen arXiv:2312.03687; Periodic Labs https://siliconangle.com/2025/10/01/periodic-labs-raises-300m-accelerate-scientific-research-ai/
 
-## 19.4 Problem 3: The mechanism of high-temperature superconductivity (the Hubbard model) and room-temperature superconductivity
+## 20.4 Problem 3: The mechanism of high-temperature superconductivity (the Hubbard model) and room-temperature superconductivity
 
 **In one sentence** Cuprates conduct with zero resistance at about −140°C, and after 40 years there is still no accepted theory, so nobody can design a room-temperature superconductor "from a blueprint". Ironically, the highest-temperature superconductors (high-pressure hydrides) **don't rely on that theory at all**; they were computed with DFT.
 
@@ -123,13 +123,13 @@ The criterion is a product of three factors: **impact** × **is math the bottlen
 
 **Sources**: Qin et al. arXiv:1910.08931; Xu et al. arXiv:2303.08376; Roth et al. arXiv:2511.07566; Troyer & Wiese arXiv:cond-mat/0408370; Ko et al. 2025, Nature 638:935; LK-99 arXiv:2307.12008; Drozdov et al. 2015, Nature 525:73; Drozdov et al. 2019, Nature 569:528; BEE-NET arXiv:2503.20005
 
-## 19.5 Problem 4: Turbulence (short card; for the Clay problem see §11)
+## 20.5 Problem 4: Turbulence (short card; for the Clay problem see §11)
 
 The equations for water and air were written down in 1845, yet turbulence still has to be computed with empirical models. The Reynolds number (the ratio of inertia to viscosity) for an airliner wing is about 3×10⁷. The cost of directly computing every eddy (DNS) grows roughly as Re³, and at this Re the grid alone would need about 6×10¹⁶ points, so it has to be modeled: the effect of small eddies on the mean flow is filled in with empirical "closure models", which often fail on separated flow and stall (NASA's *CFD Vision 2030* lists this as one of the biggest bottlenecks [established]).
 
 **On the engineering side the bottleneck is not math**, but scarce high-Re data, ML closures that fail as soon as the flow changes (Duraisamy et al. 2019), and aviation certification's requirement for verifiable models. The main contributors are AI's other capabilities: learned LES reaches the same accuracy on 2D turbulence with grids 8–10× coarser (Kochkov et al. 2021); coding agents port legacy code to GPUs, the most mundane item and possibly the one with the biggest effect on cost. Central judgment: not "basically solved" before 2030; more likely errors fall 10–30% per year (depends on compute, data and curve ①). **On the Clay side it is type A math**, and AI is already attacking it: OpenAI claims to have proved the forced branch, while the unforced branch is still open (§11); Chen–Hou used a computer-assisted proof to show that 3D Euler with a boundary blows up [established]; DeepMind and others found a family of unstable blowup solutions with accuracy that "meets the requirements of a computer-assisted proof" (2025-09) [recent]. Unforced branch: central 2028–2030 (curve ②; Millennium Problems will lag). A few theorems bear on turbulence physics: Isett proved the Onsager conjecture (energy can still be dissipated as viscosity goes to zero); Deng–Hani–Ma (2025) rigorously derived the NS–Fourier equations from hard-sphere particles [recent]. The two sides barely connect: engineering solvers never rely on global regularity. **Sources**: arXiv:2509.14185; Chen & Hou arXiv:2210.07191; Isett arXiv:1608.08301; Deng, Hani & Ma arXiv:2503.01800; Duraisamy et al. arXiv:1804.00183; Kochkov et al. arXiv:2102.01010
 
-## 19.6 Problem 5: Fusion: stability, control and stellarator design
+## 20.6 Problem 5: Fusion: stability, control and stellarator design
 
 **In one sentence** The goal is to hold a plasma at over 100 million degrees in a magnetic field for long enough. Physical feasibility has been partly demonstrated; what remains is instability control, materials and engineering. Mathematical proof is only a small piece.
 
@@ -163,13 +163,13 @@ The equations for water and air were written down in 1845, yet turbulence still 
 
 **Sources**: Grad counterexample arXiv:2609.24739; Constantin, Drivas & Ginsberg arXiv:2108.05977; Landreman & Paul arXiv:2108.03711; Degrave et al. 2022, Nature 602:414; Seo et al. 2024, Nature 626:746; TORAX arXiv:2406.06718; CFS × DeepMind https://www.ans.org/news/2025-10-22/article-7484/commonwealth-fusion-systems-partners-with-google-deepmind/; NIF https://www.llnl.gov/article/52906/llnl-experts-foster-national-fusion-energy-ecosystem-ife-star-conference; SPARC (secondhand) https://www.insidedeeptech.com/commonwealth-fusion-systems-sparc-full-guide/ ⚠
 
-## 19.7 Problem 6: Weather and climate (short card)
+## 20.7 Problem 6: Weather and climate (short card)
 
 **Weather is an "initial value problem"**: know the atmosphere now, then integrate forward. Chaos is a hard constraint: suppose errors double every 2 days (an illustrative number); after 14 days they have grown 128×, so the limit of predictability is about two weeks [established]. AI models learn "what the atmosphere looks like 6 hours later" from more than 40 years of reanalysis data (ERA5): GraphCast (2023) beat ECMWF's operational model HRES on about 90% of targets, and GenCast (2024) beat ECMWF's ensemble forecast on about 97% of targets; **ECMWF's AIFS went operational on 2025-02-25**, cutting energy use by about 1,000× [recent]. The remaining bottlenecks are sparse observations, initial-condition assimilation and few samples of extreme events, none of which is math.
 
-**Climate is a "boundary condition problem"**: what the statistical distribution of weather becomes after CO₂ doubles. IPCC AR6 gives a likely range of 2.5–4°C for equilibrium climate sensitivity, and the largest source of uncertainty is **cloud feedback**. This is a type B problem plus a data problem: there is no "doubled-CO₂ world" to train on, so AI can only extrapolate; the ACE2 authors themselves acknowledge that the model's sensitivity to changing sea surface temperature or CO₂ alone is "not entirely realistic" [recent]. End-to-end "observation → forecast" in operations: central 2028. Climate sensitivity range narrowed to about ±0.5°C: central in the mid-2030s, requiring kilometer-scale simulation plus AI cloud emulators. The same learned simulators have already rewritten operations for weather, which is scored every day, but move slowly on climate, which is scored once every few decades. This is the cleanest example of rule 3 in 19.10. **Sources**: GraphCast arXiv:2212.12794; GenCast arXiv:2312.15796; ACE2 arXiv:2411.11268; AIFS https://www.ecmwf.int/en/about/media-centre/news/2025/ecmwfs-ensemble-ai-forecasts-become-operational; IPCC AR6 WG1 Chapter 7
+**Climate is a "boundary condition problem"**: what the statistical distribution of weather becomes after CO₂ doubles. IPCC AR6 gives a likely range of 2.5–4°C for equilibrium climate sensitivity, and the largest source of uncertainty is **cloud feedback**. This is a type B problem plus a data problem: there is no "doubled-CO₂ world" to train on, so AI can only extrapolate; the ACE2 authors themselves acknowledge that the model's sensitivity to changing sea surface temperature or CO₂ alone is "not entirely realistic" [recent]. End-to-end "observation → forecast" in operations: central 2028. Climate sensitivity range narrowed to about ±0.5°C: central in the mid-2030s, requiring kilometer-scale simulation plus AI cloud emulators. The same learned simulators have already rewritten operations for weather, which is scored every day, but move slowly on climate, which is scored once every few decades. This is the cleanest example of rule 3 in 20.10. **Sources**: GraphCast arXiv:2212.12794; GenCast arXiv:2312.15796; ACE2 arXiv:2411.11268; AIFS https://www.ecmwf.int/en/about/media-centre/news/2025/ecmwfs-ensemble-ai-forecasts-become-operational; IPCC AR6 WG1 Chapter 7
 
-## 19.8 Problem 7: The Yang–Mills mass gap and making mathematical physics "rigorous"
+## 20.8 Problem 7: The Yang–Mills mass gap and making mathematical physics "rigorous"
 
 **In one sentence** Physicists have made extremely precise predictions with quantum field theory, yet mathematicians still cannot prove that four-dimensional quantum Yang–Mills theory "exists" and has a mass gap. This is a Millennium Problem with a clear statement that AI might be the first to crack, but it has almost no effect on experiment or engineering; its value is conceptual and methodological.
 
@@ -193,7 +193,7 @@ As of 2026-10-09 we found no named review by mathematical physicists. These resu
 
 **Why it matters** Practical impact is about 0: lattice QCD already gave the numbers. Conceptual impact is large: is QFT a self-consistent mathematical theory? The methods will spill over into other branches of mathematics (precedent: Witten's TQFT gave knot invariants). It is also the best test case for whether AI can **build new theoretical frameworks**, not just solve problems.
 
-**What's blocking it: is math the bottleneck?** Yes, but it is "type A statement, type B core": the statement is clear, but the proof may need new concepts (a rigorous 4D renormalization group, handling the Gribov ambiguity). There is also a formalization bottleneck [speculation]: physics has barely been formalized, HepLean/PhysLean only started in 2024, and Mathlib lacks infrastructure such as functional integration. Just writing the **statement** "4D Yang–Mills satisfies the Osterwalder–Schrader axioms" in Lean is a huge specification project, the pure form of "the bottleneck moves to the statement" (§3, §17).
+**What's blocking it: is math the bottleneck?** Yes, but it is "type A statement, type B core": the statement is clear, but the proof may need new concepts (a rigorous 4D renormalization group, handling the Gribov ambiguity). There is also a formalization bottleneck [speculation]: physics has barely been formalized, HepLean/PhysLean only started in 2024, and Mathlib lacks infrastructure such as functional integration. Just writing the **statement** "4D Yang–Mills satisfies the Osterwalder–Schrader axioms" in Lean is a huge specification project, the pure form of "the bottleneck moves to the statement" (§3, §18).
 
 **What AI can do**
 - *AI math/proof (the main contributor):* proofs in constructive QFT are known for extremely long, "bookkeeping" estimates (cluster expansions, multiscale analysis), which is exactly the kind of labor AI is best at; the 2026 batch of results shows that problems in the Lieb and Simon tradition are now within range.
@@ -201,7 +201,7 @@ As of 2026-10-09 we found no named review by mathematical physicists. These resu
 
 **If solved: first-order impact** The first rigorous interacting 4D QFT is born; large parts of the Lieb and Simon lists get closed, and mathematical physics textbooks have to be rewritten.
 
-**If solved: second-order impact** The field's center of gravity shifts from "proving" to "choosing and auditing statements", and there is a low-probability "rigor dividend": finding that some of physicists' default assumptions don't hold. A rigorous renormalization group connects to deep learning theory (19.10.2). "A Millennium Problem with physical meaning solved by AI" would cause a jump in public perception and would also test verification institutions: Clay requires a two-year period of community acceptance, while AI produces results much faster; statement faithfulness is still an issue (the lesson of forced NS, §11).
+**If solved: second-order impact** The field's center of gravity shifts from "proving" to "choosing and auditing statements", and there is a low-probability "rigor dividend": finding that some of physicists' default assumptions don't hold. A rigorous renormalization group connects to deep learning theory (20.10.2). "A Millennium Problem with physical meaning solved by AI" would cause a jump in public perception and would also test verification institutions: Clay requires a two-year period of community acceptance, while AI produces results much faster; statement faithfulness is still an issue (the lesson of forced NS, §11).
 
 **Timing** Lieb/Simon-type many-body problems: the central judgment is that by end of 2027, most well-known type A problems in mathematical physics will be claimed solved, with more than half confirmed by experts [speculation]; the basis is that a batch already appeared in 2026-09, and "famous but relatively tractable" problems will fall ahead of curve ②'s average (about 18% by end of 2027). Yang–Mills mass gap: optimistic 2028, central 2030–2033, pessimistic after 2035 [speculation]; curve ②'s 77% in 2030 refers to typical problems, and Millennium-level ones will lag; curve ③ makes proofs cheaper, but the specification cost of the statement does not fall.
 
@@ -211,19 +211,19 @@ As of 2026-10-09 we found no named review by mathematical physicists. These resu
 
 **Sources**: https://github.com/openai/math (CONTENTS; lean/docs 261, 267, 271; downloaded 2026-10-09); secondhand count https://kingy.ai/blog/openai-math-722-manuscripts-results-proofs-compute-costs/ ⚠; Simon problems https://en.wikipedia.org/wiki/Simon_problems; Clay https://www.claymath.org/lectures/yang-mills-and-the-mass-gap/; Aizenman & Duminil-Copin arXiv:1912.07973; Chandra et al. arXiv:2006.04987; Dürr et al. 2008, Science 322:1224; HepLean arXiv:2405.08863; Albergo et al. arXiv:1904.12072
 
-## 19.9 Problem 8: Quantum gravity and string theory (short card)
+## 20.9 Problem 8: Quantum gravity and string theory (short card)
 
 General relativity says gravity is smooth curvature of spacetime; quantum mechanics is discrete and probabilistic; forcing the two together produces infinities that can't be removed. Candidate theories (string theory, loop quantum gravity and others) are mathematically very rich but make almost no testable predictions. The reason can be worked out by hand: the energy scale where quantum gravity becomes significant is about 1.2×10¹⁹ GeV, while the LHC reaches only 1.36×10⁴ GeV, a gap of about 10¹⁵; at fixed magnetic field, energy is proportional to ring radius, so scaling the LHC's radius of about 4.3 km up by 10¹⁵ gives about 400 light-years. The number of ways string theory's extra dimensions can be compactified is estimated at 10⁵⁰⁰ to 10^272,000 (Taylor & Wang 2015), which makes a unique prediction hard.
 
 **The first bottleneck is experiment; the second is type B math** (string theory has no complete non-perturbative definition), but type A subproblems are everywhere: scattering amplitude identities, bootstrap bounds, Calabi–Yau classification. Using only symmetry, self-consistency and semidefinite programming, the conformal bootstrap computed the 3D Ising critical exponents to 5–6 decimal places (Kos et al. 2016) [established]. AI has already entered: in 2026-02, Guevara, Strominger and others (for OpenAI) showed that the "single-minus-helicity gluon tree amplitude", long assumed to be zero, is nonzero in particular configurations; the formula was proposed by GPT-5.2 Pro, proved by an internal model and verified by the authors [recent]. Results like this will ramp up in 2027 (curve ②); as for experimental confirmation of quantum gravity, the central judgment is not before 2040. AI's most valuable contribution may be designing tabletop experiments, for example testing whether gravity can produce entanglement (Bose et al. 2017, not yet realized) [speculation]. Conversely, a field with no experimental constraints, plus AI producing unlimited **self-consistent** mathematics, could lead to a flood of beautiful theories with no selection pressure: Lean can verify the proof, but not "this is how nature is" [speculation]. **Sources**: arXiv:2602.12176; Taylor & Wang arXiv:1511.03209; Kos et al. arXiv:1603.04436; Bose et al. arXiv:1707.06050
 
-## 19.10 Second-order effects in this field
+## 20.10 Second-order effects in this field
 
-### 19.10.1 Three rules
+### 20.10.1 Three rules
 
 **Rule 1: most "math breakthroughs" in physics are model-health proofs.** NS (§11), Vlasov–Maxwell (§12), Anderson, Heisenberg, BEC and Yang–Mills all confirm things physicists already believe. The math that really changes direction comes in three kinds: **impossibility theorems** (Schuch–Verstraete, Troyer–Wiese, which push a field toward approximations that "exploit structure"); **existence results and counterexamples** (the Grad counterexample, the Onsager conjecture, which tell you what is in the design space); **new algorithms**. So AI math's biggest value to physics may lie in designing algorithms and proving impossibility, not in sweeping up conjectures.
 
-**Rule 2: candidates are cheap, verification is expensive.** In math it is "proofs are cheap, auditing statements is expensive" (§17); in physics and chemistry it is "candidates are cheap, verification is expensive", where verification relies on experiment, high-accuracy computation, or even time (climate). GNoME's 380,000 versus 736, AI superconductor candidates plus LK-99-style frenzies, and a single release of 719 manuscripts with almost no named reviewers all have the same shape. The next scarce resource is **verification infrastructure**: autonomous replication labs, public raw data, statement auditing.
+**Rule 2: candidates are cheap, verification is expensive.** In math it is "proofs are cheap, auditing statements is expensive" (§18); in physics and chemistry it is "candidates are cheap, verification is expensive", where verification relies on experiment, high-accuracy computation, or even time (climate). GNoME's 380,000 versus 736, AI superconductor candidates plus LK-99-style frenzies, and a single release of 719 manuscripts with almost no named reviewers all have the same shape. The next scarce resource is **verification infrastructure**: autonomous replication labs, public raw data, statement auditing.
 
 **Rule 3: how fast AI speeds up a field is set by the speed of its referee.**
 
@@ -237,17 +237,17 @@ General relativity says gravity is smooth curvature of spacetime; quantum mechan
 | Climate | Observation | A decade | Slow |
 | Quantum gravity | None | ∞ | Only on subproblems |
 
-This generalizes type A / type B (§17): from "is there a referee" to "how fast is the referee".
+This generalizes type A / type B (§18): from "is there a referee" to "how fast is the referee".
 
-### 19.10.2 Cross-field connections
+### 20.10.2 Cross-field connections
 
 1. **Spin glasses → neural networks → protein folding.** The energy function of the Hopfield network (1982) is the Hamiltonian of a spin glass, and memories are energy minima (2024 Nobel Prize in Physics). Bryngelson & Wolynes (1987) used the same theory to explain the "energy funnel" of protein folding. The Mézard–Parisi result of §13, OpenAI family 281 (QAOA reaches the optimum on the SK model) and the random k-SAT threshold all use the same mathematics; so do attractor networks for working memory in neuroscience.
-2. **Renormalization group ↔ deep learning.** The renormalization group (RG) coarse-grains details layer by layer and looks at which quantities survive as the scale grows. Mehta & Schwab mapped RG onto restricted Boltzmann machines; Roberts, Yaida & Hanin wrote layer-by-layer representations as an RG flow; Halverson, Maiti & Stoner pointed out that infinitely wide networks are free fields and that finite width brings interactions. If AI produces a breakthrough in rigorous RG (Problem 7), deep learning theory may benefit directly; the free-energy and phase-transition language of singular learning theory (SLT) is statistical physics to begin with (§21) [speculation].
+2. **Renormalization group ↔ deep learning.** The renormalization group (RG) coarse-grains details layer by layer and looks at which quantities survive as the scale grows. Mehta & Schwab mapped RG onto restricted Boltzmann machines; Roberts, Yaida & Hanin wrote layer-by-layer representations as an RG flow; Halverson, Maiti & Stoner pointed out that infinitely wide networks are free fields and that finite width brings interactions. If AI produces a breakthrough in rigorous RG (Problem 7), deep learning theory may benefit directly; the free-energy and phase-transition language of singular learning theory (SLT) is statistical physics to begin with (§22) [speculation].
 3. **Non-equilibrium thermodynamics → diffusion models → materials generation.** Diffusion models (Sohl-Dickstein et al. 2015) come from the physical picture of "add noise until equilibrium, then learn the reverse process", and MatterGen now brings them back to materials.
 4. **"Simulators fail out of distribution" is a shared motif.** Weather models pushed to climate, ML functionals pushed to new elements, turbulence closures pushed to new flows, fusion surrogate models pushed to new devices. This is isomorphic to distribution shift and goal misgeneralization in alignment, and since physics has ground truth, it is a clean testbed for studying them [speculation].
-5. **Complexity theory is the seam between physics and CS.** QMA (DFT), NP-hardness (the sign problem) and the evidence on quantum advantage (Lee et al.) together determine "which problems can only ever be approximated"; AI math output along this seam (OpenAI families 279 and 284, see §18) may have more impact than purely physical results [speculation].
+5. **Complexity theory is the seam between physics and CS.** QMA (DFT), NP-hardness (the sign problem) and the evidence on quantum advantage (Lee et al.) together determine "which problems can only ever be approximated"; AI math output along this seam (OpenAI families 279 and 284, see §19) may have more impact than purely physical results [speculation].
 
-### 19.10.3 For society and AI safety
+### 20.10.3 For society and AI safety
 
 - **The physical sciences will be where autonomous AI research gets going first**, and capability spillover will show up first at the physical execution end (autonomous labs, device control, simulation-driven design), forming a compute feedback loop (fusion power purchase agreements, chip-cooling materials).
 - **Dual use**: chemistry is the most direct (toxins, energetic materials), followed by nuclear and plasma. Cheap climate simulators also lower the barrier to simulating unilateral stratospheric injection (geoengineering), which is exactly the out-of-distribution regime where simulators tend to be "confident but wrong" [speculation].
@@ -255,6 +255,6 @@ This generalizes type A / type B (§17): from "is there a referee" to "how fast 
 - **Specification-gaming examples**: forced NS, DFT density drift, and early GraphCast "smoothing out" extreme events because it optimized mean squared error.
 - **A real-world testbed for GSAI**: fusion control, chemical processes and power grids all have good physical models and suit "bounded certificates + runtime monitoring".
 
-## 19.11 Sources for this section
+## 20.11 Sources for this section
 
 Sources are listed at the end of each card. In addition: OpenAI math release https://github.com/openai/math (CONTENTS.md and lean/docs, downloaded 2026-10-09); Hopfield 1982, PNAS 79:2554; Bryngelson & Wolynes 1987, PNAS 84:7524; Mehta & Schwab arXiv:1410.3831; Roberts, Yaida & Hanin arXiv:2106.10165; Halverson, Maiti & Stoner arXiv:2008.08601; Sohl-Dickstein et al. arXiv:1503.03585. Not checked online; spot checks recommended: ITER deuterium-tritium operation in 2039; CPU hours for gyrokinetic simulations; MatterGen's measured bulk modulus; the number of digits of QED precision; the FeMoco resource-estimate summary, the count of "about 25 mathematical physics families", and SPARC's delay to 2027 (all secondhand).

@@ -55,20 +55,20 @@ TOC = [
     ("verify", "3", "Lean 能保证什么"), ("qrh", "4", "准黎曼猜想"), ("pi", "5", "π 的逼近"),
     ("matmul", "6", "矩阵乘法 ω"), ("ugc", "7", "Unique Games"), ("bpl", "8", "L = BPL"),
     ("color", "9", "平面着色"), ("thompson", "10", "Thompson 群"), ("ns", "11", "Navier–Stokes"),
-    ("vlasov", "12", "等离子体"), ("spin", "13", "自旋玻璃"), ("hodge", "14", "撤稿案例"),
-    ("synthesis", "15", "横向看"), ("ai", "16", "对 AI 意味着"),
-    ("fwd-calib", "17", "前瞻：先校准"), ("fwd-cs", "18", "计算机/密码/量子"), ("fwd-phys", "19", "物理/化学/材料"),
-    ("fwd-bio", "20", "生物/医学/神经"), ("fwd-ai", "21", "AI 理论与对齐"), ("fwd-soc", "22", "经济/社会/治理"),
-    ("fwd-synth", "23", "全景与 Top 10"),
-    ("reactions", "24", "反应"), ("learn", "25", "开放问题/继续学"), ("sources", "26", "术语/来源"),
+    ("vlasov", "12", "等离子体"), ("spin", "13", "自旋玻璃"), ("kakeya", "14", "挂谷与限制"), ("hodge", "15", "撤稿案例"),
+    ("synthesis", "16", "横向看"), ("ai", "17", "对 AI 意味着"),
+    ("fwd-calib", "18", "前瞻：先校准"), ("fwd-cs", "19", "计算机/密码/量子"), ("fwd-phys", "20", "物理/化学/材料"),
+    ("fwd-bio", "21", "生物/医学/神经"), ("fwd-ai", "22", "AI 理论与对齐"), ("fwd-soc", "23", "经济/社会/治理"),
+    ("fwd-synth", "24", "全景与 Top 10"),
+    ("reactions", "25", "反应"), ("learn", "26", "开放问题/继续学"), ("sources", "27", "术语/来源"),
 ]
 
 BODY = r'''
 <header class="masthead">
   <div class="kicker">学习 deck · 给非数学背景的 AI 研究者</div>
   <h1>OpenAI 的 719 篇 AI 数学论文：从零读懂它们在说什么</h1>
-  <p>2026-10-06，OpenAI 一次性公开了一个未发布内部模型生成的 <strong>722 篇数学手稿（372 个结果族）</strong>，其中声称解决了准黎曼猜想、Unique Games 猜想、矩阵乘法指数 ω ≤ 9/4、Thompson 群不可顺从、平面不能 5 着色等一批几十年的名题；第二天因一个符号错误撤回 3 篇。数学界称之为 "Mathocalypse"。这份 deck 的目标：<strong>只用线性代数 + 微积分 + 高中数学</strong>，把其中 10 个代表性结果各自讲到"能判断它有多大、多难、为什么重要、核实到哪一步"。</p>
-  <p class="meta">2026-10-08 首版；10-09 改版（10 个结果合并为从零详解的单一版本，Part II 前瞻重写为 §17–§23）· repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿保存在作者的研究笔记中，未随本 deck 公开</p>
+  <p>2026-10-06，OpenAI 一次性公开了一个未发布内部模型生成的 <strong>722 篇数学手稿（372 个结果族）</strong>，其中声称解决了准黎曼猜想、Unique Games 猜想、矩阵乘法指数 ω ≤ 9/4、Thompson 群不可顺从、平面不能 5 着色等一批几十年的名题；第二天因一个符号错误撤回 3 篇。数学界称之为 "Mathocalypse"。这份 deck 的目标：<strong>只用线性代数 + 微积分 + 高中数学</strong>，把其中 11 个代表性结果各自讲到"能判断它有多大、多难、为什么重要、核实到哪一步"。</p>
+  <p class="meta">2026-10-08 首版；10-09 改版（每个结果合并为从零详解的单一版本；新增 §14 挂谷问题与 Fourier 限制；Part II 前瞻重写为 §18–§24）· repo 快照 openai/math@fd4aeeb（含 10-07 撤稿与修补）· 每条事实标来源；[P] = 读过一手材料（论文/repo/Lean 源码），[R] = 二手报道，⚠ = 未核实或有冲突 · 研究底稿保存在作者的研究笔记中，未随本 deck 公开</p>
 </header>
 
 <section id="scope">
@@ -76,14 +76,18 @@ BODY = r'''
   <h2><span class="n">0.</span>这份 deck 能带你到哪，到不了哪</h2>
   <div class="note">
     <span class="label">读完能得到</span>
-    <p>对 10 个头条结果各有一个"阶梯式"理解：从一个你能手算的玩具例子出发，一级一级走到真正的命题；知道这个问题此前卡了多少年、卡在哪；知道 OpenAI 具体声称了什么、Lean 形式化覆盖到哪、人类专家目前怎么说；以及它对数学、对 AI、对 AI safety 各意味着什么。</p>
+    <p>对 11 个头条结果各有一个"阶梯式"理解：从一个你能手算的玩具例子出发，一级一级走到真正的命题；知道这个问题此前卡了多少年、卡在哪；知道 OpenAI 具体声称了什么、Lean 形式化覆盖到哪、人类专家目前怎么说；以及它对数学、对 AI、对 AI safety 各意味着什么。</p>
   </div>
   <div class="note bug">
     <span class="label">读完得不到</span>
-    <p>判断任何一个证明是否正确的能力。这 10 个结果里，截至 10-08 <strong>没有一个</strong>有人类领域专家公开表示"我读完并确认了"。本 deck 里的"核实"只到两层：① 我们静态审查了 Lean 源码与陈述；② 汇总了公开反应。都标注了来源和可信度。</p>
+    <p>判断任何一个证明是否正确的能力。这 11 个结果里，截至 10-09 <strong>没有一个</strong>有人类领域专家公开表示"我读完并确认了"。本 deck 里的"核实"只到两层：① 我们静态审查了 Lean 源码与陈述；② 汇总了公开反应。都标注了来源和可信度。</p>
+  </div>
+  <div class="note">
+    <span class="label">选题说明</span>
+    <p>372 个结果族里只讲了 11 个。筛选标准：① 问题有名，人类专家公认是难题（首日报道和数学家点名的优先）；② 尽量有 Lean 形式化，方便讲清"核实到哪一步"；③ 能用高中数学搭起来，并且和计算机、AI 有联系；④ OpenAI 公开了推理摘要的优先。首版（10-08）实际是按四个领域（数论、理论计算机、组合与群论、物理/偏微分方程）去挑的，没有系统地看完全部 17 个学科，调和分析整组（挂谷、Fourier 限制、Bochner–Riesz、局部光滑化、Falconer 距离）因此漏掉，10-09 补为 §14。<strong>仍未覆盖、但按名气看至少同一量级的</strong>还有：有理数上的 Hilbert 第十问题（004）、Hadwiger 猜想反例（157）、Kaplansky 零因子猜想反例（196）、自由群因子同构（287）、Baum–Connes 与 Kadison–Kaplansky 反例（285）、Hilbert–Smith 猜想（304）、Hilbert 第十六问题的一致界（143）、Erdős 倒数和猜想与拟多项式 Szemerédi 界（159）[推测：只读了标题，未读论文]。完整目录见 <a href="''' + REPO + '''/blob/main/overview.pdf">overview.pdf</a>。</p>
   </div>
   <h3>0.1 阅读路径</h3>
-  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§13 是 10 个结果，每节都从最基础的概念讲起，配可以手算的小例子和【检查】练习，结构相同：<em>先说结论 → 从零搭概念 → OpenAI 声称了什么 → 核实到什么程度 → 如果为真意味着什么</em>，可以按兴趣跳读。§14 是撤稿案例，§15–§16 是横向总结和对 AI 的含义。<strong>Part II（§17–§23）是前瞻</strong>：如果数学被 AI 大规模解决，或者 AI 的其他能力也突破，计算机与密码、物理与化学、生物与医学、AI 本身、经济与治理分别会发生什么。§17 先用历史和三条能力曲线校准；§18–§22 每节挑出该领域真正重要的问题，逐个讲清"瓶颈是不是数学、AI 能改变什么、更深远的影响是什么、大概什么时候"；§23 是全景、Top 10 和时间线。§24 是各方反应，§25 是开放问题和继续学习的路线，§26 是术语表与来源。</p>
+  <p>§1 先补三样基础（数学家在做什么、什么叫"开放问题"、怎么判断一个结果有多大）。§2–§3 是事件本身和"Lean 到底保证了什么"——<strong>这两节决定你该怎么读后面所有的"声称"</strong>。§4–§14 是 11 个结果，每节都从最基础的概念讲起，配可以手算的小例子和【检查】练习，结构相同：<em>先说结论 → 从零搭概念 → OpenAI 声称了什么 → 核实到什么程度 → 如果为真意味着什么</em>，可以按兴趣跳读。§15 是撤稿案例，§16–§17 是横向总结和对 AI 的含义。<strong>Part II（§18–§24）是前瞻</strong>：如果数学被 AI 大规模解决，或者 AI 的其他能力也突破，计算机与密码、物理与化学、生物与医学、AI 本身、经济与治理分别会发生什么。§18 先用历史和三条能力曲线校准；§19–§23 每节挑出该领域真正重要的问题，逐个讲清"瓶颈是不是数学、AI 能改变什么、更深远的影响是什么、大概什么时候"；§24 是全景、Top 10 和时间线。§25 是各方反应，§26 是开放问题和继续学习的路线，§27 是术语表与来源。</p>
   <h3>0.2 一张速查表</h3>
   <div class="tbl"><table>
     <thead><tr><th>§</th><th>结果（family 编号）</th><th>卡了多久</th><th>Lean</th><th>一句话</th></tr></thead>
@@ -98,7 +102,8 @@ BODY = r'''
       <tr><td>11</td><td>Navier–Stokes 爆破（9 月单独发布）</td><td>千禧年问题</td><td>有</td><td>只覆盖"带外力"分支；归属有争议</td></tr>
       <tr><td>12</td><td>相对论 Vlasov–Maxwell（362）</td><td>40 年</td><td>有</td><td>等离子体模型的大初值整体光滑性（单粒子种类）</td></tr>
       <tr><td>13</td><td>Mézard–Parisi 公式（221）</td><td>25 年</td><td>有</td><td>稀疏自旋玻璃的自由能公式（偶数元情形）</td></tr>
-      <tr><td>14</td><td>Hodge 相关撤稿（032 等）</td><td>—</td><td>无</td><td>一个符号错误撤掉 3 篇：未形式化的风险</td></tr>
+      <tr><td>14</td><td>挂谷问题：四维集合 + 三维极大函数（074）</td><td>四维：数十年；三维集合版 2025 年才解决</td><td>无</td><td>四维挂谷集维数为满 4（此前约 3.059）；同批还声称三维 Fourier 限制猜想（077）</td></tr>
+      <tr><td>15</td><td>Hodge 相关撤稿（032 等）</td><td>—</td><td>无</td><td>一个符号错误撤掉 3 篇：未形式化的风险</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -125,7 +130,7 @@ BODY = r'''
     <li><strong>是"最后一步"还是"跳了一大步"？</strong> 矩阵乘法 ω 从 2.3713 到 2.3711 是前者，到 2.25 是后者。</li>
     <li><strong>能解锁多少别的结果？</strong> Unique Games 一旦成立，几百篇"若 UGC 则……"的论文同时变成定理。</li>
     <li><strong>方法新不新？</strong> 新方法往往比结论本身更重要，因为它能被复用。</li>
-    <li><strong>题目是谁选的、失败了多少？</strong> 这是本次事件最容易被忽略的一问，见 §2.3 和 §15。</li>
+    <li><strong>题目是谁选的、失败了多少？</strong> 这是本次事件最容易被忽略的一问，见 §2.3 和 §16。</li>
   </ol>
 </section>
 
@@ -145,7 +150,7 @@ BODY = r'''
   </table></div>
   <h3>2.1 怎么产出的</h3>
   <p>README 原文 <span class="tg">[P]</span>："The vast majority of results were obtained with the same procedure using an unreleased internal OpenAI model. On average, each result used three hours of ChatGPT Pro thinking compute… the model was posed approximately 4,000 problems… requiring an appropriate level of significance led to the catalog." 也就是：<strong>约 4,000 道开放题 → 按"够重要"筛选 → 372 族</strong>。OpenAI 发言人对 Scientific American 说几乎所有结果都来自"交给单个 agent 的单个 prompt"<span class="tg">[R]</span>；MIT 的 Andrew Sutherland 回应："在模型能被复现之前，'一发入魂'应视为未验证——要看收据。"</p>
-  <p><strong>例外</strong>：README 承认 ζ 零点无零区（§4）和 CM 阿贝尔簇的 Hodge 猜想（§14）<em>不是</em>走这个固定流程产出的，并且 Re s &gt; 11/12 那份写作经过人工编辑。具体例外是什么（更多算力？人工引导？）没有披露 ⚠。</p>
+  <p><strong>例外</strong>：README 承认 ζ 零点无零区（§4）和 CM 阿贝尔簇的 Hodge 猜想（§15）<em>不是</em>走这个固定流程产出的，并且 Re s &gt; 11/12 那份写作经过人工编辑。具体例外是什么（更多算力？人工引导？）没有披露 ⚠。</p>
   <h3>2.2 数字对账</h3>
   <div class="tbl"><table>
     <thead><tr><th>说法</th><th>真实含义</th></tr></thead>
@@ -209,15 +214,16 @@ BODY = r'''
 
 {{RESULT:spin}}
 
+{{RESULT:kakeya}}
 <section id="hodge">
   <div class="kicker">反面案例 · family 032 与 10-07 撤稿</div>
-  <h2><span class="n">14.</span>一个符号错误撤掉 3 篇：未形式化的风险</h2>
+  <h2><span class="n">15.</span>一个符号错误撤掉 3 篇：未形式化的风险</h2>
   <p><strong>Hodge 猜想</strong>（千禧年问题）极简版：在光滑射影复代数簇上，有些"拓扑洞"可以由代数方程定义的子簇来"填"；猜想说凡是满足某个线性代数条件的洞都能这样填。p = 1 的情形 1924 年已知（Lefschetz）。</p>
   <p>OpenAI 声称对所有<strong>复乘（CM）阿贝尔簇</strong>证明了有理 Hodge 猜想（53 页）——这只是一个特殊类，不是千禧年问题本身；而且它和 ζ 无零区一样，<strong>不是</strong>按固定流程产出的，<strong>没有 Lean</strong>。<span class="tg">[P]</span></p>
   {{FIG_HODGE}}
-  <h3>14.1 发生了什么 <span class="tg">[P]</span></h3>
+  <h3>15.1 发生了什么 <span class="tg">[P]</span></h3>
   <p>history.md（10-07）："In 'Algebraicity of Weil classes on split abelian eightfolds' a sign error invalidates a stabilization-trace cancellation argument and the construction used by two dependent papers." 一个本应是 −1 的符号被当成 +1，带符号的计数从声称的 0 变成 −2m ≠ 0，关键定理的前提不成立；依赖它的两篇 K3 曲面论文连带撤回。CM 主论文不引用被撤论文，不在这条链上。</p>
-  <h3>14.2 三个教训</h3>
+  <h3>15.2 三个教训</h3>
   <ol>
     <li><strong>未形式化 ≈ 未验证</strong>：只有约 42% 的顶层结果有 Lean。这个错误只是一个符号——人眼和模型自查都漏了，Lean 必然会抓到。</li>
     <li><strong>错误沿依赖图传播</strong>：一个引理错了，三篇论文一起倒，下游 13 篇要更新引用——和 agent 长链推理中的错误复合是同一种结构。</li>
@@ -227,7 +233,7 @@ BODY = r'''
 
 <section id="synthesis">
   <div class="kicker">Synthesis · 横向看</div>
-  <h2><span class="n">15.</span>把 10 个结果放在一起看</h2>
+  <h2><span class="n">16.</span>把 11 个结果放在一起看</h2>
   <div class="tbl"><table>
     <thead><tr><th>结果</th><th>此前状态</th><th>声称的跳跃</th><th>陈述忠实？</th><th>人类专家确认</th></tr></thead>
     <tbody>
@@ -241,9 +247,10 @@ BODY = r'''
       <tr><td>NS 爆破</td><td>带外力 Euler 已有前驱</td><td>(C)/(D) 分支</td><td>结构一致</td><td>Clay 未认可，有争议</td></tr>
       <tr><td>Vlasov–Maxwell</td><td>40 年只有带限制的结果</td><td>单种类完整</td><td>是</td><td>无</td></tr>
       <tr><td>Mézard–Parisi</td><td>只有上界</td><td>偶数元类等号</td><td>是（范围比标题窄）</td><td>无</td></tr>
+      <tr><td>四维挂谷 / 三维极大</td><td>四维维数下界约 3.059；三维集合版 2025 年刚解决</td><td>直接到 4；三维的更强版本</td><td>无法检查（没有 Lean）</td><td>无</td></tr>
     </tbody>
   </table></div>
-  <h3>15.1 五个模式</h3>
+  <h3>16.1 五个模式</h3>
   <ol>
     <li><strong>陈述短、证明长</strong>：平面着色陈述两行、证明 3 万行；准黎曼陈述一行、证明 48 万行。这正是"人审陈述、机器审证明"分工最理想的形态——也意味着人类审稿带宽成了新瓶颈。</li>
     <li><strong>论文都异常短</strong>：9/4 矩阵乘法 13 页、Thompson 群 13 页。要么方法真的意外地简洁，要么大量细节压在 Lean 里没写给人看——Gómez-Serrano 说 NS 论文 "not written for humans"。</li>
@@ -255,14 +262,14 @@ BODY = r'''
 
 <section id="ai">
   <div class="kicker">AI & AI safety 视角</div>
-  <h2><span class="n">16.</span>这件事对 AI 意味着什么</h2>
-  <h3>16.1 数学好 ≠ 全面更聪明，但它是先行指标</h3>
+  <h2><span class="n">17.</span>这件事对 AI 意味着什么</h2>
+  <h3>17.1 数学好 ≠ 全面更聪明，但它是先行指标</h3>
   <p>数学对 AI 有一个独特优势：<strong>答案可以被机器检验</strong>（Lean），这让强化学习可以大量"试错 → 拿反馈 → 改进"。Chollet 的追问正中要害：这些"可验证领域"的进步能否迁移到不可验证的领域？合理的读法是：<strong>凡是能被自动检验的智力工作，接下来都会以类似速度被攻破</strong>——数学只是第一个。</p>
-  <h3>16.2 信任瓶颈从"证明"转移到"规格"</h3>
+  <h3>17.2 信任瓶颈从"证明"转移到"规格"</h3>
   <p>一旦有了 Lean，问题从"证明对不对"变成"陈述有没有编码对"。这和对齐研究里的核心难题同构：系统可以完美优化你写下的目标，而你写下的目标可能不是你想要的。本 deck 每一节都在做的"逐行读 Lean 陈述"，就是一种 <strong>spec review</strong>——它会成为一项越来越重要、越来越稀缺的人类工作。</p>
-  <h3>16.3 "能验证但不能理解"的知识</h3>
+  <h3>17.3 "能验证但不能理解"的知识</h3>
   <p>IAS 顾问组的原话：<em>"It is now the case that AI can output mathematical arguments in situations without the human who prompted it being able to understand the arguments, verify them, or take responsibility for them."</em> <span class="tg">[R]</span> 数学是这种局面最先出现、也最干净的领域（因为验证是完美的）。推广到科学：人类可能从"理解者"变成"检验者"。Tao 说的 Math 2.0——把讲解、社区建设、开辟新方向放到和解题同等重要的位置——本质上是在回答"人类在这个新分工里做什么"。</p>
-  <h3>16.4 对安全研究的两面</h3>
+  <h3>17.4 对安全研究的两面</h3>
   <div class="verdict">
     <div class="panel"><h4>好消息</h4><ul>
       <li><strong>验证比发现容易</strong>：如果未来的 AI 能为自己的行为给出形式化证明（"这个动作不会做 X"），人类不必理解它的全部能力，只需检验证明——这是 Guaranteed Safe AI 路线的核心想法，数学 AI 越强越可行。</li>
@@ -271,21 +278,21 @@ BODY = r'''
       <li>对齐里最难的部分（"这个 AI 真正想要什么""结果对人类好不好"）写不成 Lean。可验证领域飞速进步、不可验证领域落后，这个差距本身是风险。</li>
       <li>AI 研发里可验证的部分（kernel 优化、证明、benchmark）会最先被大规模自动化——"AI 改进 AI"的循环最可能从这里开始。</li></ul></div>
   </div>
-  <h3>16.5 治理：单方面倾倒的先例</h3>
+  <h3>17.5 治理：单方面倾倒的先例</h3>
   <p>社区已经通过 IAS 顾问组形成了初步规范（披露模型名、prompt、推理链、计算时间与成本、选题方式、同类问题失败率），OpenAI 只遵守了一部分，然后一次性发布 700 多篇。AHM 的说法 "a demonstration of power" 虽然激烈，但点到了结构性问题：<strong>前沿公司单方面决定一项能力以什么方式进入公共领域，受影响的共同体只能事后反应</strong>。</p>
 </section>
 
-{{PART2:17}}
 {{PART2:18}}
 {{PART2:19}}
 {{PART2:20}}
 {{PART2:21}}
 {{PART2:22}}
 {{PART2:23}}
+{{PART2:24}}
 
 <section id="reactions">
   <div class="kicker">Reactions · 原话</div>
-  <h2><span class="n">24.</span>各方怎么说</h2>
+  <h2><span class="n">25.</span>各方怎么说</h2>
   <div class="tbl"><table>
     <thead><tr><th>谁</th><th>原话</th><th>来源</th></tr></thead>
     <tbody>
@@ -307,8 +314,8 @@ BODY = r'''
 
 <section id="learn">
   <div class="kicker">Next steps</div>
-  <h2><span class="n">25.</span>开放问题与继续学习</h2>
-  <h3>25.1 接下来值得盯的</h3>
+  <h2><span class="n">26.</span>开放问题与继续学习</h2>
+  <h3>26.1 接下来值得盯的</h3>
   <ol>
     <li>OpenAI 会公开 4,000 题清单与失败案例吗？（决定能否回答"真实能力是多少"）</li>
     <li>未形式化的约 58% 里还有多少像 Weil 类论文那样的错误？撤稿率会怎么演化？</li>
@@ -317,7 +324,7 @@ BODY = r'''
     <li>"补完他人工作"的优先权规范怎么建立（Buckmaster 事件）？</li>
     <li>平面色数：需要 6 色的有限单位距离图长什么样？</li>
   </ol>
-  <h3>25.2 学习路线（只需线性代数 + 微积分起步）</h3>
+  <h3>26.2 学习路线（只需线性代数 + 微积分起步）</h3>
   <div class="tbl"><table>
     <thead><tr><th>阶段</th><th>材料</th><th>为什么</th></tr></thead>
     <tbody>
@@ -334,8 +341,8 @@ BODY = r'''
 
 <section id="sources">
   <div class="kicker">Glossary & sources</div>
-  <h2><span class="n">26.</span>术语表与来源</h2>
-  <h3>26.1 术语</h3>
+  <h2><span class="n">27.</span>术语表与来源</h2>
+  <h3>27.1 术语</h3>
   <div class="tbl"><table>
     <thead><tr><th>术语</th><th>一句话</th></tr></thead>
     <tbody>
@@ -353,7 +360,7 @@ BODY = r'''
       <tr><td class="mono">银河算法</td><td>渐近更快、但只在天文规模上才占优的算法</td></tr>
     </tbody>
   </table></div>
-  <h3>26.2 主要来源</h3>
+  <h3>27.2 主要来源</h3>
   <p><strong>一手</strong>：<a href="''' + REPO + '''">openai/math</a>（README、history.md、overview.pdf、CONTENTS.md、lean/、preprints/、reasoning_traces/；快照 fd4aeeb，2026-10-08）· <a href="https://github.com/openai/NavierStokesAndEuler">openai/NavierStokesAndEuler</a> · <a href="https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf">Clay NS 官方陈述（Fefferman）</a> · <a href="https://github.com/leanprover/comparator">leanprover/comparator</a> · 独立复核 <a href="https://github.com/davegoldblatt/openai-zeta-proof-check">davegoldblatt/openai-zeta-proof-check</a>、<a href="https://github.com/erenciracioglu-dotcom/openai-math-9-4-lean-check">erenciracioglu-dotcom/openai-math-9-4-lean-check</a> · Epoch <a href="https://arxiv.org/abs/2609.25050">FrontierMath Erdős（arXiv:2609.25050）</a>。</p>
   <p><strong>报道与评论</strong>：<a href="https://fortune.com/2026/10/07/openai-math-controversy-solutions-370-outstanding-challenges-published-criticisms-celebration/">Fortune 10-07</a> · <a href="https://www.nature.com/articles/d41586-026-03196-8">Nature</a>（付费墙，未读全文 ⚠）· <a href="https://www.scientificamerican.com/article/openai-unleashes-hundreds-more-math-results-upon-a-field-already-in-shock/">Scientific American</a> · <a href="https://www.quantamagazine.org/ai-has-solved-one-of-maths-1-million-millennium-prize-problems-20260908/">Quanta 09-08</a> · <a href="https://www.quantamagazine.org/as-ai-closed-in-on-unique-games-proof-researchers-raced-to-beat-the-machines-20261007/">Quanta 10-07</a> · <a href="https://www.npr.org/2026/09/22/nx-s1-5968588/openai-navier-stokes-problem-mathematicians-learn-little">NPR 09-22</a> · <a href="https://scottaaronson.blog/?p=10169">Aaronson</a> · <a href="https://gilkalai.wordpress.com/2026/10/07/updates-sharing-ai-progress-on-mathematics-amazing-and-my-lecture-plans/">Kalai</a> · <a href="https://terrytao.wordpress.com/">Tao 博客</a> · <a href="https://www.latent.space/p/ainews-quasi-riemann-hypothesis-openai">Latent Space</a>。</p>
   <p><strong>经典文献</strong>：Strassen 1969；Coppersmith–Winograd 1990；Alman 等 <a href="https://arxiv.org/abs/2404.16349">arXiv:2404.16349</a>；Ambainis–Filmus–Le Gall <a href="https://arxiv.org/abs/1411.5414">arXiv:1411.5414</a>；Goemans–Williamson 1995；Khot 2002；KKMO 2007；Raghavendra 2008；Khot–Minzer–Safra 2018；Nisan 1992；Saks–Zhou 1999；Reingold 2008；Roth 1955；Zeilberger–Zudilin <a href="https://arxiv.org/abs/1912.06345">arXiv:1912.06345</a>；Meiburg <a href="https://arxiv.org/abs/2208.13356">arXiv:2208.13356</a>；Guth–Maynard <a href="https://arxiv.org/abs/2405.20552">arXiv:2405.20552</a>；de Grey <a href="https://arxiv.org/abs/1804.02385">arXiv:1804.02385</a>；Moore <a href="https://arxiv.org/abs/1102.0747">arXiv:1102.0747</a>；Tao 2016 <a href="https://arxiv.org/abs/1402.0290">arXiv:1402.0290</a>；Glassey–Strauss 1986；Parisi 1979；Talagrand 2006；Mézard–Parisi 2001；Ding–Sly–Sun 2015。</p>
@@ -384,12 +391,13 @@ RESULT_KICKERS = {
     "ns": "偏微分方程 · 9 月单独发布（+ family 376）",
     "vlasov": "数学物理 · family 362",
     "spin": "概率与统计力学 · family 221",
+    "kakeya": "调和分析 · family 074（+ 077）",
 }
-RESULT_ORDER = ['qrh', 'pi', 'matmul', 'ugc', 'bpl', 'color', 'thompson', 'ns', 'vlasov', 'spin']
+RESULT_ORDER = ['qrh', 'pi', 'matmul', 'ugc', 'bpl', 'color', 'thompson', 'ns', 'vlasov', 'spin', 'kakeya']
 
 
 def result_html(sid):
-    """One result section (§4–§13), rendered from its chapter Markdown file."""
+    """One result section (§4–§14), rendered from its chapter Markdown file."""
     k = RESULT_ORDER.index(sid) + 1
     files = sorted(JJ_DIR.glob(f"{k:02d}_*.md"))
     assert len(files) == 1, f"result {sid}: expected exactly one chapter file, got {files}"
@@ -407,8 +415,8 @@ for _sid in RESULT_ORDER:
     BODY = BODY.replace("{{RESULT:%s}}" % _sid, result_html(_sid))
 
 P2_DIR = ROOT / "前瞻"
-P2_SECTIONS = [('fwd-calib', 17), ('fwd-cs', 18), ('fwd-phys', 19), ('fwd-bio', 20), ('fwd-ai', 21), ('fwd-soc', 22), ('fwd-synth', 23)]
-P2_KICKERS = {17: 'Part II · 前瞻 · 校准', 18: 'Part II · 前瞻 · 计算机', 19: 'Part II · 前瞻 · 物理', 20: 'Part II · 前瞻 · 生物', 21: 'Part II · 前瞻 · AI 本身', 22: 'Part II · 前瞻 · 社会', 23: 'Part II · 前瞻 · 全景'}
+P2_SECTIONS = [('fwd-calib', 18), ('fwd-cs', 19), ('fwd-phys', 20), ('fwd-bio', 21), ('fwd-ai', 22), ('fwd-soc', 23), ('fwd-synth', 24)]
+P2_KICKERS = {18: 'Part II · 前瞻 · 校准', 19: 'Part II · 前瞻 · 计算机', 20: 'Part II · 前瞻 · 物理', 21: 'Part II · 前瞻 · 生物', 22: 'Part II · 前瞻 · AI 本身', 23: 'Part II · 前瞻 · 社会', 24: 'Part II · 前瞻 · 全景'}
 
 
 def part2_html(sec_id, n):

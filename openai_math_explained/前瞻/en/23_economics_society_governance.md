@@ -1,16 +1,16 @@
 # Economics, society and governance: AI makes production cheap, and verification and legitimacy scarce
 
-## 22.0 The bottom line
+## 23.0 The bottom line
 
 - **"Math changes real-world outcomes" has hard precedents, but the conditions are demanding.** The FCC spectrum incentive auction (it could not have run without SAT solvers), kidney paired exchange, New York school choice and sortition for citizens' assemblies all meet four conditions: ① a **single designer with authority**; ② a clearly stated objective; ③ the computational or incentive problem really is the sticking point; ④ theoretical guarantees make participants willing to tell the truth. AI will push the cost of "design plus solve" close to zero, but few settings satisfy both ① and ②.
 - **For most problems the bottleneck is institutions, adoption and legitimacy, not math.** The clearing algorithm for kidney exchange already existed in 2007, but the US market is fragmented by hospitals; Agarwal et al. (2019 AER) estimate that fixing this fragmentation could **increase exchange transplants by 30–63%**.
-- **There are three places where math is truly the choke point and AI math can push directly, all mainly type A (see §17 for type A / type B)**: zero-knowledge proofs of the training process; social choice in alignment; and program equilibrium (how AIs can make credible commitments to one another).
+- **There are three places where math is truly the choke point and AI math can push directly, all mainly type A (see §18 for type A / type B)**: zero-knowledge proofs of the training process; social choice in alignment; and program equilibrium (how AIs can make credible commitments to one another).
 - **The macroeconomics of transformative AI is the most important type B problem, and math is barely the bottleneck.** Writing the models is easy (Amdahl's law is the Baumol bottleneck); the hard part is the empirical parameters. The US labor share in Q2 2026 was 52.8%, the lowest since 1947, but the evidence for attributing this to AI is insufficient.
 - **The boundaries of content provenance have already been drawn by math.** Signatures can prove "this is real"; watermarks **cannot** reliably prove "this was written by AI", and that is a theorem. What remains is an adoption problem.
 - **Cross-card theme: verifiability is becoming the scarcest resource.** AI makes production cheap, so the bottleneck moves to verification and legitimacy; whoever controls verification controls how AI output enters society. The 719 math papers (§2) are the first clear case.
 - **Direct links to AI safety**: verifiable agreements are a precondition for a "credible pause"; agent collusion is the economics version of "monitors colluding" in AI control; social choice is the formalization of "aligned to whom"; a labor share heading toward zero is the economic foundation of gradual disempowerment.
 
-## 22.1 Why these problems
+## 23.1 Why these problems
 
 **Criteria**: impact × whether math is the bottleneck × AI tractability; if any one of these is close to zero, the problem is not selected. Where math is not the bottleneck, we state whether what matters is some other AI capability, or whether AI cannot help.
 
@@ -27,7 +27,7 @@
 
 **Not selected but worth mentioning**: AI-designed tax systems (a simulated optimum is not the same as political feasibility); quadratic voting and proof of personhood (the bottleneck is identity infrastructure and adoption); AI prediction markets (the bottleneck is data and incentives).
 
-## 22.2 Problem 1: Verifiable international AI agreements — verification without trust
+## 23.2 Problem 1: Verifiable international AI agreements — verification without trust
 
 **In one sentence**: Let two countries that do not trust each other confirm that the other is not secretly training beyond an agreed scale, without either side handing over weights or trade secrets.
 
@@ -43,13 +43,13 @@
 
 **What's blocking it: is math the bottleneck?** Judgment: math/cryptography about 25%, engineering about 30%, institutions about 45%. But math is the **gate for the low-trust version**: without efficient proofs, the only option is intrusive inspection that great powers will not accept. Math determines "which institutional deals are on the table." The math parts: the efficiency of floating-point ZK; the soundness of Proof-of-Learning (which has been shown to be forgeable); the correctness of the ZK circuits themselves (under-constrained circuits are a common vulnerability ⚠). The rest: what counts as "training" is a policy choice (type B); verification-grade chips take 6–10 years; who holds the keys, sovereignty, antitrust.
 
-**What AI can do**: *AI math*: proving protocol soundness and formally verifying ZK circuits (type A); as proof costs fall to 1/10 each year, this becomes the default in 2027–2028; but whether the treaty specification is faithful remains type B (§16.2). *Other AI capabilities*: coding agents compress the "36 months to a prototype", and automated red-teaming turns 5 iterations into 500; in the other direction, they also help evaders design disguised workloads.
+**What AI can do**: *AI math*: proving protocol soundness and formally verifying ZK circuits (type A); as proof costs fall to 1/10 each year, this becomes the default in 2027–2028; but whether the treaty specification is faithful remains type B (§17.2). *Other AI capabilities*: coding agents compress the "36 months to a prototype", and automated red-teaming turns 5 iterations into 500; in the other direction, they also help evaders design disguised workloads.
 
 **If solved: first-order impact**: Compute caps go from "self-reported" to "provable"; export controls become enforceable, and violations can be proven with evidence.
 
 **If solved: second-order impact**: The game shifts from "can't verify, so we must race" to "can verify, so we can negotiate", and a pause becomes a real option [speculation]. But the ability to disable chips remotely is itself enormous power, and the verification infrastructure needs governing too (isomorphic to Problem 8). The same primitives can also support verifiable evaluation.
 
-**Timing**: *Optimistic*: telemetry and location verification enter export controls before 2027 (METR about 400 h by end of 2027). *Central*: a proof of concept for training-side ZK around 2029; binding international verification after 2030, and it will need a political shock; soundness proofs for the protocols become cheap by 2027, but they are not the rate-limiting step. *Pessimistic*: the low-trust version never lands. The cryptographic part depends on the proof-cost and solve-rate curves (§17); the hardware and political parts do not depend on any math curve.
+**Timing**: *Optimistic*: telemetry and location verification enter export controls before 2027 (METR about 400 h by end of 2027). *Central*: a proof of concept for training-side ZK around 2029; binding international verification after 2030, and it will need a political shock; soundness proofs for the protocols become cheap by 2027, but they are not the rate-limiting step. *Pessimistic*: the low-trust version never lands. The cryptographic part depends on the proof-cost and solve-rate curves (§18); the hardware and political parts do not depend on any math curve.
 
 **Counterarguments and uncertainty**: "Verification theater" could emerge; perhaps cryptography isn't needed at all, because satellites plus power data can catch large-scale training, and the real risk lies in small, efficient training runs.
 
@@ -57,7 +57,7 @@
 
 **Sources**: Glaser, Barak, Goldston 2014, *Nature* 510:497; Fearon 1995, *International Organization* 49(3); Kaizen [ePrint 2024/162](https://eprint.iacr.org/2024/162); Peigné-Lefebvre et al. [arXiv:2606.05433](https://arxiv.org/abs/2606.05433); Rahman & Tajdari [arXiv:2606.19262](https://arxiv.org/abs/2606.19262); Fang et al. 2023 [arXiv:2208.03567](https://arxiv.org/abs/2208.03567); SNARK SoK [arXiv:2402.15293](https://arxiv.org/abs/2402.15293) ⚠; Chip Security Act [secondhand report](https://startupfortune.com/congress-wants-to-put-a-gps-tracker-on-every-nvidia-chip-that-leaves-the-country/) ⚠.
 
-## 22.3 Problem 2: Mechanism design for the AI agent economy — collusion without meetings
+## 23.3 Problem 2: Mechanism design for the AI agent economy — collusion without meetings
 
 **In one sentence**: When both sides of a market are AI agents, we need rules that are efficient and also stop agents from spontaneously learning to raise prices or collude in secret; and antitrust law happens to be unable to catch "collusion without an agreement."
 
@@ -65,7 +65,7 @@
 
 *Evidence*: Q-learning pricing agents spontaneously learn collusion backed by punishment (Calvano et al. 2020) [established]; in the German gasoline market, margins rose 28% once both stations used algorithmic pricing (Assad et al. 2024) [established]; LLM pricing agents "quickly and autonomously" reach supracompetitive prices (Fish et al.) [recent]. The RealPage case reached a proposed settlement in 2025-11, with no fine and no admission of wrongdoing [recent]. On the other side: heterogeneity makes collusion fragile; when agents differ in patience, the premium falls from 22% to 10%; **but a difference in model size (32B vs 14B) instead produces a "leader–follower" structure that makes collusion more stable** (Keppo et al. 2026) [recent].
 
-*Secret collusion and program equilibrium*: Agents can hide communication inside normal outputs using steganography, and information-theoretically secure steganography is in principle undetectable (Motwani et al.); this is the same problem as "the monitor colluding with the monitored model" in AI control (§21). Conversely, AIs can show their source code: when both sides submit programs that can read each other's code, cooperation is possible even in a one-shot prisoner's dilemma (Tennenholtz 2004) [established]. This **cuts both ways**: it can support beneficial commitments (Problem 1), and it can also support collusion.
+*Secret collusion and program equilibrium*: Agents can hide communication inside normal outputs using steganography, and information-theoretically secure steganography is in principle undetectable (Motwani et al.); this is the same problem as "the monitor colluding with the monitored model" in AI control (§22). Conversely, AIs can show their source code: when both sides submit programs that can read each other's code, cooperation is possible even in a one-shot prisoner's dilemma (Tennenholtz 2004) [established]. This **cuts both ways**: it can support beneficial commitments (Problem 1), and it can also support collusion.
 
 **Why it matters**: Collusion is one of the three types of multi-agent risk (Hammond et al. 2025). Once procurement, pricing and negotiation are handed to agents at scale, "collusion without meetings" goes from an edge case to a standing risk.
 
@@ -85,7 +85,7 @@
 
 **Sources**: Calvano et al. 2020 [AER](https://www.aeaweb.org/articles?id=10.1257%2Faer.20190623); Assad et al. 2024, JPE 132(3); Fish et al. [arXiv:2404.00806](https://arxiv.org/abs/2404.00806); Keppo et al. [arXiv:2603.20281](https://arxiv.org/abs/2603.20281); RealPage [Fenwick](https://www.fenwick.com/insights/publications/dojs-realpage-settlement-a-blueprint-for-safer-algorithmic-pricing); Motwani et al. [arXiv:2402.07510](https://arxiv.org/abs/2402.07510); Tennenholtz 2004, *GEB* 49(2); Hammond et al. [arXiv:2502.14143](https://arxiv.org/abs/2502.14143); [arXiv:2502.12203](https://arxiv.org/abs/2502.12203); Magentic Marketplace [arXiv:2510.25779](https://arxiv.org/abs/2510.25779).
 
-## 22.4 Problem 3: Social choice in alignment — the math of "aligned to whom"
+## 23.4 Problem 3: Social choice in alignment — the math of "aligned to whom"
 
 **In one sentence**: Training a model that serves hundreds of millions of people means compressing conflicting preferences into a single policy. Social choice theory says what guarantees each way of compressing offers and which guarantees cannot hold at the same time; in 2024–2026 this line of work has been producing type A theorems at a fast pace.
 
@@ -105,7 +105,7 @@
 
 **If solved: second-order impact**: Alignment becomes openly politicized [speculation]: once the rules are written down, groups will lobby over weights, like fights over electoral systems; today's "default to Borda" is also a political choice, just one nobody notices. There is also a tension between pluralism and personalization: giving each group its own model brings filter bubbles.
 
-**Timing**: Type A theorems are already landing and will be largely "commoditized" by end of 2027 (depends on the solve-rate and proof-cost curves, §17); lab adoption in 2027–2029, depending on regulatory or reputational pressure; the normative questions have no timeline and will not be settled by math.
+**Timing**: Type A theorems are already landing and will be largely "commoditized" by end of 2027 (depends on the solve-rate and proof-cost curves, §18); lab adoption in 2027–2029, depending on regulatory or reputational pressure; the normative questions have no timeline and will not be settled by math.
 
 **Counterarguments and uncertainty**: RLHF violates almost every axiom yet still works well, perhaps because real preferences are highly structured. Arrow's theorem applies only to ordinal preferences; once preference intensity is introduced, many "impossibilities" loosen. Most disagreements are just matters of style.
 
@@ -113,25 +113,25 @@
 
 **Sources**: Conitzer et al. 2024 [arXiv:2404.10271](https://arxiv.org/abs/2404.10271); Siththaranjan et al. [arXiv:2312.08358](https://arxiv.org/abs/2312.08358); Gölz et al. [arXiv:2505.23749](https://arxiv.org/abs/2505.23749); Munos et al. [arXiv:2312.00886](https://arxiv.org/abs/2312.00886); [arXiv:2506.12350](https://arxiv.org/abs/2506.12350); Fish et al. [arXiv:2309.01291](https://arxiv.org/abs/2309.01291); Tang & Lin 2009, *Artificial Intelligence* 173(11); Brandl et al. 2018, JACM 65(2).
 
-## 22.5 Problem 4: Scaling democratic deliberation with AI
+## 23.5 Problem 4: Scaling democratic deliberation with AI
 
 Deliberation faces a trilemma: referendums have broad but shallow participation, while citizens' assemblies go deep but involve only a few dozen people. AI promises to improve participation, depth and equality at the same time. DeepMind's Habermas Machine (*Science* 2024) has an LLM write position statements and a reward model predict endorsement, iterating repeatedly; among 5,734 UK participants, AI-mediated statements were preferred more often than those written by human mediators, and disagreement also narrowed [established, single high-quality study]. The clean precedent already in use is sortition: the algorithm of Flanigan et al. (*Nature* 2021) is offered free as Panelot and has been used in more than 40 citizens' assemblies [established, adoption count self-reported].
 
 Math is about 20%: representativeness guarantees and Sybil resistance tend to get solved quickly once they are needed. The hard parts are type B questions ("maximizing endorsement" is not the same as "good deliberation") and institutional questions (there is no binding link between what deliberation concludes and what gets decided). AI's language ability plays the lead role, but it has a flip side: an experiment with 76,977 people and 19 LLMs found that post-training can raise political persuasiveness by up to 51%, and that **the methods that increase persuasiveness systematically reduce factual accuracy** (Hackenburg et al.) [recent]. **"Good at finding consensus" and "good at persuading" are the same capability**; whoever trains the mediation model defines "what counts as consensus", and is therefore a political actor [speculation]. Central judgment [speculation]: in 2027–2030 some government formally uses AI mediation in a statutory consultation; this depends on political will, not on the math curves. **Sources**: Tessler, Bakker et al. 2024 [Science](https://doi.org/10.1126/science.adq2852); Flanigan et al. 2021, *Nature* 596; Hackenburg et al. [arXiv:2507.13919](https://arxiv.org/abs/2507.13919).
 
-## 22.6 Problem 5: Next-generation market design — lessons from kidney exchange
+## 23.6 Problem 5: Next-generation market design — lessons from kidney exchange
 
 Kidney exchange: patient A's relative a is willing to donate a kidney but has an incompatible blood type, and the same holds for B and b; if a matches B and b matches A, the two pairs swap. Finding the maximum number of transplants is NP-hard, and by 2007 it could already be solved at national scale with integer programming [established]. **But** Agarwal et al. (2019 AER) found that in 2014 the national platforms arranged only 42% of exchanges: hospitals bear the costs of participating but get little of the benefit, so they match pairs internally; fixing the fragmentation could **increase exchange transplants by 30–63%** [established]. **The algorithm had long existed; what blocked progress was incentives and regulation.** The counterexample is the FCC spectrum incentive auction: every bid required solving an NP-complete problem similar to graph coloring, the SATFC solver solved over 95% of instances within the time limit, and revenue was **$19.8B** [established]; without the solver, there would be no such market.
 
 The successes in spectrum, school choice, kidneys and sortition all meet the same four conditions: **① a single authoritative designer; ② a clear objective; ③ the computational or incentive problem really is the sticking point; ④ theoretical guarantees make participants willing to tell the truth.** Overall, math is about 30%, and can exceed 50% in new markets with physical constraints such as power grids. AI math will make "finding a strategyproof mechanism under constraints and proving it" a type A problem (textbook scale around 2027). **The biggest lever may be preference elicitation** [speculation]: the obstacle in combinatorial auctions is that bidders cannot price all 2ⁿ bundles one by one, but an LLM agent can interview its principal and then bid on their behalf. The cheaper design becomes, the more the bottleneck concentrates on "who has the right to design"; the successes almost all happened where governments **created** markets, so AI may **increase** demand for state capacity [speculation]. A new national-scale market takes 5–10 years; no math curve can fix kidney fragmentation. **Sources**: Agarwal et al. 2019 [AER 109(11)](https://www.aeaweb.org/doi/10.1257/aer.20180771); Newman, Fréchette, Leyton-Brown [arXiv:1706.03304](https://arxiv.org/abs/1706.03304).
 
-## 22.7 Problem 6: Content provenance — signatures vs. the watermark impossibility theorem
+## 23.7 Problem 6: Content provenance — signatures vs. the watermark impossibility theorem
 
 *Signatures* prove "this is real": a camera signs the image hash with its private key, changing a single pixel invalidates the signature, and C2PA links the capture and every later edit into a signature chain [established]; the weak points are stripped metadata, leaked private keys and untrusted devices, not the math. *Watermarks* try to prove "this was written by AI". The KGW scheme randomly splits the vocabulary into "green/red" halves and biases generation toward green words: a 200-word text written by a human is expected to contain 100 green words, with a standard deviation of about 7.07; if you count 140, z ≈ 5.66, and the text is judged AI-generated. But have another model paraphrase it once, and the ratio returns to about 50%. Zhang, Barak et al. (2023) proved that as long as an attacker can judge whether quality is preserved after rewriting and can make small edits, a random walk can erase **any** watermark, even if the key is kept secret [established]. The conclusion: against disinformation, **what matters is verifying the source, not judging whether something is AI**.
 
 Math is about 15%; the boundaries are basically drawn, and what remains is the trade-off between "robustness to edits" and "resistance to spoofing". AI math can formally verify C2PA implementations; cheaper proof systems can make zero-knowledge provenance practical (PhotoProof 2016 could already prove "this image is only a crop of a signed original" without revealing the original) [established]. The main bottleneck is adoption: Article 50 of the EU AI Act takes effect 2026-08-02, California's rules do not cover text ⚠, and most platforms strip metadata on upload ⚠. Second-order impact [speculation]: trust shifts from content to the identity of the signer, creating a new concentration of power. Central judgment [speculation]: by 2028 most new phones sign by default. Text watermarks are reliable only for long, unedited text, and this **will not** change as math advances, because it is a theorem. **Sources**: Zhang et al. [arXiv:2311.04378](https://arxiv.org/abs/2311.04378); Kirchenbauer et al. 2023 [PMLR](https://proceedings.mlr.press/v202/kirchenbauer23a.html); Naveh & Tromer 2016, IEEE S&P; [EU Code of Practice](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content); SB 942/AB 853 [NatLawReview](https://natlawreview.com/article/californias-ongoing-ai-regulation-key-deadlines-arriving-2026-and-beyond) ⚠.
 
-## 22.8 Problem 7: Macroeconomics of transformative AI — labor share and explosive growth
+## 23.8 Problem 7: Macroeconomics of transformative AI — labor share and explosive growth
 
 **In one sentence**: If AI can do almost all cognitive work, what happens to growth, wages and the labor share? Estimates range from "TFP up only 0.66% over ten years" to "a tenfold increase in the growth rate", and the disagreement comes from a few empirical parameters that **cannot be derived mathematically**.
 
@@ -159,7 +159,7 @@ Math is about 15%; the boundaries are basically drawn, and what remains is the t
 
 **Sources**: [BLS 2026](https://www.bls.gov/opub/ted/2026/labor-share-at-its-lowest-level-52-8-percent-in-second-quarter-2026.htm); Acemoglu [NBER w32487](https://www.nber.org/papers/w32487); Restrepo [NBER w34423](https://www.nber.org/papers/w34423); Brynjolfsson et al. [Stanford DEL](https://digitaleconomy.stanford.edu/publication/canaries-in-the-coal-mine-six-facts-about-the-recent-employment-effects-of-artificial-intelligence/); Aghion, Jones, Jones 2019 (NBER w23928); David 1990, AER P&P; Kulveit et al. [arXiv:2501.16946](https://arxiv.org/abs/2501.16946); [Intelligence Curse](https://intelligence-curse.ai/); [AI-Enabled Coups](https://www.forethought.org/research/ai-enabled-coups-how-a-small-group-could-use-ai-to-seize-power).
 
-## 22.9 Problem 8: Political economy of AI-produced knowledge — who decides how it enters the public sphere
+## 23.9 Problem 8: Political economy of AI-produced knowledge — who decides how it enters the public sphere
 
 **In one sentence**: When one company can release 719 math papers in a day and the world's capacity to review them falls far short, who controls the production, verification and release of knowledge becomes a governance question.
 
@@ -173,15 +173,15 @@ Math is about 15%; the boundaries are basically drawn, and what remains is the t
 
 **What's blocking it: is math the bottleneck?** Judgment: math about 20%, institutions about 80%. The math part is autoformalization (moving that 58% into Lean) and methods for checking "whether the statement is faithful"; empirical science **has no equivalent of Lean**. The institutional part is journal policy, credit allocation, reviewer incentives and norms for mass releases.
 
-**What AI can do**: *AI math*: proof costs fall to 1/10 each year, so by 2027–2028 "AI math must come with a Lean proof" will become a reasonable default, and human work will concentrate on checking whether statements are faithful; this is the social version of §16.2's "the trust bottleneck moves from proofs to specifications". *Other AI capabilities*: AI reviewers and replication agents. The flip side is an arms race between generation and review.
+**What AI can do**: *AI math*: proof costs fall to 1/10 each year, so by 2027–2028 "AI math must come with a Lean proof" will become a reasonable default, and human work will concentrate on checking whether statements are faithful; this is the social version of §17.2's "the trust bottleneck moves from proofs to specifications". *Other AI capabilities*: AI reviewers and replication agents. The flip side is an arms race between generation and review.
 
 **If solved: first-order impact**: New release norms: either formalize, or label as "unverified"; staged releases that leave a window for review; disclosure following the IAS checklist.
 
 **If solved: second-order impact**:
 
 - **Enclosure of knowledge** [speculation]: science may slide toward "use internally first, release selectively", and the most valuable or most sensitive results become the least likely to be made public.
-- **Understanding separates from checking** (Thurston 1994): humans can only check, not understand (§16.3); this is a civilization-scale scalable oversight problem, isomorphic to the core of AI safety (§21).
-- **Verification as a public good**: we may need NIST-like public verification facilities (publicly funded Lean libraries, replication centers). §16.5's "frontier companies unilaterally deciding how capabilities enter the public sphere" is the same problem as Problem 1: how to check the claims of the powerful without having to trust them.
+- **Understanding separates from checking** (Thurston 1994): humans can only check, not understand (§17.3); this is a civilization-scale scalable oversight problem, isomorphic to the core of AI safety (§22).
+- **Verification as a public good**: we may need NIST-like public verification facilities (publicly funded Lean libraries, replication centers). §17.5's "frontier companies unilaterally deciding how capabilities enter the public sphere" is the same problem as Problem 1: how to check the claims of the powerful without having to trust them.
 
 **Timing**: New norms form in mathematics within 1–2 years; by end of 2027 autoformalization covers most new AI math (central scenario, depends on the proof-cost curve). Empirical science will see similar "dumping" controversies in 2028–2030, with no technical fix. A release mechanism for dual-use knowledge will most likely be triggered by some incident.
 
@@ -189,9 +189,9 @@ Math is about 15%; the boundaries are basically drawn, and what remains is the t
 
 **Signals to watch**: A second lab follows with a mass release; journals or arXiv adopt policies on mass AI submissions; the first public admission that "an AI-proven result was withheld for safety reasons".
 
-**Sources**: This deck §2, §3, §16; [openai/math](https://github.com/openai/math); [AHM statement via Tao](https://terrytao.wordpress.com/2026/10/07/ahm-statement-on-openais-october-6-release-of-mathematical-documents/); IAS advisory group norms cited only secondhand [R] ⚠; US Copyright Office 2025, *Copyright and AI, Part 2*; Thaler v. Perlmutter (2025); Thaler v. Vidal (2022); Merton 1942; Thurston 1994 [arXiv:math/9404236](https://arxiv.org/abs/math/9404236).
+**Sources**: This deck §2, §3, §17; [openai/math](https://github.com/openai/math); [AHM statement via Tao](https://terrytao.wordpress.com/2026/10/07/ahm-statement-on-openais-october-6-release-of-mathematical-documents/); IAS advisory group norms cited only secondhand [R] ⚠; US Copyright Office 2025, *Copyright and AI, Part 2*; Thaler v. Perlmutter (2025); Thaler v. Vidal (2022); Merton 1942; Thurston 1994 [arXiv:math/9404236](https://arxiv.org/abs/math/9404236).
 
-## 22.10 Second-order effects in this field
+## 23.10 Second-order effects in this field
 
 **1. The bottleneck migrates: production → verification → legitimacy.** All eight cards follow the same pattern:
 
@@ -214,8 +214,8 @@ Math is about 15%; the boundaries are basically drawn, and what remains is the t
 
 **5. Cross-field connections.** Old problems from distributed systems reappear here under new names: Amdahl's law corresponds to the Baumol bottleneck, Byzantine fault tolerance to treaty verification under low trust, and consensus protocols to commitment mechanisms.
 
-## 22.11 Sources for this section
+## 23.11 Sources for this section
 
-Full sources are at the end of each card. Suggested reading order: Fearon 1995 and Glaser–Barak–Goldston 2014 → Peigné-Lefebvre et al. 2026 → Keppo et al. 2026 → Gölz, Haghtalab, Yang 2025 → Agarwal et al. 2019 → Zhang et al. 2023 → Restrepo 2025 and Kulveit et al. 2025 → this deck §2, §16.
+Full sources are at the end of each card. Suggested reading order: Fearon 1995 and Glaser–Barak–Goldston 2014 → Peigné-Lefebvre et al. 2026 → Keppo et al. 2026 → Gölz, Haghtalab, Yang 2025 → Agarwal et al. 2019 → Zhang et al. 2023 → Restrepo 2025 and Kulveit et al. 2025 → this deck §2, §17.
 
 **⚠ To be rechecked**: The status of the Chip Security Act is known only from secondhand reports; accounts of the thresholds and dates in California's SB 942/AB 853 conflict; there is no systematic 2026 measurement of how much platforms strip C2PA metadata; details of the SNARK vulnerability SoK have not been rechecked; the IAS advisory group norms are cited only secondhand.

@@ -125,23 +125,23 @@ target — recon, hand-proven root RCE, then confirmed with the module's `check`
 
 A sourced reading deck in parallel English and Chinese editions, like `cyber_ai_fundamentals`.
 
-**Part I (§0–§16): the release.** On 2026-10-06 OpenAI released 722 (now 719) AI-generated math
+**Part I (§0–§17): the release.** On 2026-10-06 OpenAI released 722 (now 719) AI-generated math
 manuscripts. They claim results such as the quasi-Riemann hypothesis, the Unique Games Conjecture,
-the matrix-multiplication exponent ω ≤ 9/4 and the non-amenability of Thompson's group F. The deck
-takes 10 headline results, one section each. Each section builds the result up from basic concepts,
+the matrix-multiplication exponent ω ≤ 9/4, the non-amenability of Thompson's group F and the
+four-dimensional Kakeya conjecture. The deck takes 11 headline results, one section each. Each section builds the result up from basic concepts,
 with hand-checkable examples and exercises. It then gives OpenAI's exact claim and how far it is
 verified, reading each Lean statement line by line. Part I also summarizes a static audit of the
 26M-line Lean library, studies the withdrawn papers, and asks what the release means for AI.
 
-**Part II (§17–§23): what happens if AI solves mathematics at scale.**
-- §17 calibrates with history: 14 cases of math becoming real-world impact, with their lag times.
+**Part II (§18–§24): what happens if AI solves mathematics at scale.**
+- §18 calibrates with history: 14 cases of math becoming real-world impact, with their lag times.
   It explains when math is and is not the bottleneck, reviews the AI-for-science record so far, and
   sets out three capability curves.
-- §18–§22 each pick the problems that matter most in one field: computing, cryptography and quantum;
+- §19–§23 each pick the problems that matter most in one field: computing, cryptography and quantum;
   physics, chemistry and materials; biology, medicine and neuroscience; AI theory and alignment;
   economics, society and governance. For each problem they ask whether math is the bottleneck, what
   AI changes, what the deeper impacts are, and when.
-- §23 gives the cross-field picture, a top 10 and a timeline to the 2030s.
+- §24 gives the cross-field picture, a top 10 and a timeline to the 2030s.
 
 Start with [`openai_math_explained/notes_en.pdf`](openai_math_explained/notes_en.pdf) (English) or
 [`notes.pdf`](openai_math_explained/notes.pdf) (Chinese).
