@@ -1,0 +1,36 @@
+# Azure config: the one the published pilot ran on (results/), with all four models on one
+# Azure AI Services resource. Use it with MINILAB_MODELS=configs/models.azure.yaml.
+#
+#   AZURE_OPENAI_ENDPOINT   https://<resource>.openai.azure.com          (GPT-5.6 deployments)
+#   AZURE_FOUNDRY_ENDPOINT  https://<resource>.services.ai.azure.com/openai/v1  (DeepSeek Foundry models)
+#   AZURE_OPENAI_API_KEY    the resource key (both endpoints accept it)
+#
+# `model` is the *deployment name*. Here the deployments are named after the models.
+# On Azure, DeepSeek only thinks when reasoning_effort is set; `extra_body={"thinking": ...}` returns 400.
+# Prices: see configs/models.yaml.
+
+providers:
+  azure_openai:  {base_url: "${AZURE_OPENAI_ENDPOINT}/openai/v1/", api_key_env: AZURE_OPENAI_API_KEY}
+  azure_foundry: {base_url: "${AZURE_FOUNDRY_ENDPOINT}", api_key_env: AZURE_OPENAI_API_KEY}
+
+models:
+  sol:
+    provider: azure_openai
+    model: gpt-5.6-sol
+    params: {reasoning_effort: medium, max_completion_tokens: 16000}
+    price: {input: 5.00, cached_input: 0.50, output: 30.00}
+  luna:
+    provider: azure_openai
+    model: gpt-5.6-luna
+    params: {reasoning_effort: medium, max_completion_tokens: 16000}
+    price: {input: 0.20, cached_input: 0.02, output: 1.20}
+  ds-pro:
+    provider: azure_foundry
+    model: DeepSeek-V4-Pro
+    params: {reasoning_effort: high, max_tokens: 16000}
+    price: {input: 1.74, cached_input: 0.174, output: 3.48}
+  ds-flash:
+    provider: azure_foundry
+    model: DeepSeek-V4-Flash
+    params: {reasoning_effort: high, max_tokens: 16000}
+    price: {input: 0.14, cached_input: 0.014, output: 0.28}

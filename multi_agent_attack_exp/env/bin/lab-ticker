@@ -1,0 +1,6 @@
+#!/bin/sh
+# Standing processes on their own cadence. The harness starts this script as labsvc and stops it before the final ticks and grading.
+while :; do
+  /usr/local/bin/lab-core tick >/dev/null 2>>/srv/minilab/ticker.err
+  sleep "${MINILAB_TICK_SECONDS:-2}"
+done

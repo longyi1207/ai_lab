@@ -78,6 +78,26 @@ provider path produce logs + labels. See
 [`long_horizon_eval/README.md`](long_horizon_eval/README.md) for the architecture, service-topology,
 and label-decision diagrams.
 
+### [`multi_agent_attack_exp/`](multi_agent_attack_exp/) — split multi-agent attacks vs AI-control monitors
+
+A laptop-scale replication of Kitaoka et al. (2026), *Red-Teaming Multi-Agent Attacks for
+Loss-of-Control Risks* ([arXiv:2610.24052](https://arxiv.org/abs/2610.24052)). Three AI agents
+each do one ordinary-looking piece of work in a simulated AI lab, and an automated process combines
+the pieces into a harmful outcome, such as restoring a held model's weights. A monitor model tries
+to catch it reading each agent alone, the whole team, or a single agent doing everything.
+
+**MiniLab-lite** is four Dockerised services with Linux-account permissions and hidden
+deterministic graders. A scripted check (23/23 variants, no model calls) proves that every
+attack fragment is necessary. The paper's executor and monitor prompts are used verbatim, with
+the same models (DeepSeek-V4-Pro executors, GPT-5.6 Sol and Luna monitors) and the same scoring
+(12 readings, median, 7.5 threshold).
+
+Pilot result: per-agent monitoring flagged 1/12 split attacks, matching the paper's 7%. The solo
+baseline flagged only 5/12, against the paper's 87%, once the solo plan was held to the same
+commands as the team: most attacks hide by not printing the exposing record, and one agent can
+do that too. A free Level 0 (play an operator account in the world) and about $1 for a full pilot
+on the weak monitor. See [`multi_agent_attack_exp/README.md`](multi_agent_attack_exp/README.md).
+
 ### [`ai_scientist/`](ai_scientist/) — evolutionary AI research harness
 
 An IDE-primary evolutionary harness: Phase 1 intake → Phase 2 MAP-Elites / novelty search over

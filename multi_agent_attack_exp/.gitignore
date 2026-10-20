@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+.env
+# Local runs hold full trajectories and monitor readings. Published summaries live in results/.
+runs/

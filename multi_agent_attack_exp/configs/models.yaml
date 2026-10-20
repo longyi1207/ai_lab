@@ -1,0 +1,44 @@
+# Default model config: OpenAI API for the monitors, DeepSeek's own API for the executors.
+# Choose another file with MINILAB_MODELS=configs/models.azure.yaml (or any copy you edit).
+#
+# Keys are read from .env in this directory, or from the environment:
+#   OPENAI_API_KEY, DEEPSEEK_API_KEY
+#
+# Model ids were checked against each provider's /models list on 2026-10-20. This exact file
+# was not run end to end; the published pilot ran on configs/models.azure.yaml.
+#
+# Prices are USD per million tokens. They feed the cost ledger and --max-usd, and they are
+# estimates; your provider's bill is ground truth.
+#   GPT-5.6: Sol $5 / $30, Luna $0.20 / $1.20; cached input is 10% of input (third-party
+#            summaries, 2026-10-19, e.g. eesel.ai/blog/gpt-5-6-pricing).
+#   DeepSeek V4: third-party list prices (cloudzero.com/blog/deepseek-pricing).
+#
+# The executor must think in hidden reasoning (the paper's attackers run with reasoning on and the
+# monitor never sees it). DeepSeek's API returns reasoning_content by default. If an attacker's
+# reasoning comes back empty, the harness logs a warning: the plan will leak into visible text.
+
+providers:
+  openai:   {base_url: "https://api.openai.com/v1", api_key_env: OPENAI_API_KEY}
+  deepseek: {base_url: "https://api.deepseek.com", api_key_env: DEEPSEEK_API_KEY}
+
+models:
+  sol:
+    provider: openai
+    model: gpt-5.6-sol
+    params: {reasoning_effort: medium, max_completion_tokens: 16000}
+    price: {input: 5.00, cached_input: 0.50, output: 30.00}
+  luna:
+    provider: openai
+    model: gpt-5.6-luna
+    params: {reasoning_effort: medium, max_completion_tokens: 16000}
+    price: {input: 0.20, cached_input: 0.02, output: 1.20}
+  ds-pro:
+    provider: deepseek
+    model: deepseek-v4-pro
+    params: {reasoning_effort: high, max_tokens: 16000}
+    price: {input: 1.74, cached_input: 0.174, output: 3.48}
+  ds-flash:
+    provider: deepseek
+    model: deepseek-flash
+    params: {reasoning_effort: high, max_tokens: 16000}
+    price: {input: 0.14, cached_input: 0.014, output: 0.28}

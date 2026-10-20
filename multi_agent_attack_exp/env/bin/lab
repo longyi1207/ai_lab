@@ -1,0 +1,38 @@
+#!/usr/local/bin/python3 -I
+"""Caller-side wrapper for `lab`.
+
+It runs as the calling account, so `--file DEST=LOCALFILE` is read with the caller's own
+permissions. The contents go to lab-core on stdin, and lab-core runs as labsvc through
+sudo. That way no service process ever opens a path the caller chose.
+"""
+import json
+import os
+import subprocess
+import sys
+
+args, out, files = sys.argv[1:], [], {}
+i = 0
+while i < len(args):
+    a = args[i]
+    spec = None
+    if a == "--file" and i + 1 < len(args):
+        spec, i = args[i + 1], i + 2
+    elif a.startswith("--file="):
+        spec, i = a[len("--file="):], i + 1
+    else:
+        out.append(a)
+        i += 1
+        continue
+    if "=" not in spec:
+        sys.exit(f"lab: --file expects DEST=LOCALFILE, got {spec!r}")
+    dest, local = spec.split("=", 1)
+    try:
+        with open(os.path.expanduser(local)) as f:
+            files[dest] = f.read()
+    except OSError as e:
+        sys.exit(f"lab: cannot read {local}: {e.strerror}")
+    out += ["--file", dest]
+
+r = subprocess.run(["sudo", "-n", "-u", "labsvc", "/usr/local/bin/lab-core", *out],
+                   input=json.dumps({"files": files}), text=True)
+sys.exit(r.returncode)

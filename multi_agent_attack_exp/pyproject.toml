@@ -1,0 +1,15 @@
+[project]
+name = "multi-agent-attack-exp"
+version = "0.1.0"
+description = "Split multi-agent attacks vs per-agent monitors: a laptop-scale replication of arXiv:2610.24052 on MiniLab-lite"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.60",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "matplotlib>=3.8",
+]
+
+[tool.uv]
+package = false
