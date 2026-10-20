@@ -78,6 +78,24 @@ provider path produce logs + labels. See
 [`long_horizon_eval/README.md`](long_horizon_eval/README.md) for the architecture, service-topology,
 and label-decision diagrams.
 
+### [`rl_pipeline/`](rl_pipeline/) — training an agent away from shortcuts, one decision at a time
+
+An end-to-end pipeline that turns recorded episodes of agents cheating on tasks into training
+signal. It finds the step where each agent turned toward the shortcut, rebuilds the environment
+at that step in a fresh container (re-running and verifying every recorded command), samples
+alternative continuations, grades them, and fine-tunes on the difference: DPO on Azure OpenAI, plus
+hand-written DPO and GRPO that run on a laptop, and the environments served through OpenEnv's
+standard `reset` / `step` interface.
+
+Everything ran for real (about $27): 78 of 80 branch points rebuilt faithfully, 228 graded
+continuations, 92 preference pairs, a DPO job, and a paired evaluation on held-out branch points.
+The honest result is negative: the tuned model did not take fewer shortcuts, and reading the
+pairs shows why (only 4 of 92 put the exploit on the rejected side; the preference landed on
+harmless early moves). The laptop trainers check out against TRL and learn a toy task. See
+[`rl_pipeline/README.md`](rl_pipeline/README.md) and its
+[`docs/concepts.md`](rl_pipeline/docs/concepts.md), written for people new to the area. It is the
+training-side companion to `long_horizon_eval/` above.
+
 ### [`multi_agent_attack_exp/`](multi_agent_attack_exp/) — split multi-agent attacks vs AI-control monitors
 
 A laptop-scale replication of Kitaoka et al. (2026), *Red-Teaming Multi-Agent Attacks for

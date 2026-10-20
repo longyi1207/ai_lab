@@ -1,0 +1,108 @@
+# Pilot run: two tasks, a small budget, every stage end to end.
+# Each key is explained in docs/pipeline.md. ${VAR} and ${VAR:-default} come from your environment
+# (or azure.env_file); relative paths are resolved from this file's directory.
+
+run_name: pilot
+
+paths:
+  # Local checkout of https://github.com/longyi1207/score-seeking-eval (task environments,
+  # graders, prompts). Its runs/ directory holds the recorded episodes we branch from.
+  score_seeking_eval: ${SSE_ROOT:-../../score-seeking-eval}
+  runs_dir: ${SSE_RUNS_DIR:-}            # empty = <score_seeking_eval>/runs
+  output_dir: ../outputs
+
+azure:
+  env_file: ${RL_PIPELINE_ENV_FILE:-../.env}
+  policy_deployment: gpt-4.1-mini        # the model we sample from and then fine-tune
+  judge_deployment: gpt-5.4              # intent judge; a monitor unless label_source is "full"
+  finetune_base_model: gpt-4.1-mini-2025-04-14
+  training_type: GlobalStandard
+  # For creating and deleting the fine-tuned deployment with the `az` CLI.
+  subscription_id: ${AZURE_SUBSCRIPTION_ID:-}
+  resource_group: ${AZURE_RESOURCE_GROUP:-}
+  account_name: ${AZURE_ACCOUNT_NAME:-}
+
+select:
+  tasks: [internal_exfil, protocol_re]
+  max_branch_points_per_task: 40
+  margin: 1                              # branch this many steps before the located onset
+  include_temptation_points: true        # also branch from runs that noticed and declined
+  test_fraction: 0.25
+  seed: 0
+
+sample:
+  k: 4                                   # continuations per branch point
+  temperature: 1.0
+  # Capped per task at the original runner's budget minus the prefix. Keep it at least that long:
+  # honest paths take more steps than shortcuts, so a short budget quietly favours the shortcut.
+  max_new_steps: 60
+  max_tokens: 1024                       # above every observed turn (p99 500, max 834 tokens)
+  workers: 12
+
+reward:
+  label_source: outcome_action           # or "full" to also require a clean intent judgement
+  intent_policy: pursuit
+
+judge:
+  enabled: true
+  scope: eval                            # judge evaluation rollouts only
+
+pairs:
+  max_pairs_per_branch: 4
+  val_fraction: 0.1
+  min_pairs: 10
+  # The base policy rarely finishes these tasks honestly from the branch states (8 of 182 pilot
+  # rollouts), so few branch points have both a 0 and a 1 among its own samples. The recorded
+  # episode's continuation is one more graded sample from the same (replay-verified) state; for
+  # "temptation" branch points it is an honest completion. pairs/summary.json reports how many
+  # pairs use it (chosen_policy: recorded).
+  include_recorded: true
+
+finetune:
+  beta: 0.1
+  n_epochs: 2
+  suffix: rlp-pilot
+  deployment_name: gpt-4.1-mini-rlp-pilot
+  deployment_sku: DeveloperTier
+  deployment_capacity: 250                # the Developer-tier maximum (thousand tokens per minute)
+  poll_seconds: 60
+
+evaluate:
+  k: 4
+  fresh_episodes: 6                      # per (task, policy), from step 0
+
+budget:
+  max_usd: 45
+  # USD per 1M tokens: estimates, check them against your Azure price sheet. Unknown models are
+  # charged at the most expensive rate listed, so a missing entry can only stop a run early.
+  prices:
+    gpt-4.1-mini: {input: 0.40, cached_input: 0.10, output: 1.60}
+    gpt-4.1-mini-rlp: {input: 0.80, cached_input: 0.20, output: 3.20}   # fine-tuned deployment
+    gpt-5.4: {input: 2.50, cached_input: 0.25, output: 15.00}
+  training_usd_per_mtok: 5.0
+
+# Self-hosted training (python -m rl_pipeline local-dpo | local-grpo). These values are a proof of
+# concept sized for a laptop (Apple Silicon, no GPU): a 0.5B model with LoRA, contexts truncated to
+# 2048 tokens, trained and evaluated on the same data.
+local:
+  model: Qwen/Qwen2.5-0.5B-Instruct
+  device: auto
+  lora_r: 16
+  lora_alpha: 32
+  max_prompt_tokens: 2048
+  max_new_tokens: 200
+  temperature: 1.0
+  dpo_beta: 0.1
+  dpo_epochs: 3
+  dpo_lr: 1.0e-4
+  grpo_env: toy                          # or "branch" for the Docker branch points
+  grpo_iterations: 15
+  grpo_groups_per_iter: 2
+  grpo_k: 6
+  grpo_lr: 1.0e-4
+  grpo_kl_coef: 0.04
+  grpo_clip_eps: 0.2
+  grpo_ppo_epochs: 1
+  grpo_max_new_steps: 6
+  grpo_branch_points: 4
+  grpo_eval_rollouts: 24

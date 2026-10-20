@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rl-pipeline"
+version = "0.1.0"
+description = "Branch-and-resample preference training for agents that take shortcuts"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.40",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# Self-hosted DPO / GRPO (rl_pipeline.local). Runs on Apple Silicon (MPS), CUDA, or CPU.
+local = ["torch>=2.3", "transformers>=4.44", "peft>=0.12", "accelerate>=0.33"]
+# Serve the environments over the OpenEnv HTTP/WebSocket API (rl_pipeline.openenv_env).
+openenv = ["openenv-core>=0.3", "uvicorn>=0.30"]
+
+[project.scripts]
+rl-pipeline = "rl_pipeline.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "docker: needs a running Docker daemon and the task images",
+    "sse: needs a local checkout of score-seeking-eval",
+]
