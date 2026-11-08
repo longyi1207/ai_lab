@@ -502,3 +502,518 @@ def svg_why_not_plaintext():
 </svg>
 <p class="cap">Plaintext recompute answers soundness-ish checks by literally redoing the math. ZK answers them with a proof. Same audit question; different confidentiality cost.</p>
 </div>'''
+
+
+def svg_zk_recipe():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-step hash-based zkSNARK recipe">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f3f0ea; stroke: #9a5b12; stroke-width: 1.3; }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#mr); }
+  </style>
+  <defs>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">Hash-based zkSNARK = three compiles (BCS recipe)</text>
+
+  <rect x="24" y="40" width="200" height="150" rx="4" class="hi"/>
+  <text x="36" y="62" class="t">1 · IOP</text>
+  <text x="36" y="84" class="s">Info-theoretic proof.</text>
+  <text x="36" y="102" class="s">Prover posts long tables</text>
+  <text x="36" y="120" class="s">(oracles). Verifier makes</text>
+  <text x="36" y="138" class="s">few random point queries.</text>
+  <text x="36" y="160" class="s">No crypto yet — just math.</text>
+  <text x="36" y="178" class="s">~error-correcting codes.</text>
+
+  <path d="M224 115 L248 115" class="arr"/>
+
+  <rect x="248" y="40" width="200" height="150" rx="4" class="box"/>
+  <text x="260" y="62" class="t">2 · Merkle</text>
+  <text x="260" y="84" class="s">Commit to each long table</text>
+  <text x="260" y="102" class="s">with a hash tree. Send only</text>
+  <text x="260" y="120" class="s">the root. Later open the</text>
+  <text x="260" y="138" class="s">queried cells + auth paths.</text>
+  <text x="260" y="160" class="s">→ interactive argument</text>
+  <text x="260" y="178" class="s">(computational soundness).</text>
+
+  <path d="M448 115 L472 115" class="arr"/>
+
+  <rect x="472" y="40" width="224" height="150" rx="4" class="box"/>
+  <text x="484" y="62" class="t">3 · Fiat–Shamir</text>
+  <text x="484" y="84" class="s">Replace verifier’s random</text>
+  <text x="484" y="102" class="s">challenges with</text>
+  <text x="484" y="120" class="s">H(transcript so far).</text>
+  <text x="484" y="138" class="s">One proof file. Verifier</text>
+  <text x="484" y="160" class="s">re-derives challenges,</text>
+  <text x="484" y="178" class="s">checks openings + eqs.</text>
+
+  <rect x="24" y="208" width="672" height="56" rx="3" class="box"/>
+  <text x="36" y="230" class="t">What FlashProve / zkLLM / VerInf customize</text>
+  <text x="36" y="250" class="s">Almost always Step 1 (the IOP for “this forward pass / bound”). Steps 2–3 are standard hash machinery (BLAKE2, Merkle, FS).</text>
+</svg>
+<p class="cap">Memorize this stack. When a paper says “we prove inference,” ask: what is the IOP relation? Everything else is packaging.</p>
+</div>'''
+
+
+def svg_reed_solomon_zk():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Reed-Solomon zero-knowledge encoding">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Reed–Solomon + random mask = zero-knowledge encoding</text>
+
+  <rect x="24" y="40" width="330" height="140" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Message → polynomial → codeword</text>
+  <text x="36" y="84" class="s">weights m₀…mₖ₋₁ + random r₀…rₜ₋₁</text>
+  <text x="36" y="104" class="s">f(X) = r₀ + r₁X + … + rₜ₋₁ Xᵗ⁻¹</text>
+  <text x="36" y="122" class="s">         + m₀ Xᵗ + … + mₖ₋₁ Xᵗ⁺ᵏ⁻¹</text>
+  <text x="36" y="144" class="s">Evaluate f at n ≫ k points → long row</text>
+  <text x="36" y="166" class="s">Different messages → rows differ almost everywhere</text>
+
+  <rect x="366" y="40" width="330" height="140" rx="3" class="box"/>
+  <text x="378" y="62" class="t">Why ≤ t opens leak nothing</text>
+  <text x="378" y="84" class="s">Any t values of f are fixed by the</text>
+  <text x="378" y="102" class="s">random mask alone — statistically</text>
+  <text x="378" y="120" class="s">independent of the weights m.</text>
+  <text x="378" y="144" class="s">t = query budget. Open more than t</text>
+  <text x="378" y="166" class="s">columns ⇒ privacy can break.</text>
+
+  <rect x="24" y="196" width="672" height="84" rx="3" class="box"/>
+  <text x="36" y="218" class="t">FlashProve consequence</text>
+  <text x="36" y="238" class="s">Commit once (anchor table). Each proof opens a few columns → budget depletes. So make many leaf tables with fresh masks,</text>
+  <text x="36" y="256" class="s">each linked to the anchor (“same weights, new randomness”). One commitment ≈ millions of proofs until leaves wear out.</text>
+</svg>
+<p class="cap">College linear algebra: a degree-&lt;d polynomial is fixed by d points. Random low coefficients make the first t samples look random.</p>
+</div>'''
+
+
+def svg_merkle_open():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Merkle tree commit and open">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .hi { fill: #f7efe0; stroke: #9a5b12; stroke-width: 1.2; }
+    .ln { stroke: #8a867a; stroke-width: 1.1; }
+  </style>
+  <text x="24" y="22" class="h">Merkle commitment: bind a long vector; open one cell later</text>
+
+  <rect x="310" y="40" width="100" height="36" rx="3" class="hi"/>
+  <text x="328" y="62" class="t">root R</text>
+  <line x1="360" y1="76" x2="250" y2="100" class="ln"/>
+  <line x1="360" y1="76" x2="470" y2="100" class="ln"/>
+
+  <rect x="200" y="100" width="100" height="32" rx="3" class="box"/>
+  <text x="214" y="120" class="s">H(left)</text>
+  <rect x="420" y="100" width="100" height="32" rx="3" class="hi"/>
+  <text x="434" y="120" class="s">H(right)</text>
+  <line x1="250" y1="132" x2="160" y2="160" class="ln"/>
+  <line x1="250" y1="132" x2="300" y2="160" class="ln"/>
+  <line x1="470" y1="132" x2="420" y2="160" class="ln"/>
+  <line x1="470" y1="132" x2="560" y2="160" class="ln"/>
+
+  <rect x="110" y="160" width="90" height="28" rx="3" class="box"/>
+  <text x="128" y="178" class="s">col 0</text>
+  <rect x="250" y="160" width="90" height="28" rx="3" class="box"/>
+  <text x="268" y="178" class="s">col 1</text>
+  <rect x="390" y="160" width="90" height="28" rx="3" class="hi"/>
+  <text x="408" y="178" class="s">col 2 ★</text>
+  <rect x="530" y="160" width="90" height="28" rx="3" class="box"/>
+  <text x="548" y="178" class="s">col 3</text>
+
+  <rect x="24" y="208" width="672" height="66" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Open col 2</text>
+  <text x="36" y="250" class="s">Send value(col 2) + sibling hashes on the path to R. Verifier re-hashes upward; accepts iff root matches the committed R.</text>
+  <text x="36" y="268" class="s">Prover can’t change an unopened column later without breaking the root (assuming H is collision-resistant).</text>
+</svg>
+<p class="cap">IOP said “query oracle[i]”. Merkle implements that query without shipping the whole oracle.</p>
+</div>'''
+
+
+def svg_sumcheck_round():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One round of sumcheck">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Sumcheck — reduce a huge sum to one random evaluation</text>
+
+  <rect x="24" y="40" width="672" height="70" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Claim to check</text>
+  <text x="36" y="84" class="s">Σ_{x ∈ {0,1}ⁿ} P(x)  =  S     (P known as a small arithmetic circuit / formula; n can be 20–40 → millions of terms)</text>
+
+  <rect x="24" y="124" width="210" height="120" rx="3" class="box"/>
+  <text x="36" y="146" class="t">Round i</text>
+  <text x="36" y="168" class="s">Prover sends univariate</text>
+  <text x="36" y="186" class="s">gᵢ(X) = Σ_{rest} P(r₁…rᵢ₋₁, X, ·)</text>
+  <text x="36" y="210" class="s">Verifier checks</text>
+  <text x="36" y="228" class="s">gᵢ(0)+gᵢ(1) = prior claim</text>
+
+  <rect x="250" y="124" width="210" height="120" rx="3" class="box"/>
+  <text x="262" y="146" class="t">Challenge</text>
+  <text x="262" y="168" class="s">Verifier samples random</text>
+  <text x="262" y="186" class="s">rᵢ ∈ 𝔽 (or H(transcript)</text>
+  <text x="262" y="204" class="s">after Fiat–Shamir).</text>
+  <text x="262" y="228" class="s">New claim: gᵢ(rᵢ) = Sᵢ</text>
+
+  <rect x="476" y="124" width="220" height="120" rx="3" class="box"/>
+  <text x="488" y="146" class="t">After n rounds</text>
+  <text x="488" y="168" class="s">Claim is just</text>
+  <text x="488" y="186" class="s">P(r₁,…,rₙ) = Sₙ</text>
+  <text x="488" y="210" class="s">Verifier evaluates P at</text>
+  <text x="488" y="228" class="s">that one point (cheap).</text>
+
+  <rect x="24" y="260" width="672" height="64" rx="3" class="box"/>
+  <text x="36" y="282" class="t">Why cheating fails</text>
+  <text x="36" y="302" class="s">A false gᵢ agrees with the true univariate on ≤ deg(g) points. Random rᵢ hits a lie with tiny probability. n rounds → soundness ~ n·deg/|𝔽|.</text>
+</svg>
+<p class="cap">Workhorse of FlashProve (~2000 sumchecks / request). Matmul / all-reduce-style sums → few random point checks.</p>
+</div>'''
+
+
+def svg_fiat_shamir():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fiat-Shamir transformation">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#mf); }
+  </style>
+  <defs>
+    <marker id="mf" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">Fiat–Shamir: interactive random challenges → one proof file</text>
+
+  <rect x="24" y="44" width="150" height="70" rx="3" class="box"/>
+  <text x="36" y="68" class="t">msg₁</text>
+  <text x="36" y="90" class="s">prover message</text>
+  <path d="M174 79 L210 79" class="arr"/>
+  <rect x="210" y="44" width="150" height="70" rx="3" class="box"/>
+  <text x="222" y="68" class="t">c₁ = H(…)</text>
+  <text x="222" y="90" class="s">challenge</text>
+  <path d="M360 79 L396 79" class="arr"/>
+  <rect x="396" y="44" width="150" height="70" rx="3" class="box"/>
+  <text x="408" y="68" class="t">msg₂</text>
+  <text x="408" y="90" class="s">depends on c₁</text>
+  <path d="M546 79 L582 79" class="arr"/>
+  <rect x="582" y="44" width="114" height="70" rx="3" class="box"/>
+  <text x="594" y="68" class="t">c₂ = H</text>
+  <text x="594" y="90" class="s">…</text>
+
+  <rect x="24" y="140" width="672" height="100" rx="3" class="box"/>
+  <text x="36" y="162" class="t">Security intuition (random-oracle model)</text>
+  <text x="36" y="184" class="s">Prover must fix msgᵢ before learning cᵢ = H(transcript). To try many cᵢ they must re-hash many transcripts — expensive if H is</text>
+  <text x="36" y="202" class="s">idealized as a random function (BLAKE2 in FlashProve). Verifier never sends coins; they recompute the same hash chain from the file.</text>
+  <text x="36" y="224" class="s">FlashProve twist: challenges form a DAG (per-request chains join for a shared proximity test) so GPU can overlap work across a batch.</text>
+</svg>
+<p class="cap">If you only remember one sentence: the proof file is a frozen interactive transcript whose “randomness” is the hash of what came before.</p>
+</div>'''
+
+
+def svg_lookup_and_linear():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lookups and linear claims">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Two more IOP gadgets you will see everywhere in zkML</text>
+
+  <rect x="24" y="40" width="336" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Lookup</text>
+  <text x="36" y="84" class="s">Non-arithmetic ops (SiLU, Softmax</text>
+  <text x="36" y="102" class="s">piece, comparisons) → public table T</text>
+  <text x="36" y="120" class="s">of pairs (u, f(u)). Prover claims every</text>
+  <text x="36" y="138" class="s">secret pair is a row of T. Checked via</text>
+  <text x="36" y="156" class="s">sumcheck-style grand-product / LogUp.</text>
+  <text x="36" y="178" class="s">Table size must stay small (~2¹⁶).</text>
+
+  <rect x="376" y="40" width="320" height="150" rx="3" class="box"/>
+  <text x="388" y="62" class="t">Linear claim</text>
+  <text x="388" y="84" class="s">End state of almost every reduction:</text>
+  <text x="388" y="102" class="s">⟨v, m⟩ = c for known v,c and secret</text>
+  <text x="388" y="120" class="s">committed message m. Batch many via</text>
+  <text x="388" y="138" class="s">random linear combo. Then one</text>
+  <text x="388" y="156" class="s">proximity test opens a few columns</text>
+  <text x="388" y="178" class="s">and checks the combo + code distance.</text>
+
+  <rect x="24" y="206" width="672" height="58" rx="3" class="box"/>
+  <text x="36" y="228" class="t">Inference IOP flow (one sentence)</text>
+  <text x="36" y="248" class="s">“y is greedy under committed W” → poly constraints + lookups on the trace → linear claims on Enc(W) &amp; Enc(trace) → proximity opens.</text>
+</svg>
+<p class="cap">zkLLM’s tlookup / zkAttn are lookup-family gadgets. FlashProve’s ~2000 sumchecks mostly feed these linear claims.</p>
+</div>'''
+
+
+def svg_flashprove():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FlashProve pipeline">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#mfp); }
+  </style>
+  <defs>
+    <marker id="mfp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">FlashProve = commit-and-prove IOP for MoE inference (worked example of §0c)</text>
+
+  <rect x="24" y="40" width="160" height="90" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Offline</text>
+  <text x="36" y="82" class="s">Enc(W) + Merkle</text>
+  <text x="36" y="100" class="s">+ range / proximity</text>
+  <text x="36" y="118" class="s">→ commitment ID</text>
+  <path d="M184 85 L220 85" class="arr"/>
+
+  <rect x="220" y="40" width="160" height="90" rx="3" class="box"/>
+  <text x="232" y="62" class="t">Leaf tables</text>
+  <text x="232" y="82" class="s">fresh masks of same W</text>
+  <text x="232" y="100" class="s">+ link proofs</text>
+  <text x="232" y="118" class="s">(query budget)</text>
+  <path d="M380 85 L416 85" class="arr"/>
+
+  <rect x="416" y="40" width="160" height="90" rx="3" class="box"/>
+  <text x="428" y="62" class="t">Online batch</text>
+  <text x="428" y="82" class="s">integer prefill</text>
+  <text x="428" y="100" class="s">segment traces</text>
+  <text x="428" y="118" class="s">sumcheck / lookup</text>
+  <path d="M576 85 L612 85" class="arr"/>
+
+  <rect x="612" y="40" width="84" height="90" rx="3" class="box"/>
+  <text x="624" y="62" class="t">π</text>
+  <text x="624" y="82" class="s">~19 MB</text>
+  <text x="624" y="100" class="s">CPU verify</text>
+  <text x="624" y="118" class="s">~17 s</text>
+
+  <rect x="24" y="150" width="672" height="130" rx="3" class="box"/>
+  <text x="36" y="172" class="t">Measured (Llama 4 Maverick 400B MoE, 4-bit, 1×H100)</text>
+  <text x="36" y="194" class="s">~110 prefill tok/s prove (batch 24) · ~70–95× vLLM GPU-time · hides weights &amp; experts; architecture public</text>
+  <text x="36" y="214" class="s">Statement: exact-match greedy of integer model, or clipped-gap policy (Token-DiFR family). Post-hoc, not inline.</text>
+  <text x="36" y="234" class="s">Lean: soundness of Lean verifier; C++/CUDA tested, not proved equivalent. Side-channels / float serving out of scope.</text>
+  <text x="36" y="254" class="s">Lineage: Plan B evaluate engine at frontier demo scale — peer of VerInf, much faster / smaller π on a related claim.</text>
+</svg>
+<p class="cap"><a href="https://www.anthropic.com/research/provable-inference">Anthropic · FlashProve</a> · <a href="https://github.com/anthropics/FlashProve">github.com/anthropics/FlashProve</a> · Nov 2026</p>
+</div>'''
+
+
+def svg_field_sz():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Finite field and Schwartz-Zippel">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Two tiny math facts everything else sits on</text>
+
+  <rect x="24" y="40" width="336" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">1 · Finite field 𝔽_p</text>
+  <text x="36" y="84" class="s">Pick a big prime p. All + − × happen</text>
+  <text x="36" y="102" class="s">“mod p” (clock arithmetic).</text>
+  <text x="36" y="124" class="s">SNARK math only works here —</text>
+  <text x="36" y="142" class="s">not in floating-point GPU numbers.</text>
+  <text x="36" y="168" class="s">Keep values small so mod p ≈ integers.</text>
+
+  <rect x="376" y="40" width="320" height="150" rx="3" class="box"/>
+  <text x="388" y="62" class="t">2 · Schwartz–Zippel</text>
+  <text x="388" y="84" class="s">A nonzero polynomial of degree d</text>
+  <text x="388" y="102" class="s">is zero at a random point with</text>
+  <text x="388" y="120" class="s">probability ≤ d / |𝔽|  (tiny).</text>
+  <text x="388" y="142" class="s">So: check one random point ≈</text>
+  <text x="388" y="168" class="s">check the whole polynomial.</text>
+
+  <rect x="24" y="208" width="672" height="72" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Why you care</text>
+  <text x="36" y="252" class="s">Sumcheck, batching many claims, “did the prover lie?” — almost all soundness bounds are just Schwartz–Zippel in a trench coat.</text>
+</svg>
+<p class="cap">If you only memorize two formulas from this whole primer: “mod p” and “random point catches a lying polynomial.”</p>
+</div>'''
+
+
+def svg_arithmetize():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arithmetization">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#ma); }
+  </style>
+  <defs>
+    <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">Arithmetization = turn the model run into equations</text>
+
+  <rect x="24" y="44" width="180" height="90" rx="3" class="box"/>
+  <text x="36" y="68" class="t">GPU story</text>
+  <text x="36" y="90" class="s">matmul, SiLU,</text>
+  <text x="36" y="108" class="s">softmax, argmax…</text>
+  <path d="M204 89 L240 89" class="arr"/>
+
+  <rect x="240" y="44" width="200" height="90" rx="3" class="box"/>
+  <text x="252" y="68" class="t">Equation story</text>
+  <text x="252" y="90" class="s">c − a·b = 0</text>
+  <text x="252" y="108" class="s">(u,v) ∈ public table</text>
+  <path d="M440 89 L476 89" class="arr"/>
+
+  <rect x="476" y="44" width="220" height="90" rx="3" class="box"/>
+  <text x="488" y="68" class="t">Proof story</text>
+  <text x="488" y="90" class="s">check those eqs</text>
+  <text x="488" y="108" class="s">without seeing a,b,W</text>
+
+  <rect x="24" y="156" width="672" height="84" rx="3" class="box"/>
+  <text x="36" y="178" class="t">Concrete</text>
+  <text x="36" y="200" class="s">Y = W X  →  many multiply-add equations. Softmax / SiLU → “this value is in a public lookup table.”</text>
+  <text x="36" y="220" class="s">“Circuit” here means that pile of equations — not AND/OR gates from undergrad digital logic.</text>
+</svg>
+<p class="cap">No equations → nothing to sumcheck. This step is why proofs talk about an integer / quantized model, not raw BF16 CUDA.</p>
+</div>'''
+
+
+def svg_unique_list():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unique vs list decoding">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Codewords: how wrong can a table be and still “mean” one message?</text>
+
+  <rect x="24" y="40" width="336" height="130" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Unique decoding</text>
+  <text x="36" y="84" class="s">If the sent row is close enough to</text>
+  <text x="36" y="102" class="s">a codeword, only ONE message fits.</text>
+  <text x="36" y="124" class="s">Safe but needs more checks / opens.</text>
+  <text x="36" y="148" class="s">Slower proofs.</text>
+
+  <rect x="376" y="40" width="320" height="130" rx="3" class="box"/>
+  <text x="388" y="62" class="t">List decoding</text>
+  <text x="388" y="84" class="s">Allow bigger errors → a short LIST</text>
+  <text x="388" y="102" class="s">of nearby codewords might fit.</text>
+  <text x="388" y="124" class="s">Fewer opens (faster), but you must</text>
+  <text x="388" y="148" class="s">pin which message you meant.</text>
+
+  <rect x="24" y="188" width="672" height="72" rx="3" class="box"/>
+  <text x="36" y="210" class="t">FlashProve</text>
+  <text x="36" y="232" class="s">Uses the list-decoding regime + an extra “out-of-domain” random sample so the list collapses to one message. That’s the OOD answers in the commitment.</text>
+</svg>
+<p class="cap">Proximity test = “are you close to some codeword?” OOD sample = “and we mean this one.”</p>
+</div>'''
+
+
+def svg_mle_batch():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Multilinear extension and batching">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Two bookkeeping tricks used constantly</text>
+
+  <rect x="24" y="40" width="336" height="140" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Multilinear extension</text>
+  <text x="36" y="84" class="s">A table on corners {0,1}ⁿ becomes</text>
+  <text x="36" y="102" class="s">ONE polynomial that matches the</text>
+  <text x="36" y="120" class="s">table on those corners, and is</text>
+  <text x="36" y="138" class="s">degree ≤ 1 in each variable.</text>
+  <text x="36" y="160" class="s">Sumcheck often sums that polynomial.</text>
+
+  <rect x="376" y="40" width="320" height="140" rx="3" class="box"/>
+  <text x="388" y="62" class="t">Random batching</text>
+  <text x="388" y="84" class="s">Many claims C₁…Cₖ true?</text>
+  <text x="388" y="102" class="s">Pick random r; check</text>
+  <text x="388" y="120" class="s">C₁ + r C₂ + r² C₃ + … = 0.</text>
+  <text x="388" y="142" class="s">If any Cᵢ is false, the combo is a</text>
+  <text x="388" y="160" class="s">nonzero poly → random r catches it.</text>
+
+  <rect x="24" y="198" width="672" height="62" rx="3" class="box"/>
+  <text x="36" y="220" class="t">Again: Schwartz–Zippel</text>
+  <text x="36" y="242" class="s">Batching is not a new idea — it’s “one random point checks many equations at once.”</text>
+</svg>
+<p class="cap">When a paper says “we fold claims with a random challenge,” this is what they mean.</p>
+</div>'''
+
+
+def svg_proof_vs_arg():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Proof vs argument and ROM">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Words people mix up</text>
+
+  <rect x="24" y="40" width="220" height="120" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Proof (info-theoretic)</text>
+  <text x="36" y="84" class="s">Even infinite compute</text>
+  <text x="36" y="102" class="s">can’t fake it (except</text>
+  <text x="36" y="120" class="s">tiny random chance).</text>
+  <text x="36" y="144" class="s">IOP layer feels like this.</text>
+
+  <rect x="256" y="40" width="220" height="120" rx="3" class="box"/>
+  <text x="268" y="62" class="t">Argument</text>
+  <text x="268" y="84" class="s">A cheater with a huge</text>
+  <text x="268" y="102" class="s">computer who can break</text>
+  <text x="268" y="120" class="s">the hash might fake it.</text>
+  <text x="268" y="144" class="s">Merkle / SNARK layer.</text>
+
+  <rect x="488" y="40" width="208" height="120" rx="3" class="box"/>
+  <text x="500" y="62" class="t">Random oracle</text>
+  <text x="500" y="84" class="s">Pretend hash H is a</text>
+  <text x="500" y="102" class="s">perfect random function.</text>
+  <text x="500" y="120" class="s">Theorems assume that;</text>
+  <text x="500" y="144" class="s">BLAKE2 is the stand-in.</text>
+
+  <rect x="24" y="180" width="672" height="60" rx="3" class="box"/>
+  <text x="36" y="202" class="t">Practical English</text>
+  <text x="36" y="224" class="s">FlashProve is an argument in the random-oracle model: “fake a proof” ≈ “break BLAKE2 / get absurdly lucky.”</text>
+</svg>
+<p class="cap">Lean theorems are about this idealized world. Real BLAKE2 is a belief, not a proof.</p>
+</div>'''

@@ -2,7 +2,7 @@
 
 Self-contained technical map of public research on **verifiable AI slowdown / pause** (Claim A: no covert frontier training under low trust).
 
-Not a product pitch. Diagrams + who/what/maturity/lineage for the main papers and posts (Wasil, Shavit, Rahman, joshc, Cankaya Plan A/B, zkLLM, VerInf, FlexHEG, Peigné).
+Not a product pitch. Diagrams + who/what/maturity/lineage for the main papers and posts (Wasil, Shavit, Rahman, joshc, Cankaya Plan A/B, zkLLM, VerInf, FlashProve, FlexHEG, Peigné). §0c is a from-zero primer (finite fields, Schwartz–Zippel, arithmetization, IOP / Merkle / Fiat–Shamir / Sumcheck, list decoding, commit-and-prove) for reading the Plan B engines.
 
 ## Read
 

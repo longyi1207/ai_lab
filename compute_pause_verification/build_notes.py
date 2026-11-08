@@ -171,13 +171,13 @@ def svg_lineage():
   <path d="M580 260 L580 278" class="arr"/>
 
   <rect x="470" y="282" width="220" height="44" rx="3" class="box"/>
-  <text x="482" y="300" class="t">6–7 zkLLM · VerInf · DiFR</text>
-  <text x="482" y="316" class="s">Plan B evaluate engines</text>
+  <text x="482" y="300" class="t">6–7b zkLLM·VerInf·FlashProve</text>
+  <text x="482" y="316" class="s">Plan B (+ DiFR); see §0c</text>
   <text x="24" y="308" class="ly">inference crypto</text>
 
   <text x="24" y="348" class="s">FlexHEG ∥ Cankaya: longer silicon track vs near-term facility retrofit — complementary, not sequential.</text>
 </svg>
-<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM/VerInf/DiFR sit under Plan B evaluate. FlexHEG is the parallel hardware-enforcement track.</p>
+<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM / VerInf / FlashProve / DiFR sit under Plan B evaluate (§0c = algorithm primer). FlexHEG is the parallel hardware-enforcement track.</p>
 </div>'''
 def svg_wasil():
     return '''
@@ -577,7 +577,7 @@ BODY = f'''
   <div class="kicker">Briefing deck · compute-pause verification</div>
   <h1>Research directions for verifiable AI slowdown</h1>
   <p>A self-contained technical map of the main public papers and posts on verifying (and preferably throttling) frontier AI training under low trust. For each piece: who wrote it, what problem it addresses, how mature it is, and how it relates to the rest of the stack. Diagrams first; public links in each section.</p>
-  <p class="meta">2026-08-04 · standalone briefing · sources linked inline (arXiv / LessWrong / Substack / project sites)</p>
+  <p class="meta">2026-08-04 · updated 2026-11-07 (§0c from-zero zk recipe + §7b FlashProve) · standalone briefing · sources linked inline</p>
 </header>
 
 <section id="map">
@@ -623,7 +623,7 @@ BODY = f'''
     <div class="rung"><div class="lvl">tight</div><div class="body"><strong>Workload monitoring</strong> — weight snapshots + transcripts (Shavit); thin train↔infer telemetry (Rahman)</div></div>
     <div class="rung"><div class="lvl">hard</div><div class="body"><strong>Hardware-enabled guarantees</strong> — FlexHEG FLOP caps / licenses / interlocks</div></div>
     <div class="rung"><div class="lvl">crypto</div><div class="body"><strong>ZK training proofs</strong> — Peigné et al. (§9 research horizon)</div></div>
-    <div class="rung"><div class="lvl">infer</div><div class="body"><strong>Near-term inference retrofit</strong> — Cankaya Plan A (§5 taps + bit-exact) then Plan B (§6 zkLLM · §7 VerInf)</div></div>
+    <div class="rung"><div class="lvl">infer</div><div class="body"><strong>Near-term inference retrofit</strong> — Cankaya Plan A (§5 taps + bit-exact) then Plan B (§6 zkLLM · §7 VerInf · §7b FlashProve; algorithms in §0c)</div></div>
   </div>
   <p><strong>Maturity legend used below:</strong> <em>Survey</em> (conceptual menu) · <em>Blueprint</em> (architecture, no full deploy) · <em>Empirical paper</em> (measured results) · <em>Prototype / demo</em> · <em>Horizon</em> (no working end-to-end system yet) · <em>Product</em> (mass deployment — almost nothing here qualifies).</p>
 </section>
@@ -734,11 +734,196 @@ BODY = f'''
     </table>
   </div>
 
-  <h3>9 · Zero-knowledge proofs (for §§6–7, §9)</h3>
+  <h3>9 · Zero-knowledge proofs (for §§6–7, §7b, §9)</h3>
   {svg_panels.svg_verify_properties()}
   {svg_panels.svg_zk_constraints()}
   <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
   <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
+  <p><strong>Next:</strong> §0c is a from-zero primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove). Then §7b shows FlashProve assembling them at 400B.</p>
+</section>
+
+<section id="zk-recipe">
+  <div class="kicker">Primer · learn the algorithms</div>
+  <h2><span class="n">0c.</span>Hash-based zkSNARK recipe — from zero</h2>
+  <p class="dek">Written for weak math background. Plain language first; jargon only when needed. Read top to bottom once. Goal: stop treating “SNARK” as magic, then §§6–7b make sense.</p>
+
+  <h3>0 · What we are trying to do</h3>
+  <p><strong>Prover</strong> (model provider) says: “I ran <em>this</em> committed model on your prompt and got <em>these</em> tokens.”</p>
+  <p><strong>Verifier</strong> (you / auditor) has no weights, no big GPU, and should learn almost nothing about the weights.</p>
+  <p>So the prover sends a short <strong>proof file</strong>. Four wishes:</p>
+  <ul>
+    <li><strong>Complete:</strong> if they’re honest, the check passes.</li>
+    <li><strong>Sound:</strong> if they lie, the check almost always fails.</li>
+    <li><strong>Zero-knowledge:</strong> the file doesn’t leak the weights.</li>
+    <li><strong>Succinct:</strong> checking is much cheaper than re-running the model.</li>
+  </ul>
+
+  <h3>0a · Tiny math you need (really only this)</h3>
+  {svg_panels.svg_field_sz()}
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Idea</th><th>Plain English</th><th>One picture</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Finite field 𝔽_p</strong></td>
+          <td>Do + − × on a clock with p hours (p = big prime). After p you wrap around.</td>
+          <td>Like 7+8 = 3 if the clock has size 12 — same idea, huge clock.</td>
+        </tr>
+        <tr>
+          <td><strong>Why a field?</strong></td>
+          <td>Proof math needs clean algebra. GPU floats (BF16/FP8) are messy and machine-dependent.</td>
+          <td>So we prove an <em>integer</em> version of the model, then hope it’s close to float serving.</td>
+        </tr>
+        <tr>
+          <td><strong>Stay in range</strong></td>
+          <td>If a number grows past ~p/2, “mod p” no longer matches normal integer math.</td>
+          <td>Proofs include range / lookup checks so values stay small.</td>
+        </tr>
+        <tr>
+          <td><strong>Schwartz–Zippel</strong></td>
+          <td>A lying polynomial is almost never zero at a random point.</td>
+          <td>So one random check ≈ checking the whole thing. This is the soundness engine.</td>
+        </tr>
+        <tr>
+          <td><strong>Degree</strong></td>
+          <td>How “wiggly” a polynomial is. Degree d needs d+1 points to pin it down.</td>
+          <td>Used constantly: Reed–Solomon, sumcheck, masks.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>You can stop and breathe here.</strong> Everything below is “use these two facts in clever ways.”</p>
+
+  <h3>0b · Turn the model into equations (arithmetization)</h3>
+  {svg_panels.svg_arithmetize()}
+  <p>Step by step:</p>
+  <ol>
+    <li>Write the forward pass with small integers (quantized weights / activations).</li>
+    <li>Every matmul becomes many equations like <span class="mono">c = a · b</span> (in the field).</li>
+    <li>Weird nonlinear stuff (SiLU, pieces of softmax, comparisons) becomes: “this pair (input, output) is a row of a public table.” That’s a <strong>lookup</strong>.</li>
+    <li>The pile of equations is the <strong>circuit</strong>. Not AND/OR gates — just equations.</li>
+  </ol>
+  <p>If you skip this step, there is nothing for sumcheck to check.</p>
+
+  <h3>0c · Proof vs argument vs “random oracle” (vocabulary)</h3>
+  {svg_panels.svg_proof_vs_arg()}
+  <ul>
+    <li><strong>IOP</strong> (below) is the math game with long tables + random questions — close to an information-theoretic proof.</li>
+    <li>After <strong>Merkle trees</strong>, it becomes an <strong>argument</strong>: cheating means breaking the hash (or absurd luck).</li>
+    <li><strong>Random oracle model (ROM):</strong> pretend the hash is a perfect random function when writing theorems. Real life uses BLAKE2 and hopes it’s “random enough.”</li>
+  </ul>
+
+  <h3>1 · The three-step recipe (memorize this picture)</h3>
+  {svg_panels.svg_zk_recipe()}
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Name</th><th>In one sentence</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td><strong>IOP</strong></td><td>Prover posts huge tables; verifier asks a few random cells; a lie gets caught with high probability.</td></tr>
+        <tr><td class="mono">2</td><td><strong>Merkle</strong></td><td>Don’t send the huge tables — send a hash root; later open only the asked cells with a short path.</td></tr>
+        <tr><td class="mono">3</td><td><strong>Fiat–Shamir</strong></td><td>Don’t wait for a live verifier’s coin flips — set each challenge = hash(everything so far), ship one file.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Papers invent their own Step 1 (exact circuit, Û score, greedy token…). Steps 2–3 are shared plumbing. FlashProve’s hash is BLAKE2.</p>
+
+  <h3>2 · Reed–Solomon + random mask (hide the weights)</h3>
+  {svg_panels.svg_reed_solomon_zk()}
+  <p>Plain version:</p>
+  <ol>
+    <li>Take a row of weight numbers.</li>
+    <li>Treat them as coefficients of a polynomial (plus some random junk in front).</li>
+    <li>Evaluate that polynomial at many points → a long row (a <strong>codeword</strong>).</li>
+    <li>Different weight rows → long rows that disagree in most places (error-correcting code).</li>
+    <li>Because of the random junk, looking at only ≤ <strong>t</strong> cells tells you nothing about the weights. t is the <strong>query budget</strong>.</li>
+  </ol>
+  <p>Open more than t cells on the same encoding → privacy can leak. That’s why FlashProve makes many <strong>leaf tables</strong> (same weights, fresh random junk) and proves they match with <strong>link proofs</strong>.</p>
+
+  <h3>2b · Unique decoding vs list decoding (why “OOD” exists)</h3>
+  {svg_panels.svg_unique_list()}
+  <p>A <strong>proximity test</strong> asks: “is this committed row close to a real codeword?”</p>
+  <ul>
+    <li>If you demand “very close,” there’s only one possible message (<strong>unique</strong>) — safer, more opens, slower.</li>
+    <li>If you allow “kind of close,” several messages might fit (<strong>list</strong>) — fewer opens, faster, but you need an extra random sample (<strong>out-of-domain / OOD</strong>) to name which message you meant.</li>
+  </ul>
+  <p>FlashProve lives in the list-decoding world. The commitment publishes OOD answers for that reason.</p>
+
+  <h3>3 · Merkle trees (open one cell without sending the whole table)</h3>
+  {svg_panels.svg_merkle_open()}
+  <p>Think of a tournament bracket of hashes. Bottom row = table columns. Top = one root R you publish.</p>
+  <p>To open column 7: send the value + the sibling hashes along the path to R. Verifier re-hashes upward. Match R → that cell is authentic. Change any other cell later → root would change → caught (if the hash is hard to collide).</p>
+
+  <h3>4 · Multilinear extension + batching (bookkeeping)</h3>
+  {svg_panels.svg_mle_batch()}
+  <p><strong>Multilinear extension (MLE):</strong> your data is a table on the corners of a hypercube (addresses made of 0/1 bits). There is a standard way to turn that table into one polynomial that (a) matches the table on those corners and (b) is degree at most 1 in each variable. Sumcheck usually talks about that polynomial — not a random made-up P.</p>
+  <p><strong>Batching:</strong> instead of checking 1000 claims separately, take a random mix. If any claim is false, the mix is a nonzero polynomial and a random challenge catches it (Schwartz–Zippel again).</p>
+
+  <h3>5 · Sumcheck (the workhorse)</h3>
+  {svg_panels.svg_sumcheck_round()}
+  <p>Want to know if a huge sum over many inputs equals S — without adding everything.</p>
+  <ol>
+    <li>Prover sends a small 1-variable polynomial for the next bit of the address.</li>
+    <li>Verifier checks it is consistent with the previous claim (plug in 0 and 1, add).</li>
+    <li>Verifier picks a random number r for that bit; the claim shrinks.</li>
+    <li>Repeat until one random point is left; evaluate P there.</li>
+  </ol>
+  <p>If the prover lied, some small polynomial is wrong, and the random r hits the lie with tiny probability. FlashProve does this ~2000 times per request (most of the IOP). Matmuls become sumchecks.</p>
+
+  <h3>6 · Lookups + linear claims + proximity (finish the IOP)</h3>
+  {svg_panels.svg_lookup_and_linear()}
+  <ul>
+    <li><strong>Lookup:</strong> “every secret value I used sits in this public table.” Softmax/SiLU live here. Tables must stay small (~2¹⁶) or proofs explode — that’s why nonlinearities get clipped / quantized.</li>
+    <li><strong>Linear claim:</strong> almost everything reduces to “a known weighted sum of a secret vector equals c.” Batch many of these with a random mix.</li>
+    <li><strong>Proximity test:</strong> open a few Merkle columns; check you’re close to a codeword <em>and</em> the linear claim holds. Plus OOD if you’re in list-decoding land.</li>
+  </ul>
+
+  <h3>7 · Fiat–Shamir (conversation → one file)</h3>
+  {svg_panels.svg_fiat_shamir()}
+  <p>Live protocol needs the verifier to send random challenges. Nobody is online, so:</p>
+  <p class="mono" style="margin:12px 0">next challenge = hash(parameters + all messages so far)</p>
+  <p>Prover writes the whole transcript into the proof file. Verifier recomputes the same challenges and checks openings + equations.</p>
+  <p>FlashProve twist: many requests in one batch → hash chains fork and join (a DAG) so the GPU can overlap work, then share one weight opening.</p>
+
+  <h3>8 · Commit once, prove many (why leaf tables exist)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Phase</th><th>What happens</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Offline</strong></td><td>Encode weights, Merkle-commit, prove “well-formed,” publish commitment ID</td><td>Nail down one W forever (binding)</td></tr>
+        <tr><td><strong>Copy leaves</strong></td><td>Same W, new random masks; link proof says “same weights”</td><td>Each encoding only allows t opens before ZK wears out</td></tr>
+        <tr><td><strong>Online</strong></td><td>For each reply (batch), build trace, sumcheck/lookup, open ≤ t columns of one leaf</td><td>Prove this request against the committed W</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>This pattern is called <strong>commit-and-prove</strong>. One commitment, many proofs. When leaves are used up, commit again.</p>
+
+  <h3>9 · Put it together — one flowchart</h3>
+  <pre><code>public:  commitment ID, prompt x, reply y
+secret:  weights W, activations, which MoE experts ran
+
+1. turn the integer forward pass into equations (+ lookups)
+2. encode W &amp; the run-trace with RS + random masks → Merkle roots
+3. sumcheck / lookup until only a few linear claims remain
+4. proximity test opens a few columns (≤ query budget t)
+5. Fiat–Shamir freezes the whole chat into proof file π
+
+verifier: recompute hashes, check Merkle paths + field equations
+          (CPU, seconds; never sees W)</code></pre>
+
+  <div class="note">
+    <span class="label">Study checklist (honest version)</span>
+    <p>Can you explain, out loud, without looking: (1) why proofs use a prime field, not floats; (2) Schwartz–Zippel in one sentence; (3) IOP → Merkle → Fiat–Shamir; (4) what query budget t is; (5) what one sumcheck round does; (6) what a lookup is for; (7) unique vs list decoding + why OOD exists; (8) why FlashProve needs leaf tables? If not, re-read that subsection only — don’t re-read the whole §0c.</p>
+  </div>
+  <div class="note">
+    <span class="label">Primary refs</span>
+    <p>
+      Schwartz–Zippel + sumcheck: any modern ZK textbook chapter ·
+      Chiesa–Yogev <em>Proofs, Arguments, and Zero-Knowledge</em> ·
+      IOP / BCS: Ben-Sasson–Chiesa–Spooner ·
+      FlashProve <a href="https://github.com/anthropics/FlashProve/blob/main/docs/protocol.md">protocol.md</a> §5 Tools ·
+      PurpleMind hash-based SNARK videos (intuition only)
+    </p>
+  </div>
 </section>
 
 <section id="wasil">
@@ -981,10 +1166,11 @@ BODY = f'''
     </table>
   </div>
   <h3>Guts (enough to not handwave)</h3>
+  <p>Same §0c stack; Hyrax is the polynomial commitment (Step-2 cousin of Merkle/PCS). Names below are zkLLM-specific gadgets on top.</p>
   <ul>
     <li><strong>Hyrax:</strong> polynomial commitment binds W into C; open evaluations at random points.</li>
-    <li><strong>Sumcheck:</strong> big matmuls / sums become interactive algebraic checks.</li>
-    <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table via a rational identity at a random point.</li>
+    <li><strong>Sumcheck:</strong> big matmuls / sums → interactive algebraic checks (§0c.4).</li>
+    <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table via a rational identity at a random point (§0c.5 lookups).</li>
     <li><strong>zkAttn:</strong> Softmax shift shrinks exp domain; don’t prove exact log-sum-exp — only a <strong>tolerance band</strong> on row sums (fine for execution receipts; dangerous if bolted onto a manipulable unexplained-info score).</li>
   </ul>
   <h3>What it does <em>not</em> prove</h3>
@@ -1048,12 +1234,70 @@ BODY = f'''
   </div>
   <div class="note bug">
     <span class="label">Cost intuition</span>
-    <p>Spot checks, not every request. Plan A ≈ recompute GPU-time. zkLLM-13B ~minutes + tiny π. VerInf-400B = hours + tens of GB — rare audits when secrecy of weights beats AE plaintext.</p>
+    <p>Spot checks, not every request. Plan A ≈ recompute GPU-time. zkLLM-13B ~minutes + tiny π. VerInf-400B = hours + tens of GB — rare audits when secrecy of weights beats AE plaintext. FlashProve (§7b) sits in the same Plan B slot with a different statement and ~two-order GPU overhead.</p>
+  </div>
+</section>
+
+<section id="flashprove">
+  <div class="kicker">Plan B · hash-based PI at 400B</div>
+  <h2><span class="n">7b.</span>FlashProve — commit-and-prove inference (Anthropic, 2026)</h2>
+  <p class="dek"><a href="https://www.anthropic.com/research/provable-inference">anthropic.com/research/provable-inference</a> · <a href="https://github.com/anthropics/FlashProve">github.com/anthropics/FlashProve</a> · tech report + Lean + Apache-2.0 code · Nov 2026</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p>Roy Rinberg, Alex Allain (Anthropic) with Chiesa / Christ / Dalal / Fenzi / Mayer / Weissenberg (EPFL, MIT, StarkWare, Succinct…). Frontier Red Team artifact toward “inference verification.”</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Working open-source prototype</strong> at Llama-4-Maverick 400B MoE on 1×H100. Lean proves protocol properties; C++/CUDA are AI-derived from Lean and <em>tested</em>, not proved equivalent. Research release, not a serving product.</p>
+    </div>
+  </div>
+  <p><strong>Statement (exact match):</strong> committed integer weights, on a public token window, produce the claimed greedy tokens on a checked range — without revealing weights, activations, or which MoE experts ran. Architecture is public. Serving float / sampled decoding can diverge; production-shaped use is post-hoc prove under a <em>clipped-gap</em> policy (Token-DiFR family).</p>
+  <p><strong>Lineage:</strong> Same Plan B evaluate slot as zkLLM / VerInf under Cankaya’s challenge loop. Implements the §0c recipe end-to-end. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
+  {svg_panels.svg_flashprove()}
+  <h3>How it uses §0c (map the names)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>§0c piece</th><th>FlashProve instance</th></tr></thead>
+      <tbody>
+        <tr><td>RS + random mask</td><td>Weight / trace rows encoded over ~64-bit prime field; query budget t</td></tr>
+        <tr><td>Merkle</td><td>Columns are tree leaves; commitment ID hashes root + config + OOD answers</td></tr>
+        <tr><td>Sumcheck (~2k / req)</td><td>Matmuls, folds, lookup reductions → linear claims</td></tr>
+        <tr><td>Lookup</td><td>Nonlinearities on small tables (~2¹⁶); range-ish checks</td></tr>
+        <tr><td>Proximity + OOD</td><td>List-decoding regime; pin one nearby codeword</td></tr>
+        <tr><td>Fiat–Shamir (DAG)</td><td>Per-request chains join for one shared weight opening per batch</td></tr>
+        <tr><td>Leaf / link proofs</td><td>Fresh encodings of same W so privacy budget doesn’t wear out after one batch</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Numbers (public release)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Rough figure</th></tr></thead>
+      <tbody>
+        <tr><td>Model</td><td>Llama 4 Maverick 400B MoE (~17B active / token), 4-bit integer</td></tr>
+        <tr><td>Context proved</td><td class="mono">≤ 1024 tokens / request</td></tr>
+        <tr><td>Prove</td><td class="mono">~110 tok/s on 1×H100 (batch 24); ~70–95× vLLM GPU-time</td></tr>
+        <tr><td>Proof size / verify</td><td class="mono">~19 MB · ~17 s on 24-core CPU</td></tr>
+        <tr><td>Offline commit</td><td class="mono">~39 min once; ~6.5 MB public material; ~16M requests / commitment class</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>What it does <em>not</em> prove</h3>
+  <ul>
+    <li>Bit-exact float serving (integer greedy / clipped gap only).</li>
+    <li>Hidden architecture; that the committed model is “the good one” (trust the commitment ID’s publisher).</li>
+    <li>That hardware isn’t also training on the side (Claim A residual — PI ≠ pause).</li>
+    <li>Timing side-channels; contexts beyond 1k in the release.</li>
+  </ul>
+  <div class="note">
+    <span class="label">Read with §0c open</span>
+    <p>If §7b still feels like jargon, the gap is almost always Step-1 IOP reductions (sumcheck / lookup / proximity), not Merkle or Fiat–Shamir. Walk one matmul constraint → sumcheck → linear claim → one column open on paper.</p>
   </div>
 </section>
 
 <section id="flexheg">
-  <div class="kicker">Hardware track · parallel to §§5–7</div>
+  <div class="kicker">Hardware track · parallel to §§5–7b</div>
   <h2><span class="n">8.</span>FlexHEG trilogy — especially Part II</h2>
   <p class="dek">
     Tech <a href="https://arxiv.org/abs/2506.03409">2506.03409</a> ·
@@ -1131,8 +1375,10 @@ facility controls against covert RL.
 
 Cankaya is the near-term low-trust retrofit: NS-first taps feed commitments;
 Plan A = AE precise replay (bit-exact metadata; DiFR if needed). Plan B swaps
-the evaluate step for ZK — zkLLM (~13B exact integer circuit) or VerInf
-(~400B unexplained-info bound Û). FlexHEG is the parallel hardware-enforcement
+the evaluate step for ZK — zkLLM (~13B exact integer circuit), VerInf
+(~400B unexplained-info bound Û), or FlashProve (~400B MoE greedy / clipped-gap
+at ~110 tok/s prove, ~19 MB π). §0c is the IOP→Merkle→Fiat–Shamir→Sumcheck
+primer for reading those engines. FlexHEG is the parallel hardware-enforcement
 track (active caps / interlocks), not a substitute for taps+evaluate. Peigné
 sketches ZK *training* as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
 empirics, and prototypes.</code></pre>
@@ -1177,7 +1423,7 @@ empirics, and prototypes.</code></pre>
           <td class="mono">6</td>
           <td><strong>Plan A → Plan B transition</strong></td>
           <td>Plaintext AE burns confidentiality; ZK restores it but is immature/expensive. Stakeholders need a migration path, not a cliff.</td>
-          <td>Timeline + dual-run design: which challenge classes stay on AE, which move to zkLLM/VerInf as prove-time falls; joint ops with both evaluate engines.</td>
+          <td>Timeline + dual-run design: which challenge classes stay on AE, which move to zkLLM / VerInf / FlashProve as prove-time falls; joint ops with multiple evaluate engines.</td>
         </tr>
         <tr>
           <td class="mono">7</td>
@@ -1218,6 +1464,8 @@ empirics, and prototypes.</code></pre>
       bit-exact <a href="https://arxiv.org/abs/2606.00279">2606.00279</a> ·
       zkLLM <a href="https://arxiv.org/abs/2404.16109">2404.16109</a> ·
       VerInf <a href="https://github.com/JamesPetrie/VerInf">GitHub</a> ·
+      FlashProve <a href="https://www.anthropic.com/research/provable-inference">Anthropic</a> /
+        <a href="https://github.com/anthropics/FlashProve">code</a> ·
       DiFR <a href="https://arxiv.org/abs/2511.20621">2511.20621</a> ·
       Peigné <a href="https://arxiv.org/abs/2606.05433">2606.05433</a>
     </p>
@@ -1242,6 +1490,7 @@ HTML = f'''<!DOCTYPE html>
 <nav class="toc" aria-label="Contents">
   <a href="#map"><span class="num">0</span>Map</a>
   <a href="#glossary"><span class="num">0b</span>Primer</a>
+  <a href="#zk-recipe"><span class="num">0c</span>zk recipe</a>
   <a href="#wasil"><span class="num">1</span>Wasil</a>
   <a href="#shavit"><span class="num">2</span>Shavit</a>
   <a href="#rahman"><span class="num">3</span>Rahman</a>
@@ -1249,6 +1498,7 @@ HTML = f'''<!DOCTYPE html>
   <a href="#cankaya"><span class="num">5</span>Plan A</a>
   <a href="#zkllm"><span class="num">6</span>zkLLM</a>
   <a href="#verinf"><span class="num">7</span>VerInf</a>
+  <a href="#flashprove"><span class="num">7b</span>FlashProve</a>
   <a href="#flexheg"><span class="num">8</span>FlexHEG</a>
   <a href="#zk"><span class="num">9</span>ZK-train</a>
   <a href="#synth"><span class="num">10</span>Synth</a>
