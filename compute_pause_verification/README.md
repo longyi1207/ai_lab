@@ -8,6 +8,7 @@ Not a product pitch. Diagrams + who/what/maturity/lineage for the main papers an
 
 - **[`notes.pdf`](notes.pdf)** — print-ready briefing
 - **[`notes.html`](notes.html)** — same content; open locally (figures load from `figures/`)
+- **[`papers/`](papers/)** — source PDFs kept with the deck (e.g. FlashProve technical report)
 
 ## Rebuild
 
