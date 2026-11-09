@@ -172,12 +172,12 @@ def svg_lineage():
 
   <rect x="470" y="282" width="220" height="44" rx="3" class="box"/>
   <text x="482" y="300" class="t">6–7b zkLLM·VerInf·FlashProve</text>
-  <text x="482" y="316" class="s">Plan B (+ DiFR); see §0c</text>
+  <text x="482" y="316" class="s">Plan B (+ DiFR); ZK math §0c</text>
   <text x="24" y="308" class="ly">inference crypto</text>
 
   <text x="24" y="348" class="s">FlexHEG ∥ Cankaya: longer silicon track vs near-term facility retrofit — complementary, not sequential.</text>
 </svg>
-<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM / VerInf / FlashProve / DiFR sit under Plan B evaluate (§0c = algorithm primer). FlexHEG is the parallel hardware-enforcement track.</p>
+<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM / VerInf / FlashProve / DiFR sit under Plan B evaluate (§0c = ZK math foundations). FlexHEG is the parallel hardware-enforcement track.</p>
 </div>'''
 def svg_wasil():
     return '''
@@ -577,7 +577,7 @@ BODY = f'''
   <div class="kicker">Briefing deck · compute-pause verification</div>
   <h1>Research directions for verifiable AI slowdown</h1>
   <p>A self-contained technical map of the main public papers and posts on verifying (and preferably throttling) frontier AI training under low trust. For each piece: who wrote it, what problem it addresses, how mature it is, and how it relates to the rest of the stack. Diagrams first; public links in each section.</p>
-  <p class="meta">2026-08-04 · updated 2026-11-07 (§0c from-zero zk recipe + §7b FlashProve) · standalone briefing · sources linked inline</p>
+  <p class="meta">2026-08-04 · updated 2026-11-08 (§0c ZK math foundations + §7b FlashProve) · standalone briefing · sources linked inline</p>
 </header>
 
 <section id="map">
@@ -632,7 +632,7 @@ BODY = f'''
 <section id="glossary">
   <div class="kicker">Primer</div>
   <h2><span class="n">0b.</span>Hardware · ML systems · crypto vocabulary</h2>
-  <p class="dek">Zoom from hall → interconnect layers → rack → node → board → SM, then why traffic looks different for train vs infer, then ZK vocab for §§6–7. Skim once; jump back when a later section feels opaque.</p>
+  <p class="dek">Zoom from hall → interconnect layers → rack → node → board → SM, then why traffic looks different for train vs infer, then a short ZK vocab teaser. Full ZK math is §0c. Skim once; jump back when a later section feels opaque.</p>
 
   <h3>1 · Where this lives — a real hall</h3>
   <figure>
@@ -739,13 +739,13 @@ BODY = f'''
   {svg_panels.svg_zk_constraints()}
   <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
   <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
-  <p><strong>Next:</strong> §0c is a from-zero primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove). Then §7b shows FlashProve assembling them at 400B.</p>
+  <p><strong>Next:</strong> §0c is the ZK math-foundations primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove) — parallel to §0b’s hardware zoom. Then §7b shows FlashProve using those tools at 400B.</p>
 </section>
 
-<section id="zk-recipe">
-  <div class="kicker">Primer · learn the algorithms</div>
-  <h2><span class="n">0c.</span>Hash-based zkSNARK recipe — from zero</h2>
-  <p class="dek">Written for weak math background. Plain language first; jargon only when needed. Read top to bottom once. Goal: stop treating “SNARK” as magic, then §§6–7b make sense.</p>
+<section id="zk-foundations">
+  <div class="kicker">Primer</div>
+  <h2><span class="n">0c.</span>Zero-knowledge proofs · math foundations</h2>
+  <p class="dek">Pair with §0b: that section is hardware / ML systems; this one is the math behind hash-based ZK proofs used in §§6–7b. Plain language; jargon only when needed. Read top to bottom once.</p>
 
   <h3>0 · What we are trying to do</h3>
   <p><strong>Prover</strong> (model provider) says: “I ran <em>this</em> committed model on your prompt and got <em>these</em> tokens.”</p>
@@ -805,7 +805,7 @@ BODY = f'''
   </ol>
   <p>If you skip this step, there is nothing for sumcheck to check.</p>
 
-  <h3>0c · Proof vs argument vs “random oracle” (vocabulary)</h3>
+  <h3>0d · Proof vs argument vs “random oracle” (vocabulary)</h3>
   {svg_panels.svg_proof_vs_arg()}
   <ul>
     <li><strong>IOP</strong> (below) is the math game with long tables + random questions — close to an information-theoretic proof.</li>
@@ -1377,8 +1377,8 @@ Cankaya is the near-term low-trust retrofit: NS-first taps feed commitments;
 Plan A = AE precise replay (bit-exact metadata; DiFR if needed). Plan B swaps
 the evaluate step for ZK — zkLLM (~13B exact integer circuit), VerInf
 (~400B unexplained-info bound Û), or FlashProve (~400B MoE greedy / clipped-gap
-at ~110 tok/s prove, ~19 MB π). §0c is the IOP→Merkle→Fiat–Shamir→Sumcheck
-primer for reading those engines. FlexHEG is the parallel hardware-enforcement
+at ~110 tok/s prove, ~19 MB π). §0c is the ZK math-foundations primer
+(IOP→Merkle→Fiat–Shamir→Sumcheck) for reading those engines. FlexHEG is the parallel hardware-enforcement
 track (active caps / interlocks), not a substitute for taps+evaluate. Peigné
 sketches ZK *training* as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
 empirics, and prototypes.</code></pre>
@@ -1490,7 +1490,7 @@ HTML = f'''<!DOCTYPE html>
 <nav class="toc" aria-label="Contents">
   <a href="#map"><span class="num">0</span>Map</a>
   <a href="#glossary"><span class="num">0b</span>Primer</a>
-  <a href="#zk-recipe"><span class="num">0c</span>zk recipe</a>
+  <a href="#zk-foundations"><span class="num">0c</span>ZK math</a>
   <a href="#wasil"><span class="num">1</span>Wasil</a>
   <a href="#shavit"><span class="num">2</span>Shavit</a>
   <a href="#rahman"><span class="num">3</span>Rahman</a>
