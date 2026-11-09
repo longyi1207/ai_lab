@@ -225,11 +225,11 @@
   <a href="#joshc"><span class="num">4</span>joshc</a>
   <a href="#cankaya"><span class="num">5</span>Plan A</a>
   <a href="#zkllm"><span class="num">6</span>zkLLM</a>
-  <a href="#verinf"><span class="num">7</span>VerInf</a>
-  <a href="#flashprove"><span class="num">7b</span>FlashProve</a>
-  <a href="#flexheg"><span class="num">8</span>FlexHEG</a>
-  <a href="#zk"><span class="num">9</span>ZK-train</a>
-  <a href="#synth"><span class="num">10</span>Synth</a>
+  <a href="#flashprove"><span class="num">7</span>FlashProve</a>
+  <a href="#verinf"><span class="num">8</span>VerInf</a>
+  <a href="#flexheg"><span class="num">9</span>FlexHEG</a>
+  <a href="#zk"><span class="num">10</span>ZK-train</a>
+  <a href="#synth"><span class="num">11</span>Synth</a>
 </nav>
 <main>
 
@@ -237,7 +237,7 @@
   <div class="kicker">Briefing deck · compute-pause verification</div>
   <h1>Research directions for verifiable AI slowdown</h1>
   <p>A self-contained technical map of the main public papers and posts on verifying (and preferably throttling) frontier AI training under low trust. For each piece: who wrote it, what problem it addresses, how mature it is, and how it relates to the rest of the stack. Diagrams first; public links in each section.</p>
-  <p class="meta">2026-08-04 · updated 2026-11-08 (§0c ZK math foundations + §7b FlashProve) · standalone briefing · sources linked inline</p>
+  <p class="meta">2026-08-04 · updated 2026-11-08 (§0c ZK math foundations + §7 FlashProve) · standalone briefing · sources linked inline</p>
 </header>
 
 <section id="map">
@@ -367,7 +367,7 @@
   <text x="280" y="118" class="ly">near-term facility</text>
 
   <rect x="520" y="124" width="160" height="50" rx="3" class="hi"/>
-  <text x="532" y="144" class="t">8 FlexHEG</text>
+  <text x="532" y="144" class="t">9 FlexHEG</text>
   <text x="532" y="160" class="s">active caps / shell</text>
   <text x="520" y="118" class="ly">hardware track</text>
 
@@ -382,7 +382,7 @@
   <text x="24" y="198" class="ly">thin detector</text>
 
   <rect x="280" y="204" width="160" height="50" rx="3" class="box"/>
-  <text x="292" y="224" class="t">9 Peigné 2026</text>
+  <text x="292" y="224" class="t">10 Peigné 2026</text>
   <text x="292" y="240" class="s">ZK training horizon</text>
   <text x="280" y="198" class="ly">training crypto</text>
 
@@ -395,21 +395,21 @@
   <path d="M580 260 L580 278" class="arr"/>
 
   <rect x="470" y="282" width="220" height="44" rx="3" class="box"/>
-  <text x="482" y="300" class="t">6–7b zkLLM·VerInf·FlashProve</text>
+  <text x="482" y="300" class="t">6–8 zkLLM·FlashProve·VerInf</text>
   <text x="482" y="316" class="s">Plan B (+ DiFR); ZK math §0c</text>
   <text x="24" y="308" class="ly">inference crypto</text>
 
   <text x="24" y="348" class="s">FlexHEG ∥ Cankaya: longer silicon track vs near-term facility retrofit — complementary, not sequential.</text>
 </svg>
-<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM / VerInf / FlashProve / DiFR sit under Plan B evaluate (§0c = ZK math foundations). FlexHEG is the parallel hardware-enforcement track.</p>
+<p class="cap">Wasil orients. Shavit designs classical monitoring; Rahman / Peigné harden thin slices of it (telemetry vs ZK transcripts). joshc stress-tests cheap facility controls → Cankaya assembles the retrofit; zkLLM / FlashProve / VerInf / DiFR sit under Plan B evaluate (§0c = ZK math foundations). FlexHEG is the parallel hardware-enforcement track.</p>
 </div>
   <div class="ladder">
     <div class="rung"><div class="lvl">loose</div><div class="body"><strong>NTM / inspections</strong> — satellites, energy, site visits (Wasil’s access-light methods)</div></div>
     <div class="rung"><div class="lvl">medium</div><div class="body"><strong>Network / facility controls</strong> — TAPs, bandwidth caps, memory wipes, output recompute (joshc; Cankaya taps)</div></div>
     <div class="rung"><div class="lvl">tight</div><div class="body"><strong>Workload monitoring</strong> — weight snapshots + transcripts (Shavit); thin train↔infer telemetry (Rahman)</div></div>
     <div class="rung"><div class="lvl">hard</div><div class="body"><strong>Hardware-enabled guarantees</strong> — FlexHEG FLOP caps / licenses / interlocks</div></div>
-    <div class="rung"><div class="lvl">crypto</div><div class="body"><strong>ZK training proofs</strong> — Peigné et al. (§9 research horizon)</div></div>
-    <div class="rung"><div class="lvl">infer</div><div class="body"><strong>Near-term inference retrofit</strong> — Cankaya Plan A (§5 taps + bit-exact) then Plan B (§6 zkLLM · §7 VerInf · §7b FlashProve; algorithms in §0c)</div></div>
+    <div class="rung"><div class="lvl">crypto</div><div class="body"><strong>ZK training proofs</strong> — Peigné et al. (§10 research horizon)</div></div>
+    <div class="rung"><div class="lvl">infer</div><div class="body"><strong>Near-term inference retrofit</strong> — Cankaya Plan A (§5 taps + bit-exact) then Plan B (§6 zkLLM · §7 FlashProve · §8 VerInf; algorithms in §0c)</div></div>
   </div>
   <p><strong>Maturity legend used below:</strong> <em>Survey</em> (conceptual menu) · <em>Blueprint</em> (architecture, no full deploy) · <em>Empirical paper</em> (measured results) · <em>Prototype / demo</em> · <em>Horizon</em> (no working end-to-end system yet) · <em>Product</em> (mass deployment — almost nothing here qualifies).</p>
 </section>
@@ -730,7 +730,7 @@
     </table>
   </div>
 
-  <h3>9 · Zero-knowledge proofs (for §§6–7, §7b, §9)</h3>
+  <h3>9 · Zero-knowledge proofs (for §§6–8, §10)</h3>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Verification properties">
@@ -824,13 +824,13 @@
 </div>
   <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
   <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
-  <p><strong>Next:</strong> §0c is the ZK math-foundations primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove) — parallel to §0b’s hardware zoom. Then §7b shows FlashProve using those tools at 400B.</p>
+  <p><strong>Next:</strong> §0c is the ZK math-foundations primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove) — parallel to §0b’s hardware zoom. Then §7 shows FlashProve using those tools at 400B.</p>
 </section>
 
 <section id="zk-foundations">
   <div class="kicker">Primer</div>
   <h2><span class="n">0c.</span>Zero-knowledge proofs · math foundations</h2>
-  <p class="dek">Pair with §0b: that section is hardware / ML systems; this one is the math behind hash-based ZK proofs used in §§6–7b. Plain language; jargon only when needed. Read top to bottom once.</p>
+  <p class="dek">Pair with §0b: that section is hardware / ML systems; this one is the math behind hash-based ZK proofs used in §§6–8. Plain language; jargon only when needed. Read top to bottom once.</p>
 
   <h3>0 · What we are trying to do</h3>
   <p><strong>Prover</strong> (model provider) says: “I ran <em>this</em> committed model on your prompt and got <em>these</em> tokens.”</p>
@@ -1792,8 +1792,8 @@ verifier: recompute hashes, check Merkle paths + field equations
   </div>
   <p><strong>Shared audit question:</strong> was this sampled request run on the whitelist model?</p>
   <p><strong>Plan A (near-term default):</strong> air-gapped audit environment (AE) holds the whitelist weights and <em>recomputes</em> the challenged forward pass in plaintext, then compares to tapped I/O. For that comparison to be a pass/fail (not a ~1% stego channel à la joshc), you need <strong>precise replay</strong> — ideally bit-exact under recorded metadata, or a disciplined statistical alternative (DiFR).</p>
-  <p><strong>Plan B (later sections):</strong> replace AE recompute with ZK so the peer needn’t see weights — zkLLM (§6) or VerInf (§7). Same challenge loop; different evaluate engine.</p>
-  <p><strong>Lineage:</strong> Turns joshc’s TAP/recompute sketches into an arms-control-shaped architecture. FlexHEG is the longer hardware track; Peigné (§9) is the training-ZK cousin.</p>
+  <p><strong>Plan B (later sections):</strong> replace AE recompute with ZK so the peer needn’t see weights — zkLLM (§6), FlashProve (§7), or VerInf (§8). Same challenge loop; different evaluate engine.</p>
+  <p><strong>Lineage:</strong> Turns joshc’s TAP/recompute sketches into an arms-control-shaped architecture. FlexHEG is the longer hardware track; Peigné (§10) is the training-ZK cousin.</p>
 
   <h3>Properties checklist (before the diagrams)</h3>
   <div class="tbl">
@@ -2043,7 +2043,7 @@ verifier: recompute hashes, check Merkle paths + field equations
   </ul>
   <div class="note">
     <span class="label">How the pieces lock</span>
-    <p>Tap → I/O commitments · Bit-exact (+ metadata) → close stego slack · AE recompute (Plan A) evaluates samples. §§6–7 swap in ZK at the evaluate step only.</p>
+    <p>Tap → I/O commitments · Bit-exact (+ metadata) → close stego slack · AE recompute (Plan A) evaluates samples. §§6–8 swap in ZK at the evaluate step only.</p>
   </div>
 </section>
 
@@ -2062,7 +2062,7 @@ verifier: recompute hashes, check Merkle paths + field equations
     </div>
   </div>
   <p><strong>Statement:</strong> there exist weights W matching public commitment C such that the public architecture, run as an <em>integer circuit</em> on public x, yields public y — without revealing W or activations.</p>
-  <p><strong>Lineage:</strong> One Plan B evaluate backend under Cankaya’s challenge loop. Precursor / contrast to VerInf (§7): exact receipt vs unexplained-info score. Complements Plan A when the AE cannot see weights.</p>
+  <p><strong>Lineage:</strong> One Plan B evaluate backend under Cankaya’s challenge loop. Precursor to FlashProve (§7, same exact-ish receipt idea at larger scale) and contrast to VerInf (§8, unexplained-info score). Complements Plan A when the AE cannot see weights.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
@@ -2109,7 +2109,7 @@ verifier: recompute hashes, check Merkle paths + field equations
   <ul>
     <li>Bit-exact match to H100/B200 float serving (that’s Plan A / bit-exact paper).</li>
     <li>Anything about training — only a forward pass receipt.</li>
-    <li>Frontier 100B+ scale in the published system (see VerInf for the larger demo with a different statement).</li>
+    <li>Frontier 100B+ scale in the published system (see FlashProve / VerInf for larger demo with a different statement).</li>
   </ul>
   <div class="note">
     <span class="label">Cheat intuition</span>
@@ -2117,90 +2117,9 @@ verifier: recompute hashes, check Merkle paths + field equations
   </div>
 </section>
 
-<section id="verinf">
-  <div class="kicker">Plan B · unexplained-info ZK</div>
-  <h2><span class="n">7.</span>VerInf — bound leftover bits, skip float bit-exact</h2>
-  <p class="dek">Petrie 2026 draft · <a href="https://github.com/JamesPetrie/VerInf">github.com/JamesPetrie/VerInf</a> · FLI / FlexHEG author</p>
-  <div class="two-col">
-    <div class="panel">
-      <h4>Who</h4>
-      <p><strong>James Petrie</strong> — same hardware-governance thread as FlexHEG. VerInf is the “replace the recompute cluster with a ZK evaluate engine” instance at frontier demo scale.</p>
-    </div>
-    <div class="panel">
-      <h4>Maturity</h4>
-      <p><strong>Working draft + large demo</strong>, not production audit tooling. Interactive, expensive proofs meant for rare high-stakes spot checks when both parties have serious compute.</p>
-    </div>
-  </div>
-  <p><strong>Statement:</strong> a committed integer model explains a (possibly hidden) token stream well enough that leftover unexplained information is ≤ a public bound Û bits/token — without revealing weights, activations, or plaintext I/O.</p>
-  <p><strong>Lineage:</strong> Other Plan B evaluate backend under Cankaya. Designed precisely because Plan A bit-exact and zkLLM-style exact equality both get brittle or tiny-scale at frontier serving.</p>
-  
-<div class="svg-fig">
-<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
-    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
-    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
-    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
-  </style>
-  <text x="24" y="24" class="h">VerInf statement (not bit-exact equality)</text>
-  <rect x="24" y="40" width="330" height="120" rx="4" class="box"/>
-  <text x="36" y="64" class="t">Committed integer model M</text>
-  <text x="36" y="84" class="s">predicts hidden token stream</text>
-  <text x="36" y="104" class="s">well enough that leftover</text>
-  <text x="36" y="124" class="s">info ≤ public Û bits/token</text>
-  <text x="36" y="144" class="s">ZK: no weights / acts / x,y</text>
-  <rect x="370" y="40" width="326" height="120" rx="4" class="box"/>
-  <text x="382" y="64" class="t">Demo anchor (Petrie 2026)</text>
-  <text x="382" y="84" class="s">Llama-4-Maverick ~400B MoE</text>
-  <text x="382" y="104" class="s">1000 tokens · Û ≈ 0.88 b/tok</text>
-  <text x="382" y="124" class="s">π ≈ 94 GB · prove ~14h · verify ~18h</text>
-  <text x="382" y="144" class="s">spot-check scare, not every request</text>
-  <text x="24" y="190" class="t">vs zkLLM</text>
-  <text x="24" y="212" class="s">zkLLM: prove exact integer circuit output y. Softmax via tables + tolerance. Scale ~13B, tiny π.</text>
-  <text x="24" y="232" class="s">VerInf: prove predictive explanation bound. Deliberately skips float bit-exact. Scale ~400B, huge π.</text>
-  <text x="24" y="252" class="s">Both are Cankaya Plan B evaluate engines — after taps/challenge exist. Plan A stays the near-term default.</text>
-</svg>
-<p class="cap"><a href="https://github.com/JamesPetrie/VerInf">VerInf</a> — unexplained-info ZK at frontier demo scale.</p>
-</div>
-  <h3>Why change the statement</h3>
-  <ul>
-    <li>Float nondeterminism + MoE/serving stacks make “y must equal AE recompute” expensive to field at 400B.</li>
-    <li>Exact-circuit ZK at 13B already hurts; naively scaling the zkLLM statement is the wrong lever.</li>
-    <li>Û is an auditable score: too large ⇒ looks like wrong model / stego / garbage; threshold is a policy knob.</li>
-  </ul>
-  <h3>Demo anchors (draft)</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Item</th><th>Rough figure</th></tr></thead>
-      <tbody>
-        <tr><td>Model</td><td>Llama-4-Maverick ~400B MoE (commit all experts/layer)</td></tr>
-        <tr><td>Sequence</td><td>1000 tokens (500+500), fully hidden in the demo</td></tr>
-        <tr><td>Û</td><td class="mono">≈ 0.88 bits/token (~95% of vocab info explained)</td></tr>
-        <tr><td>Prove / verify</td><td class="mono">~14 h prove · ~94 GB π · ~18 h verify (single high-end box class)</td></tr>
-        <tr><td>Witness stream</td><td class="mono">~7 TB streamed · ~84 GB peak RAM</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <h3>vs zkLLM (cheat table)</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Cheat</th><th>Plan A (§5)</th><th>zkLLM (§6)</th><th>VerInf (§7)</th></tr></thead>
-      <tbody>
-        <tr><td>Swap whitelist model</td><td>recompute mismatch</td><td>fails vs C</td><td>Û blows up</td></tr>
-        <tr><td>Float nondeterminism</td><td>pain; bit-exact / metadata</td><td>proves circuit, not float replica</td><td>slack → Û</td></tr>
-        <tr><td>Softmax slack abuse</td><td>if loose match, channel</td><td>still Accept possible</td><td>forbidden design goal; unique shift</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="note bug">
-    <span class="label">Cost intuition</span>
-    <p>Spot checks, not every request. Plan A ≈ recompute GPU-time. zkLLM-13B ~minutes + tiny π. VerInf-400B = hours + tens of GB — rare audits when secrecy of weights beats AE plaintext. FlashProve (§7b) sits in the same Plan B slot with a different statement and ~two-order GPU overhead.</p>
-  </div>
-</section>
-
 <section id="flashprove">
   <div class="kicker">Plan B · hash-based PI at 400B</div>
-  <h2><span class="n">7b.</span>FlashProve — commit-and-prove inference (Anthropic, 2026)</h2>
+  <h2><span class="n">7.</span>FlashProve — commit-and-prove inference (Anthropic, 2026)</h2>
   <p class="dek"><a href="https://www.anthropic.com/research/provable-inference">anthropic.com/research/provable-inference</a> · <a href="https://github.com/anthropics/FlashProve">github.com/anthropics/FlashProve</a> · tech report + Lean + Apache-2.0 code · Nov 2026</p>
   <div class="two-col">
     <div class="panel">
@@ -2213,7 +2132,7 @@ verifier: recompute hashes, check Merkle paths + field equations
     </div>
   </div>
   <p><strong>Statement (exact match):</strong> committed integer weights, on a public token window, produce the claimed greedy tokens on a checked range — without revealing weights, activations, or which MoE experts ran. Architecture is public. Serving float / sampled decoding can diverge; production-shaped use is post-hoc prove under a <em>clipped-gap</em> policy (Token-DiFR family).</p>
-  <p><strong>Lineage:</strong> Same Plan B evaluate slot as zkLLM / VerInf under Cankaya’s challenge loop. Implements the §0c recipe end-to-end. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
+  <p><strong>Lineage:</strong> Plan B evaluate engine under Cankaya’s challenge loop — after zkLLM (§6), before VerInf (§8). Implements the §0c recipe end-to-end. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FlashProve pipeline">
@@ -2304,13 +2223,94 @@ verifier: recompute hashes, check Merkle paths + field equations
   </ul>
   <div class="note">
     <span class="label">Read with §0c open</span>
-    <p>If §7b still feels like jargon, the gap is almost always Step-1 IOP reductions (sumcheck / lookup / proximity), not Merkle or Fiat–Shamir. Walk one matmul constraint → sumcheck → linear claim → one column open on paper.</p>
+    <p>If §7 still feels like jargon, the gap is almost always Step-1 IOP reductions (sumcheck / lookup / proximity), not Merkle or Fiat–Shamir. Walk one matmul constraint → sumcheck → linear claim → one column open on paper.</p>
+  </div>
+</section>
+
+<section id="verinf">
+  <div class="kicker">Plan B · unexplained-info ZK</div>
+  <h2><span class="n">8.</span>VerInf — bound leftover bits, skip float bit-exact</h2>
+  <p class="dek">Petrie 2026 draft · <a href="https://github.com/JamesPetrie/VerInf">github.com/JamesPetrie/VerInf</a> · FLI / FlexHEG author</p>
+  <div class="two-col">
+    <div class="panel">
+      <h4>Who</h4>
+      <p><strong>James Petrie</strong> — same hardware-governance thread as FlexHEG. VerInf is the “replace the recompute cluster with a ZK evaluate engine” instance at frontier demo scale.</p>
+    </div>
+    <div class="panel">
+      <h4>Maturity</h4>
+      <p><strong>Working draft + large demo</strong>, not production audit tooling. Interactive, expensive proofs meant for rare high-stakes spot checks when both parties have serious compute.</p>
+    </div>
+  </div>
+  <p><strong>Statement:</strong> a committed integer model explains a (possibly hidden) token stream well enough that leftover unexplained information is ≤ a public bound Û bits/token — without revealing weights, activations, or plaintext I/O.</p>
+  <p><strong>Lineage:</strong> Other Plan B evaluate backend under Cankaya. Designed precisely because Plan A bit-exact and zkLLM-style exact equality both get brittle or tiny-scale at frontier serving.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .t { font: 600 12px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10.5px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="24" class="h">VerInf statement (not bit-exact equality)</text>
+  <rect x="24" y="40" width="330" height="120" rx="4" class="box"/>
+  <text x="36" y="64" class="t">Committed integer model M</text>
+  <text x="36" y="84" class="s">predicts hidden token stream</text>
+  <text x="36" y="104" class="s">well enough that leftover</text>
+  <text x="36" y="124" class="s">info ≤ public Û bits/token</text>
+  <text x="36" y="144" class="s">ZK: no weights / acts / x,y</text>
+  <rect x="370" y="40" width="326" height="120" rx="4" class="box"/>
+  <text x="382" y="64" class="t">Demo anchor (Petrie 2026)</text>
+  <text x="382" y="84" class="s">Llama-4-Maverick ~400B MoE</text>
+  <text x="382" y="104" class="s">1000 tokens · Û ≈ 0.88 b/tok</text>
+  <text x="382" y="124" class="s">π ≈ 94 GB · prove ~14h · verify ~18h</text>
+  <text x="382" y="144" class="s">spot-check scare, not every request</text>
+  <text x="24" y="190" class="t">vs zkLLM</text>
+  <text x="24" y="212" class="s">zkLLM: prove exact integer circuit output y. Softmax via tables + tolerance. Scale ~13B, tiny π.</text>
+  <text x="24" y="232" class="s">VerInf: prove predictive explanation bound. Deliberately skips float bit-exact. Scale ~400B, huge π.</text>
+  <text x="24" y="252" class="s">Both are Cankaya Plan B evaluate engines — after taps/challenge exist. Plan A stays the near-term default.</text>
+</svg>
+<p class="cap"><a href="https://github.com/JamesPetrie/VerInf">VerInf</a> — unexplained-info ZK at frontier demo scale.</p>
+</div>
+  <h3>Why change the statement</h3>
+  <ul>
+    <li>Float nondeterminism + MoE/serving stacks make “y must equal AE recompute” expensive to field at 400B.</li>
+    <li>Exact-circuit ZK at 13B already hurts; naively scaling the zkLLM statement is the wrong lever.</li>
+    <li>Û is an auditable score: too large ⇒ looks like wrong model / stego / garbage; threshold is a policy knob.</li>
+  </ul>
+  <h3>Demo anchors (draft)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Rough figure</th></tr></thead>
+      <tbody>
+        <tr><td>Model</td><td>Llama-4-Maverick ~400B MoE (commit all experts/layer)</td></tr>
+        <tr><td>Sequence</td><td>1000 tokens (500+500), fully hidden in the demo</td></tr>
+        <tr><td>Û</td><td class="mono">≈ 0.88 bits/token (~95% of vocab info explained)</td></tr>
+        <tr><td>Prove / verify</td><td class="mono">~14 h prove · ~94 GB π · ~18 h verify (single high-end box class)</td></tr>
+        <tr><td>Witness stream</td><td class="mono">~7 TB streamed · ~84 GB peak RAM</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>vs other evaluate engines (cheat table)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Cheat</th><th>Plan A (§5)</th><th>zkLLM (§6)</th><th>FlashProve (§7)</th><th>VerInf (§8)</th></tr></thead>
+      <tbody>
+        <tr><td>Swap whitelist model</td><td>recompute mismatch</td><td>fails vs C</td><td>fails vs commitment</td><td>Û blows up</td></tr>
+        <tr><td>Float nondeterminism</td><td>pain; bit-exact / metadata</td><td>proves circuit, not float replica</td><td>integer / clipped-gap; float can diverge</td><td>slack → Û</td></tr>
+        <tr><td>Softmax / gap slack abuse</td><td>if loose match, channel</td><td>still Accept possible</td><td>clipped-gap can be loose if C/θ large</td><td>forbidden design goal; unique shift</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note bug">
+    <span class="label">Cost intuition</span>
+    <p>Spot checks, not every request. Plan A ≈ recompute GPU-time. zkLLM-13B ~minutes + tiny π. FlashProve-400B ~two-order GPU overhead, ~19 MB π. VerInf-400B = hours + tens of GB — rare audits when secrecy of weights beats AE plaintext.</p>
   </div>
 </section>
 
 <section id="flexheg">
-  <div class="kicker">Hardware track · parallel to §§5–7b</div>
-  <h2><span class="n">8.</span>FlexHEG trilogy — especially Part II</h2>
+  <div class="kicker">Hardware track · parallel to §§5–8</div>
+  <h2><span class="n">9.</span>FlexHEG trilogy — especially Part II</h2>
   <p class="dek">
     Tech <a href="https://arxiv.org/abs/2506.03409">2506.03409</a> ·
     Overview <a href="https://arxiv.org/abs/2506.15093">2506.15093</a> ·
@@ -2328,7 +2328,7 @@ verifier: recompute hashes, check Merkle paths + field equations
     </div>
   </div>
   <p><strong>FlexHEG</strong> = Flexible Hardware-Enabled Guarantees: a <strong>guarantee processor</strong> that locally enforces / attests rules, plus a <strong>secure enclosure</strong> that makes bypass expensive. Rules should be updatable under multi-party authorization.</p>
-  <p><strong>Lineage:</strong> After the near-term retrofit path (§§5–7): moves Claim A from Shavit-style after-the-fact snapshots toward <em>active</em> guarantees (FLOP caps, licenses, interlocks). Near-term retrofit path often emphasized: NIC / scale-out interlock before in-die changes. Complements Cankaya’s facility-level taps (different layer).</p>
+  <p><strong>Lineage:</strong> After the near-term retrofit path (§§5–8): moves Claim A from Shavit-style after-the-fact snapshots toward <em>active</em> guarantees (FLOP caps, licenses, interlocks). Near-term retrofit path often emphasized: NIC / scale-out interlock before in-die changes. Complements Cankaya’s facility-level taps (different layer).</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
@@ -2381,7 +2381,7 @@ verifier: recompute hashes, check Merkle paths + field equations
 
 <section id="zk">
   <div class="kicker">Crypto horizon · training</div>
-  <h2><span class="n">9.</span>Peigné-Lefebvre et al. — ZK verification of frontier <em>training</em></h2>
+  <h2><span class="n">10.</span>Peigné-Lefebvre et al. — ZK verification of frontier <em>training</em></h2>
   <p class="dek"><a href="https://arxiv.org/abs/2606.05433">arXiv:2606.05433</a> · 2026 · GPAI Policy Lab / FAR.AI · Sorbonne/LIP6</p>
   <div class="two-col">
     <div class="panel">
@@ -2394,7 +2394,7 @@ verifier: recompute hashes, check Merkle paths + field equations
     </div>
   </div>
   <p><strong>Idea:</strong> make Shavit’s transcript story cryptographically binding — genesis / step / optional ex-ante proofs without revealing the proprietary run.</p>
-  <p><strong>Lineage:</strong> Different problem than §§5–7 (those audit <em>inference</em> whitelist forward passes). This is the crypto endgame of classical <em>training</em> monitoring. Does not replace near-term FlexHEG/Cankaya work; clarifies what “strong” would mean if telemetry stays porous.</p>
+  <p><strong>Lineage:</strong> Different problem than §§5–8 (those audit <em>inference</em> whitelist forward passes). This is the crypto endgame of classical <em>training</em> monitoring. Does not replace near-term FlexHEG/Cankaya work; clarifies what “strong” would mean if telemetry stays porous.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
@@ -2434,7 +2434,7 @@ verifier: recompute hashes, check Merkle paths + field equations
 
 <section id="synth">
   <div class="kicker">Synthesis</div>
-  <h2><span class="n">10.</span>Putting the stack in one breath</h2>
+  <h2><span class="n">11.</span>Putting the stack in one breath</h2>
   <p class="dek">What an outsider should be able to repeat after this deck.</p>
   <pre><code>Claim A = verify no covert frontier training (≠ TEE model-identity or
 confidential-cloud claims B/C). Wasil is the method menu. Shavit is the
@@ -2444,9 +2444,9 @@ facility controls against covert RL.
 
 Cankaya is the near-term low-trust retrofit: NS-first taps feed commitments;
 Plan A = AE precise replay (bit-exact metadata; DiFR if needed). Plan B swaps
-the evaluate step for ZK — zkLLM (~13B exact integer circuit), VerInf
-(~400B unexplained-info bound Û), or FlashProve (~400B MoE greedy / clipped-gap
-at ~110 tok/s prove, ~19 MB π). §0c is the ZK math-foundations primer
+the evaluate step for ZK — zkLLM (~13B exact integer circuit), FlashProve
+(~400B MoE greedy / clipped-gap, ~110 tok/s, ~19 MB π), or VerInf
+(~400B unexplained-info bound Û). §0c is the ZK math-foundations primer
 (IOP→Merkle→Fiat–Shamir→Sumcheck) for reading those engines. FlexHEG is the parallel hardware-enforcement
 track (active caps / interlocks), not a substitute for taps+evaluate. Peigné
 sketches ZK *training* as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
@@ -2518,7 +2518,7 @@ empirics, and prototypes.</code></pre>
 
   <div class="note">
     <span class="label">How to read this list</span>
-    <p><strong>1–5</strong> are mostly empirical / systems (can move in months). <strong>6–7</strong> mix engineering with deployment politics. <strong>8</strong> is institutional. <strong>9</strong> / §8 FlexHEG is the parallel hardware track. A credible pause needs progress on several in parallel — closing only crypto or only taps is not enough.</p>
+    <p><strong>1–5</strong> are mostly empirical / systems (can move in months). <strong>6–7</strong> mix engineering with deployment politics. <strong>8</strong> is institutional. <strong>9</strong> / §9 FlexHEG is the parallel hardware track. A credible pause needs progress on several in parallel — closing only crypto or only taps is not enough.</p>
   </div>
   <div class="note">
     <span class="label">Primary sources (public)</span>
