@@ -739,190 +739,153 @@ BODY = f'''
   {svg_panels.svg_zk_constraints()}
   <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
   <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
-  <p><strong>Next:</strong> §0c is the ZK math-foundations primer (fields, Schwartz–Zippel, arithmetization, IOP → Merkle → Fiat–Shamir, sumcheck, lookups, list decoding, commit-and-prove) — parallel to §0b’s hardware zoom. Then §7 shows FlashProve using those tools at 400B.</p>
+  <p><strong>Next:</strong> §0c teaches the shared ZK math toolbox in full sentences (what problem each tool solves). §§6–8 are applications of that toolbox, not the place where the math is introduced.</p>
 </section>
 
 <section id="zk-foundations">
   <div class="kicker">Primer</div>
   <h2><span class="n">0c.</span>Zero-knowledge proofs · math foundations</h2>
-  <p class="dek">Pair with §0b: that section is hardware / ML systems; this one is the math behind hash-based ZK proofs used in §§6–8. Plain language; jargon only when needed. Read top to bottom once.</p>
+  <p class="dek">This section is general cryptography homework for reading any hash-based zero-knowledge proof (zkLLM, VerInf, FlashProve, training-ZK papers…). It is <em>not</em> a walkthrough of one system. §0b was hardware; this is the math. Every tool below starts with the everyday problem it solves, in full sentences.</p>
 
-  <h3>0 · What we are trying to do</h3>
-  <p><strong>Prover</strong> (model provider) says: “I ran <em>this</em> committed model on your prompt and got <em>these</em> tokens.”</p>
-  <p><strong>Verifier</strong> (you / auditor) has no weights, no big GPU, and should learn almost nothing about the weights.</p>
-  <p>So the prover sends a short <strong>proof file</strong>. Four wishes:</p>
+  <h3>0 · The story in one picture</h3>
+  <p>Imagine your friend claims: “I did a huge secret calculation correctly, and the public answer is Y.” You are not allowed to see the secret numbers. You also do not want to redo the whole calculation yourself, because it would take forever.</p>
+  <p>So your friend must somehow <strong>convince</strong> you. That is what a zero-knowledge proof is for. In jargon:</p>
   <ul>
-    <li><strong>Complete:</strong> if they’re honest, the check passes.</li>
-    <li><strong>Sound:</strong> if they lie, the check almost always fails.</li>
-    <li><strong>Zero-knowledge:</strong> the file doesn’t leak the weights.</li>
-    <li><strong>Succinct:</strong> checking is much cheaper than re-running the model.</li>
+    <li>The friend is the <strong>prover</strong>.</li>
+    <li>You are the <strong>verifier</strong>.</li>
+    <li>The secret numbers are the <strong>witness</strong> (for AI papers: often model weights and intermediate activations).</li>
+    <li>The public claim is the <strong>statement</strong> (for AI papers: often “this committed model, on this prompt, produced these tokens”).</li>
   </ul>
+  <p>You want four things at once:</p>
+  <ul>
+    <li><strong>Completeness:</strong> if your friend is honest and the claim is true, you accept.</li>
+    <li><strong>Soundness:</strong> if the claim is false, a cheating friend almost never fools you.</li>
+    <li><strong>Zero knowledge:</strong> after you accept, you still learn almost nothing about the secret numbers beyond the public claim.</li>
+    <li><strong>Succinctness:</strong> checking the proof is much cheaper than redoing the calculation.</li>
+  </ul>
+  <p>The rest of this section is a toolbox. Each tool exists because one of those four wishes creates a concrete headache.</p>
 
-  <h3>0a · Tiny math you need (really only this)</h3>
+  <h3>1 · Finite fields — “we need clean number rules”</h3>
+  <p><strong>Problem:</strong> computers usually do floating-point math (like 0.1 + 0.2), and different GPUs can round differently. Proofs need exact yes/no algebra, not “close enough.”</p>
+  <p><strong>What we do:</strong> pick a huge prime number p, and do all addition and multiplication “on a clock with p hours.” After you pass p, you wrap around. People write this number system as 𝔽_p and call it a <strong>finite field</strong>.</p>
+  <p><strong>Why it matters:</strong> in a field, every nonzero number has a multiplicative inverse, and polynomials behave nicely. That is why almost every modern SNARK lives in a field, not in IEEE floats.</p>
+  <p><strong>Catch:</strong> if a value grows bigger than about p/2, wrap-around no longer matches ordinary integer arithmetic. So honest systems keep numbers small (range checks / lookups). AI papers often prove an <em>integer / quantized</em> model for this reason.</p>
   {svg_panels.svg_field_sz()}
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Idea</th><th>Plain English</th><th>One picture</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Finite field 𝔽_p</strong></td>
-          <td>Do + − × on a clock with p hours (p = big prime). After p you wrap around.</td>
-          <td>Like 7+8 = 3 if the clock has size 12 — same idea, huge clock.</td>
-        </tr>
-        <tr>
-          <td><strong>Why a field?</strong></td>
-          <td>Proof math needs clean algebra. GPU floats (BF16/FP8) are messy and machine-dependent.</td>
-          <td>So we prove an <em>integer</em> version of the model, then hope it’s close to float serving.</td>
-        </tr>
-        <tr>
-          <td><strong>Stay in range</strong></td>
-          <td>If a number grows past ~p/2, “mod p” no longer matches normal integer math.</td>
-          <td>Proofs include range / lookup checks so values stay small.</td>
-        </tr>
-        <tr>
-          <td><strong>Schwartz–Zippel</strong></td>
-          <td>A lying polynomial is almost never zero at a random point.</td>
-          <td>So one random check ≈ checking the whole thing. This is the soundness engine.</td>
-        </tr>
-        <tr>
-          <td><strong>Degree</strong></td>
-          <td>How “wiggly” a polynomial is. Degree d needs d+1 points to pin it down.</td>
-          <td>Used constantly: Reed–Solomon, sumcheck, masks.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p><strong>Best intuition hit for Schwartz–Zippel:</strong> <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube — Schwartz–Zippel lemma (wNghCHYR6Vo)</a>. Watch this before grinding the table above; the rest of §0c keeps citing the same idea.</p>
-  <p><strong>You can stop and breathe here.</strong> Everything below is “use these two facts in clever ways.”</p>
 
-  <h3>0b · Turn the model into equations (arithmetization)</h3>
+  <h3>2 · Schwartz–Zippel — “one random quiz question catches a fake essay”</h3>
+  <p><strong>Problem:</strong> checking a huge algebraic claim cell-by-cell would take forever. You need a cheap random test that still catches lies.</p>
+  <p><strong>What the lemma says, in plain words:</strong> suppose someone hands you a nonzero polynomial of degree at most d. If you plug in a random field element, the chance you accidentally hit a root is at most d / p. When p is enormous, that chance is tiny.</p>
+  <p><strong>What it is used for:</strong> almost every “pick a random challenge and check one equation” step in ZK (sumcheck, batching many claims, many Fiat–Shamir challenges) is Schwartz–Zippel wearing a trench coat.</p>
+  <p><strong>Watch this before continuing:</strong> <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube — Schwartz–Zippel lemma</a>. If that video clicks, the rest of §0c gets much easier.</p>
+
+  <h3>3 · Arithmetization — “turn the computation into equations”</h3>
+  <p><strong>Problem:</strong> “I ran a neural net” is not a mathematical object you can quiz randomly. You need a pile of exact equations that are true if and only if the run was correct.</p>
+  <p><strong>What we do:</strong> rewrite the computation as many field equations. A multiply becomes “c − a·b = 0.” A weird nonlinear function (like SiLU) becomes “the pair (input, output) appears in a public table.” That pile of equations is what people call the <strong>circuit</strong> — not AND/OR gates from a digital-logic class, just equations.</p>
+  <p><strong>What it is used for:</strong> every later tool (sumcheck, lookups, linear claims) checks pieces of this equation pile. No arithmetization → nothing to prove.</p>
   {svg_panels.svg_arithmetize()}
-  <p>Step by step:</p>
+
+  <h3>4 · The three-layer sandwich — “math game → hash trick → one file”</h3>
+  <p><strong>Problem:</strong> you want a short checkable proof, but the honest story of the calculation is enormous. You also cannot sit on a video call tossing random coins forever.</p>
+  <p>Hash-based systems usually build the answer in three layers:</p>
   <ol>
-    <li>Write the forward pass with small integers (quantized weights / activations).</li>
-    <li>Every matmul becomes many equations like <span class="mono">c = a · b</span> (in the field).</li>
-    <li>Weird nonlinear stuff (SiLU, pieces of softmax, comparisons) becomes: “this pair (input, output) is a row of a public table.” That’s a <strong>lookup</strong>.</li>
-    <li>The pile of equations is the <strong>circuit</strong>. Not AND/OR gates — just equations.</li>
+    <li><strong>Interactive Oracle Proof (IOP):</strong> in a pretend world, the prover posts huge tables, and the verifier only looks at a few random cells. If the prover lied, those random peeks catch the lie with high probability. This layer is mostly information-theoretic math.</li>
+    <li><strong>Merkle trees:</strong> in the real world you cannot email a terabyte table. So the prover publishes only a short fingerprint (the Merkle root). Later, when the verifier asks for cell number 17, the prover reveals that cell plus a short authentication path that matches the root.</li>
+    <li><strong>Fiat–Shamir:</strong> in the real world you also cannot wait for a live verifier to send random challenges. So each “random” challenge is replaced by a hash of the conversation so far. The whole conversation becomes one proof file.</li>
   </ol>
-  <p>If you skip this step, there is nothing for sumcheck to check.</p>
-
-  <h3>0d · Proof vs argument vs “random oracle” (vocabulary)</h3>
-  {svg_panels.svg_proof_vs_arg()}
-  <ul>
-    <li><strong>IOP</strong> (below) is the math game with long tables + random questions — close to an information-theoretic proof.</li>
-    <li>After <strong>Merkle trees</strong>, it becomes an <strong>argument</strong>: cheating means breaking the hash (or absurd luck).</li>
-    <li><strong>Random oracle model (ROM):</strong> pretend the hash is a perfect random function when writing theorems. Real life uses BLAKE2 and hopes it’s “random enough.”</li>
-  </ul>
-
-  <h3>1 · The three-step recipe (memorize this picture)</h3>
+  <p>People sometimes call the finished object a <strong>SNARK</strong> (Succinct Non-interactive ARgument of Knowledge). After Merkle hashes enter, soundness is computational: a cheater with a magic hash-breaking computer might forge proofs. Cryptographers then say <strong>argument</strong> instead of information-theoretic <strong>proof</strong>.</p>
+  <p>When theorems pretend the hash is a perfect random function, that pretend world is the <strong>random oracle model</strong>. Real systems plug in BLAKE2 or SHA-256 and hope it is random enough.</p>
   {svg_panels.svg_zk_recipe()}
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Step</th><th>Name</th><th>In one sentence</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">1</td><td><strong>IOP</strong></td><td>Prover posts huge tables; verifier asks a few random cells; a lie gets caught with high probability.</td></tr>
-        <tr><td class="mono">2</td><td><strong>Merkle</strong></td><td>Don’t send the huge tables — send a hash root; later open only the asked cells with a short path.</td></tr>
-        <tr><td class="mono">3</td><td><strong>Fiat–Shamir</strong></td><td>Don’t wait for a live verifier’s coin flips — set each challenge = hash(everything so far), ship one file.</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>Papers invent their own Step 1 (exact circuit, Û score, greedy token…). Steps 2–3 are shared plumbing. FlashProve’s hash is BLAKE2.</p>
+  {svg_panels.svg_proof_vs_arg()}
 
-  <h3>2 · Reed–Solomon + random mask (hide the weights)</h3>
+  <h3>5 · Reed–Solomon encoding + random mask — “hide secrets while still allowing spot checks”</h3>
+  <p><strong>Problem A (soundness):</strong> the verifier will only look at a few cells of a long table. If the table is just the raw secret numbers, a cheater could put correct values only in the cells that get asked, and garbage everywhere else.</p>
+  <p><strong>Problem B (zero knowledge):</strong> if those few opened cells are literal pieces of the secret, the verifier learns the secret bit by bit.</p>
+  <p><strong>What Reed–Solomon encoding does about Problem A:</strong> take your short secret message and turn it into a much longer row by treating the message as a polynomial and evaluating that polynomial at many points. The long row is called a <strong>codeword</strong>. Honest codewords for different messages disagree in most positions. So if a cheater changes lots of entries, almost any random peek hits a wrong value. That is the same idea as an error-correcting code on a CD: redundancy makes corruption obvious.</p>
+  <p><strong>What the random mask does about Problem B:</strong> before encoding, the prover mixes in a few random coefficients. Then any small number of opened cells looks random, and those cells do not reveal the original secret. There is a budget: if you open more than about t cells on the <em>same</em> encoding, the randomness runs out and privacy can break. People call t the <strong>query budget</strong>.</p>
+  <p><strong>What it is used for:</strong> committing to secret weights or secret intermediate values in a way that supports both “random spot checks catch cheating” and “spot checks do not leak the secret.”</p>
+  <p class="note" style="display:block;padding:12px 14px;border:1px solid var(--rule-soft);margin:14px 0;"><span class="label">Later in papers</span> Commit-and-prove systems refresh the random mask (new encodings of the same secret) when the query budget is used up. That is an application detail, not the definition of Reed–Solomon.</p>
   {svg_panels.svg_reed_solomon_zk()}
-  <p>Plain version:</p>
-  <ol>
-    <li>Take a row of weight numbers.</li>
-    <li>Treat them as coefficients of a polynomial (plus some random junk in front).</li>
-    <li>Evaluate that polynomial at many points → a long row (a <strong>codeword</strong>).</li>
-    <li>Different weight rows → long rows that disagree in most places (error-correcting code).</li>
-    <li>Because of the random junk, looking at only ≤ <strong>t</strong> cells tells you nothing about the weights. t is the <strong>query budget</strong>.</li>
-  </ol>
-  <p>Open more than t cells on the same encoding → privacy can leak. That’s why FlashProve makes many <strong>leaf tables</strong> (same weights, fresh random junk) and proves they match with <strong>link proofs</strong>.</p>
 
-  <h3>2b · Unique decoding vs list decoding (why “OOD” exists)</h3>
+  <h3>6 · Unique decoding vs list decoding — “how wrong can a row be and still mean one message?”</h3>
+  <p><strong>Problem:</strong> the verifier only sees a few opened cells, so the committed row might be noisy. You must decide how close to a perfect codeword is “close enough.”</p>
+  <p>If you demand the row be extremely close to a codeword, there is usually only <strong>one</strong> possible message that fits. That is <strong>unique decoding</strong>. It is safer, but you typically need more opens, so proofs get slower.</p>
+  <p>If you allow a larger error, several different messages might still fit the opened cells. That is <strong>list decoding</strong>. It needs fewer opens (faster), but now you must pin down <em>which</em> message you meant. Systems often add an extra random evaluation called an <strong>out-of-domain sample</strong> (OOD) for that pinning step.</p>
+  <p>A <strong>proximity test</strong> is the protocol piece that asks: “is this committed row close enough to some codeword, and does it satisfy these linear claims?” Unique vs list decoding is about how large “close enough” is allowed to be.</p>
   {svg_panels.svg_unique_list()}
-  <p>A <strong>proximity test</strong> asks: “is this committed row close to a real codeword?”</p>
-  <ul>
-    <li>If you demand “very close,” there’s only one possible message (<strong>unique</strong>) — safer, more opens, slower.</li>
-    <li>If you allow “kind of close,” several messages might fit (<strong>list</strong>) — fewer opens, faster, but you need an extra random sample (<strong>out-of-domain / OOD</strong>) to name which message you meant.</li>
-  </ul>
-  <p>FlashProve lives in the list-decoding world. The commitment publishes OOD answers for that reason.</p>
 
-  <h3>3 · Merkle trees (open one cell without sending the whole table)</h3>
+  <h3>7 · Merkle trees — “commit to a huge table without mailing the huge table”</h3>
+  <p><strong>Problem:</strong> the IOP wants the verifier to open a few cells of a huge table. Sending the whole table destroys succinctness. Letting the prover just <em>tell</em> you cell 17 is dangerous, because the prover could change answers depending on which cell you ask.</p>
+  <p><strong>What a Merkle tree does:</strong> hash every cell, then repeatedly hash pairs of hashes until one top hash remains. That top hash is the <strong>Merkle root</strong>. Publish the root early. Later, to open cell 17, send the cell value plus the sibling hashes along the path to the root. The verifier re-hashes upward. If the final hash matches the published root, that cell is authentic for the committed table.</p>
+  <p><strong>What it is used for:</strong> turning “query an oracle table” into a short, checkable opening. This is the main bridge from the IOP math game to a real-world argument.</p>
   {svg_panels.svg_merkle_open()}
-  <p>Think of a tournament bracket of hashes. Bottom row = table columns. Top = one root R you publish.</p>
-  <p>To open column 7: send the value + the sibling hashes along the path to R. Verifier re-hashes upward. Match R → that cell is authentic. Change any other cell later → root would change → caught (if the hash is hard to collide).</p>
 
-  <h3>4 · Multilinear extension + batching (bookkeeping)</h3>
+  <h3>8 · Multilinear extension — “make a spreadsheet into a polynomial you can quiz”</h3>
+  <p><strong>Problem:</strong> your data is often a big table with addresses made of bits (row 0/1, column 0/1, …). Sumcheck and friends want to talk about a <em>polynomial</em>, not a spreadsheet.</p>
+  <p><strong>What we do:</strong> there is a standard, unique way to build a polynomial that matches the table on every 0/1 corner and is degree at most 1 in each variable. That polynomial is the <strong>multilinear extension</strong> of the table.</p>
+  <p><strong>What it is used for:</strong> when a paper says “run sumcheck on P,” P is often this extension of some big table of values from the circuit, not a random made-up polynomial.</p>
+
+  <h3>9 · Random batching — “check many claims with one random mix”</h3>
+  <p><strong>Problem:</strong> after arithmetization you may have thousands of separate equations. Checking them one by one is still too expensive.</p>
+  <p><strong>What we do:</strong> pick a random field element r and check a random weighted mix of the claims (for example C₁ + r·C₂ + r²·C₃ + …). If every claim is true, the mix is true. If any claim is false, the mix is a nonzero polynomial in r, so a random r almost never makes it accidentally true. That is Schwartz–Zippel again.</p>
+  <p><strong>What it is used for:</strong> collapsing many checks into one check before sumcheck or a proximity test.</p>
   {svg_panels.svg_mle_batch()}
-  <p><strong>Multilinear extension (MLE):</strong> your data is a table on the corners of a hypercube (addresses made of 0/1 bits). There is a standard way to turn that table into one polynomial that (a) matches the table on those corners and (b) is degree at most 1 in each variable. Sumcheck usually talks about that polynomial — not a random made-up P.</p>
-  <p><strong>Batching:</strong> instead of checking 1000 claims separately, take a random mix. If any claim is false, the mix is a nonzero polynomial and a random challenge catches it (Schwartz–Zippel again).</p>
 
-  <h3>5 · Sumcheck (the workhorse)</h3>
+  <h3>10 · Sumcheck — “verify a gigantic sum without adding every term”</h3>
+  <p><strong>Problem:</strong> many circuit checks look like “the sum of this polynomial over millions of bit-strings equals S.” Adding millions of terms is too slow for the verifier.</p>
+  <p><strong>What sumcheck does:</strong> the prover and verifier play a short game, one variable at a time. In each round the prover sends a small one-variable polynomial that claims to summarize the remaining sum. The verifier checks that this small polynomial is consistent with the previous claim (plug in 0 and 1 and add). Then the verifier picks a random value for that variable, and the claim shrinks. After enough rounds, only one random evaluation of the big polynomial remains, and the verifier checks that single point.</p>
+  <p><strong>Why cheating fails:</strong> if the prover sends a wrong small polynomial, it can agree with the truth at only a few points. A random challenge almost always lands off those points. Again: Schwartz–Zippel.</p>
+  <p><strong>What it is used for:</strong> matrix multiplies and other huge structured sums inside ML circuits become sequences of sumchecks instead of brute-force addition.</p>
   {svg_panels.svg_sumcheck_round()}
-  <p>Want to know if a huge sum over many inputs equals S — without adding everything.</p>
-  <ol>
-    <li>Prover sends a small 1-variable polynomial for the next bit of the address.</li>
-    <li>Verifier checks it is consistent with the previous claim (plug in 0 and 1, add).</li>
-    <li>Verifier picks a random number r for that bit; the claim shrinks.</li>
-    <li>Repeat until one random point is left; evaluate P there.</li>
-  </ol>
-  <p>If the prover lied, some small polynomial is wrong, and the random r hits the lie with tiny probability. FlashProve does this ~2000 times per request (most of the IOP). Matmuls become sumchecks.</p>
 
-  <h3>6 · Lookups + linear claims + proximity (finish the IOP)</h3>
+  <h3>11 · Lookups — “handle ugly functions without building a nightmare circuit”</h3>
+  <p><strong>Problem:</strong> neural nets use nonlinear functions that are painful to write as a few multiplications (exponentials, comparisons, clipped activations). Expanding them into huge multiplication circuits makes proofs enormous.</p>
+  <p><strong>What a lookup does:</strong> publish a table of allowed pairs (input, output) ahead of time. The prover claims: every secret pair that appeared in my run is a row of that public table. There are standard protocols that check this claim using sumcheck-style algebra.</p>
+  <p><strong>Catch:</strong> the public table must stay reasonably small, or the proof becomes huge. That is why quantized / clipped nonlinearities show up in zkML systems.</p>
+  <p><strong>What it is used for:</strong> Softmax pieces, SiLU, range checks, comparisons — anything that is easier to tabulate than to arithmetize gate-by-gate.</p>
+
+  <h3>12 · Linear claims — “the common final shape of almost every check”</h3>
+  <p><strong>Problem:</strong> after sumchecks and lookups, you still need one simple kind of statement the proximity test knows how to finish.</p>
+  <p><strong>What a linear claim is:</strong> “for this secret committed vector m, and this public vector v that we both know, the weighted sum ⟨v, m⟩ equals a public number c.”</p>
+  <p><strong>What it is used for:</strong> nearly every high-level check eventually reduces to a handful of linear claims. Then you batch them and feed them into a proximity test that opens a few Merkle columns.</p>
   {svg_panels.svg_lookup_and_linear()}
-  <ul>
-    <li><strong>Lookup:</strong> “every secret value I used sits in this public table.” Softmax/SiLU live here. Tables must stay small (~2¹⁶) or proofs explode — that’s why nonlinearities get clipped / quantized.</li>
-    <li><strong>Linear claim:</strong> almost everything reduces to “a known weighted sum of a secret vector equals c.” Batch many of these with a random mix.</li>
-    <li><strong>Proximity test:</strong> open a few Merkle columns; check you’re close to a codeword <em>and</em> the linear claim holds. Plus OOD if you’re in list-decoding land.</li>
-  </ul>
 
-  <h3>7 · Fiat–Shamir (conversation → one file)</h3>
+  <h3>13 · Fiat–Shamir — “turn a live conversation into a file you can email”</h3>
+  <p><strong>Problem:</strong> the interactive protocol needs the verifier to keep sending fresh random challenges. In practice you want a single proof file that anyone can check offline.</p>
+  <p><strong>What Fiat–Shamir does:</strong> replace each verifier challenge with a hash of everything that has been said so far:</p>
+  <p class="mono" style="margin:12px 0">next challenge = Hash(public parameters ‖ previous messages)</p>
+  <p>The prover writes the whole transcript into the proof. The verifier recomputes the same challenges from the hashes and checks the openings and equations. Because the challenge is determined by prior messages, the prover cannot first see the challenge and then invent a matching lie (unless the hash is broken).</p>
+  <p><strong>What it is used for:</strong> making interactive IOPs into non-interactive SNARKs / STARKs.</p>
   {svg_panels.svg_fiat_shamir()}
-  <p>Live protocol needs the verifier to send random challenges. Nobody is online, so:</p>
-  <p class="mono" style="margin:12px 0">next challenge = hash(parameters + all messages so far)</p>
-  <p>Prover writes the whole transcript into the proof file. Verifier recomputes the same challenges and checks openings + equations.</p>
-  <p>FlashProve twist: many requests in one batch → hash chains fork and join (a DAG) so the GPU can overlap work, then share one weight opening.</p>
 
-  <h3>8 · Commit once, prove many (why leaf tables exist)</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Phase</th><th>What happens</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Offline</strong></td><td>Encode weights, Merkle-commit, prove “well-formed,” publish commitment ID</td><td>Nail down one W forever (binding)</td></tr>
-        <tr><td><strong>Copy leaves</strong></td><td>Same W, new random masks; link proof says “same weights”</td><td>Each encoding only allows t opens before ZK wears out</td></tr>
-        <tr><td><strong>Online</strong></td><td>For each reply (batch), build trace, sumcheck/lookup, open ≤ t columns of one leaf</td><td>Prove this request against the committed W</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>This pattern is called <strong>commit-and-prove</strong>. One commitment, many proofs. When leaves are used up, commit again.</p>
+  <h3>14 · Commit-and-prove — “nail the secret once, then prove many public claims about it”</h3>
+  <p><strong>Problem:</strong> sometimes the secret (for example a model’s weights) is reused across many statements. You want to bind that secret once, then prove many different public claims against the same binding, without re-sending the secret.</p>
+  <p><strong>What commit-and-prove means:</strong> first publish a commitment (often a Merkle root of an encoding of the secret). Later, for each new public claim, produce a proof that refers back to that same commitment. The commitment is binding: you should not be able to open it to two different secrets. Separately, encodings may need fresh randomness so zero knowledge does not wear out after many openings.</p>
+  <p><strong>What it is used for:</strong> “I committed to one model; here are many inference receipts against that same model.”</p>
 
-  <h3>9 · Put it together — one flowchart</h3>
-  <pre><code>public:  commitment ID, prompt x, reply y
-secret:  weights W, activations, which MoE experts ran
+  <h3>15 · How the tools fit together (still general)</h3>
+  <pre><code>1. Rewrite the computation as field equations (+ lookups).     ← arithmetization
+2. Encode secret tables (Reed–Solomon + random mask).         ← hide + add redundancy
+3. Commit with Merkle roots.                                  ← short fingerprint
+4. Reduce big checks with sumcheck / lookups / batching
+   until only a few linear claims remain.
+5. Run a proximity test (open a few authenticated cells).
+6. Replace live randomness with Fiat–Shamir hashes.           ← one proof file
 
-1. turn the integer forward pass into equations (+ lookups)
-2. encode W &amp; the run-trace with RS + random masks → Merkle roots
-3. sumcheck / lookup until only a few linear claims remain
-4. proximity test opens a few columns (≤ query budget t)
-5. Fiat–Shamir freezes the whole chat into proof file π
-
-verifier: recompute hashes, check Merkle paths + field equations
-          (CPU, seconds; never sees W)</code></pre>
+Verifier recomputes hashes and checks a short list of equations.
+Secret witness never needs to be sent in the clear.</code></pre>
+  <p>Different papers choose different public statements (exact circuit output, unexplained-info score, greedy token, training step, …). The toolbox above stays mostly the same. Concrete systems in §§6–8 are applications of this toolbox, not replacements for it.</p>
 
   <div class="note">
-    <span class="label">Study checklist (honest version)</span>
-    <p>Can you explain, out loud, without looking: (1) why proofs use a prime field, not floats; (2) Schwartz–Zippel in one sentence; (3) IOP → Merkle → Fiat–Shamir; (4) what query budget t is; (5) what one sumcheck round does; (6) what a lookup is for; (7) unique vs list decoding + why OOD exists; (8) why FlashProve needs leaf tables? If not, re-read that subsection only — don’t re-read the whole §0c.</p>
+    <span class="label">Study checklist</span>
+    <p>For each tool, say out loud: (a) what everyday problem it solves, and (b) what would go wrong if we deleted it. Tools: finite field, Schwartz–Zippel, arithmetization, IOP, Merkle, Reed–Solomon+mask, unique vs list decoding, multilinear extension, batching, sumcheck, lookup, linear claim, Fiat–Shamir, commit-and-prove. If you cannot answer (a) in a full sentence, re-read only that subsection.</p>
   </div>
   <div class="note">
     <span class="label">Primary refs</span>
     <p>
       Schwartz–Zippel (watch first): <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube wNghCHYR6Vo</a> ·
-      sumcheck / textbook: Chiesa–Yogev <em>Proofs, Arguments, and Zero-Knowledge</em> ·
-      IOP / BCS: Ben-Sasson–Chiesa–Spooner ·
-      FlashProve <a href="https://github.com/anthropics/FlashProve/blob/main/docs/protocol.md">protocol.md</a> §5 Tools ·
-      PurpleMind hash-based SNARK videos (intuition only)
+      Textbook overview: Chiesa–Yogev <em>Proofs, Arguments, and Zero-Knowledge</em> ·
+      IOP compilation: Ben-Sasson–Chiesa–Spooner ·
+      Then read a concrete system (§6 zkLLM / §7 FlashProve / §8 VerInf) as an application of this section
     </p>
   </div>
 </section>
@@ -1170,8 +1133,8 @@ verifier: recompute hashes, check Merkle paths + field equations
   <p>Same §0c stack; Hyrax is the polynomial commitment (Step-2 cousin of Merkle/PCS). Names below are zkLLM-specific gadgets on top.</p>
   <ul>
     <li><strong>Hyrax:</strong> polynomial commitment binds W into C; open evaluations at random points.</li>
-    <li><strong>Sumcheck:</strong> big matmuls / sums → interactive algebraic checks (§0c.4).</li>
-    <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table via a rational identity at a random point (§0c.5 lookups).</li>
+    <li><strong>Sumcheck:</strong> big matmuls / sums → interactive algebraic checks (see §0c sumcheck).</li>
+    <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table (see §0c lookups).</li>
     <li><strong>zkAttn:</strong> Softmax shift shrinks exp domain; don’t prove exact log-sum-exp — only a <strong>tolerance band</strong> on row sums (fine for execution receipts; dangerous if bolted onto a manipulable unexplained-info score).</li>
   </ul>
   <h3>What it does <em>not</em> prove</h3>
@@ -1201,7 +1164,7 @@ verifier: recompute hashes, check Merkle paths + field equations
     </div>
   </div>
   <p><strong>Statement (exact match):</strong> committed integer weights, on a public token window, produce the claimed greedy tokens on a checked range — without revealing weights, activations, or which MoE experts ran. Architecture is public. Serving float / sampled decoding can diverge; production-shaped use is post-hoc prove under a <em>clipped-gap</em> policy (Token-DiFR family).</p>
-  <p><strong>Lineage:</strong> Plan B evaluate engine under Cankaya’s challenge loop — after zkLLM (§6), before VerInf (§8). Implements the §0c recipe end-to-end. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
+  <p><strong>Lineage:</strong> Plan B evaluate engine under Cankaya’s challenge loop — after zkLLM (§6), before VerInf (§8). Concrete application of the §0c toolbox. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
   {svg_panels.svg_flashprove()}
   <h3>How it uses §0c (map the names)</h3>
   <div class="tbl">
@@ -1240,7 +1203,7 @@ verifier: recompute hashes, check Merkle paths + field equations
   </ul>
   <div class="note">
     <span class="label">Read with §0c open</span>
-    <p>If §7 still feels like jargon, the gap is almost always Step-1 IOP reductions (sumcheck / lookup / proximity), not Merkle or Fiat–Shamir. Walk one matmul constraint → sumcheck → linear claim → one column open on paper.</p>
+    <p>If §7 still feels like jargon, go back to §0c and re-read the tool whose <em>problem statement</em> you cannot repeat in a full sentence — usually sumcheck, lookup, or proximity / list decoding — then return here.</p>
   </div>
 </section>
 
