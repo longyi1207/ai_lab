@@ -781,7 +781,7 @@ BODY = f'''
   <p><strong>Problem:</strong> checking a huge algebraic claim cell-by-cell would take forever. You need a cheap random test that still catches lies.</p>
   <p><strong>What the lemma says, in plain words:</strong> suppose someone hands you a nonzero polynomial of degree at most d. If you plug in a random field element, the chance you accidentally hit a root is at most d / p. When p is enormous, that chance is tiny.</p>
   <p><strong>What it is used for:</strong> almost every “pick a random challenge and check one equation” step in ZK (sumcheck, batching many claims, many Fiat–Shamir challenges, Hyrax evaluation points) is Schwartz–Zippel wearing a trench coat.</p>
-  <p><strong>Watch this before continuing:</strong> <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube — Schwartz–Zippel lemma</a>. If that video clicks, the rest of §0c gets much easier.</p>
+  <p>Watch this video to better understand: <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">https://www.youtube.com/watch?v=wNghCHYR6Vo</a></p>
 
   <h3>3 · Arithmetization — “turn the computation into equations”</h3>
   <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">§6 hand-built ML circuit</span> <span class="tag">§7 same</span> <span class="tag">§10 via zkVM trace</span></p>
