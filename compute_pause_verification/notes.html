@@ -148,6 +148,12 @@
   .note p:last-child { margin-bottom: 0; }
   .note.bug .label { color: var(--accent); }
 
+  /* §0c “which direction uses this tool” tags */
+  .usedby { margin: 6px 0 16px; font-size: 12.5px; color: var(--ink-faint); font-family: system-ui, sans-serif; line-height: 1.7; }
+  .usedby .label { display: inline; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; margin-right: 6px; color: var(--accent); font-weight: 600; }
+  .usedby .tag { display: inline-block; padding: 1px 7px; margin: 2px 3px 2px 0; border: 1px solid var(--rule); border-radius: 3px; font-size: 11.5px; color: var(--ink-dim); background: var(--code-bg); }
+  .usedby .tag.core { border-color: var(--rule-strong, var(--rule)); color: var(--ink); }
+
   /* small data table */
   .tbl { overflow-x: auto; margin: 18px 0 24px; }
   table { border-collapse: collapse; font-size: 14px; width: 100%; }
@@ -237,7 +243,7 @@
   <div class="kicker">Briefing deck · compute-pause verification</div>
   <h1>Research directions for verifiable AI slowdown</h1>
   <p>A self-contained technical map of the main public papers and posts on verifying (and preferably throttling) frontier AI training under low trust. For each piece: who wrote it, what problem it addresses, how mature it is, and how it relates to the rest of the stack. Diagrams first; public links in each section.</p>
-  <p class="meta">2026-08-04 · updated 2026-11-08 (§0c ZK math foundations + §7 FlashProve) · standalone briefing · sources linked inline</p>
+  <p class="meta">2026-08-04 · updated 2026-11-12 (§0c complete crypto foundations for §§6–8, §10) · standalone briefing · sources linked inline</p>
 </header>
 
 <section id="map">
@@ -824,22 +830,23 @@
 </div>
   <p><strong>Constraint system intuition:</strong> turn “this forward pass was correct” into a huge set of algebraic checks over a <em>prime field</em> 𝔽_p (multiplications, lookups, range checks). The prover knows a <em>witness</em> (weights, activations) satisfying every constraint; the verifier checks a short proof that such a witness exists for the public statement — without learning the witness.</p>
   <p><strong>Integer constraint, concretely:</strong> GPUs run BF16/FP8 with rounding; SNARK circuits run integers mod p. zkLLM-style systems therefore prove a <em>quantized integer circuit</em> that approximates the model, not “whatever your CUDA float kernel did today.” That is why Plan A cares about bit-exact float recompute, and why VerInf replaces exact equality with an unexplained-info bound (Û / U-hat). Failures of soundness = false compliance; failures of ZK / confidentiality = IP/data leakage through the proof; failures of assurance = you never sampled the cheat.</p>
-  <p><strong>Next:</strong> §0c teaches the shared ZK math toolbox in full sentences (what problem each tool solves). §§6–8 are applications of that toolbox, not the place where the math is introduced.</p>
+  <p><strong>Next:</strong> §0c teaches the full ZK toolbox for this deck (shared floor + hash stack + Hyrax/PCS + statement choice + zkVM), each tool tagged with which direction uses it. §§6–8 and §10 apply that toolbox; they are not where the math is introduced.</p>
 </section>
 
 <section id="zk-foundations">
   <div class="kicker">Primer</div>
   <h2><span class="n">0c.</span>Zero-knowledge proofs · math foundations</h2>
-  <p class="dek">This section is general cryptography homework for reading any hash-based zero-knowledge proof (zkLLM, VerInf, FlashProve, training-ZK papers…). It is <em>not</em> a walkthrough of one system. §0b was hardware; this is the math. Every tool below starts with the everyday problem it solves, in full sentences.</p>
+  <p class="dek">Complete crypto homework for every ZK direction in this deck: §6 zkLLM, §7 FlashProve, §8 VerInf, §10 Peigné. Not a walkthrough of one paper. §0b was hardware; this is the math. Every tool starts with the everyday problem it solves, then says which directions use it.</p>
 
   <h3>0 · The story in one picture</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">§6 zkLLM</span> <span class="tag">§7 FlashProve</span> <span class="tag">§8 VerInf</span> <span class="tag">§10 Peigné</span></p>
   <p>Imagine your friend claims: “I did a huge secret calculation correctly, and the public answer is Y.” You are not allowed to see the secret numbers. You also do not want to redo the whole calculation yourself, because it would take forever.</p>
   <p>So your friend must somehow <strong>convince</strong> you. That is what a zero-knowledge proof is for. In jargon:</p>
   <ul>
     <li>The friend is the <strong>prover</strong>.</li>
     <li>You are the <strong>verifier</strong>.</li>
     <li>The secret numbers are the <strong>witness</strong> (for AI papers: often model weights and intermediate activations).</li>
-    <li>The public claim is the <strong>statement</strong> (for AI papers: often “this committed model, on this prompt, produced these tokens”).</li>
+    <li>The public claim is the <strong>statement</strong> (for AI papers: often “this committed model, on this prompt, produced these tokens” — or a weaker score; see §17).</li>
   </ul>
   <p>You want four things at once:</p>
   <ul>
@@ -848,13 +855,59 @@
     <li><strong>Zero knowledge:</strong> after you accept, you still learn almost nothing about the secret numbers beyond the public claim.</li>
     <li><strong>Succinctness:</strong> checking the proof is much cheaper than redoing the calculation.</li>
   </ul>
-  <p>The rest of this section is a toolbox. Each tool exists because one of those four wishes creates a concrete headache.</p>
+  <p>This deck’s systems do <em>not</em> all use the same crypto packaging. They share a floor (fields, random quizzes, equations), then branch into three stacks:</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three ZK stacks in this deck">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Three crypto stacks this briefing actually uses</text>
+
+  <rect x="24" y="40" width="220" height="170" rx="3" class="box"/>
+  <text x="36" y="62" class="t">A · Hash / IOP</text>
+  <text x="36" y="84" class="s">Reed–Solomon + mask</text>
+  <text x="36" y="102" class="s">Merkle openings</text>
+  <text x="36" y="120" class="s">sumcheck · lookups</text>
+  <text x="36" y="138" class="s">Fiat–Shamir</text>
+  <text x="36" y="164" class="t">§7 FlashProve</text>
+  <text x="36" y="186" class="s">(§8 often same family)</text>
+
+  <rect x="256" y="40" width="220" height="170" rx="3" class="box"/>
+  <text x="268" y="62" class="t">B · Algebraic PCS</text>
+  <text x="268" y="84" class="s">Elliptic-curve group</text>
+  <text x="268" y="102" class="s">Hyrax / IPA-style</text>
+  <text x="268" y="120" class="s">ProveEval at points</text>
+  <text x="268" y="138" class="s">+ sumcheck / lookups</text>
+  <text x="268" y="164" class="t">§6 zkLLM</text>
+  <text x="268" y="186" class="s">Hyrax binds W → C</text>
+
+  <rect x="488" y="40" width="208" height="170" rx="3" class="box"/>
+  <text x="500" y="62" class="t">C · zkVM</text>
+  <text x="500" y="84" class="s">Prove a program run</text>
+  <text x="500" y="102" class="s">(CPU/GPU step as</text>
+  <text x="500" y="120" class="s">bytecode), not a</text>
+  <text x="500" y="138" class="s">hand-built ML circuit</text>
+  <text x="500" y="164" class="t">§10 Peigné</text>
+  <text x="500" y="186" class="s">training horizon</text>
+
+  <rect x="24" y="228" width="672" height="54" rx="3" class="box"/>
+  <text x="36" y="250" class="t">Shared floor</text>
+  <text x="36" y="268" class="s">Fields · Schwartz–Zippel · arithmetization · Fiat–Shamir · “what statement?” — then pick stack A, B, or C.</text>
+</svg>
+<p class="cap">If you only learn stack A, zkLLM’s Hyrax and Peigné’s zkVM will feel like aliens. Learn the shared floor, then the branch.</p>
+</div>
+  <p>Read §§1–3 and §13–14 first (shared floor). Then either the hash branch (§§4–12), the algebraic-PCS branch (§§15–16), the statement-design section (§17), or the zkVM branch (§18), depending on which paper you open next.</p>
 
   <h3>1 · Finite fields — “we need clean number rules”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">§6</span> <span class="tag">§7</span> <span class="tag">§8</span> <span class="tag">§10</span></p>
   <p><strong>Problem:</strong> computers usually do floating-point math (like 0.1 + 0.2), and different GPUs can round differently. Proofs need exact yes/no algebra, not “close enough.”</p>
   <p><strong>What we do:</strong> pick a huge prime number p, and do all addition and multiplication “on a clock with p hours.” After you pass p, you wrap around. People write this number system as 𝔽_p and call it a <strong>finite field</strong>.</p>
   <p><strong>Why it matters:</strong> in a field, every nonzero number has a multiplicative inverse, and polynomials behave nicely. That is why almost every modern SNARK lives in a field, not in IEEE floats.</p>
-  <p><strong>Catch:</strong> if a value grows bigger than about p/2, wrap-around no longer matches ordinary integer arithmetic. So honest systems keep numbers small (range checks / lookups). AI papers often prove an <em>integer / quantized</em> model for this reason.</p>
+  <p><strong>Catch:</strong> if a value grows bigger than about p/2, wrap-around no longer matches ordinary integer arithmetic. So honest systems keep numbers small (range checks / lookups). AI papers often prove an <em>integer / quantized</em> model for this reason — or, like VerInf, they change the <em>statement</em> so they do not need bit-exact float equality.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Finite field and Schwartz-Zippel">
@@ -890,15 +943,17 @@
 </div>
 
   <h3>2 · Schwartz–Zippel — “one random quiz question catches a fake essay”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">sumcheck</span> <span class="tag">batching</span> <span class="tag">Fiat–Shamir quizzes</span></p>
   <p><strong>Problem:</strong> checking a huge algebraic claim cell-by-cell would take forever. You need a cheap random test that still catches lies.</p>
   <p><strong>What the lemma says, in plain words:</strong> suppose someone hands you a nonzero polynomial of degree at most d. If you plug in a random field element, the chance you accidentally hit a root is at most d / p. When p is enormous, that chance is tiny.</p>
-  <p><strong>What it is used for:</strong> almost every “pick a random challenge and check one equation” step in ZK (sumcheck, batching many claims, many Fiat–Shamir challenges) is Schwartz–Zippel wearing a trench coat.</p>
+  <p><strong>What it is used for:</strong> almost every “pick a random challenge and check one equation” step in ZK (sumcheck, batching many claims, many Fiat–Shamir challenges, Hyrax evaluation points) is Schwartz–Zippel wearing a trench coat.</p>
   <p><strong>Watch this before continuing:</strong> <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube — Schwartz–Zippel lemma</a>. If that video clicks, the rest of §0c gets much easier.</p>
 
   <h3>3 · Arithmetization — “turn the computation into equations”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">§6 hand-built ML circuit</span> <span class="tag">§7 same</span> <span class="tag">§10 via zkVM trace</span></p>
   <p><strong>Problem:</strong> “I ran a neural net” is not a mathematical object you can quiz randomly. You need a pile of exact equations that are true if and only if the run was correct.</p>
   <p><strong>What we do:</strong> rewrite the computation as many field equations. A multiply becomes “c − a·b = 0.” A weird nonlinear function (like SiLU) becomes “the pair (input, output) appears in a public table.” That pile of equations is what people call the <strong>circuit</strong> — not AND/OR gates from a digital-logic class, just equations.</p>
-  <p><strong>What it is used for:</strong> every later tool (sumcheck, lookups, linear claims) checks pieces of this equation pile. No arithmetization → nothing to prove.</p>
+  <p><strong>What it is used for:</strong> every later tool (sumcheck, lookups, linear claims, Hyrax openings) checks pieces of this equation pile. No arithmetization → nothing to prove. In a zkVM (§18) the “circuit” is the VM’s transition rules applied to a long execution trace — same idea, different packaging.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arithmetization">
@@ -942,8 +997,9 @@
 </div>
 
   <h3>4 · The three-layer sandwich — “math game → hash trick → one file”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§7 FlashProve</span> <span class="tag">§8 VerInf (typical backend family)</span> <span class="tag">not Hyrax’s commit layer</span></p>
   <p><strong>Problem:</strong> you want a short checkable proof, but the honest story of the calculation is enormous. You also cannot sit on a video call tossing random coins forever.</p>
-  <p>Hash-based systems usually build the answer in three layers:</p>
+  <p>Hash-based systems (stack A in the picture above) usually build the answer in three layers:</p>
   <ol>
     <li><strong>Interactive Oracle Proof (IOP):</strong> in a pretend world, the prover posts huge tables, and the verifier only looks at a few random cells. If the prover lied, those random peeks catch the lie with high probability. This layer is mostly information-theoretic math.</li>
     <li><strong>Merkle trees:</strong> in the real world you cannot email a terabyte table. So the prover publishes only a short fingerprint (the Merkle root). Later, when the verifier asks for cell number 17, the prover reveals that cell plus a short authentication path that matches the root.</li>
@@ -951,6 +1007,7 @@
   </ol>
   <p>People sometimes call the finished object a <strong>SNARK</strong> (Succinct Non-interactive ARgument of Knowledge). After Merkle hashes enter, soundness is computational: a cheater with a magic hash-breaking computer might forge proofs. Cryptographers then say <strong>argument</strong> instead of information-theoretic <strong>proof</strong>.</p>
   <p>When theorems pretend the hash is a perfect random function, that pretend world is the <strong>random oracle model</strong>. Real systems plug in BLAKE2 or SHA-256 and hope it is random enough.</p>
+  <p><strong>Important:</strong> zkLLM (§6) does <em>not</em> use this sandwich for binding weights. It uses an algebraic polynomial commitment (Hyrax, §§15–16) instead of Merkle+RS for that job. Same wish-list; different commit crypto.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-step hash-based zkSNARK recipe">
@@ -1046,11 +1103,12 @@
 </div>
 
   <h3>5 · Reed–Solomon encoding + random mask — “hide secrets while still allowing spot checks”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§7 FlashProve</span> <span class="tag">hash-based backends</span> <span class="tag">not Hyrax itself</span></p>
   <p><strong>Problem A (soundness):</strong> the verifier will only look at a few cells of a long table. If the table is just the raw secret numbers, a cheater could put correct values only in the cells that get asked, and garbage everywhere else.</p>
   <p><strong>Problem B (zero knowledge):</strong> if those few opened cells are literal pieces of the secret, the verifier learns the secret bit by bit.</p>
   <p><strong>What Reed–Solomon encoding does about Problem A:</strong> take your short secret message and turn it into a much longer row by treating the message as a polynomial and evaluating that polynomial at many points. The long row is called a <strong>codeword</strong>. Honest codewords for different messages disagree in most positions. So if a cheater changes lots of entries, almost any random peek hits a wrong value. That is the same idea as an error-correcting code on a CD: redundancy makes corruption obvious.</p>
   <p><strong>What the random mask does about Problem B:</strong> before encoding, the prover mixes in a few random coefficients. Then any small number of opened cells looks random, and those cells do not reveal the original secret. There is a budget: if you open more than about t cells on the <em>same</em> encoding, the randomness runs out and privacy can break. People call t the <strong>query budget</strong>.</p>
-  <p><strong>What it is used for:</strong> committing to secret weights or secret intermediate values in a way that supports both “random spot checks catch cheating” and “spot checks do not leak the secret.”</p>
+  <p><strong>What it is used for:</strong> committing to secret weights or secret intermediate values in a way that supports both “random spot checks catch cheating” and “spot checks do not leak the secret.” FlashProve’s commit layer is this story. Hyrax solves the same job with group elements instead (§16).</p>
   <p class="note" style="display:block;padding:12px 14px;border:1px solid var(--rule-soft);margin:14px 0;"><span class="label">Later in papers</span> Commit-and-prove systems refresh the random mask (new encodings of the same secret) when the query budget is used up. That is an application detail, not the definition of Reed–Solomon.</p>
   
 <div class="svg-fig">
@@ -1088,10 +1146,11 @@
 </div>
 
   <h3>6 · Unique decoding vs list decoding — “how wrong can a row be and still mean one message?”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§7 FlashProve</span> <span class="tag">proximity tests in hash SNARKs</span></p>
   <p><strong>Problem:</strong> the verifier only sees a few opened cells, so the committed row might be noisy. You must decide how close to a perfect codeword is “close enough.”</p>
   <p>If you demand the row be extremely close to a codeword, there is usually only <strong>one</strong> possible message that fits. That is <strong>unique decoding</strong>. It is safer, but you typically need more opens, so proofs get slower.</p>
   <p>If you allow a larger error, several different messages might still fit the opened cells. That is <strong>list decoding</strong>. It needs fewer opens (faster), but now you must pin down <em>which</em> message you meant. Systems often add an extra random evaluation called an <strong>out-of-domain sample</strong> (OOD) for that pinning step.</p>
-  <p>A <strong>proximity test</strong> is the protocol piece that asks: “is this committed row close enough to some codeword, and does it satisfy these linear claims?” Unique vs list decoding is about how large “close enough” is allowed to be.</p>
+  <p>A <strong>proximity test</strong> is the protocol piece that asks: “is this committed row close enough to some codeword, and does it satisfy these linear claims?” Unique vs list decoding is about how large “close enough” is allowed to be. (Related name you will see in STARK literature: <strong>FRI</strong> — a different proximity engine for Reed–Solomon; FlashProve’s writeups lean on the RS+Merkle+OOD story above rather than teaching FRI as a named protocol.)</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unique vs list decoding">
@@ -1118,16 +1177,17 @@
   <text x="388" y="148" class="s">pin which message you meant.</text>
 
   <rect x="24" y="188" width="672" height="72" rx="3" class="box"/>
-  <text x="36" y="210" class="t">FlashProve</text>
-  <text x="36" y="232" class="s">Uses the list-decoding regime + an extra “out-of-domain” random sample so the list collapses to one message. That’s the OOD answers in the commitment.</text>
+  <text x="36" y="210" class="t">Where this shows up</text>
+  <text x="36" y="232" class="s">Hash-based systems (FlashProve §7) often use list-decoding + an out-of-domain (OOD) sample so the list collapses to one message.</text>
 </svg>
 <p class="cap">Proximity test = “are you close to some codeword?” OOD sample = “and we mean this one.”</p>
 </div>
 
   <h3>7 · Merkle trees — “commit to a huge table without mailing the huge table”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§7 FlashProve</span> <span class="tag">§5 tap hashes (non-ZK cousin)</span> <span class="tag">not Hyrax PCS</span></p>
   <p><strong>Problem:</strong> the IOP wants the verifier to open a few cells of a huge table. Sending the whole table destroys succinctness. Letting the prover just <em>tell</em> you cell 17 is dangerous, because the prover could change answers depending on which cell you ask.</p>
   <p><strong>What a Merkle tree does:</strong> hash every cell, then repeatedly hash pairs of hashes until one top hash remains. That top hash is the <strong>Merkle root</strong>. Publish the root early. Later, to open cell 17, send the cell value plus the sibling hashes along the path to the root. The verifier re-hashes upward. If the final hash matches the published root, that cell is authentic for the committed table.</p>
-  <p><strong>What it is used for:</strong> turning “query an oracle table” into a short, checkable opening. This is the main bridge from the IOP math game to a real-world argument.</p>
+  <p><strong>What it is used for:</strong> turning “query an oracle table” into a short, checkable opening. This is the main bridge from the IOP math game to a real-world hash-based argument. Cankaya’s Plan A taps also hash-and-sign blobs — same “fingerprint” intuition, without a SNARK on top.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Merkle tree commit and open">
@@ -1173,14 +1233,16 @@
 </div>
 
   <h3>8 · Multilinear extension — “make a spreadsheet into a polynomial you can quiz”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM</span> <span class="tag core">§7 FlashProve</span> <span class="tag">any sumcheck-heavy system</span></p>
   <p><strong>Problem:</strong> your data is often a big table with addresses made of bits (row 0/1, column 0/1, …). Sumcheck and friends want to talk about a <em>polynomial</em>, not a spreadsheet.</p>
   <p><strong>What we do:</strong> there is a standard, unique way to build a polynomial that matches the table on every 0/1 corner and is degree at most 1 in each variable. That polynomial is the <strong>multilinear extension</strong> of the table.</p>
-  <p><strong>What it is used for:</strong> when a paper says “run sumcheck on P,” P is often this extension of some big table of values from the circuit, not a random made-up polynomial.</p>
+  <p><strong>What it is used for:</strong> when a paper says “run sumcheck on P,” P is often this extension of some big table of values from the circuit, not a random made-up polynomial. Hyrax also talks about committing to (multilinear) polynomials over the weights.</p>
 
   <h3>9 · Random batching — “check many claims with one random mix”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all ZK §§</span> <span class="tag">§6</span> <span class="tag">§7</span> <span class="tag">§8</span></p>
   <p><strong>Problem:</strong> after arithmetization you may have thousands of separate equations. Checking them one by one is still too expensive.</p>
   <p><strong>What we do:</strong> pick a random field element r and check a random weighted mix of the claims (for example C₁ + r·C₂ + r²·C₃ + …). If every claim is true, the mix is true. If any claim is false, the mix is a nonzero polynomial in r, so a random r almost never makes it accidentally true. That is Schwartz–Zippel again.</p>
-  <p><strong>What it is used for:</strong> collapsing many checks into one check before sumcheck or a proximity test.</p>
+  <p><strong>What it is used for:</strong> collapsing many checks into one check before sumcheck, a proximity test, or a batch of Hyrax openings.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Multilinear extension and batching">
@@ -1216,10 +1278,11 @@
 </div>
 
   <h3>10 · Sumcheck — “verify a gigantic sum without adding every term”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM</span> <span class="tag core">§7 FlashProve (~2000 / request)</span> <span class="tag">§8</span></p>
   <p><strong>Problem:</strong> many circuit checks look like “the sum of this polynomial over millions of bit-strings equals S.” Adding millions of terms is too slow for the verifier.</p>
   <p><strong>What sumcheck does:</strong> the prover and verifier play a short game, one variable at a time. In each round the prover sends a small one-variable polynomial that claims to summarize the remaining sum. The verifier checks that this small polynomial is consistent with the previous claim (plug in 0 and 1 and add). Then the verifier picks a random value for that variable, and the claim shrinks. After enough rounds, only one random evaluation of the big polynomial remains, and the verifier checks that single point.</p>
   <p><strong>Why cheating fails:</strong> if the prover sends a wrong small polynomial, it can agree with the truth at only a few points. A random challenge almost always lands off those points. Again: Schwartz–Zippel.</p>
-  <p><strong>What it is used for:</strong> matrix multiplies and other huge structured sums inside ML circuits become sequences of sumchecks instead of brute-force addition.</p>
+  <p><strong>What it is used for:</strong> matrix multiplies and other huge structured sums inside ML circuits become sequences of sumchecks instead of brute-force addition. FlashProve is sumcheck-heavy; zkLLM uses sumcheck on top of Hyrax openings.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One round of sumcheck">
@@ -1264,15 +1327,17 @@
 </div>
 
   <h3>11 · Lookups — “handle ugly functions without building a nightmare circuit”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM (tlookup · zkAttn)</span> <span class="tag core">§7 FlashProve</span> <span class="tag">range checks everywhere</span></p>
   <p><strong>Problem:</strong> neural nets use nonlinear functions that are painful to write as a few multiplications (exponentials, comparisons, clipped activations). Expanding them into huge multiplication circuits makes proofs enormous.</p>
   <p><strong>What a lookup does:</strong> publish a table of allowed pairs (input, output) ahead of time. The prover claims: every secret pair that appeared in my run is a row of that public table. There are standard protocols that check this claim using sumcheck-style algebra.</p>
   <p><strong>Catch:</strong> the public table must stay reasonably small, or the proof becomes huge. That is why quantized / clipped nonlinearities show up in zkML systems.</p>
-  <p><strong>What it is used for:</strong> Softmax pieces, SiLU, range checks, comparisons — anything that is easier to tabulate than to arithmetize gate-by-gate.</p>
+  <p><strong>What it is used for:</strong> Softmax pieces, SiLU, range checks, comparisons — anything that is easier to tabulate than to arithmetize gate-by-gate. zkLLM names its gadgets <strong>tlookup</strong> (generic table membership via a rational identity) and <strong>zkAttn</strong> (Softmax shift + digit exp tables + a tolerance band on row sums — not exact log-sum-exp).</p>
 
   <h3>12 · Linear claims — “the common final shape of almost every check”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§7 FlashProve</span> <span class="tag">hash proximity finishers</span></p>
   <p><strong>Problem:</strong> after sumchecks and lookups, you still need one simple kind of statement the proximity test knows how to finish.</p>
   <p><strong>What a linear claim is:</strong> “for this secret committed vector m, and this public vector v that we both know, the weighted sum ⟨v, m⟩ equals a public number c.”</p>
-  <p><strong>What it is used for:</strong> nearly every high-level check eventually reduces to a handful of linear claims. Then you batch them and feed them into a proximity test that opens a few Merkle columns.</p>
+  <p><strong>What it is used for:</strong> nearly every high-level check in the hash stack eventually reduces to a handful of linear claims. Then you batch them and feed them into a proximity test that opens a few Merkle columns. In the Hyrax stack, the analogous “finisher” is often ProveEval at random points rather than Merkle column opens — same reduction spirit, different opening API.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lookups and linear claims">
@@ -1310,11 +1375,12 @@
 </div>
 
   <h3>13 · Fiat–Shamir — “turn a live conversation into a file you can email”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">all non-interactive ZK §§</span> <span class="tag">§6</span> <span class="tag">§7</span> <span class="tag">§8</span> <span class="tag">§10</span></p>
   <p><strong>Problem:</strong> the interactive protocol needs the verifier to keep sending fresh random challenges. In practice you want a single proof file that anyone can check offline.</p>
   <p><strong>What Fiat–Shamir does:</strong> replace each verifier challenge with a hash of everything that has been said so far:</p>
   <p class="mono" style="margin:12px 0">next challenge = Hash(public parameters ‖ previous messages)</p>
   <p>The prover writes the whole transcript into the proof. The verifier recomputes the same challenges from the hashes and checks the openings and equations. Because the challenge is determined by prior messages, the prover cannot first see the challenge and then invent a matching lie (unless the hash is broken).</p>
-  <p><strong>What it is used for:</strong> making interactive IOPs into non-interactive SNARKs / STARKs.</p>
+  <p><strong>What it is used for:</strong> making interactive protocols into non-interactive SNARKs / STARKs. FlashProve’s twist: challenges form a DAG (per-request chains join for a shared proximity test) so GPU work can overlap — still Fiat–Shamir, just with a dependency graph.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fiat-Shamir transformation">
@@ -1358,26 +1424,190 @@
 </div>
 
   <h3>14 · Commit-and-prove — “nail the secret once, then prove many public claims about it”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM</span> <span class="tag core">§7 FlashProve</span> <span class="tag core">§8 VerInf</span></p>
   <p><strong>Problem:</strong> sometimes the secret (for example a model’s weights) is reused across many statements. You want to bind that secret once, then prove many different public claims against the same binding, without re-sending the secret.</p>
-  <p><strong>What commit-and-prove means:</strong> first publish a commitment (often a Merkle root of an encoding of the secret). Later, for each new public claim, produce a proof that refers back to that same commitment. The commitment is binding: you should not be able to open it to two different secrets. Separately, encodings may need fresh randomness so zero knowledge does not wear out after many openings.</p>
+  <p><strong>What commit-and-prove means:</strong> first publish a commitment C. Later, for each new public claim, produce a proof that refers back to that same C. The commitment is binding: you should not be able to open it to two different secrets. Separately, encodings may need fresh randomness so zero knowledge does not wear out after many openings.</p>
+  <p><strong>How C is built differs by stack:</strong> FlashProve → Merkle root of RS+mask encodings. zkLLM → Hyrax group commitment to the weight polynomial. VerInf → same commit-and-prove pattern, with a different public statement (Û).</p>
   <p><strong>What it is used for:</strong> “I committed to one model; here are many inference receipts against that same model.”</p>
 
-  <h3>15 · How the tools fit together (still general)</h3>
-  <pre><code>1. Rewrite the computation as field equations (+ lookups).     ← arithmetization
-2. Encode secret tables (Reed–Solomon + random mask).         ← hide + add redundancy
-3. Commit with Merkle roots.                                  ← short fingerprint
-4. Reduce big checks with sumcheck / lookups / batching
-   until only a few linear claims remain.
-5. Run a proximity test (open a few authenticated cells).
-6. Replace live randomness with Fiat–Shamir hashes.           ← one proof file
+  <h3>15 · Discrete log &amp; elliptic-curve groups — “why Hyrax can be short”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM (Hyrax)</span> <span class="tag">algebraic PCS family</span> <span class="tag">not FlashProve’s commit layer</span></p>
+  <p><strong>Problem:</strong> Merkle commitments are easy to understand, but every opening costs path hashes, and proof size grows with how many cells you open. People wanted a different deal: a tiny commitment object, and a way to prove “the committed polynomial evaluates to y at this random point” without shipping half the table.</p>
+  <p><strong>What a group gives you:</strong> think of public points G, H, … on an elliptic curve as “atoms” you can add and scale, but you cannot efficiently reverse “how many times did I add G to get this point?” That hard reverse is the <strong>discrete-logarithm</strong> problem. A <strong>Pedersen-style commitment</strong> looks like C = a·G + r·H: it binds the secret a (you cannot open C to two different a’s without breaking discrete log), and the random r hides a (so C alone does not leak a).</p>
+  <p><strong>What you need to remember (not a crypto course):</strong> hash assumptions (“break BLAKE2”) and discrete-log assumptions (“solve DL on this curve”) are different hardness stories. FlashProve’s commit layer bets on hashes. zkLLM’s Hyrax bets on discrete log in an elliptic-curve group. You can believe one and still be nervous about the other.</p>
+  <p><strong>Trusted setup vs transparent:</strong> some algebraic SNARKs need a special ceremony to make public parameters (toxic waste if leaked). Hyrax as used in zkLLM is in the <strong>transparent</strong> family — no ceremony with secret leftovers — which is why the deck’s zkLLM table says “no trusted setup.”</p>
 
-Verifier recomputes hashes and checks a short list of equations.
-Secret witness never needs to be sent in the clear.</code></pre>
-  <p>Different papers choose different public statements (exact circuit output, unexplained-info score, greedy token, training step, …). The toolbox above stays mostly the same. Concrete systems in §§6–8 are applications of this toolbox, not replacements for it.</p>
+  <h3>16 · Polynomial commitment schemes &amp; Hyrax — “bind a poly, open at random points”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 zkLLM</span> <span class="tag">any algebraic-PCS zkML</span></p>
+  <p><strong>Problem:</strong> after arithmetization and sumcheck, the verifier often needs to believe “this huge secret polynomial P, evaluated at a random point r, equals y” — without seeing all of P.</p>
+  <p><strong>What a PCS is:</strong> a <strong>polynomial commitment scheme</strong> is an API with two moves. (1) <em>Commit:</em> turn P into a short object C. (2) <em>Open / ProveEval:</em> later prove that P(r) = y for public r, y, relative to that same C. Binding means you cannot open C to two different polynomials. Hiding (when required) means C alone does not leak P.</p>
+  <p><strong>Hyrax in one paragraph:</strong> Hyrax is a transparent PCS built from Pedersen-style commitments and an inner-product / bulletproofs-flavored argument (people say IPA for inner-product argument). zkLLM commits the weights W into C with Hyrax, then uses ProveEval at Schwartz–Zippel-random points as the finisher after sumchecks and lookups. Tiny proofs (~hundreds of bytes in the published 13B setting) come from this algebraic opening style, not from Merkle paths.</p>
+  <p><strong>Names you may meet later (not needed for this deck, but so they do not scare you):</strong> KZG (pairing-based PCS, usually needs a setup), IPA/Bulletproofs (pairing-free, proof size grows slowly with degree), FRI (hash-based proximity for Reed–Solomon — lives next to stack A, not Hyrax).</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Polynomial commitment vs Merkle">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Two ways to commit to a secret polynomial / table</text>
+
+  <rect x="24" y="40" width="336" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Hash / Merkle path (§7)</text>
+  <text x="36" y="84" class="s">Encode → hash tree → root.</text>
+  <text x="36" y="102" class="s">Open = reveal a few cells</text>
+  <text x="36" y="120" class="s">+ Merkle paths.</text>
+  <text x="36" y="142" class="s">Assumption: hash is random.</text>
+  <text x="36" y="168" class="s">Proof size grows with opens.</text>
+
+  <rect x="376" y="40" width="320" height="150" rx="3" class="box"/>
+  <text x="388" y="62" class="t">Algebraic PCS / Hyrax (§6)</text>
+  <text x="388" y="84" class="s">Bind the poly into a short</text>
+  <text x="388" y="102" class="s">group element C (Pedersen-</text>
+  <text x="388" y="120" class="s">style). Open = ProveEval:</text>
+  <text x="388" y="142" class="s">“at random r, P(r)=y.”</text>
+  <text x="388" y="168" class="s">Assumption: discrete log.</text>
+
+  <rect x="24" y="208" width="672" height="54" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Same job, different crypto</text>
+  <text x="36" y="248" class="s">Both answer “I committed to one secret; later check random algebraic claims about it.” Merkle ≠ Hyrax.</text>
+</svg>
+<p class="cap">zkLLM’s first slide is Hyrax. FlashProve’s first slide is Merkle+RS. Do not mash them into one box.</p>
+</div>
+
+  <h3>17 · Choosing the public statement — “exact · clipped-gap · unexplained Û”</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§6 exact circuit</span> <span class="tag core">§7 greedy / clipped-gap</span> <span class="tag core">§8 Û bound</span> <span class="tag">§5 DiFR contrast</span></p>
+  <p><strong>Problem:</strong> cryptography proves whatever statement you feed it. If you ask the wrong question, you get a perfect proof of the wrong policy claim. Float nondeterminism and steganography make “bit-exact same tokens as the GPU” a brutal statement.</p>
+  <p><strong>Three statements this deck actually uses:</strong></p>
+  <ul>
+    <li><strong>Exact integer circuit</strong> (§6 zkLLM): the committed quantized model on public (or committed) input x produces output y. Strongest “receipt.” Softmax is only proven up to zkAttn’s tolerance band.</li>
+    <li><strong>Greedy / clipped-gap</strong> (§7 FlashProve): either exact-match greedy of the integer model, or a <strong>clipped-gap / TokenDiFR-family</strong> policy — the emitted token is allowed if it sits inside a gap of the model’s preferred choice. Slack is a <em>policy</em> choice, not a new SNARK.</li>
+    <li><strong>Unexplained-info bound Û</strong> (§8 VerInf): the committed model explains a (possibly hidden) token stream well enough that leftover unexplained information is ≤ a public Û bits/token. This is an information-theoretic <em>score</em>, not bit-exact equality. Wrong model / stego / garbage → Û blows up. Threshold Û is a policy knob.</li>
+  </ul>
+  <p><strong>DiFR next door (not a SNARK):</strong> Plan A recompute under float chaos often needs a statistical accept region (DiFR). Same “budgeted slack” intuition as clipped-gap / Û, but the engine is plaintext recompute, not a proof.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Choosing the public statement">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Crypto proves a statement — you still choose which claim</text>
+
+  <rect x="24" y="40" width="220" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Exact circuit</text>
+  <text x="36" y="84" class="s">“Integer model on x</text>
+  <text x="36" y="102" class="s">outputs y / greedy</text>
+  <text x="36" y="120" class="s">token.”</text>
+  <text x="36" y="148" class="t">§6 zkLLM</text>
+  <text x="36" y="170" class="s">tight · float-painful</text>
+
+  <rect x="256" y="40" width="220" height="150" rx="3" class="box"/>
+  <text x="268" y="62" class="t">Clipped-gap / TokenDiFR</text>
+  <text x="268" y="84" class="s">“Top token within a</text>
+  <text x="268" y="102" class="s">gap of the model’s</text>
+  <text x="268" y="120" class="s">argmax.”</text>
+  <text x="268" y="148" class="t">§7 FlashProve</text>
+  <text x="268" y="170" class="s">policy slack</text>
+
+  <rect x="488" y="40" width="208" height="150" rx="3" class="box"/>
+  <text x="500" y="62" class="t">Unexplained Û</text>
+  <text x="500" y="84" class="s">“Leftover info in</text>
+  <text x="500" y="102" class="s">the tokens ≤ Û</text>
+  <text x="500" y="120" class="s">bits/token.”</text>
+  <text x="500" y="148" class="t">§8 VerInf</text>
+  <text x="500" y="170" class="s">score, not equality</text>
+
+  <rect x="24" y="208" width="672" height="64" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Not crypto, but next door</text>
+  <text x="36" y="252" class="s">DiFR (§5 contrast) = statistical accept region for Plan A recompute when floats disagree. Same “slack” intuition as clipped-gap / Û, different engine.</text>
+</svg>
+<p class="cap">Wrong statement ⇒ sound crypto proving the wrong policy question. Pick the claim before you pick the SNARK.</p>
+</div>
+  <p>When you open a paper, ask first: <em>what is the statement?</em> Then ask which stack (hash PCS vs Hyrax vs zkVM) proves it.</p>
+
+  <h3>18 · zkVM, recursion, folding — “prove a program ran” (§10)</h3>
+  <p class="usedby"><span class="label">Used by</span> <span class="tag core">§10 Peigné</span> <span class="tag">training-ZK horizon</span></p>
+  <p><strong>Problem:</strong> hand-building an attention/matmul circuit for every frontier training kernel (BF16/FP32 optimizer steps, sharding, collectives) does not scale as a research program. You want to write the step as a <em>program</em> and prove that the program executed.</p>
+  <p><strong>What a zkVM is:</strong> a virtual machine whose every step obeys public transition rules. The prover produces a long <strong>execution trace</strong> (registers, memory, flags at each clock). Arithmetization says “every consecutive pair of rows obeys the VM rules, and the public I/O matches the claim.” Then a SNARK (often hash-based or folding-based under the hood) proves that statement. You prove “this guest program ran,” not “this one-off Softmax gadget.”</p>
+  <p><strong>Why recursion / folding show up:</strong> a training step’s trace is enormous. <strong>Recursion</strong> means a SNARK that verifies other SNARKs, so you can compress many chunks into one short proof. <strong>Folding</strong> (Nova-style intuition): incrementally combine two instance-witness pairs into one, paying a small cost per step instead of re-proving the world from scratch. You do not need the Nova/Halo2 paper trail to read Peigné — you need the idea “long computation → many small proven chunks → one short proof.”</p>
+  <p><strong>What Peigné is arguing:</strong> in principle, BF16/FP32-aware zkVM proofs of frontier training steps are a coherent research target. There is no end-to-end prototype in this briefing. Treat §10 as the training-side horizon that uses stack C, while §§6–8 are inference Plan B engines.</p>
+  
+<div class="svg-fig">
+<svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="zkVM idea">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#mz); }
+  </style>
+  <defs>
+    <marker id="mz" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">zkVM = prove “this program ran,” not “this hand-built ML circuit”</text>
+
+  <rect x="24" y="44" width="160" height="90" rx="3" class="box"/>
+  <text x="36" y="68" class="t">Training step</text>
+  <text x="36" y="90" class="s">BF16/FP32 ops,</text>
+  <text x="36" y="108" class="s">optimizer, shards…</text>
+  <path d="M184 89 L220 89" class="arr"/>
+
+  <rect x="220" y="44" width="180" height="90" rx="3" class="box"/>
+  <text x="232" y="68" class="t">Guest program</text>
+  <text x="232" y="90" class="s">runs inside a VM</text>
+  <text x="232" y="108" class="s">(bytecode trace)</text>
+  <path d="M400 89 L436 89" class="arr"/>
+
+  <rect x="436" y="44" width="260" height="90" rx="3" class="box"/>
+  <text x="448" y="68" class="t">SNARK over the trace</text>
+  <text x="448" y="90" class="s">(+ recursion / folding</text>
+  <text x="448" y="108" class="s">so steps stay short)</text>
+
+  <rect x="24" y="156" width="672" height="94" rx="3" class="box"/>
+  <text x="36" y="178" class="t">Why Peigné talks this way</text>
+  <text x="36" y="200" class="s">Hand-arithmetizing every frontier training kernel is hopeless. A zkVM lets you write (or compile) the step as a program</text>
+  <text x="36" y="220" class="s">and prove execution. Hard part moves to float fidelity + proving cost — still a research horizon, not a product.</text>
+</svg>
+<p class="cap">Same completeness/soundness/ZK wish-list. Different packaging: program trace instead of a bespoke attention circuit.</p>
+</div>
+
+  <h3>19 · How the tools fit together (three recipes)</h3>
+  <p class="usedby"><span class="label">Map</span> <span class="tag">§7 ≈ recipe A</span> <span class="tag">§6 ≈ recipe B</span> <span class="tag">§10 ≈ recipe C</span> <span class="tag">§8 = pick statement + A or B backend</span></p>
+  <pre><code>Shared floor (everyone):
+  fields · Schwartz–Zippel · arithmetization · Fiat–Shamir · pick a statement (§17)
+
+Recipe A — hash / IOP  (§7 FlashProve; many VerInf-shaped backends):
+  1. Equations + lookups
+  2. Reed–Solomon + random mask
+  3. Merkle commit
+  4. Sumcheck / lookups / batching → linear claims
+  5. Proximity test (Merkle opens; unique/list + OOD)
+  6. Fiat–Shamir → one proof file
+
+Recipe B — algebraic PCS  (§6 zkLLM):
+  1. Equations + lookups (tlookup / zkAttn)
+  2. Hyrax commit to weight polynomial → C
+  3. Sumcheck / lookups / batching
+  4. Hyrax ProveEval at random points (discrete-log assumption)
+  5. Fiat–Shamir → one (often tiny) proof file
+
+Recipe C — zkVM  (§10 Peigné horizon):
+  1. Compile / write the training step as a guest program
+  2. Arithmetize the VM trace (floats are the hard fidelity problem)
+  3. Prove chunks; recurse / fold into a short proof
+  4. Fiat–Shamir → one proof file</code></pre>
+  <p>Concrete systems in §§6–8 and §10 are applications of these recipes, not replacements for this section. If a later section name-drops a tool you forgot, jump back here — each subsection’s <em>Used by</em> line tells you whether that paper needs it.</p>
 
   <div class="note">
     <span class="label">Study checklist</span>
-    <p>For each tool, say out loud: (a) what everyday problem it solves, and (b) what would go wrong if we deleted it. Tools: finite field, Schwartz–Zippel, arithmetization, IOP, Merkle, Reed–Solomon+mask, unique vs list decoding, multilinear extension, batching, sumcheck, lookup, linear claim, Fiat–Shamir, commit-and-prove. If you cannot answer (a) in a full sentence, re-read only that subsection.</p>
+    <p>For each tool, say out loud: (a) what everyday problem it solves, (b) which deck direction uses it, and (c) what would go wrong if we deleted it. Tools: finite field, Schwartz–Zippel, arithmetization, IOP sandwich, Merkle, Reed–Solomon+mask, unique vs list decoding, multilinear extension, batching, sumcheck, lookup, linear claim, Fiat–Shamir, commit-and-prove, discrete log / Pedersen, PCS / Hyrax, statement choice (exact · gap · Û), zkVM / folding. If you cannot answer (a) in a full sentence, re-read only that subsection.</p>
   </div>
   <div class="note">
     <span class="label">Primary refs</span>
@@ -1385,7 +1615,8 @@ Secret witness never needs to be sent in the clear.</code></pre>
       Schwartz–Zippel (watch first): <a href="https://www.youtube.com/watch?v=wNghCHYR6Vo">YouTube wNghCHYR6Vo</a> ·
       Textbook overview: Chiesa–Yogev <em>Proofs, Arguments, and Zero-Knowledge</em> ·
       IOP compilation: Ben-Sasson–Chiesa–Spooner ·
-      Then read a concrete system (§6 zkLLM / §7 FlashProve / §8 VerInf) as an application of this section
+      Hyrax PCS: Wahby et al. ·
+      Then read a concrete system as an application: §6 zkLLM (recipe B) · §7 FlashProve (recipe A) · §8 VerInf (statement §17) · §10 Peigné (recipe C)
     </p>
   </div>
 </section>
@@ -2062,9 +2293,9 @@ Secret witness never needs to be sent in the clear.</code></pre>
     </table>
   </div>
   <h3>Guts (enough to not handwave)</h3>
-  <p>Same §0c stack; Hyrax is the polynomial commitment (Step-2 cousin of Merkle/PCS). Names below are zkLLM-specific gadgets on top.</p>
+  <p>Recipe B in §0c (§§15–16): Hyrax PCS on elliptic-curve discrete log, not Merkle+RS. Names below are zkLLM-specific gadgets on that floor.</p>
   <ul>
-    <li><strong>Hyrax:</strong> polynomial commitment binds W into C; open evaluations at random points.</li>
+    <li><strong>Hyrax:</strong> see §0c ·16 — binds W into C; ProveEval at random points.</li>
     <li><strong>Sumcheck:</strong> big matmuls / sums → interactive algebraic checks (see §0c sumcheck).</li>
     <li><strong>tlookup:</strong> non-arithmetic ops → prove secret tensor entries lie in a public table (see §0c lookups).</li>
     <li><strong>zkAttn:</strong> Softmax shift shrinks exp domain; don’t prove exact log-sum-exp — only a <strong>tolerance band</strong> on row sums (fine for execution receipts; dangerous if bolted onto a manipulable unexplained-info score).</li>
@@ -2096,7 +2327,7 @@ Secret witness never needs to be sent in the clear.</code></pre>
     </div>
   </div>
   <p><strong>Statement (exact match):</strong> committed integer weights, on a public token window, produce the claimed greedy tokens on a checked range — without revealing weights, activations, or which MoE experts ran. Architecture is public. Serving float / sampled decoding can diverge; production-shaped use is post-hoc prove under a <em>clipped-gap</em> policy (Token-DiFR family).</p>
-  <p><strong>Lineage:</strong> Plan B evaluate engine under Cankaya’s challenge loop — after zkLLM (§6), before VerInf (§8). Concrete application of the §0c toolbox. Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
+  <p><strong>Lineage:</strong> Plan B evaluate engine under Cankaya’s challenge loop — after zkLLM (§6), before VerInf (§8). Concrete application of §0c recipe A (hash/IOP). Separately, Anthropic’s RSP “inference verification” goal was also met by a non-ZK path (sign traffic + recompute on a trusted box) — FlashProve is the cryptographic sibling.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FlashProve pipeline">
@@ -2358,7 +2589,7 @@ Secret witness never needs to be sent in the clear.</code></pre>
     </div>
   </div>
   <p><strong>Idea:</strong> make Shavit’s transcript story cryptographically binding — genesis / step / optional ex-ante proofs without revealing the proprietary run.</p>
-  <p><strong>Lineage:</strong> Different problem than §§5–8 (those audit <em>inference</em> whitelist forward passes). This is the crypto endgame of classical <em>training</em> monitoring. Does not replace near-term FlexHEG/Cankaya work; clarifies what “strong” would mean if telemetry stays porous.</p>
+  <p><strong>Lineage:</strong> Different problem than §§5–8 (those audit <em>inference</em> whitelist forward passes). This is the crypto endgame of classical <em>training</em> monitoring — §0c recipe C (zkVM / recursion / folding). Does not replace near-term FlexHEG/Cankaya work; clarifies what “strong” would mean if telemetry stays porous.</p>
   
 <div class="svg-fig">
 <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
@@ -2410,10 +2641,11 @@ Cankaya is the near-term low-trust retrofit: NS-first taps feed commitments;
 Plan A = AE precise replay (bit-exact metadata; DiFR if needed). Plan B swaps
 the evaluate step for ZK — zkLLM (~13B exact integer circuit), FlashProve
 (~400B MoE greedy / clipped-gap, ~110 tok/s, ~19 MB π), or VerInf
-(~400B unexplained-info bound Û). §0c is the ZK math-foundations primer
-(IOP→Merkle→Fiat–Shamir→Sumcheck) for reading those engines. FlexHEG is the parallel hardware-enforcement
+(~400B unexplained-info bound Û). §0c is the complete ZK primer for this deck
+(shared floor + hash/IOP recipe A + Hyrax/PCS recipe B + statement choice + zkVM recipe C),
+each tool tagged with which direction uses it. FlexHEG is the parallel hardware-enforcement
 track (active caps / interlocks), not a substitute for taps+evaluate. Peigné
-sketches ZK *training* as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
+sketches ZK *training* via zkVM as a longer crypto horizon. Almost none of this is mass-deployed product yet — blueprints,
 empirics, and prototypes.</code></pre>
   <h3>Open problems / next-step research (what to do after this deck)</h3>
   <p>These are not “unsolved math curiosities” — they are the load-bearing gaps between today’s blueprints and a credible pause. Several track cruxes raised against Cankaya’s retrofit (precise replay, sampling economics, perimeter, rare covert adapters, Plan A→B transition, adjudication).</p>

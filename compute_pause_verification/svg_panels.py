@@ -935,10 +935,181 @@ def svg_unique_list():
   <text x="388" y="148" class="s">pin which message you meant.</text>
 
   <rect x="24" y="188" width="672" height="72" rx="3" class="box"/>
-  <text x="36" y="210" class="t">FlashProve</text>
-  <text x="36" y="232" class="s">Uses the list-decoding regime + an extra “out-of-domain” random sample so the list collapses to one message. That’s the OOD answers in the commitment.</text>
+  <text x="36" y="210" class="t">Where this shows up</text>
+  <text x="36" y="232" class="s">Hash-based systems (FlashProve §7) often use list-decoding + an out-of-domain (OOD) sample so the list collapses to one message.</text>
 </svg>
 <p class="cap">Proximity test = “are you close to some codeword?” OOD sample = “and we mean this one.”</p>
+</div>'''
+
+
+def svg_three_stacks():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three ZK stacks in this deck">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Three crypto stacks this briefing actually uses</text>
+
+  <rect x="24" y="40" width="220" height="170" rx="3" class="box"/>
+  <text x="36" y="62" class="t">A · Hash / IOP</text>
+  <text x="36" y="84" class="s">Reed–Solomon + mask</text>
+  <text x="36" y="102" class="s">Merkle openings</text>
+  <text x="36" y="120" class="s">sumcheck · lookups</text>
+  <text x="36" y="138" class="s">Fiat–Shamir</text>
+  <text x="36" y="164" class="t">§7 FlashProve</text>
+  <text x="36" y="186" class="s">(§8 often same family)</text>
+
+  <rect x="256" y="40" width="220" height="170" rx="3" class="box"/>
+  <text x="268" y="62" class="t">B · Algebraic PCS</text>
+  <text x="268" y="84" class="s">Elliptic-curve group</text>
+  <text x="268" y="102" class="s">Hyrax / IPA-style</text>
+  <text x="268" y="120" class="s">ProveEval at points</text>
+  <text x="268" y="138" class="s">+ sumcheck / lookups</text>
+  <text x="268" y="164" class="t">§6 zkLLM</text>
+  <text x="268" y="186" class="s">Hyrax binds W → C</text>
+
+  <rect x="488" y="40" width="208" height="170" rx="3" class="box"/>
+  <text x="500" y="62" class="t">C · zkVM</text>
+  <text x="500" y="84" class="s">Prove a program run</text>
+  <text x="500" y="102" class="s">(CPU/GPU step as</text>
+  <text x="500" y="120" class="s">bytecode), not a</text>
+  <text x="500" y="138" class="s">hand-built ML circuit</text>
+  <text x="500" y="164" class="t">§10 Peigné</text>
+  <text x="500" y="186" class="s">training horizon</text>
+
+  <rect x="24" y="228" width="672" height="54" rx="3" class="box"/>
+  <text x="36" y="250" class="t">Shared floor</text>
+  <text x="36" y="268" class="s">Fields · Schwartz–Zippel · arithmetization · Fiat–Shamir · “what statement?” — then pick stack A, B, or C.</text>
+</svg>
+<p class="cap">If you only learn stack A, zkLLM’s Hyrax and Peigné’s zkVM will feel like aliens. Learn the shared floor, then the branch.</p>
+</div>'''
+
+
+def svg_pcs_hyrax():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Polynomial commitment vs Merkle">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Two ways to commit to a secret polynomial / table</text>
+
+  <rect x="24" y="40" width="336" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Hash / Merkle path (§7)</text>
+  <text x="36" y="84" class="s">Encode → hash tree → root.</text>
+  <text x="36" y="102" class="s">Open = reveal a few cells</text>
+  <text x="36" y="120" class="s">+ Merkle paths.</text>
+  <text x="36" y="142" class="s">Assumption: hash is random.</text>
+  <text x="36" y="168" class="s">Proof size grows with opens.</text>
+
+  <rect x="376" y="40" width="320" height="150" rx="3" class="box"/>
+  <text x="388" y="62" class="t">Algebraic PCS / Hyrax (§6)</text>
+  <text x="388" y="84" class="s">Bind the poly into a short</text>
+  <text x="388" y="102" class="s">group element C (Pedersen-</text>
+  <text x="388" y="120" class="s">style). Open = ProveEval:</text>
+  <text x="388" y="142" class="s">“at random r, P(r)=y.”</text>
+  <text x="388" y="168" class="s">Assumption: discrete log.</text>
+
+  <rect x="24" y="208" width="672" height="54" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Same job, different crypto</text>
+  <text x="36" y="248" class="s">Both answer “I committed to one secret; later check random algebraic claims about it.” Merkle ≠ Hyrax.</text>
+</svg>
+<p class="cap">zkLLM’s first slide is Hyrax. FlashProve’s first slide is Merkle+RS. Do not mash them into one box.</p>
+</div>'''
+
+
+def svg_statement_choice():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Choosing the public statement">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+  </style>
+  <text x="24" y="22" class="h">Crypto proves a statement — you still choose which claim</text>
+
+  <rect x="24" y="40" width="220" height="150" rx="3" class="box"/>
+  <text x="36" y="62" class="t">Exact circuit</text>
+  <text x="36" y="84" class="s">“Integer model on x</text>
+  <text x="36" y="102" class="s">outputs y / greedy</text>
+  <text x="36" y="120" class="s">token.”</text>
+  <text x="36" y="148" class="t">§6 zkLLM</text>
+  <text x="36" y="170" class="s">tight · float-painful</text>
+
+  <rect x="256" y="40" width="220" height="150" rx="3" class="box"/>
+  <text x="268" y="62" class="t">Clipped-gap / TokenDiFR</text>
+  <text x="268" y="84" class="s">“Top token within a</text>
+  <text x="268" y="102" class="s">gap of the model’s</text>
+  <text x="268" y="120" class="s">argmax.”</text>
+  <text x="268" y="148" class="t">§7 FlashProve</text>
+  <text x="268" y="170" class="s">policy slack</text>
+
+  <rect x="488" y="40" width="208" height="150" rx="3" class="box"/>
+  <text x="500" y="62" class="t">Unexplained Û</text>
+  <text x="500" y="84" class="s">“Leftover info in</text>
+  <text x="500" y="102" class="s">the tokens ≤ Û</text>
+  <text x="500" y="120" class="s">bits/token.”</text>
+  <text x="500" y="148" class="t">§8 VerInf</text>
+  <text x="500" y="170" class="s">score, not equality</text>
+
+  <rect x="24" y="208" width="672" height="64" rx="3" class="box"/>
+  <text x="36" y="230" class="t">Not crypto, but next door</text>
+  <text x="36" y="252" class="s">DiFR (§5 contrast) = statistical accept region for Plan A recompute when floats disagree. Same “slack” intuition as clipped-gap / Û, different engine.</text>
+</svg>
+<p class="cap">Wrong statement ⇒ sound crypto proving the wrong policy question. Pick the claim before you pick the SNARK.</p>
+</div>'''
+
+
+def svg_zkvm():
+    return '''
+<div class="svg-fig">
+<svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="zkVM idea">
+  <style>
+    .t { font: 600 11.5px ui-monospace, monospace; fill: #1a1a18; }
+    .s { font: 10px ui-monospace, monospace; fill: #55524a; }
+    .h { font: 600 11px ui-monospace, monospace; fill: #9a5b12; }
+    .box { fill: #f3f0ea; stroke: rgba(26,26,24,0.18); }
+    .arr { stroke: #8a867a; fill: none; stroke-width: 1.2; marker-end: url(#mz); }
+  </style>
+  <defs>
+    <marker id="mz" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a867a"/>
+    </marker>
+  </defs>
+  <text x="24" y="22" class="h">zkVM = prove “this program ran,” not “this hand-built ML circuit”</text>
+
+  <rect x="24" y="44" width="160" height="90" rx="3" class="box"/>
+  <text x="36" y="68" class="t">Training step</text>
+  <text x="36" y="90" class="s">BF16/FP32 ops,</text>
+  <text x="36" y="108" class="s">optimizer, shards…</text>
+  <path d="M184 89 L220 89" class="arr"/>
+
+  <rect x="220" y="44" width="180" height="90" rx="3" class="box"/>
+  <text x="232" y="68" class="t">Guest program</text>
+  <text x="232" y="90" class="s">runs inside a VM</text>
+  <text x="232" y="108" class="s">(bytecode trace)</text>
+  <path d="M400 89 L436 89" class="arr"/>
+
+  <rect x="436" y="44" width="260" height="90" rx="3" class="box"/>
+  <text x="448" y="68" class="t">SNARK over the trace</text>
+  <text x="448" y="90" class="s">(+ recursion / folding</text>
+  <text x="448" y="108" class="s">so steps stay short)</text>
+
+  <rect x="24" y="156" width="672" height="94" rx="3" class="box"/>
+  <text x="36" y="178" class="t">Why Peigné talks this way</text>
+  <text x="36" y="200" class="s">Hand-arithmetizing every frontier training kernel is hopeless. A zkVM lets you write (or compile) the step as a program</text>
+  <text x="36" y="220" class="s">and prove execution. Hard part moves to float fidelity + proving cost — still a research horizon, not a product.</text>
+</svg>
+<p class="cap">Same completeness/soundness/ZK wish-list. Different packaging: program trace instead of a bespoke attention circuit.</p>
 </div>'''
 
 

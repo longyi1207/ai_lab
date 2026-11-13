@@ -141,6 +141,12 @@
   .note p:last-child { margin-bottom: 0; }
   .note.bug .label { color: var(--accent); }
 
+  /* §0c “which direction uses this tool” tags */
+  .usedby { margin: 6px 0 16px; font-size: 12.5px; color: var(--ink-faint); font-family: system-ui, sans-serif; line-height: 1.7; }
+  .usedby .label { display: inline; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; margin-right: 6px; color: var(--accent); font-weight: 600; }
+  .usedby .tag { display: inline-block; padding: 1px 7px; margin: 2px 3px 2px 0; border: 1px solid var(--rule); border-radius: 3px; font-size: 11.5px; color: var(--ink-dim); background: var(--code-bg); }
+  .usedby .tag.core { border-color: var(--rule-strong, var(--rule)); color: var(--ink); }
+
   /* small data table */
   .tbl { overflow-x: auto; margin: 18px 0 24px; }
   table { border-collapse: collapse; font-size: 14px; width: 100%; }
